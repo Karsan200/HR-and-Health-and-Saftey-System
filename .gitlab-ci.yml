@@ -24,6 +24,7 @@ backend:build:
   artifacts:
     paths:
       - backend/build/libs/*.jar
+    expire_in: 4 week
 
 backend:test:
   image: eclipse-temurin:21-jdk
@@ -41,6 +42,7 @@ backend:test:
       - backend/build/reports/checkstyle/
       - backend/build/jacocoHtml/
       - backend/build/jacoco/test.exec
+    expire_in: 4 week
 
 frontend:test:
   image: node:20-bullseye
