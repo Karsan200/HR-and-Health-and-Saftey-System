@@ -1,0 +1,41 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+stages:
+  - build
+  - test
+
+cache:
+  key: gradle-cache-key
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+  policy: pull-push
+
+backend:build:
+  image: openjdk:21-alpine
+  stage: build
+  script:
+    - chmod +x gradlew
+    - ./gradlew build
+  artifacts:
+    paths:
+      - build/libs/*.jar
+
+backend:test:
+  image: openjdk:21-alpine
+  stage: test
+  needs:
+    - backend:build
+  script:
+    - chmod +x gradlew
+    - ./gradlew check
+  artifacts:
+    name: "$CI_JOB_NAME"
+    paths:
+      - build/reports/tests/
+      - build/reports/checkstyle/
+      - build/jacocoHtml/
+      - build/jacoco/test.exec
