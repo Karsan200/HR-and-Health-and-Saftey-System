@@ -23,7 +23,7 @@ backend:build:
     - ./gradlew build
   artifacts:
     paths:
-      - build/libs/*.jar
+      - backend/build/libs/*.jar
 
 backend:test:
   image: eclipse-temurin:21-jdk
@@ -37,7 +37,7 @@ backend:test:
   artifacts:
     name: "$CI_JOB_NAME"
     paths:
-      - build/reports/tests/
-      - build/reports/checkstyle/
-      - build/jacocoHtml/
-      - build/jacoco/test.exec
+      - backend/build/reports/tests/
+      - backend/build/reports/checkstyle/
+      - backend/build/jacocoHtml/
+      - backend/build/jacoco/test.exec
