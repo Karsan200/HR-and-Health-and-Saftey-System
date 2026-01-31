@@ -18,6 +18,7 @@ backend:build:
   image: eclipse-temurin:21-jdk
   stage: build
   script:
+    - cd backend
     - chmod +x gradlew
     - ./gradlew build
   artifacts:
@@ -30,6 +31,7 @@ backend:test:
   needs:
     - backend:build
   script:
+    - cd backend
     - chmod +x gradlew
     - ./gradlew check
   artifacts:
