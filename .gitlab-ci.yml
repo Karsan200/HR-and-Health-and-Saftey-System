@@ -41,6 +41,12 @@ backend:test:
       - backend/build/reports/checkstyle/
       - backend/build/jacocoHtml/
       - backend/build/jacoco/test.exec
+      - backend/build/reports/jacoco/test/jacocoTestReport.xml
+    reports:
+      coverage_report:
+        coverage_format: jacoco
+        path: backend/build/reports/jacoco/test/jacocoTestReport.xml
+      junit: backend/build/test-results/test/TEST-*.xml
 
 frontend:test:
   image: node:20-bullseye
@@ -56,9 +62,14 @@ frontend:test:
     - cd frontend
     - npm ci
     - npm run lint
-    - npm test
+    - npm test -- --coverage --ci --maxWorkers=2
   artifacts:
     when: always
     paths:
       - frontend/coverage/
+      - frontend/coverage/cobertura-coverage.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: frontend/coverage/cobertura-coverage.xml
     expire_in: 4 week
