@@ -41,3 +41,24 @@ backend:test:
       - backend/build/reports/checkstyle/
       - backend/build/jacocoHtml/
       - backend/build/jacoco/test.exec
+
+frontend:test:
+  image: node:20-bullseye
+  stage: test
+  cache:
+    key:
+      files:
+        - frontend/package-lock.json
+    paths:
+      - frontend/node_modules/
+    policy: pull-push
+  script:
+    - cd frontend
+    - npm ci
+    - npm run lint
+    - npm test
+  artifacts:
+    when: always
+    paths:
+      - frontend/coverage/
+    expire_in: 4 week
