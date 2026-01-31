@@ -15,7 +15,7 @@ cache:
   policy: pull-push
 
 backend:build:
-  image: openjdk:21
+  image: jdk21-alpine
   stage: build
   script:
     - chmod +x gradlew
@@ -25,7 +25,7 @@ backend:build:
       - build/libs/*.jar
 
 backend:test:
-  image: openjdk:21
+  image: jdk21-alpine
   stage: test
   needs:
     - backend:build
