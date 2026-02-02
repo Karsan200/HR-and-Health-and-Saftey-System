@@ -125,7 +125,7 @@ frontend:web:test:
 
 frontend:web:build:
   image: node:20-bullseye
-  stage: test
+  stage: build
   needs:
     - frontend:web:test
   cache:
