@@ -100,3 +100,24 @@ frontend:web:test:
         coverage_format: cobertura
         path: frontend-web/coverage/cobertura-coverage.xml
     expire_in: 4 week
+
+frontend:web:build:
+  image: node:20-bullseye
+  stage: test
+  needs:
+    - frontend:web:test
+  cache:
+    key:
+      files:
+        - frontend-web/package-lock.json
+    paths:
+      - frontend-web/node_modules/
+    policy: pull-push
+  script:
+    - cd frontend-web
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - frontend-web/dist/
+    expire_in: 4 week
