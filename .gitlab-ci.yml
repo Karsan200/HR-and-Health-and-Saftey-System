@@ -14,22 +14,9 @@ cache:
     - .gradle/caches
   policy: pull-push
 
-backend:build:
-  image: eclipse-temurin:21-jdk
-  stage: build
-  script:
-    - cd backend
-    - chmod +x gradlew
-    - ./gradlew build
-  artifacts:
-    paths:
-      - backend/build/libs/*.jar
-
 backend:test:
   image: eclipse-temurin:21-jdk
   stage: test
-  needs:
-    - backend:build
   script:
     - cd backend
     - chmod +x gradlew
@@ -48,6 +35,19 @@ backend:test:
         path: backend/build/reports/jacoco/test/jacocoTestReport.xml
       junit: backend/build/test-results/test/TEST-*.xml
     expire_in: 4 week
+
+backend:build:
+  image: eclipse-temurin:21-jdk
+  stage: build
+  needs:
+    - backend:test
+  script:
+    - cd backend
+    - chmod +x gradlew
+    - ./gradlew build
+  artifacts:
+    paths:
+      - backend/build/libs/*.jar
 
 frontend:mobile:test:
   image: node:20-bullseye
