@@ -75,6 +75,28 @@ frontend:mobile:test:
         path: frontend-mobile/coverage/cobertura-coverage.xml
     expire_in: 4 week
 
+frontend:mobile:android:build:
+  image: reactnativecommunity/react-native-android:latest
+  stage: build
+  needs:
+    - frontend:mobile:test
+  cache:
+    key: android-gradle
+    paths:
+      - frontend-mobile/android/.gradle/
+      - frontend-mobile/node_modules/
+  script:
+    - cd frontend-mobile
+    - npm ci
+    - cd android
+    - ./gradlew assembleDebug --no-daemon
+  artifacts:
+    when: always
+    paths:
+      - frontend-mobile/android/app/build/outputs/apk/debug/
+    expire_in: 4 week
+
+
 frontend:web:test:
   image: node:20-bullseye
   stage: test
