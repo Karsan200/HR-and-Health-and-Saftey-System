@@ -4,8 +4,8 @@ workflow:
     - if: $CI_COMMIT_BRANCH == "main"
 
 stages:
-  - build
   - test
+  - build
 
 cache:
   key: gradle-cache-key
@@ -73,4 +73,30 @@ frontend:mobile:test:
       coverage_report:
         coverage_format: cobertura
         path: frontend-mobile/coverage/cobertura-coverage.xml
+    expire_in: 4 week
+
+frontend:web:test:
+  image: node:20-bullseye
+  stage: test
+  cache:
+    key:
+      files:
+        - frontend-web/package-lock.json
+    paths:
+      - frontend-web/node_modules/
+    policy: pull-push
+  script:
+    - cd frontend-web
+    - npm ci
+    - npm run lint
+    - npm test -- --coverage --ci --maxWorkers=2
+  artifacts:
+    when: always
+    paths:
+      - frontend-web/coverage/
+      - frontend-web/coverage/cobertura-coverage.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: frontend-web/coverage/cobertura-coverage.xml
     expire_in: 4 week
