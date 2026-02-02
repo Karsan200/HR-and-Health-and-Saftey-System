@@ -1,0 +1,146 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+stages:
+  - test
+  - build
+
+cache:
+  key: gradle-cache-key
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+  policy: pull-push
+
+backend:test:
+  image: eclipse-temurin:21-jdk
+  stage: test
+  script:
+    - cd backend
+    - chmod +x gradlew
+    - ./gradlew check
+  artifacts:
+    name: "$CI_JOB_NAME"
+    paths:
+      - backend/build/reports/tests/
+      - backend/build/reports/checkstyle/
+      - backend/build/jacocoHtml/
+      - backend/build/jacoco/test.exec
+      - backend/build/reports/jacoco/test/jacocoTestReport.xml
+    reports:
+      coverage_report:
+        coverage_format: jacoco
+        path: backend/build/reports/jacoco/test/jacocoTestReport.xml
+      junit: backend/build/test-results/test/TEST-*.xml
+    expire_in: 4 week
+
+backend:build:
+  image: eclipse-temurin:21-jdk
+  stage: build
+  needs:
+    - backend:test
+  script:
+    - cd backend
+    - chmod +x gradlew
+    - ./gradlew build
+  artifacts:
+    paths:
+      - backend/build/libs/*.jar
+
+frontend:mobile:test:
+  image: node:20-bullseye
+  stage: test
+  cache:
+    key:
+      files:
+        - frontend-mobile/package-lock.json
+    paths:
+      - frontend-mobile/node_modules/
+    policy: pull-push
+  script:
+    - cd frontend-mobile
+    - npm ci
+    - npm run lint
+    - npm test -- --coverage --ci --maxWorkers=2
+  artifacts:
+    when: always
+    paths:
+      - frontend-mobile/coverage/
+      - frontend-mobile/coverage/cobertura-coverage.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: frontend-mobile/coverage/cobertura-coverage.xml
+    expire_in: 4 week
+
+frontend:mobile:android:build:
+  image: reactnativecommunity/react-native-android:latest
+  stage: build
+  needs:
+    - frontend:mobile:test
+  cache:
+    key: android-gradle
+    paths:
+      - frontend-mobile/android/.gradle/
+      - frontend-mobile/node_modules/
+  script:
+    - cd frontend-mobile
+    - npm ci
+    - cd android
+    - chmod +x gradlew
+    - ./gradlew assembleDebug --no-daemon
+  artifacts:
+    when: always
+    paths:
+      - frontend-mobile/android/app/build/outputs/apk/debug/
+    expire_in: 4 week
+
+
+frontend:web:test:
+  image: node:20-bullseye
+  stage: test
+  cache:
+    key:
+      files:
+        - frontend-web/package-lock.json
+    paths:
+      - frontend-web/node_modules/
+    policy: pull-push
+  script:
+    - cd frontend-web
+    - npm ci
+    - npm run lint
+    - npm test -- --coverage --ci --maxWorkers=2
+  artifacts:
+    when: always
+    paths:
+      - frontend-web/coverage/
+      - frontend-web/coverage/cobertura-coverage.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: frontend-web/coverage/cobertura-coverage.xml
+    expire_in: 4 week
+
+frontend:web:build:
+  image: node:20-bullseye
+  stage: build
+  needs:
+    - frontend:web:test
+  cache:
+    key:
+      files:
+        - frontend-web/package-lock.json
+    paths:
+      - frontend-web/node_modules/
+    policy: pull-push
+  script:
+    - cd frontend-web
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - frontend-web/dist/
+    expire_in: 4 week
