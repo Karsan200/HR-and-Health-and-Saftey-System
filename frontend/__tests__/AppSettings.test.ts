@@ -1,4 +1,4 @@
-import { AppSettings } from '../src/shared/AppSettings.ts';
+import { AppSettings } from '../src/AppSettings.ts';
 
 describe('AppSettings', () => {
   it('should export AppSettings object', () => {

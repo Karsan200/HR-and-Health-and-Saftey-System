@@ -6,17 +6,11 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
-    "web": "webpack serve --mode development",
-    "build:web": "webpack --mode production",
     "build:android": "cd android && ./gradlew assembleRelease",
     "lint": "eslint .",
     "test": "jest"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/material": "^7.3.7",
-    "@mui/styled-engine-sc": "^7.3.7",
     "@react-native-vector-icons/material-design-icons": "^12.4.0",
     "@react-native/new-app-screen": "0.83.1",
     "react": "^19.2.4",
@@ -57,10 +51,7 @@
     "prettier": "2.8.8",
     "react-test-renderer": "19.2.0",
     "ts-loader": "^9.5.4",
-    "typescript": "^5.9.3",
-    "webpack": "^5.104.1",
-    "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.3"
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=20"

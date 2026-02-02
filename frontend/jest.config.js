@@ -6,8 +6,7 @@ module.exports = {
   ],
   collectCoverageFrom: [
     "src/**/*.{js,jsx,ts,tsx}",
-    "!src/web/App.tsx",
-    "!src/mobile/App.tsx",
+    "!src/App.tsx",
     "!src/**/index.{js,ts}",
     "!src/**/*.d.ts"
   ],
