@@ -89,6 +89,7 @@ frontend:mobile:android:build:
     - cd frontend-mobile
     - npm ci
     - cd android
+    - chmod +x gradlew
     - ./gradlew assembleDebug --no-daemon
   artifacts:
     when: always
