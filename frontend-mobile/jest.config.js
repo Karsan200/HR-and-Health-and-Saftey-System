@@ -1,12 +1,11 @@
 module.exports = {
   coveragePathIgnorePatterns: [
     '/node_modules/',
-    '/src/web/App.tsx',
-    '/src/mobile/App.tsx'
+    'App.tsx',
   ],
   collectCoverageFrom: [
     "src/**/*.{js,jsx,ts,tsx}",
-    "!src/App.tsx",
+    "!App.tsx",
     "!src/**/index.{js,ts}",
     "!src/**/*.d.ts"
   ],
@@ -19,18 +18,6 @@ module.exports = {
     }
   },
   projects: [
-    {
-      displayName: 'web',
-      testMatch: ['**/__tests__/**/*.web.test.{js,jsx,ts,tsx}'],
-      testEnvironment: 'jsdom',
-      setupFilesAfterEnv: ['<rootDir>/jest.setup.web.js'],
-      transform: {
-        '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
-      },
-      moduleNameMapper: {
-        '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-      },
-    },
     {
       displayName: 'mobile',
       preset: 'react-native',

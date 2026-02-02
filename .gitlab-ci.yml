@@ -49,28 +49,28 @@ backend:test:
       junit: backend/build/test-results/test/TEST-*.xml
     expire_in: 4 week
 
-frontend:test:
+frontend:mobile:test:
   image: node:20-bullseye
   stage: test
   cache:
     key:
       files:
-        - frontend/package-lock.json
+        - frontend-mobile/package-lock.json
     paths:
-      - frontend/node_modules/
+      - frontend-mobile/node_modules/
     policy: pull-push
   script:
-    - cd frontend
+    - cd frontend-mobile
     - npm ci
     - npm run lint
     - npm test -- --coverage --ci --maxWorkers=2
   artifacts:
     when: always
     paths:
-      - frontend/coverage/
-      - frontend/coverage/cobertura-coverage.xml
+      - frontend-mobile/coverage/
+      - frontend-mobile/coverage/cobertura-coverage.xml
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: frontend/coverage/cobertura-coverage.xml
+        path: frontend-mobile/coverage/cobertura-coverage.xml
     expire_in: 4 week
