@@ -8,16 +8,15 @@ stages:
   - build
   - deploy
 
-cache:
-  key: gradle-cache-key
-  paths:
-    - .gradle/wrapper
-    - .gradle/caches
-  policy: pull-push
-
 backend:test:
   image: eclipse-temurin:21-jdk
   stage: test
+  cache:
+    key: gradle-cache-key
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+    policy: pull-push
   script:
     - cd backend
     - chmod +x gradlew
@@ -40,6 +39,12 @@ backend:test:
 backend:build:
   image: eclipse-temurin:21-jdk
   stage: build
+  cache:
+    key: gradle-cache-key
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+    policy: pull-push
   needs:
     - backend:test
   script:
@@ -56,24 +61,24 @@ frontend:mobile:test:
   cache:
     key:
       files:
-        - frontend-mobile/package-lock.json
+        - mobile/package-lock.json
     paths:
-      - frontend-mobile/node_modules/
+      - mobile/node_modules/
     policy: pull-push
   script:
-    - cd frontend-mobile
+    - cd mobile
     - npm ci
     - npm run lint
     - npm test -- --coverage --ci --maxWorkers=2
   artifacts:
     when: always
     paths:
-      - frontend-mobile/coverage/
-      - frontend-mobile/coverage/cobertura-coverage.xml
+      - mobile/coverage/
+      - mobile/coverage/cobertura-coverage.xml
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: frontend-mobile/coverage/cobertura-coverage.xml
+        path: mobile/coverage/cobertura-coverage.xml
     expire_in: 4 week
 
 frontend:mobile:android:build:
@@ -84,10 +89,10 @@ frontend:mobile:android:build:
   cache:
     key: android-gradle
     paths:
-      - frontend-mobile/android/.gradle/
-      - frontend-mobile/node_modules/
+      - mobile/android/.gradle/
+      - mobile/node_modules/
   script:
-    - cd frontend-mobile
+    - cd mobile
     - npm ci
     - cd android
     - chmod +x gradlew
@@ -95,7 +100,7 @@ frontend:mobile:android:build:
   artifacts:
     when: always
     paths:
-      - frontend-mobile/android/app/build/outputs/apk/debug/
+      - mobile/android/app/build/outputs/apk/debug/
     expire_in: 4 week
 
 
@@ -105,24 +110,24 @@ frontend:web:test:
   cache:
     key:
       files:
-        - frontend-web/package-lock.json
+        - web/package-lock.json
     paths:
-      - frontend-web/node_modules/
+      - web/node_modules/
     policy: pull-push
   script:
-    - cd frontend-web
+    - cd web
     - npm ci
     - npm run lint
     - npm test -- --coverage --ci --maxWorkers=2
   artifacts:
     when: always
     paths:
-      - frontend-web/coverage/
-      - frontend-web/coverage/cobertura-coverage.xml
+      - web/coverage/
+      - web/coverage/cobertura-coverage.xml
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: frontend-web/coverage/cobertura-coverage.xml
+        path: web/coverage/cobertura-coverage.xml
     expire_in: 4 week
 
 frontend:web:build:
@@ -133,17 +138,17 @@ frontend:web:build:
   cache:
     key:
       files:
-        - frontend-web/package-lock.json
+        - web/package-lock.json
     paths:
-      - frontend-web/node_modules/
+      - web/node_modules/
     policy: pull-push
   script:
-    - cd frontend-web
+    - cd web
     - npm ci
     - npm run build
   artifacts:
     paths:
-      - frontend-web/dist/
+      - web/dist/
     expire_in: 4 week
 
 frontend:web:deploy:
@@ -156,11 +161,11 @@ frontend:web:deploy:
   cache:
     key:
       files:
-        - frontend-web/package-lock.json
+        - web/package-lock.json
     paths:
-      - frontend-web/node_modules/
+      - web/node_modules/
     policy: pull-push
   script:
-    - cd frontend-web
+    - cd web
     - npm install wrangler --location=global
     - wrangler pages publish ./src --project-name "large-team-project" --branch "main"

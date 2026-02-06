@@ -19,7 +19,7 @@ module.exports = {
   },
   projects: [
     {
-      displayName: 'mobile',
+      displayName: 'Rent-A-Tech HR',
       preset: 'react-native',
       testMatch: ['**/__tests__/**/*.test.{js,jsx,ts,tsx}', '!**/__tests__/**/*.web.test.{js,jsx,ts,tsx}'],
     },
