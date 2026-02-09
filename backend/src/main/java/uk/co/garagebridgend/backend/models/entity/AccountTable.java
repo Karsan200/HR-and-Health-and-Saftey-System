@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 
 /**
  * Account entity mapped to the database.
- *
+ * <p>
  * Stores the basic profile and authentication data for a user account.
  * Keep sensitive values (passwords, PINs) hashed and salted.
  */
@@ -42,11 +42,15 @@ public class AccountTable {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
+    /** Required: user's username. - used for sign-in */
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
+
     /**
-     * User's email address. Required and unique — used for sign-in and
+     * User's email address. Required and unique — used for admin and
      * notifications.
      */
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", nullable = false)
     private String email;
 
     /** Hashed password. Do not store plaintext passwords. */

@@ -18,7 +18,7 @@ import java.util.UUID;
 
 /**
  * Represents a user authentication session.
- *
+ * <p>
  * Stores the session UUID, linked account, refresh token
  * and flags for two-factor authentication and expiry.
  */
@@ -51,6 +51,10 @@ public class SessionTable {
     /** True when two-factor authentication has been completed for this session. */
     @Column(name = "is_two_factor", nullable = false)
     private boolean isTwoFactor;
+
+    /** True when the session is for the mobile app. */
+    @Column(name = "is_mobile", nullable = false)
+    private boolean isMobile;
 
     /** When this session (or its refresh token) expires. */
     @Column(name = "expires", nullable = false)

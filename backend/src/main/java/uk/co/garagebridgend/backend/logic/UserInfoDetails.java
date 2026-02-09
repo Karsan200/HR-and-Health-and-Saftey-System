@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class UserInfoDetails implements UserDetails {
 
-    private final String username; // Changed from 'name' to 'email' for clarity
+    private final String username;
     private final String password;
     private final List<GrantedAuthority> authorities;
 

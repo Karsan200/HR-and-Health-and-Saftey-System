@@ -4,20 +4,22 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.function.Function;
 
+import uk.co.garagebridgend.backend.models.entity.SessionTable;
+import uk.co.garagebridgend.backend.models.exception.InvalidRefreshTokenException;
+import uk.co.garagebridgend.backend.models.response.RefreshTokenResponse;
+import uk.co.garagebridgend.backend.repository.SessionRepository;
+
 @Component
-public class JwtService {
+public class AuthenticationService {
     @Value("${jwt.secret}")
     private String secretKey;
 
@@ -30,36 +32,43 @@ public class JwtService {
     @Value("${jwt.refresh_token_expiration_mobile}")
     private Long jwtRefreshTokenExpirationMobile;
 
-    public String generateAccessToken(String email) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, email, jwtAccessTokenExpiration);
+    private final SessionRepository sessionRepository;
+
+    public AuthenticationService(SessionRepository sessionRepository) {
+        this.sessionRepository = sessionRepository;
     }
 
-    public String generateRefreshToken(String email, Boolean isMobile) {
-        Map<String, Object> claims = new HashMap<>();
-        if (isMobile) {
-            return createToken(claims, email, jwtRefreshTokenExpirationMobile);
-        } else {
-            return createToken(claims, email, jwtRefreshTokenExpiration);
+    public RefreshTokenResponse refreshAccessToken(String refreshToken) {
+        Optional<SessionTable> session = sessionRepository.findById(UUID.fromString(refreshToken));
+
+        if (session.isEmpty() || session.get().getExpires().isBefore(LocalDateTime.now())) {
+            throw new InvalidRefreshTokenException();
         }
+
+        // Get username and claims from session
+        String username = session.get().getAccount().getUsername();
+
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("TWO_FACTOR_AUTHORISED", session.get().isTwoFactor());
+        claims.put("TOKEN_MOBILE", session.get().isMobile());
+
+        // Generate new access token
+        String newAccessToken = createToken(claims, username);
+
+        return new RefreshTokenResponse(newAccessToken);
     }
 
-    private String createToken(Map<String, Object> claims, String email, Long expiration) {
+    private String createToken(Map<String, Object> claims, String username) {
         return Jwts.builder()
-                .claims(claims)  // or .add(extraClaims) to add to existing claims
-                .subject(email)
+                .claims(claims)
+                .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSignInKey(), Jwts.SIG.HS256)  // SignatureAlgorithm parameter is no longer needed
+                .expiration(new Date(System.currentTimeMillis() + jwtAccessTokenExpiration))
+                .signWith(getSignKey(), Jwts.SIG.HS256)
                 .compact();
     }
 
-    private SecretKey getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    private Key getSignKey() {
+    private SecretKey getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
@@ -79,7 +88,7 @@ public class JwtService {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getSignInKey())
+                .verifyWith(getSignKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

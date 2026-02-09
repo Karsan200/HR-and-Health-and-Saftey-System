@@ -8,14 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootApplication
 @RestController
 public class RentATechApplication {
-
-    @RequestMapping("/")
-    public String home() {
-        return "Hello Docker World";
-    }
-
     public static void main(String[] args) {
         SpringApplication.run(RentATechApplication.class, args);
     }
-
 }

@@ -9,5 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface PermissionsRepository extends JpaRepository<PermissionsTable, AccountTable> {
-    Optional<PermissionsTable> findByEmail(String email);
+    Optional<PermissionsTable> findByUsername(String username);
 }
