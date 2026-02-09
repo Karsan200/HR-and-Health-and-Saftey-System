@@ -69,7 +69,7 @@ public class AccountTable {
     @Column(name = "mobile_pin_salt", length = SALT_LENGTH)
     private String mobilePinSalt;
 
-    /** Autopopulated creation timestamp (set once, not updatable). */
+    /** Creation timestamp (auto-populated, not updatable). */
     @Column(name = "created", nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime created;

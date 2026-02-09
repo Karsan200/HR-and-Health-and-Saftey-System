@@ -44,27 +44,19 @@ public class SessionTable {
     @JoinColumn(name = "account_id", referencedColumnName = "account_id")
     private AccountTable account;
 
-    /**
-     * Refresh token associated with the session (sensitive).
-     */
+    /** Refresh token associated with the session (sensitive). */
     @Column(name = "refresh_token", nullable = false)
     private String refreshToken;
 
-    /**
-     * True when two-factor authentication has been completed for this session.
-     */
+    /** True when two-factor authentication has been completed for this session. */
     @Column(name = "is_two_factor", nullable = false)
     private boolean isTwoFactor;
 
-    /**
-     * When this session (or its refresh token) expires.
-     */
+    /** When this session (or its refresh token) expires. */
     @Column(name = "expires", nullable = false)
     private LocalDateTime expires;
 
-    /**
-     * Creation timestamp (auto-populated, not updatable).
-     */
+    /** Creation timestamp (auto-populated, not updatable). */
     @Column(name = "created", nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime created;
