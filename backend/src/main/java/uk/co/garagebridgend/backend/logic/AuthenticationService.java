@@ -49,8 +49,8 @@ public class AuthenticationService {
         String username = session.get().getAccount().getUsername();
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("TWO_FACTOR_AUTHORISED", session.get().isTwoFactor());
-        claims.put("TOKEN_MOBILE", session.get().isMobile());
+        claims.put("mfa", session.get().isTwoFactor());
+        claims.put("mobileToken", session.get().isMobile());
 
         // Generate new access token
         String newAccessToken = createToken(claims, username);
@@ -75,6 +75,16 @@ public class AuthenticationService {
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public boolean extractTokenType(String token) {
+        Boolean value = extractClaim(token, claims -> claims.get("mobileToken", Boolean.class));
+        return Boolean.TRUE.equals(value);
+    }
+
+    public boolean extract2FA(String token) {
+        Boolean value = extractClaim(token, claims -> claims.get("mfa", Boolean.class));
+        return Boolean.TRUE.equals(value);
     }
 
     public Date extractExpiration(String token) {

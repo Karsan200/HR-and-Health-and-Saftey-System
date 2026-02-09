@@ -9,7 +9,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.PermissionsTable;
+import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.PermissionsRepository;
 
 import java.util.ArrayList;
@@ -20,12 +22,18 @@ import java.util.stream.Collectors;
 @Service
 public class UserInfoService implements UserDetailsService {
 
-    private final PermissionsRepository repository;
+    private final AccountRepository repository;
+    private final PermissionsRepository permissionsRepository;
     private final PasswordEncoder encoder;
 
     @Autowired
-    public UserInfoService(PermissionsRepository repository, PasswordEncoder encoder) {
+    public UserInfoService(
+        AccountRepository repository,
+        PermissionsRepository permissionsRepository,
+        PasswordEncoder encoder
+    ) {
         this.repository = repository;
+        this.permissionsRepository = permissionsRepository;
         this.encoder = encoder;
     }
 
@@ -33,26 +41,25 @@ public class UserInfoService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // Fetch user from the database
-        Optional<PermissionsTable> userInfo = repository.findByUsername(username);
+        AccountTable account = repository.findByUsername(username).orElseThrow(() ->
+            new UsernameNotFoundException("User not found"));
 
-        if (userInfo.isEmpty()) {
-            throw new UsernameNotFoundException("User not found with username: " + username);
-        }
-
-        // Convert permissions to Spring Security roles
-        PermissionsTable user = userInfo.get();
+        // Get permissions for the user
+        Optional<PermissionsTable> permissions = permissionsRepository.findById(account);
         List<String> roleNames = new ArrayList<>();
-        if (user.isAdmin()) {
-            roleNames.add("ROLE_ADMIN");
-        }
-        if (user.isManager()) {
-            roleNames.add("ROLE_MANAGER");
+        if (permissions.isPresent()) {
+            if (permissions.get().isAdmin()) {
+                roleNames.add("ROLE_ADMIN");
+            }
+            if (permissions.get().isManager()) {
+                roleNames.add("ROLE_MANAGER");
+            }
         }
 
         // Convert Account data to UserDetails (UserInfoDetails)
         return new User(
-            user.getAccount().getEmail(),
-            user.getAccount().getPassword(),
+            account.getEmail(),
+                account.getPassword(),
             roleNames.stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList())
