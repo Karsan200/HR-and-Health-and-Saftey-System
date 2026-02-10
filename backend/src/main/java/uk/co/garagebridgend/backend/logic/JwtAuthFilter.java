@@ -21,26 +21,47 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * Servlet filter that authenticates requests based on a JWT passed in the
+ * Authorization header. When valid, places an authenticated
+ * UsernamePasswordAuthenticationToken into the SecurityContext.
+ */
 @Component
-public class JwtAuthFilter extends OncePerRequestFilter {
-
+public final class JwtAuthFilter extends OncePerRequestFilter {
+    /** Service for UserDetails. */
     private final UserDetailsService userDetailsService;
+    /** Service for JWT handling and authentication operations. */
     private final AuthenticationService authenticationService;
+    /** Length of the "Bearer " prefix in the Authorization header. */
+    private final int tokenBeginIndex = 7; // "Bearer " prefix length
 
+    /**
+     * Constructor for dependency injection of required services.
+     * @param userDetailsServiceImpl the UserDetailsService implementation to use
+     * @param authenticationServiceImpl the AuthenticationService implementation to use
+     */
     @Autowired
-    public JwtAuthFilter(UserDetailsService userDetailsService, AuthenticationService authenticationService) {
-        this.userDetailsService = userDetailsService;
-        this.authenticationService = authenticationService;
+    public JwtAuthFilter(
+        final UserDetailsService userDetailsServiceImpl,
+        final AuthenticationService authenticationServiceImpl
+    ) {
+        this.userDetailsService = userDetailsServiceImpl;
+        this.authenticationService = authenticationServiceImpl;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+        final HttpServletRequest request,
+        final HttpServletResponse response,
+        final FilterChain filterChain
+    ) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
+            // "Bearer " prefix length
+            token = authHeader.substring(tokenBeginIndex);
             username = authenticationService.extractUsername(token);
         }
 
@@ -54,8 +75,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 // Token context
                 if (authenticationService.extractTokenType(token)) {
                     authorities.add(new SimpleGrantedAuthority("TOKEN_MOBILE"));
-                }
-                else {
+                } else {
                     authorities.add(new SimpleGrantedAuthority("TOKEN_WEB"));
                 }
 

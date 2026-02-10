@@ -19,27 +19,41 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service providing user details for Spring Security.
+ * <p>
+ * Implements {@code UserDetailsService} and loads account information and
+ * derived authorities used for authentication and authorization checks.
+ */
 @Service
 public class UserInfoService implements UserDetailsService {
-
+    /** Repositories and encoder for accessing user data and permissions. */
     private final AccountRepository repository;
+    /** Repository for fetching user permissions. */
     private final PermissionsRepository permissionsRepository;
+    /** Encoder for password handling. */
     private final PasswordEncoder encoder;
 
+    /**
+     * Constructor for dependency injection of required repositories and encoder.
+     * @param accountRepositoryImpl the AccountRepository implementation to use
+     * @param permissionsRepositoryImpl the PermissionsRepository implementation to use
+     * @param encoderImpl the PasswordEncoder implementation to use
+     */
     @Autowired
     public UserInfoService(
-        AccountRepository repository,
-        PermissionsRepository permissionsRepository,
-        PasswordEncoder encoder
+        final AccountRepository accountRepositoryImpl,
+        final PermissionsRepository permissionsRepositoryImpl,
+        final PasswordEncoder encoderImpl
     ) {
-        this.repository = repository;
-        this.permissionsRepository = permissionsRepository;
-        this.encoder = encoder;
+        this.repository = accountRepositoryImpl;
+        this.permissionsRepository = permissionsRepositoryImpl;
+        this.encoder = encoderImpl;
     }
 
-    /** Method to load user details by username (email) */
+    /** Method to load user details by username (email). */
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
         // Fetch user from the database
         AccountTable account = repository.findByUsername(username).orElseThrow(() ->
             new UsernameNotFoundException("User not found"));

@@ -1,6 +1,12 @@
 package uk.co.garagebridgend.backend.models.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,18 +26,24 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class PermissionsTable {
     /**
-     * Account that owns these permissions (primary key). Maps to {@code account_id}.
+     * Account that owns these permissions (primary key).
+     * Maps to {@code account_id}.
      */
     @Id
     @OneToOne
-    @JoinColumn(name = "account_id", referencedColumnName = "account_id")
+    @JoinColumn(
+        name = "account_id",
+        referencedColumnName = "account_id",
+        nullable = false
+    )
     private AccountTable account;
 
     /**
-     * Account that assigned these permissions (optional). Maps to {@code assigned_by}.
+     * Account that assigned these permissions (optional).
+     * Maps to {@code assigned_by}.
      */
     @ManyToOne
-    @JoinColumn(name = "assigned_by", referencedColumnName = "account_id", nullable = true)
+    @JoinColumn(name = "assigned_by", referencedColumnName = "account_id")
     private AccountTable assignedByAccount;
 
 

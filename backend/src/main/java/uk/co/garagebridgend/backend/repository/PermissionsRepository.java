@@ -5,9 +5,11 @@ import org.springframework.stereotype.Repository;
 import uk.co.garagebridgend.backend.models.entity.PermissionsTable;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 
-import java.util.Optional;
-
+/**
+ * JPA repository for managing {@link PermissionsTable} entities.
+ */
 @Repository
-public interface PermissionsRepository extends JpaRepository<PermissionsTable, AccountTable> {
+public interface PermissionsRepository extends JpaRepository
+    <PermissionsTable, AccountTable> {
 
 }

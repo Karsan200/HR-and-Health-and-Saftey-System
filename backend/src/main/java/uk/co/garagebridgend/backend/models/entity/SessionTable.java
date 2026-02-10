@@ -48,7 +48,8 @@ public class SessionTable {
     @Column(name = "refresh_token", nullable = false)
     private String refreshToken;
 
-    /** True when two-factor authentication has been completed for this session. */
+    /** True when two-factor authentication has been completed for
+     * this session. */
     @Column(name = "is_two_factor", nullable = false)
     private boolean isTwoFactor;
 

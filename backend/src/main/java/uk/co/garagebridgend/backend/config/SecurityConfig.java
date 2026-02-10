@@ -21,25 +21,41 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import uk.co.garagebridgend.backend.logic.JwtAuthFilter;
 
+/**
+ * Spring Security configuration for the application.
+ * <p>
+ * Sets up JWT-based stateless authentication, the custom JWT filter, and
+ * role-based endpoint authorization rules.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    /** Custom JWT authentication filter that processes incoming requests. */
     private final JwtAuthFilter jwtAuthFilter;
+    /** Service for loading user details during authentication. */
     private final UserDetailsService userDetailsService;
 
-    // Constructor injection for required dependencies
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter,
-                          UserDetailsService userDetailsService) {
-        this.jwtAuthFilter = jwtAuthFilter;
-        this.userDetailsService = userDetailsService;
+    /**
+     * Constructor for dependency injection of required services.
+     * @param jwtAuthFilterImpl the JwtAuthFilter implementation to use
+     * @param userDetailsServiceImpl the UserDetailsService implementation to use
+     */
+    public SecurityConfig(
+        final JwtAuthFilter jwtAuthFilterImpl,
+        final UserDetailsService userDetailsServiceImpl) {
+        this.jwtAuthFilter = jwtAuthFilterImpl;
+        this.userDetailsService = userDetailsServiceImpl;
     }
-    /*
-     * Main security configuration
-     * Defines endpoint access rules and JWT filter setup
+
+    /**
+     * Configures the security filter chain for HTTP requests.
+     * @param http the HttpSecurity object to configure
+     * @return the configured SecurityFilterChain
+     * @throws Exception if an error occurs during configuration
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         http
                 // Disable CSRF (not needed for stateless JWT)
                 .csrf(csrf -> csrf.disable())
@@ -58,7 +74,8 @@ public class SecurityConfig {
                 )
 
                 // Stateless session (required for JWT)
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(sess ->
+                        sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 // Set custom authentication provider
                 .authenticationProvider(authenticationProvider())
@@ -69,18 +86,18 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /*
-     * Password encoder bean (uses BCrypt hashing)
-     * Critical for secure password storage
+    /**
+     * Defines the password encoder bean using BCrypt hashing algorithm.
+     * @return a PasswordEncoder instance for encoding and verifying passwords
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /*
-     * Authentication provider configuration
-     * Links UserDetailsService and PasswordEncoder
+    /**
+     * Defines the authentication provider bean that uses a DaoAuthenticationProvider.
+     * @return an AuthenticationProvider configured with the UserDetailsService and PasswordEncoder
      */
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -89,12 +106,15 @@ public class SecurityConfig {
         return provider;
     }
 
-    /*
-     * Authentication manager bean
-     * Required for programmatic authentication (e.g., in /generateToken)
+    /**
+     * Defines the authentication manager bean that retrieves the AuthenticationManager
+     * from the AuthenticationConfiguration.
+     * @param config the AuthenticationConfiguration used to obtain the AuthenticationManager
+     * @return the AuthenticationManager for handling authentication operations
+     * @throws Exception if an error occurs while retrieving the AuthenticationManager
      */
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(final AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }
