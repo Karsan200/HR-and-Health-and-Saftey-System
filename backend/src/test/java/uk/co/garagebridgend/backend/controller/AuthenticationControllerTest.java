@@ -4,14 +4,19 @@ import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.RentATechApplication;
+import uk.co.garagebridgend.backend.logic.AuthenticationService;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.PermissionsTable;
 import uk.co.garagebridgend.backend.models.entity.SessionTable;
@@ -19,8 +24,11 @@ import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.PermissionsRepository;
 import uk.co.garagebridgend.backend.repository.SessionRepository;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -41,6 +49,12 @@ public class AuthenticationControllerTest {
 
     @Autowired
     private SessionRepository sessionRepository;
+
+    @Mock
+    private AuthenticationService authenticationService;  // make this a mock
+
+    @InjectMocks
+    private AuthenticationController authenticationController;
 
     @Autowired
     private MockMvc mockMvc;
@@ -70,16 +84,16 @@ public class AuthenticationControllerTest {
         // Sessions
         SessionTable expired = new SessionTable();
         expired.setAccount(account);
-        expired.setRefreshToken("expired-token");
-        expired.setExpires(LocalDateTime.now().minusHours(1));
+        expired.setRefreshToken("7ba4f287-5940-404e-9a54-f360a0f29eff");
+        expired.setExpires(LocalDateTime.now(Clock.systemUTC()).minusHours(1));
         expired.setMobile(false);
         expired.setTwoFactor(false);
         sessionRepository.save(expired);
 
         SessionTable valid = new SessionTable();
         valid.setAccount(account);
-        valid.setRefreshToken("valid-token");
-        valid.setExpires(LocalDateTime.now().plusHours(1));
+        valid.setRefreshToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
+        valid.setExpires(LocalDateTime.now(Clock.systemUTC()).plusHours(2));
         valid.setMobile(false);
         valid.setTwoFactor(false);
         sessionRepository.save(valid);
@@ -94,14 +108,37 @@ public class AuthenticationControllerTest {
     @Test
     void testRefreshTokenExpired() throws Exception {
         mockMvc.perform(get("/auth/refresh")
-                        .cookie(new Cookie("refreshToken", "expired-token")))
+                        .cookie(new Cookie("refreshToken", "7ba4f287-5940-404e-9a54-f360a0f29eff")))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void testRefreshTokenValid() throws Exception {
         mockMvc.perform(get("/auth/refresh")
-                        .cookie(new Cookie("refreshToken", "valid-token")))
+                        .cookie(new Cookie("refreshToken", "87cc6b24-d1aa-468a-bc98-ad1a902c8b3e")))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void testRefreshTokenThrowsException() throws Exception {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(authenticationController).build();
+
+        // simulate your AuthenticationService throwing an exception
+        when(authenticationService.refreshAccessToken("87cc6b24"))
+                .thenThrow(new RuntimeException("Service failed"));
+
+        // perform a GET/POST to /auth/refresh with a cookie
+        mockMvc.perform(get("/auth/refresh")
+                        .cookie(new Cookie("refreshToken", "87cc6b24")))
+                .andExpect(status().isInternalServerError()) // matches ResponseStatusException
+                .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
+                .andExpect(result -> {
+                    ResponseStatusException ex = (ResponseStatusException) result.getResolvedException();
+                    assertNotNull(ex);
+                    assertEquals("Internal sever error", ex.getReason()); // match your controller message
+                });
+    }
+
+
 }

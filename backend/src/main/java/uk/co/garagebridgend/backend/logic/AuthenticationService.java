@@ -10,13 +10,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.function.Function;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import uk.co.garagebridgend.backend.models.entity.SessionTable;
 import uk.co.garagebridgend.backend.models.exception.InvalidRefreshTokenException;
@@ -63,9 +63,9 @@ public class AuthenticationService {
      * @throws InvalidRefreshTokenException if the refresh token is invalid or expired
      */
     public RefreshTokenResponse refreshAccessToken(final String refreshToken) throws InvalidRefreshTokenException {
-        Optional<SessionTable> session = sessionRepository.findById(UUID.fromString(refreshToken));
+        Optional<SessionTable> session = sessionRepository.findByRefreshToken(refreshToken);
 
-        if (session.isEmpty() || session.get().getExpires().isBefore(LocalDateTime.now())) {
+        if (session.isEmpty() || session.get().getExpires().isBefore(LocalDateTime.now(Clock.systemUTC()))) {
             throw new InvalidRefreshTokenException();
         }
 
