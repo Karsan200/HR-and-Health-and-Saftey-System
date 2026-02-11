@@ -6,12 +6,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -29,7 +29,7 @@ import java.util.List;
 @Component
 public final class JwtAuthFilter extends OncePerRequestFilter {
     /** Service for UserDetails. */
-    private final UserDetailsService userDetailsService;
+    private final UserInfoService userInfoService;
     /** Service for JWT handling and authentication operations. */
     private final AuthenticationService authenticationService;
     /** Length of the "Bearer " prefix in the Authorization header. */
@@ -37,15 +37,15 @@ public final class JwtAuthFilter extends OncePerRequestFilter {
 
     /**
      * Constructor for dependency injection of required services.
-     * @param userDetailsServiceImpl the UserDetailsService implementation to use
+     * @param userInfoServiceImpl the UserInfoService implementation to use
      * @param authenticationServiceImpl the AuthenticationService implementation to use
      */
     @Autowired
     public JwtAuthFilter(
-        final UserDetailsService userDetailsServiceImpl,
+        @Lazy final UserInfoService userInfoServiceImpl,
         final AuthenticationService authenticationServiceImpl
     ) {
-        this.userDetailsService = userDetailsServiceImpl;
+        this.userInfoService = userInfoServiceImpl;
         this.authenticationService = authenticationServiceImpl;
     }
 
@@ -66,7 +66,7 @@ public final class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails = userInfoService.loadUserByUsername(username);
             if (authenticationService.validateToken(token, userDetails)) {
 
                 // Roles (still source-of-truth from DB or token)

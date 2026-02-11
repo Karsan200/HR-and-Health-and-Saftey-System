@@ -7,7 +7,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
@@ -26,7 +26,7 @@ import uk.co.garagebridgend.backend.repository.SessionRepository;
 /**
  * Service responsible for JWT handling and authentication operations.
  */
-@Component
+@Service
 public class AuthenticationService {
     /** Secret key for signing JWTs, injected from application properties. */
     @Value("${jwt.secret}")

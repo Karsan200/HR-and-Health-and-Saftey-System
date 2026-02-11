@@ -79,10 +79,6 @@ jacocoTestCoverageVerification {
                 value = 'COVEREDRATIO'
                 minimum = 0.9
             }
-            excludes = [
-                'uk/co/garagebridgend/config/**',
-                'uk/co/garagebridgend/backend/RentATechApplication'
-            ]
         }
     }
 }
