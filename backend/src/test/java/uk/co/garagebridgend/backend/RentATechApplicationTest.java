@@ -14,4 +14,9 @@ class RentATechApplicationTest {
     @Test
     void contextLoads() {
     }
+
+    @Test
+    void mainRuns() {
+        RentATechApplication.main(new String[] {});
+    }
 }
