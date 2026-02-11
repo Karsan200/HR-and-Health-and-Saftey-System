@@ -55,6 +55,12 @@ public final class JwtAuthFilter extends OncePerRequestFilter {
         final HttpServletResponse response,
         final FilterChain filterChain
     ) throws ServletException, IOException {
+        String path = request.getRequestURI();
+        if (path.equals("/auth/refresh")) {
+            filterChain.doFilter(request, response); // skip JWT parsing
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;
