@@ -6,6 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,11 +31,14 @@ public class PermissionsTable {
      * Maps to {@code account_id}.
      */
     @Id
+    @Column(name = "account_id")
+    private long accountId;
+
+    /** Account that owns these permissions (primary key). */
     @OneToOne
-    @JoinColumn(
+    @PrimaryKeyJoinColumn(
         name = "account_id",
-        referencedColumnName = "account_id",
-        nullable = false
+        referencedColumnName = "account_id"
     )
     private AccountTable account;
 
@@ -56,7 +60,7 @@ public class PermissionsTable {
     private boolean isManager;
 
     /** Creation timestamp (auto-populated, not updatable). */
-    @Column(name = "created", nullable = false, updatable = false)
     @CreationTimestamp
+    @Column(name = "created", nullable = false, updatable = false)
     private LocalDateTime created;
 }

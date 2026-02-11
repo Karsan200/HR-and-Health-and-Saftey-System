@@ -62,7 +62,7 @@ public class SessionTable {
     private LocalDateTime expires;
 
     /** Creation timestamp (auto-populated, not updatable). */
-    @Column(name = "created", nullable = false, updatable = false)
     @CreationTimestamp
+    @Column(name = "created", nullable = false, updatable = false)
     private LocalDateTime created;
 }

@@ -74,7 +74,7 @@ public class AccountTable {
     private String mobilePinSalt;
 
     /** Creation timestamp (auto-populated, not updatable). */
-    @Column(name = "created", nullable = false, updatable = false)
     @CreationTimestamp
+    @Column(name = "created", nullable = false, updatable = false)
     private LocalDateTime created;
 }
