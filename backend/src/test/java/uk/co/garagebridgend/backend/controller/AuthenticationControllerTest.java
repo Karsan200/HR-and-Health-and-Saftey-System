@@ -113,6 +113,13 @@ public class AuthenticationControllerTest {
     }
 
     @Test
+    void testRefreshTokenInvalid() throws Exception {
+        mockMvc.perform(get("/auth/refresh")
+                        .cookie(new Cookie("refreshToken", "invalid-token")))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void testRefreshTokenValid() throws Exception {
         mockMvc.perform(get("/auth/refresh")
                         .cookie(new Cookie("refreshToken", "87cc6b24-d1aa-468a-bc98-ad1a902c8b3e")))
@@ -128,7 +135,7 @@ public class AuthenticationControllerTest {
         when(authenticationService.refreshAccessToken("87cc6b24"))
                 .thenThrow(new RuntimeException("Service failed"));
 
-        // perform a GET/POST to /auth/refresh with a cookie
+        // perform a GET to /auth/refresh with a cookie
         mockMvc.perform(get("/auth/refresh")
                         .cookie(new Cookie("refreshToken", "87cc6b24")))
                 .andExpect(status().isInternalServerError()) // matches ResponseStatusException
