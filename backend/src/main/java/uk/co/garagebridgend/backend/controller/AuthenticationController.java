@@ -5,13 +5,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import uk.co.garagebridgend.backend.logic.AuthenticationService;
 import uk.co.garagebridgend.backend.models.exception.InvalidRefreshTokenException;
+import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
 import uk.co.garagebridgend.backend.models.response.RefreshTokenResponse;
 
 import java.util.Arrays;
@@ -25,6 +24,21 @@ import java.util.Arrays;
 public class AuthenticationController {
     /** Authentication service for handling authentication operations. */
     private final AuthenticationService authenticationService;
+
+    /** Rotates a refresh token by invalidating the old one and issuing a new one.
+     * @param body The request body containing the pin code for rotation.
+     * */
+    @PostMapping("/rotate")
+    public void rotateRefreshToken(@RequestBody AuthRotateRequest body) {
+        try {
+            // TODO: implement rotate token logic
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal sever error"
+            );
+        }
+    }
 
 
     /** Refreshes an access token using a valid refresh token
