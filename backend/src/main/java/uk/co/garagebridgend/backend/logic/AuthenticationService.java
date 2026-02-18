@@ -6,6 +6,9 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +20,8 @@ import java.util.function.Function;
 
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.SessionTable;
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
+import uk.co.garagebridgend.backend.models.exception.InvalidPasswordException;
 import uk.co.garagebridgend.backend.models.exception.InvalidRefreshTokenException;
 import uk.co.garagebridgend.backend.models.internal.RotateRefreshTokenInternal;
 import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
@@ -65,8 +70,37 @@ public class AuthenticationService {
         this.accountRepository = accountRepositoryImpl;
     }
 
-    public RotateRefreshTokenInternal rotateRefreshToken(AuthRotateRequest body) {
+    /**
+     * Rotates the refresh token for the currently authenticated user. Revokes all existing mobile refresh tokens,
+     * creates a new mobile refresh token, and generates a new access token with appropriate claims.
+     * @param body the request body containing the user's pin code
+     * @return a RotateRefreshTokenInternal object containing the new refresh token and access token
+     * @throws AuthenticatedAccountNotFoundException if no authenticated user is found in the security context
+     */
+    public RotateRefreshTokenInternal rotateRefreshToken(AuthRotateRequest body)
+            throws AuthenticatedAccountNotFoundException, InvalidPasswordException
+    {
+        // Get the current user
+        User user = AuthenticationService.getCurrentUser();
 
+        if (user == null) {
+            throw new AuthenticatedAccountNotFoundException();
+        }
+
+        // Revoke all existing mobile refresh tokens for the user
+        sessionRepository.deleteMobileSessionsByAccountId(Long.valueOf(user.getUsername()));
+
+        // Create a new mobile refresh token
+        String newRefreshToken = createRefreshToken(Long.valueOf(user.getUsername()), true);
+
+        // Create a new access token
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("mfa", false);
+        claims.put("mobileToken", true);
+
+        String newAccessToken = createToken(claims, Long.valueOf(user.getUsername()));
+
+        return new RotateRefreshTokenInternal(newRefreshToken, newAccessToken);
     }
 
     /**
@@ -83,16 +117,30 @@ public class AuthenticationService {
         }
 
         // Get username and claims from session
-        final String username = session.get().getAccount().getUsername();
+        final Long accountId = session.get().getAccount().getAccountId();
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("mfa", session.get().isTwoFactor());
         claims.put("mobileToken", session.get().isMobile());
 
         // Generate new access token
-        String newAccessToken = createToken(claims, username);
+        String newAccessToken = createToken(claims, accountId);
 
         return new RefreshTokenResponse(newAccessToken);
+    }
+
+    /**
+     * Retrieves the currently authenticated user from the Spring Security context. If the authentication
+     * is present and the principal is an instance of User, it returns the User object; otherwise, it returns null.
+     * @return the currently authenticated User, or null if no authentication is present or the principal is not a User
+     */
+    public static User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof User) {
+            return (User) authentication.getPrincipal();
+        }
+        return null;
     }
 
     /**
@@ -104,13 +152,13 @@ public class AuthenticationService {
      * @return the generated refresh token as a string
      * @throws IllegalArgumentException if the account ID is not found in the database
      */
-    private String createRefreshToken(Long accountId, boolean isMobile) throws IllegalArgumentException {
+    private String createRefreshToken(Long accountId, boolean isMobile) throws AuthenticatedAccountNotFoundException {
         // Find the account to create a session for
         Optional<AccountTable> account = accountRepository.findById(accountId);
 
         // Check if a user has been found
         if (account.isEmpty()) {
-            throw new IllegalArgumentException("Account not found.");
+            throw new AuthenticatedAccountNotFoundException();
         }
 
         // Create the refresh token
@@ -150,13 +198,13 @@ public class AuthenticationService {
     /**
      * Creates a JWT access token with the given claims and username. The token is signed using the secret key
      * @param claims the claims to include in the token payload
-     * @param username the subject (username) to include in the token
+     * @param accountId the subject (accountId) to include in the token
      * @return the generated JWT access token as a string
      */
-    private String createToken(final Map<String, Object> claims, final String username) {
+    private String createToken(final Map<String, Object> claims, final Long accountId) {
         return Jwts.builder()
                 .claims(claims)
-                .subject(username)
+                .subject(accountId.toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtAccessTokenExpiration))
                 .signWith(getSignKey(), Jwts.SIG.HS256)

@@ -51,11 +51,11 @@ public class UserInfoService implements UserDetailsService {
         this.encoder = encoderImpl;
     }
 
-    /** Method to load user details by username (email). */
+    /** Method to load user details by username (accountId). */
     @Override
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
         // Fetch user from the database
-        AccountTable account = repository.findByUsername(username).orElseThrow(() ->
+        AccountTable account = repository.findById(Long.valueOf(username)).orElseThrow(() ->
             new UsernameNotFoundException("User not found"));
 
         // Get permissions for the user
@@ -72,7 +72,7 @@ public class UserInfoService implements UserDetailsService {
 
         // Convert Account data to UserDetails (UserInfoDetails)
         return new User(
-            account.getEmail(),
+            account.getAccountId().toString(),
                 account.getPassword(),
             roleNames.stream()
                 .map(SimpleGrantedAuthority::new)
