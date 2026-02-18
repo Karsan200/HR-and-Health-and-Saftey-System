@@ -12,15 +12,16 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.*;
 import java.util.function.Function;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
+import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.SessionTable;
 import uk.co.garagebridgend.backend.models.exception.InvalidRefreshTokenException;
+import uk.co.garagebridgend.backend.models.internal.RotateRefreshTokenInternal;
+import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
 import uk.co.garagebridgend.backend.models.response.RefreshTokenResponse;
+import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.SessionRepository;
 
 /**
@@ -47,13 +48,25 @@ public class AuthenticationService {
     /** Repository for fetching session data related to refresh tokens. */
     private final SessionRepository sessionRepository;
 
+    /** Repository for fetching account data related to session creation and validation. */
+    private final AccountRepository accountRepository;
+
     /**
      * Constructor for dependency injection of required services and repositories.
      * @param sessionRepositoryImpl the SessionRepository implementation to use
+     * @param accountRepositoryImpl the AccountRepository implementation to use
      */
     @Autowired
-    public AuthenticationService(final SessionRepository sessionRepositoryImpl) {
+    public AuthenticationService(
+            final SessionRepository sessionRepositoryImpl,
+            final AccountRepository accountRepositoryImpl
+    ) {
         this.sessionRepository = sessionRepositoryImpl;
+        this.accountRepository = accountRepositoryImpl;
+    }
+
+    public RotateRefreshTokenInternal rotateRefreshToken(AuthRotateRequest body) {
+
     }
 
     /**
@@ -80,6 +93,58 @@ public class AuthenticationService {
         String newAccessToken = createToken(claims, username);
 
         return new RefreshTokenResponse(newAccessToken);
+    }
+
+    /**
+     * Creates a new refresh token for the given account ID and mobile token flag. Validates the account ID and creates
+     * a new session in the database with the generated refresh token and expiration time
+     * based on whether it's a mobile token or not.
+     * @param accountId the ID of the account for which to create the refresh token
+     * @param isMobile flag indicating whether the refresh token is for a mobile device
+     * @return the generated refresh token as a string
+     * @throws IllegalArgumentException if the account ID is not found in the database
+     */
+    private String createRefreshToken(Long accountId, boolean isMobile) throws IllegalArgumentException {
+        // Find the account to create a session for
+        Optional<AccountTable> account = accountRepository.findById(accountId);
+
+        // Check if a user has been found
+        if (account.isEmpty()) {
+            throw new IllegalArgumentException("Account not found.");
+        }
+
+        // Create the refresh token
+        String refreshToken = generateRandomString(128);
+
+        // Create a new session in the database
+        SessionTable session = new SessionTable();
+        session.setAccount(account.get());
+        session.setRefreshToken(refreshToken);
+        session.setTwoFactor(false);
+        session.setMobile(isMobile);
+        session.setExpires(LocalDateTime.now(Clock.systemUTC()).plusSeconds(
+                isMobile ? jwtRefreshTokenExpirationMobile / 1000 : jwtRefreshTokenExpiration / 1000
+        ));
+
+        // Save the session to the database
+        sessionRepository.save(session);
+
+        // Return the generated refresh token
+        return refreshToken;
+    }
+
+    /**
+     * Generates a random string of the specified length consisting of alphanumeric characters (0-9, A-Z, a-z).
+     * @param length the desired length of the generated random string
+     * @return a random string of the specified length containing only alphanumeric characters
+     */
+    private String generateRandomString(int length) {
+        Random random = new Random();
+        return random.ints(48, 122 + 1)
+                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+                .limit(128)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
     }
 
     /**

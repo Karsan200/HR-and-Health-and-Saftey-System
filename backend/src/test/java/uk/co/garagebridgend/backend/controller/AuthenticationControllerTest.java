@@ -51,7 +51,7 @@ public class AuthenticationControllerTest {
     private SessionRepository sessionRepository;
 
     @Mock
-    private AuthenticationService authenticationService;  // make this a mock
+    private AuthenticationService authenticationService;
 
     @InjectMocks
     private AuthenticationController authenticationController;
