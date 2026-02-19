@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -87,8 +88,21 @@ public class AuthenticationService {
             throw new AuthenticatedAccountNotFoundException();
         }
 
+        // Get the account from the database
+        Optional<AccountTable> account = accountRepository.findById(Long.valueOf(user.getUsername()));
+
+        if (account.isEmpty()) {
+            throw new AuthenticatedAccountNotFoundException();
+        }
+
+        // Validate the provided pin code
+        String saltedPin = body.getPinCode() + account.get().getMobilePinSalt();
+        if (!BCrypt.checkpw(saltedPin, account.get().getMobilePin())) {
+            throw new InvalidPasswordException("Invalid pin code");
+        }
+
         // Revoke all existing mobile refresh tokens for the user
-        sessionRepository.deleteMobileSessionsByAccountId(Long.valueOf(user.getUsername()));
+        sessionRepository.deleteMobileSessionsByAccountId(account.get().getAccountId());
 
         // Create a new mobile refresh token
         String newRefreshToken = createRefreshToken(Long.valueOf(user.getUsername()), true);
