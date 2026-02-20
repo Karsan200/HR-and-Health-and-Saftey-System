@@ -14,9 +14,13 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
@@ -35,6 +39,13 @@ import uk.co.garagebridgend.backend.repository.SessionRepository;
  */
 @Service
 public class AuthenticationService {
+    /** Length of generated refresh tokens. */
+    private static final int REFRESH_TOKEN_LENGTH = 128;
+
+    /** Alphanumeric characters used for generating random strings. */
+    private static final String ALPHANUMERIC =
+            "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
     /** Secret key for signing JWTs, injected from application properties. */
     @Value("${jwt.secret}")
     private String secretKey;
@@ -78,9 +89,8 @@ public class AuthenticationService {
      * @return a RotateRefreshTokenInternal object containing the new refresh token and access token
      * @throws AuthenticatedAccountNotFoundException if no authenticated user is found in the security context
      */
-    public RotateRefreshTokenInternal rotateRefreshToken(AuthRotateRequest body)
-            throws AuthenticatedAccountNotFoundException, InvalidPasswordException
-    {
+    public RotateRefreshTokenInternal rotateRefreshToken(final AuthRotateRequest body)
+            throws AuthenticatedAccountNotFoundException, InvalidPasswordException {
         // Get the current user
         User user = AuthenticationService.getCurrentUser();
 
@@ -166,7 +176,8 @@ public class AuthenticationService {
      * @return the generated refresh token as a string
      * @throws IllegalArgumentException if the account ID is not found in the database
      */
-    private String createRefreshToken(Long accountId, boolean isMobile) throws AuthenticatedAccountNotFoundException {
+    private String createRefreshToken(final Long accountId, final boolean isMobile)
+            throws AuthenticatedAccountNotFoundException {
         // Find the account to create a session for
         Optional<AccountTable> account = accountRepository.findById(accountId);
 
@@ -176,7 +187,7 @@ public class AuthenticationService {
         }
 
         // Create the refresh token
-        String refreshToken = generateRandomString(128);
+        String refreshToken = generateRandomString();
 
         // Create a new session in the database
         SessionTable session = new SessionTable();
@@ -185,7 +196,7 @@ public class AuthenticationService {
         session.setTwoFactor(false);
         session.setMobile(isMobile);
         session.setExpires(LocalDateTime.now(Clock.systemUTC()).plusSeconds(
-                isMobile ? jwtRefreshTokenExpirationMobile / 1000 : jwtRefreshTokenExpiration / 1000
+                isMobile ? jwtRefreshTokenExpirationMobile : jwtRefreshTokenExpiration
         ));
 
         // Save the session to the database
@@ -197,15 +208,16 @@ public class AuthenticationService {
 
     /**
      * Generates a random string of the specified length consisting of alphanumeric characters (0-9, A-Z, a-z).
-     * @param length the desired length of the generated random string
      * @return a random string of the specified length containing only alphanumeric characters
      */
-    private String generateRandomString(int length) {
-        Random random = new Random();
-        return random.ints(48, 122 + 1)
-                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
-                .limit(128)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+    private String generateRandomString() {
+        SecureRandom random = new SecureRandom();
+
+        return random.ints(REFRESH_TOKEN_LENGTH, 0, ALPHANUMERIC.length())
+                .mapToObj(ALPHANUMERIC::charAt)
+                .collect(StringBuilder::new,
+                        StringBuilder::append,
+                        StringBuilder::append)
                 .toString();
     }
 

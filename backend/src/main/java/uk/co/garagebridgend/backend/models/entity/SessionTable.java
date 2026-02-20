@@ -27,6 +27,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SessionTable {
+    /** Named constant for refresh token column length. */
+    private static final int REFRESH_TOKEN_LENGTH = 128;
 
     /**
      * Session identifier (generated UUID).
@@ -45,7 +47,7 @@ public class SessionTable {
     private AccountTable account;
 
     /** Refresh token associated with the session (sensitive). */
-    @Column(name = "refresh_token", length=128, nullable = false)
+    @Column(name = "refresh_token", length = REFRESH_TOKEN_LENGTH, nullable = false)
     private String refreshToken;
 
     /** True when two-factor authentication has been completed for
