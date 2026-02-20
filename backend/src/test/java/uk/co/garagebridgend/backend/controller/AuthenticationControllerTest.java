@@ -10,6 +10,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,6 +31,7 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(
@@ -61,14 +63,19 @@ public class AuthenticationControllerTest {
 
     @BeforeEach
     void setup() {
+        // Create salt
+        String salt = BCrypt.gensalt();
+
         // Create account
         AccountTable account = new AccountTable();
         account.setFirstName("John");
         account.setLastName("Doe");
         account.setUsername("johnd18");
         account.setEmail("johnd@test.com");
-        account.setPassword("hashedPassword");
-        account.setSalt("1234567890123456");
+        account.setPassword(BCrypt.hashpw("hashedPassword", salt));
+        account.setSalt(salt);
+        account.setMobilePin(BCrypt.hashpw("123456", salt));
+        account.setMobilePinSalt(salt);
         accountRepository.save(account);
 
         // Get the saved account to ensure we have the generated ID
@@ -100,6 +107,12 @@ public class AuthenticationControllerTest {
     }
 
     @Test
+    void testRotateNotAuthenticated() throws Exception {
+        mockMvc.perform(post("/auth/rotate"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void testNoRefreshToken() throws Exception {
         mockMvc.perform(get("/auth/refresh"))
                 .andExpect(status().isUnauthorized());
@@ -127,7 +140,7 @@ public class AuthenticationControllerTest {
     }
 
     @Test
-    void testRefreshTokenThrowsException() throws Exception {
+    void testThrowsException() throws Exception {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(authenticationController).build();
 

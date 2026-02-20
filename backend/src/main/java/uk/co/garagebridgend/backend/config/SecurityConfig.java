@@ -11,6 +11,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,6 +19,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 import uk.co.garagebridgend.backend.logic.JwtAuthFilter;
 import uk.co.garagebridgend.backend.logic.UserInfoService;
@@ -59,7 +62,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         http
                 // Disable CSRF (not needed for stateless JWT)
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
+
+                // Return 401 for unauthenticated requests
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
 
                 // Configure endpoint authorization
                 .authorizeHttpRequests(auth -> auth

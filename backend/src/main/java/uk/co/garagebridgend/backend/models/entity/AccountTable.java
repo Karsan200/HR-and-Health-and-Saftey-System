@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 public class AccountTable {
 
     /** Named constant for salt-related column lengths. */
-    private static final int SALT_LENGTH = 16;
+    private static final int SALT_LENGTH = 32;
 
     /** Primary key (auto-generated). */
     @Id

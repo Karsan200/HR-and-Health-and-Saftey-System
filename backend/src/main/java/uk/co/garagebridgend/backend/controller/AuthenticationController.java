@@ -2,6 +2,7 @@ package uk.co.garagebridgend.backend.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -9,7 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import uk.co.garagebridgend.backend.logic.AuthenticationService;
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
+import uk.co.garagebridgend.backend.models.exception.InvalidPasswordException;
 import uk.co.garagebridgend.backend.models.exception.InvalidRefreshTokenException;
+import uk.co.garagebridgend.backend.models.internal.RotateRefreshTokenInternal;
 import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
 import uk.co.garagebridgend.backend.models.response.RefreshTokenResponse;
 
@@ -29,10 +33,33 @@ public class AuthenticationController {
      * @param body The request body containing the pin code for rotation.
      * */
     @PostMapping("/rotate")
-    public void rotateRefreshToken(@RequestBody AuthRotateRequest body) {
+    public RefreshTokenResponse rotateRefreshToken(
+            @RequestBody AuthRotateRequest body, HttpServletResponse response
+    ) {
         try {
-            // TODO: implement rotate token logic
-        } catch (Exception e) {
+            RotateRefreshTokenInternal tokens = authenticationService.rotateRefreshToken(body);
+
+            // Set the new refresh token in an HttpOnly cookie
+            Cookie refreshTokenCookie = new Cookie("refreshToken", tokens.getRefreshToken());
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setMaxAge(30 * 24 * 60 * 60);
+
+            response.addCookie(refreshTokenCookie);
+            return new RefreshTokenResponse(tokens.getAccessToken());
+        } catch (InvalidPasswordException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Invalid pin code provided."
+            );
+        }
+        catch (AuthenticatedAccountNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Authenticated account not found."
+            );
+        }
+        catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal sever error"
