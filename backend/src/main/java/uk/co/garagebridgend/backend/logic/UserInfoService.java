@@ -59,7 +59,7 @@ public class UserInfoService implements UserDetailsService {
             new UsernameNotFoundException("User not found"));
 
         // Get permissions for the user
-        Optional<PermissionsTable> permissions = permissionsRepository.findById(account);
+        Optional<PermissionsTable> permissions = permissionsRepository.findById(account.getAccountId());
         List<String> roleNames = new ArrayList<>();
         if (permissions.isPresent()) {
             if (permissions.get().isAdmin()) {

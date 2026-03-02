@@ -6,7 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.MapsId;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,14 +32,12 @@ public class PermissionsTable {
      */
     @Id
     @Column(name = "account_id")
-    private long accountId;
+    private Long accountId;
 
     /** Account that owns these permissions (primary key). */
+    @MapsId
     @OneToOne
-    @PrimaryKeyJoinColumn(
-        name = "account_id",
-        referencedColumnName = "account_id"
-    )
+    @JoinColumn(name = "account_id")
     private AccountTable account;
 
     /**

@@ -2,25 +2,27 @@ package uk.co.garagebridgend.backend.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.ObjectMapper;
 import uk.co.garagebridgend.backend.RentATechApplication;
 import uk.co.garagebridgend.backend.logic.AuthenticationService;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.PermissionsTable;
 import uk.co.garagebridgend.backend.models.entity.SessionTable;
+import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.PermissionsRepository;
 import uk.co.garagebridgend.backend.repository.SessionRepository;
@@ -39,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ActiveProfiles("test")
 @Transactional
 public class AuthenticationControllerTest {
@@ -60,6 +63,8 @@ public class AuthenticationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    private String accessToken = null;
 
     @BeforeEach
     void setup() {
@@ -106,19 +111,94 @@ public class AuthenticationControllerTest {
         sessionRepository.save(valid);
     }
 
+    private void setAccessToken() throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(get("/auth/refresh")
+                        .cookie(new Cookie("refreshToken", "87cc6b24-d1aa-468a-bc98-ad1a902c8b3e")))
+                .andReturn()
+                .getResponse();
+
+        if (response.getStatus() != 200) {
+            throw new IllegalStateException(
+                    "Expected 200 but got " + response.getStatus()
+            );
+        }
+
+        String body = response.getContentAsString();
+
+        if (body.isBlank()) {
+            throw new IllegalStateException("Response body was empty");
+        }
+
+        accessToken = new ObjectMapper()
+                .readTree(body)
+                .path("accessToken")
+                .asString();
+    }
+
     @Test
+    @Order(2)
     void testRotateNotAuthenticated() throws Exception {
         mockMvc.perform(post("/auth/rotate"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
+    @Order(2)
+    void testRotateInvalidPin() throws Exception {
+        if (accessToken == null) {
+            setAccessToken();
+        }
+
+        mockMvc.perform(post("/auth/rotate")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "pinCode": "000000"
+                    }"""))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @Order(2)
+    void testRotateThrowsException() throws Exception {
+        if (accessToken == null) {
+            setAccessToken();
+        }
+
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(authenticationController).build();
+
+        // simulate your AuthenticationService throwing an exception
+        when(authenticationService.rotateRefreshToken(new AuthRotateRequest()))
+                .thenThrow(new RuntimeException("Service failed"));
+
+        // perform a POST to /auth/rotate with an Authorization header
+        mockMvc.perform(post("/auth/rotate")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "pinCode": ""
+                    }"""))
+                .andExpect(status().isInternalServerError()) // matches ResponseStatusException
+                .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
+                .andExpect(result -> {
+                    ResponseStatusException ex = (ResponseStatusException) result.getResolvedException();
+                    assertNotNull(ex);
+                    assertEquals("Internal sever error", ex.getReason()); // match your controller message
+                });
+    }
+
+    @Test
+    @Order(1)
     void testNoRefreshToken() throws Exception {
         mockMvc.perform(get("/auth/refresh"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
+    @Order(1)
     void testRefreshTokenExpired() throws Exception {
         mockMvc.perform(get("/auth/refresh")
                         .cookie(new Cookie("refreshToken", "7ba4f287-5940-404e-9a54-f360a0f29eff")))
@@ -126,6 +206,7 @@ public class AuthenticationControllerTest {
     }
 
     @Test
+    @Order(1)
     void testRefreshTokenInvalid() throws Exception {
         mockMvc.perform(get("/auth/refresh")
                         .cookie(new Cookie("refreshToken", "invalid-token")))
@@ -133,6 +214,7 @@ public class AuthenticationControllerTest {
     }
 
     @Test
+    @Order(1)
     void testRefreshTokenValid() throws Exception {
         mockMvc.perform(get("/auth/refresh")
                         .cookie(new Cookie("refreshToken", "87cc6b24-d1aa-468a-bc98-ad1a902c8b3e")))
@@ -140,7 +222,8 @@ public class AuthenticationControllerTest {
     }
 
     @Test
-    void testThrowsException() throws Exception {
+    @Order(1)
+    void testRefreshThrowsException() throws Exception {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(authenticationController).build();
 
