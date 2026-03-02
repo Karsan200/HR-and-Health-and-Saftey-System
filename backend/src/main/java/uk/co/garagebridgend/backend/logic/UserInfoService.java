@@ -1,11 +1,11 @@
 package uk.co.garagebridgend.backend.logic;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -53,13 +53,16 @@ public class UserInfoService implements UserDetailsService {
 
     /** Method to load user details by username (accountId). */
     @Override
-    public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
+    public @Nullable UserDetails loadUserByUsername(final String username) {
         // Fetch user from the database
-        AccountTable account = repository.findById(Long.valueOf(username)).orElseThrow(() ->
-            new UsernameNotFoundException("User not found"));
+        Optional<AccountTable> account = repository.findById(Long.valueOf(username));
+
+        if (account.isEmpty()) {
+            return null;
+        }
 
         // Get permissions for the user
-        Optional<PermissionsTable> permissions = permissionsRepository.findById(account.getAccountId());
+        Optional<PermissionsTable> permissions = permissionsRepository.findById(account.get().getAccountId());
         List<String> roleNames = new ArrayList<>();
         if (permissions.isPresent()) {
             if (permissions.get().isAdmin()) {
@@ -72,8 +75,8 @@ public class UserInfoService implements UserDetailsService {
 
         // Convert Account data to UserDetails (UserInfoDetails)
         return new User(
-            account.getAccountId().toString(),
-                account.getPassword(),
+            account.get().getAccountId().toString(),
+                account.get().getPassword(),
             roleNames.stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList())

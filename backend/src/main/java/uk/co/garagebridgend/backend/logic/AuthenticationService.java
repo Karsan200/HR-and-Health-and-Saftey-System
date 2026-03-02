@@ -99,20 +99,16 @@ public class AuthenticationService {
         }
 
         // Get the account from the database
-        Optional<AccountTable> account = accountRepository.findById(Long.valueOf(user.getUsername()));
-
-        if (account.isEmpty()) {
-            throw new AuthenticatedAccountNotFoundException();
-        }
+        AccountTable account = accountRepository.findById(Long.valueOf(user.getUsername()))
+                .orElseThrow(AuthenticatedAccountNotFoundException::new);
 
         // Validate the provided pin code
-        String saltedPin = body.getPinCode() + account.get().getMobilePinSalt();
-        if (!BCrypt.checkpw(saltedPin, account.get().getMobilePin())) {
+        if (!BCrypt.checkpw(body.getPinCode(), account.getMobilePin())) {
             throw new InvalidPasswordException("Invalid pin code");
         }
 
         // Revoke all existing mobile refresh tokens for the user
-        sessionRepository.deleteMobileSessionsByAccountId(account.get().getAccountId());
+        sessionRepository.deleteMobileSessionsByAccountId(account.getAccountId());
 
         // Create a new mobile refresh token
         String newRefreshToken = createRefreshToken(Long.valueOf(user.getUsername()), true);

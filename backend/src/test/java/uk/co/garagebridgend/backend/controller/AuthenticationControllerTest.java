@@ -5,6 +5,8 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +24,7 @@ import uk.co.garagebridgend.backend.logic.AuthenticationService;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.PermissionsTable;
 import uk.co.garagebridgend.backend.models.entity.SessionTable;
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.PermissionsRepository;
@@ -29,8 +32,11 @@ import uk.co.garagebridgend.backend.repository.SessionRepository;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -63,8 +69,6 @@ public class AuthenticationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    private String accessToken = null;
 
     @BeforeEach
     void setup() {
@@ -99,7 +103,7 @@ public class AuthenticationControllerTest {
         expired.setRefreshToken("7ba4f287-5940-404e-9a54-f360a0f29eff");
         expired.setExpires(LocalDateTime.now(Clock.systemUTC()).minusHours(1));
         expired.setMobile(false);
-        expired.setTwoFactor(false);
+        expired.setTwoFactor(true);
         sessionRepository.save(expired);
 
         SessionTable valid = new SessionTable();
@@ -109,11 +113,49 @@ public class AuthenticationControllerTest {
         valid.setMobile(false);
         valid.setTwoFactor(false);
         sessionRepository.save(valid);
+
+        // Create a new account (for mobile)
+        var mobilePin = "654321";
+        var mobilePinSalt = BCrypt.gensalt();
+
+        AccountTable mobile = new AccountTable();
+        mobile.setFirstName("Jane");
+        mobile.setLastName("Smith");
+        mobile.setUsername("janesmith");
+        mobile.setEmail("janesmith@example.com");
+
+        // Password for login
+        var passwordSalt = BCrypt.gensalt();
+        mobile.setPassword(BCrypt.hashpw("hashedPassword", passwordSalt));
+        mobile.setSalt(passwordSalt);
+
+        // Mobile PIN for refresh rotation
+        mobile.setMobilePin(BCrypt.hashpw(mobilePin, mobilePinSalt));
+        mobile.setMobilePinSalt(mobilePinSalt);
+
+        accountRepository.save(mobile);
+
+        mobile = accountRepository.findByUsername("janesmith").orElseThrow();
+
+        PermissionsTable permissionsMobile = new PermissionsTable();
+        permissionsMobile.setAccount(mobile);
+        permissionsMobile.setAdmin(false);
+        permissionsMobile.setManager(false);
+        permissionsRepository.save(permissionsMobile);
+
+        // Create session
+        SessionTable sessionMobile = new SessionTable();
+        sessionMobile.setAccount(mobile);
+        sessionMobile.setRefreshToken("87cc6b24-d1aa-468a-bc98-ad1a902fghfghf");
+        sessionMobile.setExpires(LocalDateTime.now(Clock.systemUTC()).plusHours(2));
+        sessionMobile.setMobile(true);
+        sessionMobile.setTwoFactor(false);
+        sessionRepository.save(sessionMobile);
     }
 
-    private void setAccessToken() throws Exception {
+    private String getAccessToken(String refreshToken) throws Exception {
         MockHttpServletResponse response = mockMvc.perform(get("/auth/refresh")
-                        .cookie(new Cookie("refreshToken", "87cc6b24-d1aa-468a-bc98-ad1a902c8b3e")))
+                        .cookie(new Cookie("refreshToken", refreshToken)))
                 .andReturn()
                 .getResponse();
 
@@ -129,7 +171,7 @@ public class AuthenticationControllerTest {
             throw new IllegalStateException("Response body was empty");
         }
 
-        accessToken = new ObjectMapper()
+        return new ObjectMapper()
                 .readTree(body)
                 .path("accessToken")
                 .asString();
@@ -145,9 +187,7 @@ public class AuthenticationControllerTest {
     @Test
     @Order(2)
     void testRotateInvalidPin() throws Exception {
-        if (accessToken == null) {
-            setAccessToken();
-        }
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
 
         mockMvc.perform(post("/auth/rotate")
                         .header("Authorization", "Bearer " + accessToken)
@@ -161,10 +201,64 @@ public class AuthenticationControllerTest {
 
     @Test
     @Order(2)
-    void testRotateThrowsException() throws Exception {
-        if (accessToken == null) {
-            setAccessToken();
+    void testRotateAccountNotFound() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902fghfghf");
+
+        // Delete the account associated with the session to simulate account not found
+        Optional<SessionTable> session = sessionRepository.findByRefreshToken("87cc6b24-d1aa-468a-bc98-ad1a902fghfghf");
+
+        assertTrue(session.isPresent(), "Session should exist before deletion");
+
+        // Mock getCurrentUser to return null
+        try (MockedStatic<AuthenticationService> mocked = Mockito.mockStatic(AuthenticationService.class)) {
+            mocked.when(AuthenticationService::getCurrentUser).thenReturn(null);
+
+            mockMvc.perform(post("/auth/rotate")
+                            .header("Authorization", "Bearer " + accessToken)
+                            .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                            .content("""
+                    {
+                        "pinCode": "123456"
+                    }"""))
+                    .andExpect(status().isUnauthorized());
         }
+    }
+
+    @Test
+    @Order(2)
+    void testRotateSuccess() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902fghfghf");
+
+        mockMvc.perform(post("/auth/rotate")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                            {
+                                "pinCode": "654321"
+                            }"""))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    String responseBody = result.getResponse().getContentAsString();
+                    assertFalse(responseBody.isBlank(), "Response body should not be empty");
+
+                    // Check access token in response
+                    String newAccessToken = new ObjectMapper()
+                            .readTree(responseBody)
+                            .path("accessToken")
+                            .asString();
+                    assertFalse(newAccessToken.isBlank(), "Access token should not be empty");
+
+                    // Check refresh token cookie
+                    Cookie refreshCookie = result.getResponse().getCookie("refreshToken");
+                    assertNotNull(refreshCookie, "Refresh token cookie should be set");
+                    assertFalse(refreshCookie.getValue().isBlank(), "Refresh token cookie value should not be empty");
+                });
+    }
+
+    @Test
+    @Order(2)
+    void testRotateThrowsException() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
 
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(authenticationController).build();

@@ -73,6 +73,10 @@ public final class JwtAuthFilter extends OncePerRequestFilter {
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userInfoService.loadUserByUsername(username);
+            if (userDetails == null) {
+                filterChain.doFilter(request, response); // User not found, skip authentication
+                return;
+            }
             if (authenticationService.validateToken(token, userDetails)) {
 
                 // Roles (still source-of-truth from DB or token)
