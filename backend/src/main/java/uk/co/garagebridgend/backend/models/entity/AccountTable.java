@@ -28,6 +28,15 @@ public class AccountTable {
     /** Named constant for salt-related column lengths. */
     private static final int SALT_LENGTH = 32;
 
+    /** Named constant for phone number column length. */
+    private static final int PHONE_NUMBER_LENGTH = 17;
+
+    /** Named constant for region code column length. */
+    private static final int REGION_CODE_LENGTH = 4;
+
+    /** Named constant for postal code column length. */
+    private static final int POSTAL_CODE_LENGTH = 8;
+
     /** Primary key (auto-generated). */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,6 +69,26 @@ public class AccountTable {
     /** Salt for the password hash (stored alongside the hash). */
     @Column(name = "salt", length = SALT_LENGTH, nullable = false)
     private String salt;
+
+    /** Region code for phone number. */
+    @Column(name = "region_code", length = REGION_CODE_LENGTH)
+    private String regionCode;
+
+    /** Phone number. */
+    @Column(name = "phone_number", length = PHONE_NUMBER_LENGTH)
+    private String phoneNumber;
+
+    /** Address line one. */
+    @Column(name = "address_one", nullable = false)
+    private String addressOne;
+
+    /** Address line two. */
+    @Column(name = "address_two")
+    private String addressTwo;
+
+    /** Postal code. */
+    @Column(name = "postal_code", length = POSTAL_CODE_LENGTH, nullable = false)
+    private String postalCode;
 
     /** Optional two-factor authentication (TOTP) secret. */
     @Column(name = "two_factor_secret")
