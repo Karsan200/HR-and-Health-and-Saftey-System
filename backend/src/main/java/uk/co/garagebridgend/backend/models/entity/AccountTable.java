@@ -44,26 +44,26 @@ public class AccountTable {
     private Long accountId;
 
     /** Required: user's first name. */
-    @Column(name = "first_name", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "first_name", nullable = false)
     private String firstName;
 
     /** Required: user's last name. */
-    @Column(name = "last_name", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "last_name", nullable = false)
     private String lastName;
 
     /** Required: user's username. - used for sign-in */
-    @Column(name = "username", nullable = false, unique = true)
+    @Column(columnDefinition = "TEXT", name = "username", nullable = false, unique = true)
     private String username;
 
     /**
      * User's email address. Required and unique — used for admin and
      * notifications.
      */
-    @Column(name = "email", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "email", nullable = false)
     private String email;
 
     /** Hashed password. Do not store plaintext passwords. */
-    @Column(name = "password", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "password", nullable = false)
     private String password;
 
     /** Salt for the password hash (stored alongside the hash). */
@@ -79,11 +79,11 @@ public class AccountTable {
     private String phoneNumber;
 
     /** Address line one. */
-    @Column(name = "address_one", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "address_one", nullable = false)
     private String addressOne;
 
     /** Address line two. */
-    @Column(name = "address_two")
+    @Column(columnDefinition = "TEXT", name = "address_two")
     private String addressTwo;
 
     /** Postal code. */
@@ -91,11 +91,11 @@ public class AccountTable {
     private String postalCode;
 
     /** Optional two-factor authentication (TOTP) secret. */
-    @Column(name = "two_factor_secret")
+    @Column(columnDefinition = "TEXT", name = "two_factor_secret")
     private String twoFactorSecret;
 
     /** Optional mobile PIN (should be hashed). */
-    @Column(name = "mobile_pin")
+    @Column(columnDefinition = "TEXT", name = "mobile_pin")
     private String mobilePin;
 
     /** Salt used for hashing the mobile PIN. */
