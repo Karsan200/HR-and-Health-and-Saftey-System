@@ -85,6 +85,8 @@ public class AuthenticationControllerTest {
         account.setSalt(salt);
         account.setMobilePin(BCrypt.hashpw("123456", salt));
         account.setMobilePinSalt(salt);
+        account.setAddressOne("123 Main St");
+        account.setPostalCode("12345");
         accountRepository.save(account);
 
         // Get the saved account to ensure we have the generated ID
@@ -123,6 +125,8 @@ public class AuthenticationControllerTest {
         mobile.setLastName("Smith");
         mobile.setUsername("janesmith");
         mobile.setEmail("janesmith@example.com");
+        mobile.setAddressOne("123 Main St");
+        mobile.setPostalCode("12345");
 
         // Password for login
         var passwordSalt = BCrypt.gensalt();

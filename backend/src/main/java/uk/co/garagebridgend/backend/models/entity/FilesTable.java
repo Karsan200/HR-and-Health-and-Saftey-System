@@ -50,7 +50,7 @@ public class FilesTable {
      * account table.
      */
     @ManyToOne
-    @JoinColumn(name = "created_by", referencedColumnName = "created_by")
+    @JoinColumn(name = "created_by", referencedColumnName = "account_id")
     private AccountTable createdBy;
 
     /** Filename of the uploaded file. */

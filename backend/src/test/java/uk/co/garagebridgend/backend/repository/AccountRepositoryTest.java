@@ -29,6 +29,8 @@ class AccountRepositoryTest {
         account.setEmail("johnd@test.com");
         account.setPassword("hashedPassword");
         account.setSalt("1234567890123456");
+        account.setAddressOne("123 Main St");
+        account.setPostalCode("12345");
 
         // Save the account to the repository
         accountRepository.save(account);

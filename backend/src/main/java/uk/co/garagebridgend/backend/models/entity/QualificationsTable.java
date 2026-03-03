@@ -45,7 +45,7 @@ public class QualificationsTable {
      */
     @ManyToOne
     @JoinColumn(name = "file_id", referencedColumnName = "file_id", nullable = true)
-    private AccountTable file;
+    private FilesTable file;
 
     /** Title of the qualification. */
     @JoinColumn(name = "title", nullable = false)
