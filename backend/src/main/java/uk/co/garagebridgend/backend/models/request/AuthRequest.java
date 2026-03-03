@@ -5,14 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Request payload for user authentication, containing email and password.
+ * Request payload for user authentication, containing username and password.
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthRequest {
-    /** User's email address. */
-    private String email;
+    /** User's username address. */
+    private String username;
 
     /** User's plaintext password. */
     private String password;
