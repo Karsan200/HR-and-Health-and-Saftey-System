@@ -38,7 +38,7 @@ public class SettingsTable {
 
     /** Large text field for user defined accessibility settings. */
     @Column(name = "large_text", nullable = false)
-    private String largeText;
+    private boolean largeText;
 
     /** Dyslexic font for user defined accessibility settings. */
     @Column(name = "dyslexic_font", nullable = false)

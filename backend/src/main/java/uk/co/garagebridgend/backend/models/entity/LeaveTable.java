@@ -57,11 +57,11 @@ public class LeaveTable {
     private boolean isApproved;
 
     /** Notes left about this leave request. */
-    @Column(name = "notes")
+    @Column(columnDefinition = "TEXT", name = "notes")
     private String notes;
 
     /** Reason for rejection/approval - primary use for why a request is rejected. */
-    @Column(name = "response")
+    @Column(columnDefinition = "TEXT", name = "response")
     private String response;
 
     /** Creation timestamp (auto-populated, not updatable). */

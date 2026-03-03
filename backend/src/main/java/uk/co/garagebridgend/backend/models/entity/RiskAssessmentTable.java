@@ -39,7 +39,7 @@ public class RiskAssessmentTable {
     private FilesTable file;
 
     /** Title of the risk assessment. */
-    @JoinColumn(name = "title", nullable = false)
+    @JoinColumn(columnDefinition = "TEXT", name = "title", nullable = false)
     private String title;
 
     /** Creation timestamp (auto-populated, not updatable). */

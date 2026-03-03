@@ -48,11 +48,11 @@ public class QualificationsTable {
     private FilesTable file;
 
     /** Title of the qualification. */
-    @JoinColumn(name = "title", nullable = false)
+    @JoinColumn(columnDefinition = "TEXT", name = "title", nullable = false)
     private String title;
 
     /** Description of the qualification. */
-    @JoinColumn(name = "details", nullable = false)
+    @JoinColumn(columnDefinition = "TEXT", name = "details", nullable = false)
     private String details;
 
     /** Creation timestamp (auto-populated, not updatable). */
