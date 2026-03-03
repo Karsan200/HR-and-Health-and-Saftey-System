@@ -29,7 +29,7 @@ public class LeaveTypeTable {
     private Integer leaveTypeId;
 
     /** Name of the leave type (e.g., "Sick Leave", "Holiday"). */
-    @Column(name = "name", nullable = false, unique = true)
+    @Column(columnDefinition = "TEXT", name = "name", nullable = false, unique = true)
     private String name;
 
     /** The colour of the icon for the leave type. */
@@ -41,6 +41,6 @@ public class LeaveTypeTable {
     private String colourBg;
 
     /** The type of the icon for the leave type. */
-    @Column(name = "icon_type", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "icon_type", nullable = false)
     private String iconType;
 }
