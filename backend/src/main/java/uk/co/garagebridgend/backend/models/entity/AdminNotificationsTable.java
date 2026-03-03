@@ -51,7 +51,7 @@ public class AdminNotificationsTable {
     @Column(name = "is_acknowledged", nullable = false)
     private boolean isAcknowledged;
 
-    /** Month the payslip is for. */
+    /** The priority of the notification. */
     @Column(columnDefinition = "TINYINT", name = "priority", nullable = false)
     private int priority;
 
