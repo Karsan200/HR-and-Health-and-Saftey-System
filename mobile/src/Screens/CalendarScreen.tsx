@@ -12,29 +12,27 @@ const CalendarScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Summary Boxes */}
       <SummaryRow>
         <SummaryCard
-          label="Hours Left"
+          label="Hours"
           value={82}
           icon="clock-outline"
-          iconColor={Colours.bluePrimary}
-          iconBackgroundColor={Colours.bluePrimary + '15'}
+          colour="red"
         />
 
         <SummaryCard
           label="Pending"
           value={4}
           icon="alert-circle-outline"
-          iconColor={Colours.amberPrimary}
-          iconBackgroundColor={Colours.amberBackgroundLight}
+          colour="amber"
         />
 
         <SummaryCard
           label="Approved"
           value={2}
           icon="check-circle-outline"
-          iconColor={Colours.greenPrimary}
-          iconBackgroundColor={Colours.greenBackgroundLight}
+          colour="green"
         />
       </SummaryRow>
 

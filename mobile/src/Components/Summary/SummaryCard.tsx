@@ -1,15 +1,18 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Icon } from 'react-native-paper';
-import { Spacing, FontSize, BorderRadius, TextStyles, } from '../../theme/theme';
-import { Colours } from '../../theme/colours.ts';
+import { FontSize, BorderRadius, TextStyles } from '../../theme/theme';
+import { Colours } from '../../theme/colours';
+
+type CardColour = 'red' | 'amber' | 'green' | 'neutral';
 
 interface SummaryCardProps {
   label: string;
   value: string | number;
-  icon?: string; // MaterialCommunityIcons name
-  iconColor?: string;
-  iconBackgroundColor?: string;
+  icon?: string;
+  colour?: CardColour;
+  iconColor?: string; // optional override
+  iconBackgroundColor?: string; // optional override
   onPress?: () => void;
 }
 
@@ -17,27 +20,62 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
   label,
   value,
   icon,
-  iconColor = Colours.bluePrimary,
-  iconBackgroundColor = Colours.greyBackground,
+  colour = 'neutral',
+  iconColor,
+  iconBackgroundColor,
   onPress,
 }) => {
   const Container = onPress ? Pressable : View;
 
+  // 🎨 Colour mapping
+  const colourStyles = {
+    red: {
+      iconColor: Colours.redPrimary,
+      background: Colours.redBackgroundLight,
+    },
+    amber: {
+      iconColor: Colours.amberPrimary,
+      background: Colours.amberBackgroundLight,
+    },
+    green: {
+      iconColor: Colours.greenPrimary,
+      background: Colours.greenBackgroundLight,
+    },
+    neutral: {
+      iconColor: Colours.bluePrimary,
+      background: Colours.greyBackground,
+    },
+  };
+
+  const resolvedIconColor = iconColor ?? colourStyles[colour].iconColor;
+
+  const resolvedBackgroundColor =
+    iconBackgroundColor ?? colourStyles[colour].background;
+
   return (
     <Container style={styles.card} onPress={onPress}>
-      {icon && (
-        <View
-          style={[
-            styles.iconContainer,
-            { backgroundColor: iconBackgroundColor },
-          ]}
-        >
-          <Icon source={icon} size={20} color={iconColor} />
-        </View>
-      )}
+      <View style={styles.content}>
+        {/* Top Row → Icon + Label */}
+        <View style={styles.topRow}>
+          {icon && (
+            <View
+              style={[
+                styles.iconContainer,
+                { backgroundColor: resolvedBackgroundColor },
+              ]}
+            >
+              <Icon source={icon} size={15} color={resolvedIconColor} />
+            </View>
+          )}
 
-      <Text style={styles.label}>{label}</Text>
-      <Text style={styles.value}>{value}</Text>
+          <Text style={styles.label}>{label}</Text>
+        </View>
+
+        {/* Bottom Row → Value */}
+        <View style={styles.bottomRow}>
+          <Text style={styles.value}>{value}</Text>
+        </View>
+      </View>
     </Container>
   );
 };
@@ -49,32 +87,48 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colours.white,
     borderRadius: BorderRadius.largeButtonsAndOutlines,
-    paddingVertical: Spacing.mediumPadding,
-    alignItems: 'center',
-    shadowColor: Colours.black,
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    shadowColor: Colours.greyIconLight,
+    shadowOpacity: 1,
+    shadowRadius: 4,
     elevation: 4,
   },
 
+  content: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  bottomRow: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
   iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 20,
+    height: 20,
+    borderRadius: BorderRadius.smallTextBackground,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Spacing.smallPadding,
+    marginRight: 6,
   },
 
   label: {
     ...TextStyles.regular,
     fontSize: FontSize.xs14,
     color: Colours.greyIconLight,
-    marginBottom: Spacing.smallPadding,
   },
 
   value: {
-    ...TextStyles.medium,
+    ...TextStyles.regular,
     fontSize: FontSize.l24,
     color: Colours.black,
   },
