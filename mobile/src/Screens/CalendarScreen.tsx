@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar, DateData } from 'react-native-calendars';
@@ -9,8 +9,6 @@ import SummaryCard from '../Components/Summary/SummaryCard.tsx';
 import SummaryRow from '../Components/Summary/SummaryRow.tsx';
 
 const CalendarScreen: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<string>('');
-
   const today = dayjs();
   const bookedDays = ['2026-03-11', '2026-03-13', '2026-03-16']; // Example booked days
 
@@ -40,12 +38,10 @@ const CalendarScreen: React.FC = () => {
   bookedDays.forEach(date => {
     bookedDates[date] = {
       selected: true,
-      selectedColor: Colours.redPrimary, // solid red like selected
+      selectedColor: Colours.redPrimary,
       selectedTextColor: Colours.white,
       customStyles: {
-        container: {
-          borderRadius: 20,
-        },
+        container: { borderRadius: 20 },
         text: {
           color: Colours.white,
           fontWeight: '600',
@@ -60,12 +56,10 @@ const CalendarScreen: React.FC = () => {
   const todayMarking: Record<string, any> = {
     [today.format('YYYY-MM-DD')]: {
       selected: true,
-      selectedColor: Colours.black, // solid black background
+      selectedColor: Colours.black,
       selectedTextColor: Colours.white,
       customStyles: {
-        container: {
-          borderRadius: 20,
-        },
+        container: { borderRadius: 20 },
         text: {
           color: Colours.white,
           fontWeight: '600',
@@ -81,15 +75,6 @@ const CalendarScreen: React.FC = () => {
     ...greyedDates,
     ...bookedDates,
     ...todayMarking,
-    ...(selectedDate
-      ? {
-          [selectedDate]: {
-            selected: true,
-            selectedColor: Colours.redPrimary,
-            selectedTextColor: Colours.white,
-          },
-        }
-      : {}),
   };
 
   return (
@@ -119,7 +104,10 @@ const CalendarScreen: React.FC = () => {
       {/* Calendar */}
       <View style={styles.calendarContainer}>
         <Calendar
-          onDayPress={(day: DateData) => setSelectedDate(day.dateString)}
+          onDayPress={(day: DateData) => {
+            // Handle tap if needed
+            console.log('User pressed:', day.dateString);
+          }}
           markedDates={markedDates}
           theme={{
             calendarBackground: Colours.white,
