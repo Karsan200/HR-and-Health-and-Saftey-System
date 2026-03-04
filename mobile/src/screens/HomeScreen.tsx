@@ -2,13 +2,14 @@ import React from 'react';
 import { ScrollView, Text, View, Pressable } from 'react-native';
 import { Avatar, IconButton } from 'react-native-paper';
 import { homeStyles as styles } from './HomeScreen.styles';
-import { Colours } from '../theme/colours'; //getting the colours from the set list
+import { Colours } from '../theme/colours';
+import { useNavigation } from '@react-navigation/native';
 
 export default function HomeScreen() {
+    const navigation = useNavigation<any>();
+
     return (
         <ScrollView contentContainerStyle={styles.container}>
-
-            {/*Profile Image at the top of the page*/}
             <Avatar.Icon
                 size={150}
                 icon="account-circle"
@@ -16,13 +17,11 @@ export default function HomeScreen() {
                 color={Colours.redPrimary}
             />
 
-            {/*Welcome message under the profile icon*/}
             <Text style={styles.welcomeText}>Welcome Back</Text>
             <Text style={styles.userName}>Maggie May</Text>
 
             <Text style={styles.sectionTitle}>CHOOSE A SECTION</Text>
 
-            {/*On click takes you to the HR Section of the app (Calendar) CURRENTLY BLANK*/}
             <Pressable style={styles.sectionButton} onPress={() => {}}>
                 <View style={styles.sectionButtonContent}>
                     <IconButton
@@ -36,8 +35,10 @@ export default function HomeScreen() {
                 </View>
             </Pressable>
 
-            {/*On click takes you to the Health and Safety section of the app (HS Overview) CURRENTLY BLANK*/}
-            <Pressable style={styles.sectionButton} onPress={() => {}}>
+            <Pressable
+                style={styles.sectionButton}
+                onPress={() => navigation.navigate('HsOverview')}
+            >
                 <View style={styles.sectionButtonContent}>
                     <IconButton
                         icon="shield-outline"
@@ -50,11 +51,9 @@ export default function HomeScreen() {
                 </View>
             </Pressable>
 
-            {/*All quick assess buttons*/}
             <View style={styles.quickAccessContainer}>
                 <Text style={styles.quickAccessTitle}>QUICK ACCESS</Text>
 
-                {/*Profile (CURRENTLY BLANK)*/}
                 <Pressable style={styles.quickAccessButtonContainer} onPress={() => {}}>
                     <View style={styles.quickAccessButtonContent}>
                         <IconButton
@@ -68,7 +67,6 @@ export default function HomeScreen() {
                     </View>
                 </Pressable>
 
-                {/*Notifications (CURRENTLY BLANK)*/}
                 <Pressable style={styles.quickAccessButtonContainer} onPress={() => {}}>
                     <View style={styles.quickAccessButtonContent}>
                         <IconButton
@@ -82,7 +80,6 @@ export default function HomeScreen() {
                     </View>
                 </Pressable>
 
-                {/*Settings (CURRENTLY BLANK)*/}
                 <Pressable style={styles.quickAccessButtonContainer} onPress={() => {}}>
                     <View style={styles.quickAccessButtonContent}>
                         <IconButton
@@ -96,7 +93,6 @@ export default function HomeScreen() {
                     </View>
                 </Pressable>
 
-                {/*Logout (CURRENTLY BLANK)*/}
                 <Pressable style={styles.quickAccessButtonContainer} onPress={() => {}}>
                     <View style={styles.quickAccessButtonContent}>
                         <IconButton

@@ -1,20 +1,16 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
+// file: mobile/App.tsx
 import React from 'react';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-} from 'react-native-safe-area-context';
-import HomeScreen from "./src/screens/HomeScreen.tsx";
+import { StatusBar, StyleSheet } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import HomeScreen from './src/screens/HomeScreen';
+import HsOverview from './src/screens/HsOverview';
 
+const Stack = createNativeStackNavigator();
 
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+  const isDarkMode = false; // keep behaviour similar to before or use useColorScheme if desired
 
   return (
     <SafeAreaProvider>
@@ -25,11 +21,13 @@ function App() {
 }
 
 function AppContent() {
-
   return (
-    <View style={styles.container}>
-        <HomeScreen />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="HsOverview" component={HsOverview} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 

@@ -23,6 +23,5 @@ export const Colours = {
     //Miscellaneous colours
     bluePrimary: '#588FFF',
     blueDark: '#002A80',
-
-
+    blueLight: '#E6ECF9',
 };
