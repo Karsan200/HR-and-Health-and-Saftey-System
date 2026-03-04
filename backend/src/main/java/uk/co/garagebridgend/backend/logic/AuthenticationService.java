@@ -92,7 +92,7 @@ public class AuthenticationService {
      * @throws NotFoundException if no account is found with the provided username
      * @throws InvalidPasswordException if the provided password does not match the stored password
      */
-    public RotateRefreshTokenInternal authenticateMobile(final AuthRequest body)
+    public RotateRefreshTokenInternal authenticate(final AuthRequest body)
             throws NotFoundException, InvalidPasswordException {
         // Get the account from the database
         AccountTable account = accountRepository.findByUsername(body.getUsername())
@@ -104,7 +104,7 @@ public class AuthenticationService {
         }
 
         // Create a new refresh token for the user
-        String refreshToken = createRefreshToken(account.getAccountId(), true);
+        String refreshToken = createRefreshToken(account.getAccountId(), body.isMobile());
 
         // Generate new access token
         RefreshTokenResponse token = refreshAccessToken(refreshToken);
