@@ -1,32 +1,42 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar, DateData } from 'react-native-calendars';
 import {Spacing, FontSize, BorderRadius, TextStyles,} from '../theme/theme';
 import {Colours} from "../theme/colours.ts";
+import SummaryCard from "../Components/Summary/SummaryCard.tsx";
+import SummaryRow from "../Components/Summary/SummaryRow.tsx";
 
 const CalendarScreen: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string>('');
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Summary Boxes */}
-      <View style={styles.summaryContainer}>
-        <View style={styles.card}>
-          <Text style={styles.cardLabel}>Hours Left</Text>
-          <Text style={styles.cardNumber}>82</Text>
-        </View>
+      <SummaryRow>
+        <SummaryCard
+          label="Hours Left"
+          value={82}
+          icon="clock-outline"
+          iconColor={Colours.bluePrimary}
+          iconBackgroundColor={Colours.bluePrimary + '15'}
+        />
 
-        <View style={styles.card}>
-          <Text style={styles.cardLabel}>Pending</Text>
-          <Text style={styles.cardNumber}>4</Text>
-        </View>
+        <SummaryCard
+          label="Pending"
+          value={4}
+          icon="alert-circle-outline"
+          iconColor={Colours.amberPrimary}
+          iconBackgroundColor={Colours.amberBackgroundLight}
+        />
 
-        <View style={styles.card}>
-          <Text style={styles.cardLabel}>Approved</Text>
-          <Text style={styles.cardNumber}>2</Text>
-        </View>
-      </View>
+        <SummaryCard
+          label="Approved"
+          value={2}
+          icon="check-circle-outline"
+          iconColor={Colours.greenPrimary}
+          iconBackgroundColor={Colours.greenBackgroundLight}
+        />
+      </SummaryRow>
 
       {/* Calendar */}
       <View style={styles.calendarContainer}>
