@@ -40,31 +40,31 @@ public class HazardTable {
     private AccountTable account;
 
     /** Title of the hazard. */
-    @JoinColumn(name = "title", nullable = false)
+    @JoinColumn(columnDefinition = "TEXT", name = "title", nullable = false)
     private String title;
 
     /** first question of the hazard report. */
-    @JoinColumn(name = "question_one", nullable = false)
+    @JoinColumn(columnDefinition = "TEXT", name = "question_one", nullable = false)
     private String questionOne;
 
     /** second question of the hazard report. */
-    @JoinColumn(name = "question_two", nullable = false)
+    @JoinColumn(columnDefinition = "TEXT", name = "question_two", nullable = false)
     private String questionTwo;
 
     /** third question of the hazard report. */
-    @JoinColumn(name = "question_three", nullable = false)
+    @JoinColumn(columnDefinition = "TEXT", name = "question_three", nullable = false)
     private String questionThree;
 
     /** fourth question of the hazard report. */
-    @JoinColumn(name = "question_four", nullable = false)
+    @JoinColumn(columnDefinition = "TEXT", name = "question_four", nullable = false)
     private String questionFour;
 
     /** fifth question of the hazard report. */
-    @JoinColumn(name = "question_five", nullable = false)
+    @JoinColumn(columnDefinition = "TEXT", name = "question_five", nullable = false)
     private String questionFive;
 
     /** sixth question of the hazard report. */
-    @JoinColumn(name = "question_six", nullable = false)
+    @JoinColumn(columnDefinition = "TEXT", name = "question_six", nullable = false)
     private String questionSix;
 
     /** The priority of the hazard. */
