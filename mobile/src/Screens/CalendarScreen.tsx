@@ -1,14 +1,96 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar, DateData } from 'react-native-calendars';
-import {Spacing, FontSize, BorderRadius, TextStyles,} from '../theme/theme';
-import {Colours} from "../theme/colours.ts";
-import SummaryCard from "../Components/Summary/SummaryCard.tsx";
-import SummaryRow from "../Components/Summary/SummaryRow.tsx";
+import dayjs from 'dayjs';
+import { Spacing, FontSize, BorderRadius, TextStyles } from '../theme/theme';
+import { Colours } from '../theme/colours.ts';
+import SummaryCard from '../Components/Summary/SummaryCard.tsx';
+import SummaryRow from '../Components/Summary/SummaryRow.tsx';
 
 const CalendarScreen: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string>('');
+
+  const today = dayjs();
+  const bookedDays = ['2026-03-11', '2026-03-13', '2026-03-16']; // Example booked days
+
+  // Greyed out dates (next 2 weeks)
+  const greyedDates: Record<string, any> = {};
+  for (let i = 1; i <= 14; i++) {
+    const date = today.add(i, 'day').format('YYYY-MM-DD');
+    greyedDates[date] = {
+      selected: true,
+      selectedColor: Colours.greyBackground,
+      selectedTextColor: Colours.greyPrimaryMainText,
+      customStyles: {
+        container: { borderRadius: 20 },
+        text: {
+          color: Colours.greyPrimaryMainText,
+          textAlign: 'center',
+          lineHeight: 32,
+        },
+      },
+      disabled: true,
+      disableTouchEvent: true,
+    };
+  }
+
+  // Booked days with solid red background
+  const bookedDates: Record<string, any> = {};
+  bookedDays.forEach(date => {
+    bookedDates[date] = {
+      selected: true,
+      selectedColor: Colours.redPrimary, // solid red like selected
+      selectedTextColor: Colours.white,
+      customStyles: {
+        container: {
+          borderRadius: 20,
+        },
+        text: {
+          color: Colours.white,
+          fontWeight: '600',
+          textAlign: 'center',
+          lineHeight: 32,
+        },
+      },
+    };
+  });
+
+  // Today solid black
+  const todayMarking: Record<string, any> = {
+    [today.format('YYYY-MM-DD')]: {
+      selected: true,
+      selectedColor: Colours.black, // solid black background
+      selectedTextColor: Colours.white,
+      customStyles: {
+        container: {
+          borderRadius: 20,
+        },
+        text: {
+          color: Colours.white,
+          fontWeight: '600',
+          textAlign: 'center',
+          lineHeight: 32,
+        },
+      },
+    },
+  };
+
+  // Combine all markings
+  const markedDates: Record<string, any> = {
+    ...greyedDates,
+    ...bookedDates,
+    ...todayMarking,
+    ...(selectedDate
+      ? {
+          [selectedDate]: {
+            selected: true,
+            selectedColor: Colours.redPrimary,
+            selectedTextColor: Colours.white,
+          },
+        }
+      : {}),
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -20,14 +102,12 @@ const CalendarScreen: React.FC = () => {
           icon="clock-outline"
           colour="red"
         />
-
         <SummaryCard
           label="Pending"
           value={4}
           icon="alert-circle-outline"
           colour="amber"
         />
-
         <SummaryCard
           label="Approved"
           value={2}
@@ -40,12 +120,7 @@ const CalendarScreen: React.FC = () => {
       <View style={styles.calendarContainer}>
         <Calendar
           onDayPress={(day: DateData) => setSelectedDate(day.dateString)}
-          markedDates={{
-            [selectedDate]: {
-              selected: true,
-              selectedColor: Colours.redPrimary,
-            },
-          }}
+          markedDates={markedDates}
           theme={{
             calendarBackground: Colours.white,
             textSectionTitleColor: Colours.greyPrimaryMainText,
@@ -56,6 +131,15 @@ const CalendarScreen: React.FC = () => {
             monthTextColor: Colours.black,
           }}
         />
+
+        {/* Red stripe below top part */}
+        <View style={styles.redStripe} />
+
+        {/* Booked days key */}
+        <View style={styles.bookedKey}>
+          <View style={styles.bookedKeyCircle} />
+          <Text style={styles.bookedKeyText}>Booked Days Off</Text>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -69,39 +153,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colours.greyBackground,
   },
 
-  summaryContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.largePadding,
-    marginBottom: Spacing.mediumPadding,
-  },
-
-  card: {
-    flex: 1,
-    backgroundColor: Colours.white,
-    marginHorizontal: 6,
-    borderRadius: BorderRadius.largeButtonsAndOutlines,
-    paddingVertical: Spacing.mediumPadding,
-    alignItems: 'center',
-    shadowColor: Colours.black,
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-
-  cardLabel: {
-    ...TextStyles.regular,
-    fontSize: FontSize.xs14,
-    color: Colours.greyIconLight,
-    marginBottom: Spacing.smallPadding,
-  },
-
-  cardNumber: {
-    ...TextStyles.medium,
-    fontSize: FontSize.l24,
-    color: Colours.black,
-  },
-
   calendarContainer: {
     marginHorizontal: Spacing.largePadding,
     borderRadius: BorderRadius.largeButtonsAndOutlines,
@@ -111,5 +162,33 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 4,
+  },
+
+  redStripe: {
+    height: 2,
+    backgroundColor: Colours.redPrimary,
+    marginVertical: 6,
+    borderRadius: 1,
+  },
+
+  bookedKey: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 35,
+    paddingVertical: 10,
+    gap: 10,
+  },
+
+  bookedKeyCircle: {
+    width: 13,
+    height: 13,
+    backgroundColor: Colours.redPrimary,
+    borderRadius: 100,
+  },
+
+  bookedKeyText: {
+    ...TextStyles.regular,
+    fontSize: FontSize.xs14,
+    color: Colours.black,
   },
 });
