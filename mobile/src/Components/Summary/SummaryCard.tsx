@@ -27,7 +27,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
 }) => {
   const Container = onPress ? Pressable : View;
 
-  // 🎨 Colour mapping
+  // Colour mapping
   const colourStyles = {
     red: {
       iconColor: Colours.redPrimary,

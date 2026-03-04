@@ -79,33 +79,34 @@ const CalendarScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Summary Boxes */}
-      <SummaryRow>
-        <SummaryCard
-          label="Hours"
-          value={82}
-          icon="clock-outline"
-          colour="red"
-        />
-        <SummaryCard
-          label="Pending"
-          value={4}
-          icon="alert-circle-outline"
-          colour="amber"
-        />
-        <SummaryCard
-          label="Approved"
-          value={2}
-          icon="check-circle-outline"
-          colour="green"
-        />
-      </SummaryRow>
+      {/* Wrapper to add padding above summary */}
+      <View style={styles.summaryWrapper}>
+        <SummaryRow>
+          <SummaryCard
+            label="Hours"
+            value={82}
+            icon="clock-outline"
+            colour="red"
+          />
+          <SummaryCard
+            label="Pending"
+            value={4}
+            icon="alert-circle-outline"
+            colour="amber"
+          />
+          <SummaryCard
+            label="Approved"
+            value={2}
+            icon="check-circle-outline"
+            colour="green"
+          />
+        </SummaryRow>
+      </View>
 
       {/* Calendar */}
       <View style={styles.calendarContainer}>
         <Calendar
           onDayPress={(day: DateData) => {
-            // Handle tap if needed
             console.log('User pressed:', day.dateString);
           }}
           markedDates={markedDates}
@@ -139,6 +140,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colours.greyBackground,
+  },
+
+  summaryWrapper: {
+    paddingTop: Spacing.largePadding, // Space above summary boxes
+    marginBottom: Spacing.largePadding, // Space between summary boxes and calendar
   },
 
   calendarContainer: {
