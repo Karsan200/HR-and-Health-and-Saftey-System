@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar, DateData } from 'react-native-calendars';
+import {Spacing, FontSize, BorderRadius, TextStyles,} from '../theme/theme';
+import {Colours} from "../theme/colours.ts";
 
 const CalendarScreen: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string>('');
@@ -33,17 +35,17 @@ const CalendarScreen: React.FC = () => {
           markedDates={{
             [selectedDate]: {
               selected: true,
-              selectedColor: '#D20414',
+              selectedColor: Colours.redPrimary,
             },
           }}
           theme={{
-            calendarBackground: '#FFFFFF',
-            textSectionTitleColor: '#767676',
-            selectedDayBackgroundColor: '#D20414',
-            selectedDayTextColor: '#FFFFFF',
-            todayTextColor: '#D20414',
-            arrowColor: '#D20414',
-            monthTextColor: '#000',
+            calendarBackground: Colours.white,
+            textSectionTitleColor: Colours.greyPrimaryMainText,
+            selectedDayBackgroundColor: Colours.redPrimary,
+            selectedDayTextColor: Colours.white,
+            todayTextColor: Colours.redPrimary,
+            arrowColor: Colours.redPrimary,
+            monthTextColor: Colours.black,
           }}
         />
       </View>
@@ -51,57 +53,55 @@ const CalendarScreen: React.FC = () => {
   );
 };
 
+export default CalendarScreen;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F6F6F8',
-    paddingTop: 16,
+    backgroundColor: Colours.greyBackground,
   },
 
   summaryContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    paddingHorizontal: Spacing.largePadding,
+    marginBottom: Spacing.mediumPadding,
   },
 
   card: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colours.white,
     marginHorizontal: 6,
-    borderRadius: 14,
-    paddingVertical: 18,
+    borderRadius: BorderRadius.largeButtonsAndOutlines,
+    paddingVertical: Spacing.mediumPadding,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: Colours.black,
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 4,
   },
 
   cardLabel: {
-    fontSize: 14,
-    color: '#8E8E93',
-    marginBottom: 8,
+    ...TextStyles.regular,
+    fontSize: FontSize.xs14,
+    color: Colours.greyIconLight,
+    marginBottom: Spacing.smallPadding,
   },
 
   cardNumber: {
-    fontSize: 26,
-    fontWeight: '500',
-    color: '#000',
+    ...TextStyles.medium,
+    fontSize: FontSize.l24,
+    color: Colours.black,
   },
 
   calendarContainer: {
-    marginHorizontal: 20,
-    borderRadius: 18,
-    backgroundColor: '#FFFFFF',
-    padding: 12,
-    shadowColor: '#000',
+    marginHorizontal: Spacing.largePadding,
+    borderRadius: BorderRadius.largeButtonsAndOutlines,
+    backgroundColor: Colours.white,
+    padding: Spacing.smallPadding,
+    shadowColor: Colours.black,
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 4,
   },
 });
-
-export default CalendarScreen;
-
-
