@@ -1,7 +1,7 @@
 import React from 'react';
 import { StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import CalendarScreen from "./src/Screens/CalendarScreen.tsx";
+import CalendarScreen from "./src/screens/CalendarScreen.tsx";
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';

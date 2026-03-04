@@ -5,8 +5,8 @@ import { Calendar, DateData } from 'react-native-calendars';
 import dayjs from 'dayjs';
 import { Spacing, FontSize, BorderRadius, TextStyles } from '../theme/theme';
 import { Colours } from '../theme/colours.ts';
-import SummaryCard from '../Components/Summary/SummaryCard.tsx';
-import SummaryRow from '../Components/Summary/SummaryRow.tsx';
+import SummaryCard from '../Components/summary/SummaryCard.tsx';
+import SummaryRow from '../Components/summary/SummaryRow.tsx';
 
 const CalendarScreen: React.FC = () => {
   const today = dayjs();
