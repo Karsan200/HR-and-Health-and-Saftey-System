@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +18,9 @@ import uk.co.garagebridgend.backend.logic.AuthenticationService;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.exception.InvalidPasswordException;
 import uk.co.garagebridgend.backend.models.exception.InvalidRefreshTokenException;
+import uk.co.garagebridgend.backend.models.exception.NotFoundException;
 import uk.co.garagebridgend.backend.models.internal.RotateRefreshTokenInternal;
+import uk.co.garagebridgend.backend.models.request.AuthRequest;
 import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
 import uk.co.garagebridgend.backend.models.response.RefreshTokenResponse;
 
@@ -30,11 +33,60 @@ import java.util.Arrays;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
-    /** Max age for mobile refresh token cookies in seconds (30 days). */
-    private static final int MOBILE_REFRESH_TOKEN_COOKIE_EXPIRATION = 2592000;
+    /** Max age for mobile refresh token cookies in milliseconds. */
+    @Value("${jwt.refresh_token_expiration_mobile}")
+    private Long MOBILE_REFRESH_TOKEN_COOKIE_EXPIRATION;
+
+    /** Max age for web refresh token cookies in milliseconds. */
+    @Value("${jwt.refresh_token_expiration}")
+    private Long WEB_REFRESH_TOKEN_COOKIE_EXPIRATION;
+
+    private static final int MILLISECONDS_IN_SECOND = 1000;
 
     /** Authentication service for handling authentication operations. */
     private final AuthenticationService authenticationService;
+
+        /** Authenticates a user and issues access and refresh tokens.
+        * @param body The request body containing the username, password, and client type.
+        * @param response The HTTP response to set the refresh token cookie on.
+        * @return RefreshTokenResponse containing the access token if authentication is successful.
+        * */
+    @PostMapping("/login")
+    public RefreshTokenResponse authenticate(
+            final @RequestBody AuthRequest body, final HttpServletResponse response
+    ) {
+        try {
+            RotateRefreshTokenInternal tokens = authenticationService.authenticate(body);
+
+            // Set the new refresh token in an HttpOnly cookie
+            Cookie refreshTokenCookie = new Cookie("refreshToken", tokens.getRefreshToken());
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setPath("/");
+            if (body.isMobile()) {
+                refreshTokenCookie.setMaxAge((int) (MOBILE_REFRESH_TOKEN_COOKIE_EXPIRATION / MILLISECONDS_IN_SECOND));
+            } else {
+                refreshTokenCookie.setMaxAge((int) (WEB_REFRESH_TOKEN_COOKIE_EXPIRATION / MILLISECONDS_IN_SECOND));
+            }
+
+            response.addCookie(refreshTokenCookie);
+            return new RefreshTokenResponse(tokens.getAccessToken());
+        } catch (InvalidPasswordException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Username or password is incorrect."
+            );
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Account not found."
+            );
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal sever error"
+            );
+        }
+    }
 
     /** Rotates a mobile refresh token by invalidating the old one and issuing a new one.
      * @param body The request body containing the pin code for rotation.
@@ -52,7 +104,7 @@ public class AuthenticationController {
             Cookie refreshTokenCookie = new Cookie("refreshToken", tokens.getRefreshToken());
             refreshTokenCookie.setHttpOnly(true);
             refreshTokenCookie.setPath("/");
-            refreshTokenCookie.setMaxAge(MOBILE_REFRESH_TOKEN_COOKIE_EXPIRATION);
+            refreshTokenCookie.setMaxAge((int) (MOBILE_REFRESH_TOKEN_COOKIE_EXPIRATION / MILLISECONDS_IN_SECOND));
 
             response.addCookie(refreshTokenCookie);
             return new RefreshTokenResponse(tokens.getAccessToken());

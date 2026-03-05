@@ -179,6 +179,80 @@ public class AuthenticationControllerTest {
     }
 
     @Test
+    @Order(1)
+    void testAuthenticateMobileSuccess() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "username": "johnd18",
+                        "password": "hashedPassword",
+                        "mobile": true
+                    }"""))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    String responseBody = result.getResponse().getContentAsString();
+                    assertFalse(responseBody.isBlank(), "Response body should not be empty");
+
+                    // Check access token in response
+                    String accessToken = new ObjectMapper()
+                            .readTree(responseBody)
+                            .path("accessToken")
+                            .asString();
+                    assertFalse(accessToken.isBlank(), "Access token should not be empty");
+
+                    // Check refresh token cookie
+                    Cookie refreshCookie = result.getResponse().getCookie("refreshToken");
+                    assertNotNull(refreshCookie, "Refresh token cookie should be set");
+                    assertFalse(refreshCookie.getValue().isBlank(), "Refresh token cookie value should not be empty");
+                });
+    }
+
+    @Test
+    @Order(1)
+    void testAuthenticateWebSuccess() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "username": "johnd18",
+                        "password": "hashedPassword",
+                        "mobile": false
+                    }"""))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    String responseBody = result.getResponse().getContentAsString();
+                    assertFalse(responseBody.isBlank(), "Response body should not be empty");
+
+                    // Check access token in response
+                    String accessToken = new ObjectMapper()
+                            .readTree(responseBody)
+                            .path("accessToken")
+                            .asString();
+                    assertFalse(accessToken.isBlank(), "Access token should not be empty");
+
+                    // Check refresh token cookie
+                    Cookie refreshCookie = result.getResponse().getCookie("refreshToken");
+                    assertNotNull(refreshCookie, "Refresh token cookie should be set");
+                    assertFalse(refreshCookie.getValue().isBlank(), "Refresh token cookie value should not be empty");
+                });
+    }
+
+    @Test
+    @Order(1)
+    void testAuthenticateInvalidCredentials() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "username": "johnd18",
+                        "password": "wrongPassword",
+                        "mobile": false
+                    }"""))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @Order(2)
     void testRotateNotAuthenticated() throws Exception {
         mockMvc.perform(post("/auth/rotate"))
