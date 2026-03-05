@@ -50,7 +50,7 @@ export default function HomeScreen() {
                 </View>
             </Pressable>
 
-            {/*All quick assess buttons*/}
+            {/*All quick access buttons*/}
             <View style={styles.quickAccessContainer}>
                 <Text style={styles.quickAccessTitle}>QUICK ACCESS</Text>
 
