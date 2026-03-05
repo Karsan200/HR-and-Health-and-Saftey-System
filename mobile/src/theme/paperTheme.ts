@@ -1,3 +1,4 @@
+import { MD3LightTheme } from 'react-native-paper';
 import { ThemeProp } from 'react-native-paper/lib/typescript/types';
 
 import { colours } from './colours.ts';
@@ -9,11 +10,13 @@ import { theme } from './theme.ts';
  * for information on how to edit themes for react native paper components.
  */
 export const paperTheme: ThemeProp = {
+  ...MD3LightTheme, // Default theme, overridden by custom properties below
   dark: false,
   version: 3,
   mode: 'exact',
   roundness: 1.8,
   colors: {
+    ...MD3LightTheme.colors, // Default theme, overridden by custom colors below
     primary: colours.redPrimary,
     onSurfaceVariant: colours.greyPrimaryMainText,
     outline: colours.greyIconLight
@@ -98,5 +101,8 @@ export const paperTheme: ThemeProp = {
       fontSize: theme.fontSize.xxl36,
       fontWeight: theme.textStyles.extraBold.fontWeight
     }
+  },
+  animation: {
+    scale: 1.0
   }
 }
