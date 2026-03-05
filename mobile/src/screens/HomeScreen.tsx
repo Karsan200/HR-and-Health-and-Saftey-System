@@ -3,8 +3,10 @@ import { ScrollView, Text, View, Pressable } from 'react-native';
 import { Avatar, IconButton } from 'react-native-paper';
 import { homeStyles as styles } from './HomeScreen.styles';
 import { Colours } from '../theme/colours'; //getting the colours from the set list
+import { useNavigation } from '@react-navigation/native';
 
 export default function HomeScreen() {
+  const navigation = useNavigation<any>();
     return (
         <ScrollView contentContainerStyle={styles.container}>
 
@@ -83,7 +85,7 @@ export default function HomeScreen() {
                 </Pressable>
 
                 {/*Settings (CURRENTLY BLANK)*/}
-                <Pressable style={styles.quickAccessButtonContainer} onPress={() => {}}>
+                <Pressable style={styles.quickAccessButtonContainer} onPress={() => navigation.navigate('Settings')}>
                     <View style={styles.quickAccessButtonContent}>
                         <IconButton
                             icon="cog"
