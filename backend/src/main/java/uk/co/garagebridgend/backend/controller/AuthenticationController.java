@@ -33,24 +33,22 @@ import java.util.Arrays;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
-    /** Max age for mobile refresh token cookies in milliseconds. */
+    /** Max age for mobile refresh token cookies in seconds. */
     @Value("${jwt.refresh_token_expiration_mobile}")
-    private Long MOBILE_REFRESH_TOKEN_COOKIE_EXPIRATION;
+    private Long mobileRefreshTokenCookieExpiration;
 
-    /** Max age for web refresh token cookies in milliseconds. */
+    /** Max age for web refresh token cookies in seconds. */
     @Value("${jwt.refresh_token_expiration}")
-    private Long WEB_REFRESH_TOKEN_COOKIE_EXPIRATION;
-
-    private static final int MILLISECONDS_IN_SECOND = 1000;
+    private Long webRefreshTokenCookieExpiration;
 
     /** Authentication service for handling authentication operations. */
     private final AuthenticationService authenticationService;
 
-        /** Authenticates a user and issues access and refresh tokens.
-        * @param body The request body containing the username, password, and client type.
-        * @param response The HTTP response to set the refresh token cookie on.
-        * @return RefreshTokenResponse containing the access token if authentication is successful.
-        * */
+    /** Authenticates a user and issues access and refresh tokens.
+     * @param body The request body containing the username, password, and client type.
+     * @param response The HTTP response to set the refresh token cookie on.
+     * @return RefreshTokenResponse containing the access token if authentication is successful.
+     * */
     @PostMapping("/login")
     public RefreshTokenResponse authenticate(
             final @RequestBody AuthRequest body, final HttpServletResponse response
@@ -63,9 +61,9 @@ public class AuthenticationController {
             refreshTokenCookie.setHttpOnly(true);
             refreshTokenCookie.setPath("/");
             if (body.isMobile()) {
-                refreshTokenCookie.setMaxAge((int) (MOBILE_REFRESH_TOKEN_COOKIE_EXPIRATION / MILLISECONDS_IN_SECOND));
+                refreshTokenCookie.setMaxAge(Math.toIntExact(mobileRefreshTokenCookieExpiration));
             } else {
-                refreshTokenCookie.setMaxAge((int) (WEB_REFRESH_TOKEN_COOKIE_EXPIRATION / MILLISECONDS_IN_SECOND));
+                refreshTokenCookie.setMaxAge(Math.toIntExact(webRefreshTokenCookieExpiration));
             }
 
             response.addCookie(refreshTokenCookie);
@@ -104,7 +102,7 @@ public class AuthenticationController {
             Cookie refreshTokenCookie = new Cookie("refreshToken", tokens.getRefreshToken());
             refreshTokenCookie.setHttpOnly(true);
             refreshTokenCookie.setPath("/");
-            refreshTokenCookie.setMaxAge((int) (MOBILE_REFRESH_TOKEN_COOKIE_EXPIRATION / MILLISECONDS_IN_SECOND));
+            refreshTokenCookie.setMaxAge(Math.toIntExact(mobileRefreshTokenCookieExpiration));
 
             response.addCookie(refreshTokenCookie);
             return new RefreshTokenResponse(tokens.getAccessToken());

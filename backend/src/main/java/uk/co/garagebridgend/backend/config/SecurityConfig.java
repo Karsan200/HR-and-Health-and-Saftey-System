@@ -72,7 +72,7 @@ public class SecurityConfig {
                 // Configure endpoint authorization
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
-                        .requestMatchers("/auth/refresh").permitAll()
+                        .requestMatchers("/auth/refresh", "/auth/login").permitAll()
 
                         // Role-based endpoints (order matters - most specific first)
                         .requestMatchers("/admin/permissions/**").hasAuthority("ROLE_ADMIN")

@@ -24,6 +24,7 @@ import uk.co.garagebridgend.backend.logic.AuthenticationService;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.PermissionsTable;
 import uk.co.garagebridgend.backend.models.entity.SessionTable;
+import uk.co.garagebridgend.backend.models.request.AuthRequest;
 import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.PermissionsRepository;
@@ -69,19 +70,14 @@ public class AuthenticationControllerTest {
 
     @BeforeEach
     void setup() {
-        // Create salt
-        String salt = BCrypt.gensalt();
-
         // Create account
         AccountTable account = new AccountTable();
         account.setFirstName("John");
         account.setLastName("Doe");
         account.setUsername("johnd18");
         account.setEmail("johnd@test.com");
-        account.setPassword(BCrypt.hashpw("hashedPassword", salt));
-        account.setSalt(salt);
-        account.setMobilePin(BCrypt.hashpw("123456", salt));
-        account.setMobilePinSalt(salt);
+        account.setPassword(BCrypt.hashpw("hashedPassword", BCrypt.gensalt()));
+        account.setMobilePin(BCrypt.hashpw("123456", BCrypt.gensalt()));
         account.setAddressOne("123 Main St");
         account.setPostalCode("12345");
         accountRepository.save(account);
@@ -115,7 +111,6 @@ public class AuthenticationControllerTest {
 
         // Create a new account (for mobile)
         var mobilePin = "654321";
-        var mobilePinSalt = BCrypt.gensalt();
 
         AccountTable mobile = new AccountTable();
         mobile.setFirstName("Jane");
@@ -126,13 +121,10 @@ public class AuthenticationControllerTest {
         mobile.setPostalCode("12345");
 
         // Password for login
-        var passwordSalt = BCrypt.gensalt();
-        mobile.setPassword(BCrypt.hashpw("hashedPassword", passwordSalt));
-        mobile.setSalt(passwordSalt);
+        mobile.setPassword(BCrypt.hashpw("hashedPassword", BCrypt.gensalt()));
 
         // Mobile PIN for refresh rotation
-        mobile.setMobilePin(BCrypt.hashpw(mobilePin, mobilePinSalt));
-        mobile.setMobilePinSalt(mobilePinSalt);
+        mobile.setMobilePin(BCrypt.hashpw(mobilePin, BCrypt.gensalt()));
 
         accountRepository.save(mobile);
 
@@ -187,7 +179,7 @@ public class AuthenticationControllerTest {
                     {
                         "username": "johnd18",
                         "password": "hashedPassword",
-                        "mobile": true
+                        "isMobile": true
                     }"""))
                 .andExpect(status().isOk())
                 .andExpect(result -> {
@@ -217,7 +209,7 @@ public class AuthenticationControllerTest {
                     {
                         "username": "johnd18",
                         "password": "hashedPassword",
-                        "mobile": false
+                        "isMobile": false
                     }"""))
                 .andExpect(status().isOk())
                 .andExpect(result -> {
@@ -247,9 +239,51 @@ public class AuthenticationControllerTest {
                     {
                         "username": "johnd18",
                         "password": "wrongPassword",
-                        "mobile": false
+                        "isMobile": false
                     }"""))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @Order(1)
+    void testAuthenticateAccountNotFound() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "username": "nonexistent",
+                        "password": "hashedPassword",
+                        "isMobile": false
+                    }"""))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Order(1)
+    void testAuthenticateThrowsException() throws Exception {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(authenticationController).build();
+
+        // simulate your AuthenticationService throwing an exception
+        when(authenticationService.authenticate(new AuthRequest()))
+                .thenThrow(new RuntimeException("Service failed"));
+
+        // perform a POST to /auth/login
+        mockMvc.perform(post("/auth/login")
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "username": "johnd18",
+                        "password": "hashedPassword",
+                        "isMobile": false
+                    }"""))
+                .andExpect(status().isInternalServerError()) // matches ResponseStatusException
+                .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
+                .andExpect(result -> {
+                    ResponseStatusException ex = (ResponseStatusException) result.getResolvedException();
+                    assertNotNull(ex);
+                    assertEquals("Internal sever error", ex.getReason()); // match your controller message
+                });
     }
 
     @Test
