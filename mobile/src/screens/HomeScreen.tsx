@@ -1,8 +1,8 @@
 import React from 'react';
 import { ScrollView, Text, View, Pressable } from 'react-native';
 import { Avatar, IconButton } from 'react-native-paper';
-import { homeStyles as styles } from './HomeScreen.styles';
-import { Colours } from '../theme/colours'; //getting the colours from the set list
+import { homeStyles as styles } from './HomeScreen.styles.ts';
+import { colours } from '../theme/colours'; //getting the colours from the set list
 
 export default function HomeScreen() {
     return (
@@ -13,7 +13,7 @@ export default function HomeScreen() {
                 size={150}
                 icon="account-circle"
                 style={styles.profileIcon}
-                color={Colours.redPrimary}
+                color={colours.redPrimary}
             />
 
             {/*Welcome message under the profile icon*/}
@@ -28,7 +28,7 @@ export default function HomeScreen() {
                     <IconButton
                         icon="briefcase-outline"
                         size={35}
-                        iconColor={Colours.black}
+                        iconColor={colours.black}
                         containerColor="transparent"
                         style={styles.iconButton}
                     />
@@ -42,7 +42,7 @@ export default function HomeScreen() {
                     <IconButton
                         icon="shield-outline"
                         size={35}
-                        iconColor={Colours.black}
+                        iconColor={colours.black}
                         containerColor="transparent"
                         style={styles.iconButton}
                     />
@@ -60,7 +60,7 @@ export default function HomeScreen() {
                         <IconButton
                             icon="account-circle"
                             size={24}
-                            iconColor={Colours.black}
+                            iconColor={colours.black}
                             containerColor="transparent"
                             style={styles.iconButton}
                         />
@@ -74,7 +74,7 @@ export default function HomeScreen() {
                         <IconButton
                             icon="bell-outline"
                             size={24}
-                            iconColor={Colours.black}
+                            iconColor={colours.black}
                             containerColor="transparent"
                             style={styles.iconButton}
                         />
@@ -88,7 +88,7 @@ export default function HomeScreen() {
                         <IconButton
                             icon="cog"
                             size={24}
-                            iconColor={Colours.black}
+                            iconColor={colours.black}
                             containerColor="transparent"
                             style={styles.iconButton}
                         />
@@ -102,7 +102,7 @@ export default function HomeScreen() {
                         <IconButton
                             icon="logout"
                             size={24}
-                            iconColor={Colours.black}
+                            iconColor={colours.black}
                             containerColor="transparent"
                             style={styles.iconButton}
                         />

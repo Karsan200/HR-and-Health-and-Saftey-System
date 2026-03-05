@@ -1,4 +1,7 @@
-export const Colours = {
+/*
+  * Colours used in the app.
+ */
+export const colours = {
     // Basic colours
     black: '#000000',
     white: '#FFFFFF',
