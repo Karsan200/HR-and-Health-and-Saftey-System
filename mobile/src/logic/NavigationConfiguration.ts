@@ -18,19 +18,19 @@ export type BottomNavItem = {
 };
 
 export const hrBottomNavItems: BottomNavItem[] = [
-    { key: 'payslips', label: 'Payslips', icon: 'file-document-outline' },
-    { key: 'calendar', label: 'Calendar', icon: 'calendar-month-outline' },
+    { key: 'payslips', label: 'Payslips', icon: 'file-outline' },
+    { key: 'calendar', label: 'Calendar', icon: 'calendar-blank-outline' },
     { key: 'home', label: 'Home', icon: 'home-outline' },
     { key: 'handbook', label: 'Handbook', icon: 'book-outline' },
-    { key: 'clockIn', label: 'Clock - in', icon: 'clock-outline' },
+    { key: 'clockIn', label: 'Clock-in', icon: 'clock-outline' },
 ];
 
 export const healthSafetyBottomNavItems: BottomNavItem[] = [
     { key: 'documents', label: 'Documents', icon: 'file-document-outline' },
-    { key: 'risk', label: 'Risk Assessments', icon: 'shield-alert-outline' },
+    { key: 'risk', label: 'Risk', icon: 'clipboard-outline' },
     { key: 'home', label: 'Home', icon: 'home-outline' },
     { key: 'overview', label: 'Overview', icon: 'view-dashboard-outline' },
-    { key: 'personal', label: 'Personal Info', icon: 'account-circle' },
+    { key: 'personal', label: 'Personal', icon: 'folder-outline' },
 ];
 
 export function getBottomNavItems(section: AppSection): BottomNavItem[] {

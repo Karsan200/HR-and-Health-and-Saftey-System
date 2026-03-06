@@ -4,7 +4,15 @@ import { Avatar, IconButton } from 'react-native-paper';
 import { homeStyles as styles } from './HomeScreen.styles';
 import { Colours } from '../theme/colours'; //getting the colours from the set list
 
-export default function HomeScreen() {
+type HomeScreenProps = {
+  onSelectHr: () => void;
+  onSelectHealthSafety: () => void;
+};
+
+export default function HomeScreen({
+    onSelectHr,
+    onSelectHealthSafety,
+}: HomeScreenProps) {
     return (
         <ScrollView contentContainerStyle={styles.container}>
 
@@ -23,7 +31,7 @@ export default function HomeScreen() {
             <Text style={styles.sectionTitle}>CHOOSE A SECTION</Text>
 
             {/*On click takes you to the HR Section of the app (Calendar) CURRENTLY BLANK*/}
-            <Pressable style={styles.sectionButton} onPress={() => {}}>
+            <Pressable style={styles.sectionButton} onPress={onSelectHr}>
                 <View style={styles.sectionButtonContent}>
                     <IconButton
                         icon="briefcase-outline"
@@ -37,7 +45,7 @@ export default function HomeScreen() {
             </Pressable>
 
             {/*On click takes you to the Health and Safety section of the app (HS Overview) CURRENTLY BLANK*/}
-            <Pressable style={styles.sectionButton} onPress={() => {}}>
+            <Pressable style={styles.sectionButton} onPress={onSelectHealthSafety}>
                 <View style={styles.sectionButtonContent}>
                     <IconButton
                         icon="shield-outline"
