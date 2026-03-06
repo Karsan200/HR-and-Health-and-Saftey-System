@@ -1,0 +1,3 @@
+/*
+Going to put all the stying elements for the bottom navbar here
+*/
