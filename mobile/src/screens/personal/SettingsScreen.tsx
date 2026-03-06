@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import {Pressable, ScrollView, Text, View} from 'react-native';
 import ColorPicker from 'react-native-wheel-color-picker';
 import { settingsStyles as styles } from './SettingsScreen.styles';
 
@@ -112,13 +112,34 @@ function generateColorSet(primaryHex: string): ColorSet {
 
 export default function SettingsScreen() {
 
+  const [pickerVisible, setPickerVisible] = useState(false);
+  const [editingColor, setEditingColor] = useState<string | null>(null);
+
+  const [pickColors, setPickColors] = useState({
+    background: "#EEEEF3",
+    text: "#000000",
+    accent: "#D20414"
+  });
+
   const [colors, setColors] = useState<ColorSet>({
     primary: "#D20414",
     dark: "#000000",
     light: "#ffffff"
   });
 
+  function openPicker(type: "background" | "text" | "accent") {
+    setEditingColor(type);
+    setPickerVisible(true);
+  }
+
+
   function updateColor(hex: string) {
+    if (!editingColor) return;
+
+    setPickColors({
+      ...pickColors,
+      [editingColor]: hex
+    });
     const newColors = generateColorSet(hex);
     setColors(newColors);
   }
@@ -128,61 +149,133 @@ export default function SettingsScreen() {
 
       <View style={styles.quickAccessContainer}>
 
-        <Text style={styles.quickAccessTitle}>Accessibility Settings</Text>
-        {/* Future accessibility controls */}
-
-        <Text style={styles.quickAccessTitle}>Colour Themes</Text>
-
-        <ColorPicker
-          color={colors.primary}
-          onColorChangeComplete={updateColor}
-          thumbSize={40}
-          sliderSize={30}
-          noSnap={true}
-          row={false}
-        />
-
-        <View style={{ flexDirection: "row", marginTop: 20 }}>
-
-          <View
-            style={{
-              flex: 1,
-              height: 60,
-              backgroundColor: colors.primary,
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <Text>{colors.primary}</Text>
-          </View>
-
-          <View
-            style={{
-              flex: 1,
-              height: 60,
-              backgroundColor: colors.dark,
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <Text>{colors.dark}</Text>
-          </View>
-
-          <View
-            style={{
-              flex: 1,
-              height: 60,
-              backgroundColor: colors.light,
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <Text>{colors.light}</Text>
-          </View>
-
+        {/* Accessibility Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Accessibility Settings</Text>
+          {/* TO DO: Toggles for settings*/}
         </View>
 
-      </View>
+        <View style={styles.section}>
+
+          <Text style={styles.quickAccessTitle}>Colour Themes</Text>
+
+          <View style={styles.schemeGrid}>
+            <Pressable style={styles.schemeButton}>
+              <Text>Default</Text>
+            </Pressable>
+
+            <Pressable style={styles.schemeButton}>
+              <Text>Blue</Text>
+            </Pressable>
+
+            <Pressable style={styles.schemeButton}>
+              <Text>Green</Text>
+            </Pressable>
+
+            <Pressable style={styles.schemeButton}>
+              <Text>Custom</Text>
+            </Pressable>
+
+          </View>
+
+          {/* Background Colour */}
+          <Text style={styles.label}>Background Colour</Text>
+          <Pressable
+              style={styles.colourRow}
+              onPress={() => openPicker("background")}
+          >
+            <View
+                style={[
+                  styles.colourPreview,
+                  { backgroundColor: pickColors.background }
+                ]}
+            />
+            <Text>{pickColors.background}</Text>
+          </Pressable>
+
+          {/* Text Colour */}
+          <Text style={styles.label}>Text Colour</Text>
+          <Pressable
+              style={styles.colourRow}
+              onPress={() => openPicker("text")}
+          >
+            <View
+                style={[
+                  styles.colourPreview,
+                  { backgroundColor: pickColors.text }
+                ]}
+            />
+            <Text>{pickColors.text}</Text>
+          </Pressable>
+
+          {/* Accent Colour */}
+          <Text style={styles.label}>Accent Colour</Text>
+          <Pressable
+              style={styles.colourRow}
+              onPress={() => openPicker("accent")}
+          >
+            <View
+                style={[
+                  styles.colourPreview,
+                  { backgroundColor: pickColors.accent }
+                ]}
+            />
+            <Text>{pickColors.accent}</Text>
+          </Pressable>
+        </View>
+
+          {pickerVisible && (
+            <View style={{ marginTop: 30 }}>
+              <ColorPicker
+                color={colors.primary}
+                onColorChangeComplete={updateColor}
+                thumbSize={40}
+                sliderSize={30}
+                noSnap={true}
+                row={false}
+              />
+            </View>
+          )}
+
+          <View style={{ flexDirection: "row", marginTop: 20 }}>
+
+            <View
+              style={{
+                flex: 1,
+                height: 60,
+                backgroundColor: colors.primary,
+                justifyContent: "center",
+                alignItems: "center"
+              }}
+            >
+              <Text>{colors.primary}</Text>
+            </View>
+
+            <View
+              style={{
+                flex: 1,
+                height: 60,
+                backgroundColor: colors.dark,
+                justifyContent: "center",
+                alignItems: "center"
+              }}
+            >
+              <Text>{colors.dark}</Text>
+            </View>
+
+            <View
+              style={{
+                flex: 1,
+                height: 60,
+                backgroundColor: colors.light,
+                justifyContent: "center",
+                alignItems: "center"
+              }}
+            >
+              <Text>{colors.light}</Text>
+            </View>
+          </View>
+        </View>
 
     </ScrollView>
   );
