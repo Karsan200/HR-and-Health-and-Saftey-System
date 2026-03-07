@@ -13,6 +13,7 @@ import {
 import HomeScreen from "./src/screens/HomeScreen.tsx";
 import BottomNavBar from "./src/components/BottomNavBar.tsx";
 import {AppSection, ScreenKey} from "./src/logic/NavigationConfiguration.ts";
+import TopNavBar from './src/components/TopNavBar.tsx';
 
 
 function App() {
@@ -69,28 +70,67 @@ function AppContent() {
           );
 
         case 'calendar':
-          return <View style={styles.content} />;
+          return <>
+            <TopNavBar title="Calendar" />
+            <View style={styles.content} />
+          </>;
 
         case 'payslips':
-          return <View style={styles.content} />;
+          return <>
+            <TopNavBar title="Payslips" />
+            <View style={styles.content} />
+          </>;
 
         case 'handbook':
-          return <View style={styles.content} />;
+          return <>
+            <TopNavBar title="Handbook" />
+            <View style={styles.content} />
+          </>;
 
         case 'clockIn':
-          return <View style={styles.content} />;
+          return <>
+            <TopNavBar title="Clock-In" />
+            <View style={styles.content} />
+          </>;
 
         case 'overview':
-          return <View style={styles.content} />;
+          return <>
+            <TopNavBar title="Overview" />
+            <View style={styles.content} />
+          </>;
 
         case 'documents':
-          return <View style={styles.content} />;
+          return <>
+            <TopNavBar title="Documents" />
+            <View style={styles.content} />
+          </>;
 
         case 'risk':
-          return <View style={styles.content} />;
+          return <>
+            <TopNavBar title="Risk" />
+            <View style={styles.content} />
+          </>;
 
         case 'personal':
-          return <View style={styles.content} />;
+          return <>
+            <TopNavBar title="Personal" />
+            <View style={styles.content} />
+          </>;
+
+        /*
+        How to add the top nav bar to a screen:
+        Main screen:
+        <TopNavBar
+          title="NameOfTheScreen"
+        />
+
+        Sub-screen:
+        <TopNavBar
+          title="NameOfTheScreen"
+          showBackButton={true}
+          onBackPress={handleBack}
+        />
+         */
 
         // Defaulting to the home screen
         default:
