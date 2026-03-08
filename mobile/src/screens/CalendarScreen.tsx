@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar, DateData } from 'react-native-calendars';
@@ -22,8 +22,34 @@ const CalendarScreen: React.FC = () => {
 
   const MaxBookedDays = 2;
 
-  // Booked date entry
-  const bookedDays = ['2026-03-11', '2026-03-11', '2026-03-13', '2026-03-16'];
+  const [bookedDays, setBookedDays] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchLeave();
+  }, []);
+
+  const fetchLeave = async () => {
+    try {
+      const response = await fetch('http://10.0.2.2:8080/api/leave/calendar');
+      const data = await response.json();
+
+      const dates: string[] = [];
+
+      data.forEach((leave: any) => {
+        let current = dayjs(leave.startDate);
+        const end = dayjs(leave.endDate);
+
+        while (current.isBefore(end) || current.isSame(end, 'day')) {
+          dates.push(current.format('YYYY-MM-DD'));
+          current = current.add(1, 'day');
+        }
+      });
+
+      setBookedDays(dates);
+    } catch (error) {
+      console.error('Error fetching leave', error);
+    }
+  };
 
   // Count bookings per date
   const bookingCount: Record<string, number> = {};
