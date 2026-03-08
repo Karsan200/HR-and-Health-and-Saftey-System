@@ -19,7 +19,18 @@ const CalendarScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
 
   const today = dayjs();
-  const bookedDays = ['2026-03-11', '2026-03-13', '2026-03-16'];
+
+  const MaxBookedDays = 2;
+
+  // Booked date entry
+  const bookedDays = ['2026-03-11', '2026-03-11', '2026-03-13', '2026-03-16'];
+
+  // Count bookings per date
+  const bookingCount: Record<string, number> = {};
+
+  bookedDays.forEach(date => {
+    bookingCount[date] = (bookingCount[date] || 0) + 1;
+  });
 
   // Greyed out dates (next 2 weeks)
   const greyedDates: Record<string, any> = {};
@@ -43,12 +54,15 @@ const CalendarScreen: React.FC = () => {
     };
   }
 
-  // Booked days
+  // Booked days logic
   const bookedDates: Record<string, any> = {};
-  bookedDays.forEach(date => {
+
+  Object.entries(bookingCount).forEach(([date, count]) => {
+    const fullyBooked = count >= MaxBookedDays;
+
     bookedDates[date] = {
       selected: true,
-      selectedColor: Colours.redPrimary,
+      selectedColor: fullyBooked ? Colours.redPrimary : Colours.amberPrimary,
       selectedTextColor: Colours.white,
       customStyles: {
         container: { borderRadius: 20 },
@@ -132,9 +146,17 @@ const CalendarScreen: React.FC = () => {
 
         <View style={styles.redStripe} />
 
-        <View style={styles.bookedKey}>
-          <View style={styles.bookedKeyCircle} />
-          <Text style={styles.bookedKeyText}>Booked Days Off</Text>
+        {/* Key */}
+        <View style={styles.keyContainer}>
+          <View style={styles.keyItem}>
+            <View style={styles.fullyBookedCircle} />
+            <Text style={styles.keyText}>Fully Booked Days</Text>
+          </View>
+
+          <View style={styles.keyItem}>
+            <View style={styles.partialBookedCircle} />
+            <Text style={styles.keyText}>Partial Booked Days</Text>
+          </View>
         </View>
       </View>
     </SafeAreaView>
@@ -172,22 +194,34 @@ const styles = StyleSheet.create({
     borderRadius: 1,
   },
 
-  bookedKey: {
+  keyContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 35,
+    justifyContent: 'center',
+    gap: 20,
     paddingVertical: 10,
-    gap: 10,
   },
 
-  bookedKeyCircle: {
+  keyItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+
+  fullyBookedCircle: {
     width: 13,
     height: 13,
     backgroundColor: Colours.redPrimary,
     borderRadius: 100,
   },
 
-  bookedKeyText: {
+  partialBookedCircle: {
+    width: 13,
+    height: 13,
+    backgroundColor: Colours.amberPrimary,
+    borderRadius: 100,
+  },
+
+  keyText: {
     ...TextStyles.regular,
     fontSize: FontSize.xs14,
     color: Colours.black,
