@@ -19,7 +19,7 @@ jest.mock('react-native-paper', () => {
   const { Text, View } = require('react-native');
 
   return {
-    Icon: (props: any) => React.createElement(Text, props, 'icon'),
+    Icon: (props: any) => React.createElement(Text, props, props.source || 'icon'),
     Avatar: {
       Icon: (props: any) => React.createElement(View, props),
     },
@@ -37,20 +37,25 @@ describe('App navigation flow', () => {
     expect(getByText('HR Portal')).toBeTruthy();
     expect(getByText('Health & Safety')).toBeTruthy();
 
-    // Ensuring no bottom navigation is shown on the home screen
+    // Ensuring portal navigation labels are not shown on the home screen
     expect(queryByText('Payslips')).toBeNull();
     expect(queryByText('Documents')).toBeNull();
   });
 
-  it('opens HR section and shows HR bottom navigation', () => {
-    const { getByText, queryByText } = render(<App />);
+  it('opens HR section and shows the HR top and bottom navigation', () => {
+    const { getByText, getAllByText, queryByText } = render(<App />);
 
     // When the HR button is pressed
     fireEvent.press(getByText('HR Portal'));
 
+    // Then the word calendar should appear in the top navbar and bottom navbar
+    expect(getAllByText('Calendar')).toHaveLength(2);
+
+    // Then the HR top navigation icons should be visible
+    expect(getByText('bell')).toBeTruthy();
+
     // Then the HR bottom navigation items should be visible
     expect(getByText('Payslips')).toBeTruthy();
-    expect(getByText('Calendar')).toBeTruthy();
     expect(getByText('Home')).toBeTruthy();
     expect(getByText('Handbook')).toBeTruthy();
     expect(getByText('Clock-in')).toBeTruthy();
@@ -60,17 +65,22 @@ describe('App navigation flow', () => {
     expect(queryByText('Overview')).toBeNull();
   });
 
-  it('opens health and safety section and shows health and safety bottom navigation', () => {
-    const { getByText, queryByText } = render(<App />);
+  it('opens health and safety section and shows the health and safety top and bottom navigation', () => {
+    const { getByText, getAllByText, queryByText } = render(<App />);
 
     // When Health and Safety is pressed
     fireEvent.press(getByText('Health & Safety'));
+
+    // Then Overview should appear in both the top nav and bottom nav
+    expect(getAllByText('Overview')).toHaveLength(2);
+
+    // Then the health and safety top navigation icons should be visible
+    expect(getByText('bell')).toBeTruthy();
 
     // Then the health and safety bottom navigation items should be visible
     expect(getByText('Documents')).toBeTruthy();
     expect(getByText('Risk')).toBeTruthy();
     expect(getByText('Home')).toBeTruthy();
-    expect(getByText('Overview')).toBeTruthy();
     expect(getByText('Personal')).toBeTruthy();
 
     // Ensuring HR items are not shown in the health and safety section
@@ -79,11 +89,11 @@ describe('App navigation flow', () => {
   });
 
   it('returns to the home screen when Home is pressed in the bottom nav', () => {
-    const { getByText, queryByText } = render(<App />);
+    const { getByText, getAllByText, queryByText } = render(<App />);
 
     // Given the user has entered the HR section
     fireEvent.press(getByText('HR Portal'));
-    expect(getByText('Calendar')).toBeTruthy();
+    expect(getAllByText('Calendar')).toHaveLength(2);
 
     // When Home is pressed in the bottom navigation
     fireEvent.press(getByText('Home'));
@@ -93,9 +103,10 @@ describe('App navigation flow', () => {
     expect(getByText('HR Portal')).toBeTruthy();
     expect(getByText('Health & Safety')).toBeTruthy();
 
-    // Ensuring the HR bottom navigation is no longer shown
+    // Ensuring the portal navigation is no longer shown
     expect(queryByText('Payslips')).toBeNull();
     expect(queryByText('Calendar')).toBeNull();
     expect(queryByText('Handbook')).toBeNull();
+    expect(queryByText('Documents')).toBeNull();
   });
 });
