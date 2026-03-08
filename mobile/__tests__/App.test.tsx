@@ -15,16 +15,16 @@ jest.mock('react-native-safe-area-context', () => {
 
 // Mocking react-native-paper components used in the app
 jest.mock('react-native-paper', () => {
-  const React = require('react');
+  const mockReact = require('react');
   const { Text, View } = require('react-native');
 
   return {
-    Icon: (props: any) => React.createElement(Text, props, props.source || 'icon'),
+    Icon: (props: any) => mockReact.createElement(Text, props, props.source || 'icon'),
     Avatar: {
-      Icon: (props: any) => React.createElement(View, props),
+      Icon: (props: any) => mockReact.createElement(View, props),
     },
     IconButton: (props: any) =>
-      React.createElement(Text, { onPress: props.onPress }, props.icon || 'icon-button'),
+      mockReact.createElement(Text, { onPress: props.onPress }, props.icon || 'icon-button'),
   };
 });
 
