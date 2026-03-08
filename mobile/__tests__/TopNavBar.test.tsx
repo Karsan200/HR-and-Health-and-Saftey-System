@@ -95,6 +95,42 @@ describe('TopNavBar component', () => {
     expect(getByText('account-circle')).toBeTruthy();
   });
 
+  it('calls onNotificationsPress when the notification bell is pressed', () => {
+    // Given an onNotificationsPress handler appears
+    const onNotificationsPress = jest.fn();
+
+    const { getByText } = render(
+      <TopNavBar
+        title="Risks"
+        onNotificationsPress={onNotificationsPress}
+      />
+    );
+
+    // When the notification bell is pressed
+    fireEvent.press(getByText('bell'));
+
+    // Then the onNotificationsPress handler should be called
+    expect(onNotificationsPress).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onProfilePress when the profile icon is pressed', () => {
+    // Given an onProfilePress handler appears
+    const onProfilePress = jest.fn();
+
+    const { getByText } = render(
+      <TopNavBar
+        title="Risks"
+        onProfilePress={onProfilePress}
+      />
+    );
+
+    // When the profile icon is pressed
+    fireEvent.press(getByText('account-circle'));
+
+    // Then the onProfilePress handler should be called
+    expect(onProfilePress).toHaveBeenCalledTimes(1);
+  });
+
   it('renders both left and right side content together', () => {
     // Given the TopNavBar is rendered with a back button, When the component loads
     const { getByText } = render(

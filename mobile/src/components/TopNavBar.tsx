@@ -9,12 +9,16 @@ type TopNavBarProps = {
   title: string;
   showBackButton?: boolean;
   onBackPress?: () => void;
+  onNotificationsPress?: () => void;
+  onProfilePress?: () => void;
 };
 
 export default function TopNavBar({
                                     title,
                                     showBackButton = false,
-                                    onBackPress
+                                    onBackPress,
+                                    onNotificationsPress,
+                                    onProfilePress,
                                   }: TopNavBarProps) {
   return (
     // Adding the back button on the far left, if it is required
@@ -31,7 +35,7 @@ export default function TopNavBar({
 
       {/* Adding the notification bell and profile icon on the far right*/}
       <View style={styles.rightSection}>
-        <Pressable style={styles.iconButton} onPress={() => {}}>
+        <Pressable style={styles.iconButton} onPress={onNotificationsPress}>
           <View style={styles.notificationWrapper}>
             <Icon source="bell" size={22} color={Colours.black} />
             <View style={styles.notificationBadge}>
@@ -39,7 +43,7 @@ export default function TopNavBar({
             </View>
           </View>
         </Pressable>
-        <Pressable style={styles.iconButton} onPress={() => {}}>
+        <Pressable style={styles.iconButton} onPress={onProfilePress}>
           <Icon source="account-circle" size={24} color={Colours.black} />
         </Pressable>
       </View>
