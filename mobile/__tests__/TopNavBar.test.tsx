@@ -7,11 +7,11 @@ import { fireEvent, render } from '@testing-library/react-native';
 
 // Mocking react-native-paper components used in the TopNavBar
 jest.mock('react-native-paper', () => {
-  const React = require('react');
+  const mockReact = require('react');
   const { Text } = require('react-native');
 
   return {
-    Icon: (props: any) => React.createElement(Text, props, props.source || 'icon'),
+    Icon: (props: any) => mockReact.createElement(Text, props, props.source || 'icon'),
   };
 });
 
