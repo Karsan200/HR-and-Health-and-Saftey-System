@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -25,25 +25,13 @@ type Activity = {
   until: string;
 };
 
-const mockActivities: Activity[] = [
-  {
-    name: 'Jane Doe',
-    role: 'Technician',
-    until: '10/02/2026',
-  },
-  {
-    name: 'John Doe',
-    role: 'Admin',
-    until: '06/02/2026',
-  },
-];
-
 const DateDetailsScreen: React.FC = () => {
   const route = useRoute<DateDetailsRouteProp>();
 
   const initialDate = route.params?.date || dayjs().format('YYYY-MM-DD');
 
   const [selectedDate, setSelectedDate] = useState(dayjs(initialDate));
+  const [activities, setActivities] = useState<Activity[]>([]);
 
   const startOfWeek = selectedDate.startOf('week');
 
@@ -52,6 +40,45 @@ const DateDetailsScreen: React.FC = () => {
   );
 
   const isToday = selectedDate.isSame(dayjs(), 'day');
+
+  // Fetch leave for a specific date
+  const fetchLeaveForDate = async (date: string) => {
+    try {
+      const response = await fetch(
+        `http://10.0.2.2:8080/api/leave/day/${date}`, // correct endpoint
+      );
+
+      if (!response.ok) {
+        console.log('Leave fetch failed:', response.status);
+        setActivities([]);
+        return;
+      }
+
+      const text = await response.text();
+
+      if (!text) {
+        setActivities([]);
+        return;
+      }
+
+      const data = JSON.parse(text);
+
+      const mapped = data.map((leave: any) => ({
+        name: leave.name, // matches LeaveDayDTO
+        role: leave.role,
+        until: dayjs(leave.endDate).format('DD/MM/YYYY'),
+      }));
+
+      setActivities(mapped);
+    } catch (error) {
+      console.error('Error fetching leave', error);
+    }
+  };
+
+  // Fetch leave whenever selected date changes
+  useEffect(() => {
+    fetchLeaveForDate(selectedDate.format('YYYY-MM-DD'));
+  }, [selectedDate]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -96,7 +123,9 @@ const DateDetailsScreen: React.FC = () => {
         </View>
 
         {/* Activity Cards */}
-        {mockActivities.map((activity, index) => (
+        {activities.length === 0 && <Text>No leave for this date</Text>}
+
+        {activities.map((activity, index) => (
           <View key={index} style={styles.activityCard}>
             <View style={styles.activityRow}>
               <View style={styles.activityTitle}>
