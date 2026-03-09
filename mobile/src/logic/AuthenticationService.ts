@@ -3,8 +3,14 @@ import { AppSettings } from '../AppSettings.ts';
 import { HttpException } from '../exception/HttpException.ts';
 
 class AuthenticationService {
+    /**
+     * Helper method to perform fetch requests, handling authorisation headers for JWT tokens
+     * @param url - The endpoint URL to send the request to
+     * @param options - RequestInit options for the fetch request, including method, headers, body, etc.
+     * @returns Promise that resolves to the Response object from the fetch request
+     */
     static async fetch(url: string, options: RequestInit): Promise<Response> {
-        return await fetch(url, options);
+        return await fetch(AppSettings.API_URL+ url, options);
     }
 
     /**
