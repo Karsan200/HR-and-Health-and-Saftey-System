@@ -3,13 +3,16 @@ import { ScrollView, Text, View, Pressable } from 'react-native';
 import { Avatar, IconButton } from 'react-native-paper';
 import { homeStyles as styles } from './HomeScreen.styles';
 import { Colours } from '../theme/colours';
-import { useNavigation } from '@react-navigation/native';
 
-export default function HomeScreen() {
-    const navigation = useNavigation<any>();
+type HomeScreenProps = {
+    onSelectHr: () => void;
+    onSelectHealthSafety: () => void;
+};
 
+export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScreenProps) {
     return (
         <ScrollView contentContainerStyle={styles.container}>
+            {/* Profile Icon */}
             <Avatar.Icon
                 size={150}
                 icon="account-circle"
@@ -17,12 +20,15 @@ export default function HomeScreen() {
                 color={Colours.redPrimary}
             />
 
+            {/* Welcome Text */}
             <Text style={styles.welcomeText}>Welcome Back</Text>
             <Text style={styles.userName}>Maggie May</Text>
 
+            {/* Section Selection */}
             <Text style={styles.sectionTitle}>CHOOSE A SECTION</Text>
 
-            <Pressable style={styles.sectionButton} onPress={() => {}}>
+            {/* HR Portal */}
+            <Pressable style={styles.sectionButton} onPress={onSelectHr}>
                 <View style={styles.sectionButtonContent}>
                     <IconButton
                         icon="briefcase-outline"
@@ -35,10 +41,8 @@ export default function HomeScreen() {
                 </View>
             </Pressable>
 
-            <Pressable
-                style={styles.sectionButton}
-                onPress={() => navigation.navigate('HsOverview')}
-            >
+            {/* Health & Safety */}
+            <Pressable style={styles.sectionButton} onPress={onSelectHealthSafety}>
                 <View style={styles.sectionButtonContent}>
                     <IconButton
                         icon="shield-outline"
@@ -51,6 +55,7 @@ export default function HomeScreen() {
                 </View>
             </Pressable>
 
+            {/* Quick Access Buttons */}
             <View style={styles.quickAccessContainer}>
                 <Text style={styles.quickAccessTitle}>QUICK ACCESS</Text>
 
