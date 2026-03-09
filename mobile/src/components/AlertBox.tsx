@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
-import { Colours } from '../theme/colours';
-import { BorderRadius, FontSize, TextStyles } from '../theme/theme';
+import { colours } from '../theme/colours';
+import { theme } from '../theme/theme';
 
 interface AlertBoxProps {
   label?: string;
@@ -20,9 +20,9 @@ interface AlertBoxProps {
 const AlertBox: React.FC<AlertBoxProps> = ({
                                              label = 'Document',
                                              body = 'Fire and Safety Policy v2.0 requires a signature',
-                                             circleColor = Colours.redPrimary,
-                                             labelColor = Colours.redTextDark,
-                                             labelBackground = Colours.redBackgroundLight,
+                                             circleColor = colours.redPrimary,
+                                             labelColor = colours.redTextDark,
+                                             labelBackground = colours.redBackgroundLight,
                                              style,
                                            }) => {
   return (
@@ -52,13 +52,13 @@ const styles = StyleSheet.create({
   // Container for the alert card with elevation and padding
   container: {
     height: 88,
-    backgroundColor: Colours.white,
-    borderRadius: BorderRadius.largeButtonsAndOutlines,
+    backgroundColor: colours.white,
+    borderRadius: theme.borderRadius.largeButtonsAndOutlines,
     paddingHorizontal: 10,
     paddingVertical: 10,
     justifyContent: 'center',
     // shadow: x=0 y=0 blur=4 with greyIconLight to match figma design
-    shadowColor: Colours.greyIconLight,
+    shadowColor: colours.greyIconLight,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
     shadowRadius: 4,
@@ -81,18 +81,18 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     paddingHorizontal: 8,
     paddingVertical: 0,
-    borderRadius: BorderRadius.smallTextBackground,
+    borderRadius: theme.borderRadius.smallTextBackground,
   },
   // Text style for the label inside the pill
   labelText: {
-    ...TextStyles.regular,
-    fontSize: FontSize.s16,
+    ...theme.textStyles.regular,
+    fontSize: theme.fontSize.s16,
   },
   // Body text style for the alert message
   bodyText: {
     marginTop: 8,
-    ...TextStyles.regular,
-    fontSize: FontSize.xxs12,
-    color: Colours.black,
+    ...theme.textStyles.regular,
+    fontSize: theme.fontSize.xxs12,
+    color: colours.black,
   },
 });

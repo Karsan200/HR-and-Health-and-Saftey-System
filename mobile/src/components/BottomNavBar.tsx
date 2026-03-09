@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, View, Pressable } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { bottomNavStyles as styles } from './BottomNavBar.styles';
-import { Colours } from '../theme/colours';
+import { colours } from '../theme/colours';
 import {AppSection, ScreenKey, getBottomNavItems } from '../logic/NavigationConfiguration.ts';
 
 type BottomNavBarProps = {
@@ -36,7 +36,7 @@ export default function BottomNavBar({
             <Icon
               source={item.icon}
               size={40}
-              color={isActive ? Colours.redPrimary : Colours.greyIconLight}
+              color={isActive ? colours.redPrimary : colours.greyIconLight}
             />
             <Text
                 style={[styles.navLabel, isActive && styles.activeNavLabel]}
