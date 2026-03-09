@@ -14,6 +14,8 @@ import HomeScreen from "./src/screens/HomeScreen.tsx";
 import BottomNavBar from "./src/components/BottomNavBar.tsx";
 import {AppSection, ScreenKey} from "./src/logic/NavigationConfiguration.ts";
 import TopNavBar from './src/components/TopNavBar.tsx';
+import CalendarScreen from './src/screens/CalendarScreen';
+import DateDetailsScreen from './src/screens/DateDetailsScreen';
 
 
 function App() {
@@ -30,6 +32,7 @@ function App() {
 function AppContent() {
     const [section, setSection] = useState<AppSection>(null);
     const [currentScreen, setCurrentScreen] = useState<ScreenKey>('home');
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
     // Defaulting to the calendar screen when the HR section is selected.
     const handleSelectHr = () => {
@@ -54,6 +57,15 @@ function AppContent() {
         setCurrentScreen(screen);
     };
 
+    const handleOpenDateDetails = (date: string) => {
+      setSelectedDate(date);
+      setCurrentScreen('dateDetails');
+    };
+
+    const handleBack = () => {
+      setCurrentScreen('calendar');
+    };
+
     /*
     Rendering in the main content area based on the current screen.
     Using switch cases to select the screen to load in.
@@ -70,52 +82,80 @@ function AppContent() {
           );
 
         case 'calendar':
-          return <>
-            <TopNavBar title="Calendar" />
-            <View style={styles.content} />
-          </>;
+          return (
+            <>
+              <TopNavBar title="Calendar" />
+              <CalendarScreen onDayPress={handleOpenDateDetails} />
+            </>
+          );
+
+        case 'dateDetails':
+          return (
+            <>
+              <TopNavBar
+                title=""
+                showBackButton={true}
+                onBackPress={handleBack}
+              />
+              <DateDetailsScreen date={selectedDate} />
+            </>
+          );
 
         case 'payslips':
-          return <>
-            <TopNavBar title="Payslips" />
-            <View style={styles.content} />
-          </>;
+          return (
+            <>
+              <TopNavBar title="Payslips" />
+              <View style={styles.content} />
+            </>
+          );
 
         case 'handbook':
-          return <>
-            <TopNavBar title="Handbook" />
-            <View style={styles.content} />
-          </>;
+          return (
+            <>
+              <TopNavBar title="Handbook" />
+              <View style={styles.content} />
+            </>
+          );
 
         case 'clockIn':
-          return <>
-            <TopNavBar title="Clock-In" />
-            <View style={styles.content} />
-          </>;
+          return (
+            <>
+              <TopNavBar title="Clock-In" />
+              <View style={styles.content} />
+            </>
+          );
 
         case 'overview':
-          return <>
-            <TopNavBar title="Overview" />
-            <View style={styles.content} />
-          </>;
+          return (
+            <>
+              <TopNavBar title="Overview" />
+              <View style={styles.content} />
+            </>
+          );
 
         case 'documents':
-          return <>
-            <TopNavBar title="Documents" />
-            <View style={styles.content} />
-          </>;
+          return (
+            <>
+              <TopNavBar title="Documents" />
+              <View style={styles.content} />
+            </>
+          );
 
         case 'risk':
-          return <>
-            <TopNavBar title="Risk" />
-            <View style={styles.content} />
-          </>;
+          return (
+            <>
+              <TopNavBar title="Risk" />
+              <View style={styles.content} />
+            </>
+          );
 
         case 'personal':
-          return <>
-            <TopNavBar title="Personal" />
-            <View style={styles.content} />
-          </>;
+          return (
+            <>
+              <TopNavBar title="Personal" />
+              <View style={styles.content} />
+            </>
+          );
 
         /*
         How to add the top nav bar to a screen:

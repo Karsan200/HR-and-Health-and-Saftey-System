@@ -4,20 +4,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar, DateData } from 'react-native-calendars';
 import dayjs from 'dayjs';
 
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../App';
-
 import { Spacing, FontSize, BorderRadius, TextStyles } from '../theme/theme';
 import { Colours } from '../theme/colours';
 import SummaryCard from '../components/summary/SummaryCard';
 import SummaryRow from '../components/summary/SummaryRow';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Calendar'>;
+type Props = {
+  onDayPress: (date: string) => void;
+};
 
-const CalendarScreen: React.FC = () => {
-  const navigation = useNavigation<NavigationProp>();
-
+const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
   const today = dayjs();
 
   //TODO: allow admin to set this via desktop
@@ -122,10 +118,14 @@ const CalendarScreen: React.FC = () => {
     },
   };
 
-  const markedDates: Record<string, any> = {
+  const markedDates = {
     ...greyedDates,
     ...bookedDates,
     ...todayMarking,
+  };
+
+  const handleDayPress = (day: DateData) => {
+    onDayPress(day.dateString);
   };
 
   return (
@@ -138,12 +138,14 @@ const CalendarScreen: React.FC = () => {
             icon="clock-outline"
             colour="red"
           />
+
           <SummaryCard
             label="Pending"
             value={4}
             icon="alert-circle-outline"
             colour="amber"
           />
+
           <SummaryCard
             label="Approved"
             value={2}
@@ -155,11 +157,7 @@ const CalendarScreen: React.FC = () => {
 
       <View style={styles.calendarContainer}>
         <Calendar
-          onDayPress={(day: DateData) => {
-            navigation.navigate('DayDetails', {
-              date: day.dateString,
-            });
-          }}
+          onDayPress={handleDayPress}
           markedDates={markedDates}
           theme={{
             calendarBackground: Colours.white,

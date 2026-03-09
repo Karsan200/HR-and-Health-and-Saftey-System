@@ -7,17 +7,14 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRoute, RouteProp } from '@react-navigation/native';
 import dayjs from 'dayjs';
 
 import { Colours } from '../theme/colours';
 import { Spacing, BorderRadius, FontSize, TextStyles } from '../theme/theme';
 
-type RootStackParamList = {
-  DayDetails: { date: string };
+type Props = {
+  date: string | null;
 };
-
-type DateDetailsRouteProp = RouteProp<RootStackParamList, 'DayDetails'>;
 
 type Activity = {
   name: string;
@@ -25,10 +22,8 @@ type Activity = {
   until: string;
 };
 
-const DateDetailsScreen: React.FC = () => {
-  const route = useRoute<DateDetailsRouteProp>();
-
-  const initialDate = route.params?.date || dayjs().format('YYYY-MM-DD');
+const DateDetailsScreen: React.FC<Props> = ({ date }) => {
+  const initialDate = date || dayjs().format('YYYY-MM-DD');
 
   const [selectedDate, setSelectedDate] = useState(dayjs(initialDate));
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -41,7 +36,6 @@ const DateDetailsScreen: React.FC = () => {
 
   const isToday = selectedDate.isSame(dayjs(), 'day');
 
-  // Fetch leave for a specific date
   const fetchLeaveForDate = async (date: string) => {
     try {
       const response = await fetch(
