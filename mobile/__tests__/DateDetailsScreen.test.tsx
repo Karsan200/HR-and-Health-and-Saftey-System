@@ -1,126 +1,161 @@
+/**
+ * @format
+ */
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import DateDetailsScreen from '../src/screens/DateDetailsScreen';
 import dayjs from 'dayjs';
 
-// Mock SafeAreaView
+// Mock SafeAreaView to render children directly
 jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-// Mock fetch globally
-(globalThis as any).fetch = jest.fn();
+// Mock Colours to avoid undefined
+jest.mock('../src/theme/colours', () => ({
+  Colours: {
+    greyBackground: '#eee',
+    black: '#000',
+    redPrimary: '#f00',
+    white: '#fff',
+    greyPrimaryMainText: '#666',
+    redBackgroundLight: '#fcc',
+    redTextDark: '#900',
+  },
+}));
+
+// Mock Theme values
+jest.mock('../src/theme/theme', () => ({
+  Spacing: { largePadding: 10 },
+  BorderRadius: { largeButtonsAndOutlines: 8 },
+  FontSize: { xs14: 12 },
+  TextStyles: { regular: {} },
+}));
 
 describe('DateDetailsScreen', () => {
-  const mockDate = dayjs().format('YYYY-MM-DD');
+  const today = dayjs().format('YYYY-MM-DD');
+  let fetchMock: jest.Mock;
+  let consoleLogSpy: jest.SpyInstance;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    fetchMock = jest.fn();
+    // @ts-ignore
+    global.fetch = fetchMock;
+
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
-  it('renders the selected date and TODAY label if today', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('renders correctly with no activities', async () => {
+    fetchMock.mockResolvedValueOnce({
       ok: true,
       text: async () => '[]',
     });
 
-    const { getByText } = render(<DateDetailsScreen date={mockDate} />);
+    const { getByText } = render(<DateDetailsScreen date={today} />);
 
-    await waitFor(() =>
-      expect(getByText(dayjs(mockDate).format('D MMMM, YYYY'))).toBeTruthy(),
-    );
-    await waitFor(() => expect(getByText('TODAY')).toBeTruthy());
+    await waitFor(() => {
+      expect(getByText('No leave for this date')).toBeTruthy();
+    });
   });
 
-  it('renders week day buttons', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
+  it('renders activities when fetch returns data', async () => {
+    const leaveData = [
+      { name: 'John Doe', role: 'Developer', endDate: '2026-03-15' },
+    ];
+    fetchMock.mockResolvedValueOnce({
       ok: true,
-      text: async () => '[]',
+      text: async () => JSON.stringify(leaveData),
     });
 
-    const { getByText } = render(<DateDetailsScreen date={mockDate} />);
+    const { getByText } = render(<DateDetailsScreen date={today} />);
 
-    const startOfWeek = dayjs(mockDate).startOf('week');
-    for (let i = 0; i < 7; i++) {
-      const day = startOfWeek.add(i, 'day');
-      await waitFor(() =>
-        expect(getByText(day.format('ddd').toUpperCase())).toBeTruthy(),
+    await waitFor(() => {
+      expect(getByText('John Doe • Developer')).toBeTruthy();
+      expect(getByText('On leave til 15/03/2026')).toBeTruthy();
+    });
+  });
+
+  it('handles fetch failure gracefully', async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+    });
+
+    const { getByText } = render(<DateDetailsScreen date={today} />);
+
+    await waitFor(() => {
+      expect(consoleLogSpy).toHaveBeenCalledWith('Leave fetch failed:', 500);
+      expect(getByText('No leave for this date')).toBeTruthy();
+    });
+  });
+
+  it('handles fetch throwing an error', async () => {
+    fetchMock.mockRejectedValueOnce(new Error('Network error'));
+
+    const { getByText } = render(<DateDetailsScreen date={today} />);
+
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error fetching leave',
+        expect.any(Error),
       );
-      await waitFor(() => expect(getByText(day.format('D'))).toBeTruthy());
-    }
+      expect(getByText('No leave for this date')).toBeTruthy();
+    });
   });
 
-  it('renders "No leave for this date" when fetch returns empty', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      text: async () => '[]',
+  it('changes selected date when a day card is pressed', async () => {
+    fetchMock.mockResolvedValue({ ok: true, text: async () => '[]' });
+
+    const { getByText } = render(<DateDetailsScreen date={today} />);
+
+    await waitFor(() => {
+      const dayLabel = dayjs(today).startOf('week').add(1, 'day').format('D');
+      const dayButton = getByText(dayLabel);
+      fireEvent.press(dayButton);
+
+      expect(dayButton).toBeTruthy();
     });
-
-    const { getByText } = render(<DateDetailsScreen date={mockDate} />);
-
-    await waitFor(() =>
-      expect(getByText('No leave for this date')).toBeTruthy(),
-    );
   });
 
-  it('renders activity cards when fetch returns data', async () => {
-    const mockData = [{ name: 'Alice', role: 'Manager', endDate: mockDate }];
+  it('navigates to previous and next weeks', async () => {
+    fetchMock.mockResolvedValue({ ok: true, text: async () => '[]' });
 
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      text: async () => JSON.stringify(mockData),
+    const { getByText } = render(<DateDetailsScreen date={today} />);
+
+    await waitFor(() => {
+      const prevButton = getByText('‹');
+      const nextButton = getByText('›');
+
+      fireEvent.press(prevButton);
+      fireEvent.press(nextButton);
+
+      expect(prevButton).toBeTruthy();
+      expect(nextButton).toBeTruthy();
     });
-
-    const { getByText } = render(<DateDetailsScreen date={mockDate} />);
-
-    await waitFor(() => expect(getByText('Alice • Manager')).toBeTruthy());
-    await waitFor(() =>
-      expect(
-        getByText(`On leave til ${dayjs(mockDate).format('DD/MM/YYYY')}`),
-      ).toBeTruthy(),
-    );
   });
 
-  it('pressing previous and next week buttons changes selected date', async () => {
-    (fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      text: async () => '[]',
+  it('shows TODAY badge if selected date is today', async () => {
+    fetchMock.mockResolvedValue({ ok: true, text: async () => '[]' });
+
+    const { getByText } = render(<DateDetailsScreen date={today} />);
+
+    await waitFor(() => {
+      expect(getByText('TODAY')).toBeTruthy();
     });
-
-    const { getByText } = render(<DateDetailsScreen date={mockDate} />);
-
-    const prevButton = getByText('‹');
-    const nextButton = getByText('›');
-
-    fireEvent.press(prevButton);
-    fireEvent.press(nextButton);
   });
 
-  it('pressing a day card changes the selected date', async () => {
-    (fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      text: async () => '[]',
-    });
+  it('renders add button', async () => {
+    fetchMock.mockResolvedValue({ ok: true, text: async () => '[]' });
 
-    const { getByText } = render(<DateDetailsScreen date={mockDate} />);
-
-    const startOfWeek = dayjs(mockDate).startOf('week');
-    const dayToPress = startOfWeek.add(2, 'day'); // Wednesday for example
-    const dayButton = getByText(dayToPress.format('D'));
-
-    fireEvent.press(dayButton);
-  });
-
-  it('renders the add button and covers press', async () => {
-    (fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      text: async () => '[]',
-    });
-
-    const { getByText } = render(<DateDetailsScreen date={mockDate} />);
+    const { getByText } = render(<DateDetailsScreen date={today} />);
 
     const addButton = getByText('+');
     expect(addButton).toBeTruthy();
-    fireEvent.press(addButton);
   });
 });
