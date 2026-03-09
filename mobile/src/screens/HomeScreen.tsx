@@ -33,7 +33,7 @@ export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScr
                     <IconButton
                         icon="briefcase-outline"
                         size={35}
-                        iconColor={Colours.black}
+                        iconColor={colours.black}
                         containerColor="transparent"
                         style={styles.iconButton}
                     />
@@ -64,7 +64,7 @@ export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScr
                         <IconButton
                             icon="account-circle"
                             size={24}
-                            iconColor={Colours.black}
+                            iconColor={colours.black}
                             containerColor="transparent"
                             style={styles.iconButton}
                         />
