@@ -22,8 +22,8 @@ type Activity = {
   until: string;
 };
 
-const DateDetailsScreen: React.FC<Props> = ({ date }) => {
-  const initialDate = date || dayjs().format('YYYY-MM-DD');
+const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
+  const initialDate = initialDateStr || dayjs().format('YYYY-MM-DD');
 
   const [selectedDate, setSelectedDate] = useState(dayjs(initialDate));
   const [activities, setActivities] = useState<Activity[]>([]);

@@ -8,35 +8,35 @@ import CalendarScreen from '../src/screens/CalendarScreen';
 
 // Mocking react-native-calendars
 jest.mock('react-native-calendars', () => {
-  const React = require('react');
+  const mockReact = require('react');
   const { Text, TouchableOpacity } = require('react-native');
 
   return {
     Calendar: ({ onDayPress }: any) =>
-      React.createElement(
+      mockReact.createElement(
         TouchableOpacity,
         { onPress: () => onDayPress({ dateString: '2026-03-09' }) },
-        React.createElement(Text, null, 'Calendar')
+        mockReact.createElement(Text, null, 'Calendar')
       ),
   };
 });
 
 // Mocking summary components
 jest.mock('../src/components/summary/SummaryCard', () => {
-  const React = require('react');
+  const mockReact = require('react');
   const { View, Text } = require('react-native');
   return (props: any) =>
-    React.createElement(
+    mockReact.createElement(
       View,
       null,
-      React.createElement(Text, null, props.label || 'SummaryCard'),
+      mockReact.createElement(Text, null, props.label || 'SummaryCard'),
     );
 });
 
 jest.mock('../src/components/summary/SummaryRow', () => {
-  const React = require('react');
+  const mockReact = require('react');
   const { View } = require('react-native');
-  return (props: any) => React.createElement(View, null, props.children);
+  return (props: any) => mockReact.createElement(View, null, props.children);
 });
 
 describe('CalendarScreen', () => {

@@ -30,10 +30,10 @@ jest.mock('react-native-paper', () => {
 
 // Mock CalendarScreen to just render a placeholder
 jest.mock('../src/screens/CalendarScreen', () => {
-  const React = require('react');
+  const mockReact = require('react');
   const { View, Text } = require('react-native');
 
-  return () => React.createElement(View, null, React.createElement(Text, null, 'Calendar'));
+  return () => mockReact.createElement(View, null, mockReact.createElement(Text, null, 'Calendar'));
 });
 
 describe('App navigation flow', () => {
