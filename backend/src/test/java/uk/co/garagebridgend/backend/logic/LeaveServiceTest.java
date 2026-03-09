@@ -1,0 +1,94 @@
+package uk.co.garagebridgend.backend.logic;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import uk.co.garagebridgend.backend.models.entity.AccountTable;
+import uk.co.garagebridgend.backend.models.entity.LeaveTable;
+import uk.co.garagebridgend.backend.repository.LeaveRepository;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
+
+/**
+ * Tests for {@link LeaveService}.
+ */
+public class LeaveServiceTest {
+
+    @Mock
+    private LeaveRepository leaveRepository;
+
+    @InjectMocks
+    private LeaveService leaveService;
+
+    @BeforeEach
+    void setup() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void testGetAllLeaveDates() {
+
+        LeaveTable leave = new LeaveTable();
+        leave.setStartDate(LocalDateTime.now());
+        leave.setEndDate(LocalDateTime.now().plusDays(2));
+
+        when(leaveRepository.findAll()).thenReturn(List.of(leave));
+
+        var result = leaveService.getAllLeaveDates();
+
+        assertEquals(1, result.size());
+        assertNotNull(result.getFirst().getStartDate());
+        assertNotNull(result.getFirst().getEndDate());
+    }
+
+    @Test
+    void testGetAllLeaveDatesEmpty() {
+
+        when(leaveRepository.findAll()).thenReturn(List.of());
+
+        var result = leaveService.getAllLeaveDates();
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetLeaveForDate() {
+
+        AccountTable account = new AccountTable();
+        account.setFirstName("John");
+        account.setLastName("Doe");
+
+        LeaveTable leave = new LeaveTable();
+        leave.setAccount(account);
+        leave.setStartDate(LocalDateTime.now());
+        leave.setEndDate(LocalDateTime.now().plusDays(1));
+
+        when(leaveRepository.findLeaveForDate(LocalDate.parse("2026-03-01").atStartOfDay()))
+                .thenReturn(List.of(leave));
+
+        var result = leaveService.getLeaveForDate(LocalDate.parse("2026-03-01"));
+
+        assertEquals(1, result.size());
+        assertEquals("John Doe", result.getFirst().getName());
+        assertEquals("Technician", result.getFirst().getRole());
+    }
+
+    @Test
+    void testGetLeaveForDateEmpty() {
+
+        when(leaveRepository.findLeaveForDate(LocalDate.parse("2026-03-01").atStartOfDay()))
+                .thenReturn(List.of());
+
+        var result = leaveService.getLeaveForDate(LocalDate.parse("2026-03-01"));
+
+        assertTrue(result.isEmpty());
+    }
+}

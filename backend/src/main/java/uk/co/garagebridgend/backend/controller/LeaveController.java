@@ -2,11 +2,13 @@ package uk.co.garagebridgend.backend.controller;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import uk.co.garagebridgend.backend.logic.LeaveService;
 import uk.co.garagebridgend.backend.models.dto.LeaveCalendarDTO;
@@ -45,7 +47,14 @@ public class LeaveController {
      */
     @GetMapping("/day/{date}")
     public List<LeaveDayDTO> getLeaveForDay(final @PathVariable String date) {
-        LocalDate parsedDate = LocalDate.parse(date);
-        return leaveService.getLeaveForDate(parsedDate);
+        try {
+            LocalDate parsedDate = LocalDate.parse(date);
+            return leaveService.getLeaveForDate(parsedDate);
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid date format"
+            );
+        }
     }
 }
