@@ -8,23 +8,24 @@
 import React, {useState} from 'react';
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import {
-  SafeAreaProvider,
+    SafeAreaProvider,
 } from 'react-native-safe-area-context';
 import HomeScreen from "./src/screens/HomeScreen.tsx";
+import HsOverview from './src/screens/HsOverview';
 import BottomNavBar from "./src/components/BottomNavBar.tsx";
 import {AppSection, ScreenKey} from "./src/logic/NavigationConfiguration.ts";
 import TopNavBar from './src/components/TopNavBar.tsx';
 
 
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+    const isDarkMode = useColorScheme() === 'dark';
 
-  return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
-  );
+    return (
+        <SafeAreaProvider>
+            <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+            <AppContent />
+        </SafeAreaProvider>
+    );
 }
 
 function AppContent() {
@@ -60,109 +61,113 @@ function AppContent() {
     At the moment they are all blank view, they will need to be replaced by the screen components when they are created.
      */
     const renderScreen = () => {
-      switch (currentScreen) {
-        case 'home':
-          return (
-            <HomeScreen
-              onSelectHr={handleSelectHr}
-              onSelectHealthSafety={handleSelectHealthSafety}
+        switch (currentScreen) {
+            case 'home':
+                return (
+                    <HomeScreen
+                        onSelectHr={handleSelectHr}
+                        onSelectHealthSafety={handleSelectHealthSafety}
+                    />
+                );
+
+            case 'calendar':
+                return <>
+                    <TopNavBar title="Calendar" />
+                    <View style={styles.content} />
+                </>;
+
+            case 'payslips':
+                return <>
+                    <TopNavBar title="Payslips" />
+                    <View style={styles.content} />
+                </>;
+
+            case 'handbook':
+                return <>
+                    <TopNavBar title="Handbook" />
+                    <View style={styles.content} />
+                </>;
+
+            case 'clockIn':
+                return <>
+                    <TopNavBar title="Clock-In" />
+                    <View style={styles.content} />
+                </>;
+
+            case 'overview':
+                return (
+                    <>
+                        <TopNavBar title="Overview" />
+                        <View style={styles.content}>
+                            <HsOverview />
+                        </View>
+                    </>
+                );
+
+            case 'documents':
+                return <>
+                    <TopNavBar title="Documents" />
+                    <View style={styles.content} />
+                </>;
+
+            case 'risk':
+                return <>
+                    <TopNavBar title="Risk" />
+                    <View style={styles.content} />
+                </>;
+
+            case 'personal':
+                return <>
+                    <TopNavBar title="Personal" />
+                    <View style={styles.content} />
+                </>;
+
+            /*
+            How to add the top nav bar to a screen:
+            Main screen:
+            <TopNavBar
+              title="NameOfTheScreen"
             />
-          );
 
-        case 'calendar':
-          return <>
-            <TopNavBar title="Calendar" />
-            <View style={styles.content} />
-          </>;
-
-        case 'payslips':
-          return <>
-            <TopNavBar title="Payslips" />
-            <View style={styles.content} />
-          </>;
-
-        case 'handbook':
-          return <>
-            <TopNavBar title="Handbook" />
-            <View style={styles.content} />
-          </>;
-
-        case 'clockIn':
-          return <>
-            <TopNavBar title="Clock-In" />
-            <View style={styles.content} />
-          </>;
-
-        case 'overview':
-          return <>
-            <TopNavBar title="Overview" />
-            <View style={styles.content} />
-          </>;
-
-        case 'documents':
-          return <>
-            <TopNavBar title="Documents" />
-            <View style={styles.content} />
-          </>;
-
-        case 'risk':
-          return <>
-            <TopNavBar title="Risk" />
-            <View style={styles.content} />
-          </>;
-
-        case 'personal':
-          return <>
-            <TopNavBar title="Personal" />
-            <View style={styles.content} />
-          </>;
-
-        /*
-        How to add the top nav bar to a screen:
-        Main screen:
-        <TopNavBar
-          title="NameOfTheScreen"
-        />
-
-        Sub-screen:
-        <TopNavBar
-          title="NameOfTheScreen"
-          showBackButton={true}
-          onBackPress={handleBack}
-        />
-         */
-
-        // Defaulting to the home screen
-        default:
-          return (
-            <HomeScreen
-              onSelectHr={handleSelectHr}
-              onSelectHealthSafety={handleSelectHealthSafety}
+            Sub-screen:
+            <TopNavBar
+              title="NameOfTheScreen"
+              showBackButton={true}
+              onBackPress={handleBack}
             />
-          );
-      }
+             */
+
+            // Defaulting to the home screen
+            default:
+                return (
+                    <HomeScreen
+                        onSelectHr={handleSelectHr}
+                        onSelectHealthSafety={handleSelectHealthSafety}
+                    />
+                );
+        }
     };
 
 
     // returning the main content and the bottom navbar
     return (
-      <>
-        <View style={styles.content}>{renderScreen()}</View>
-        <BottomNavBar
-          section={section}
-          currentScreen={currentScreen}
-          onNavigate={handleNavigate}
-        />
-      </>
+        <>
+            <View style={styles.content}>{renderScreen()}</View>
+            <BottomNavBar
+                section={section}
+                currentScreen={currentScreen}
+                onNavigate={handleNavigate}
+            />
+        </>
     );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+    container: {
+        flex: 1,
+    },
     content: {
-    flex: 1,
+        flex: 1,
     }
 });
 

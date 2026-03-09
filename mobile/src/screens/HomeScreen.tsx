@@ -2,21 +2,17 @@ import React from 'react';
 import { ScrollView, Text, View, Pressable } from 'react-native';
 import { Avatar, IconButton } from 'react-native-paper';
 import { homeStyles as styles } from './HomeScreen.styles';
-import { Colours } from '../theme/colours'; //getting the colours from the set list
+import { Colours } from '../theme/colours';
 
 type HomeScreenProps = {
-  onSelectHr: () => void;
-  onSelectHealthSafety: () => void;
+    onSelectHr: () => void;
+    onSelectHealthSafety: () => void;
 };
 
-export default function HomeScreen({
-    onSelectHr,
-    onSelectHealthSafety,
-}: HomeScreenProps) {
+export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScreenProps) {
     return (
         <ScrollView contentContainerStyle={styles.container}>
-
-            {/*Profile Image at the top of the page*/}
+            {/* Profile Icon */}
             <Avatar.Icon
                 size={150}
                 icon="account-circle"
@@ -24,13 +20,14 @@ export default function HomeScreen({
                 color={Colours.redPrimary}
             />
 
-            {/*Welcome message under the profile icon*/}
+            {/* Welcome Text */}
             <Text style={styles.welcomeText}>Welcome Back</Text>
             <Text style={styles.userName}>Maggie May</Text>
 
+            {/* Section Selection */}
             <Text style={styles.sectionTitle}>CHOOSE A SECTION</Text>
 
-            {/*On click takes you to the HR Section of the app (Calendar) CURRENTLY BLANK*/}
+            {/* HR Portal */}
             <Pressable style={styles.sectionButton} onPress={onSelectHr}>
                 <View style={styles.sectionButtonContent}>
                     <IconButton
@@ -44,7 +41,7 @@ export default function HomeScreen({
                 </View>
             </Pressable>
 
-            {/*On click takes you to the Health and Safety section of the app (HS Overview) CURRENTLY BLANK*/}
+            {/* Health & Safety */}
             <Pressable style={styles.sectionButton} onPress={onSelectHealthSafety}>
                 <View style={styles.sectionButtonContent}>
                     <IconButton
@@ -58,11 +55,10 @@ export default function HomeScreen({
                 </View>
             </Pressable>
 
-            {/*All quick assess buttons*/}
+            {/* Quick Access Buttons */}
             <View style={styles.quickAccessContainer}>
                 <Text style={styles.quickAccessTitle}>QUICK ACCESS</Text>
 
-                {/*Profile (CURRENTLY BLANK)*/}
                 <Pressable style={styles.quickAccessButtonContainer} onPress={() => {}}>
                     <View style={styles.quickAccessButtonContent}>
                         <IconButton
@@ -76,7 +72,6 @@ export default function HomeScreen({
                     </View>
                 </Pressable>
 
-                {/*Notifications (CURRENTLY BLANK)*/}
                 <Pressable style={styles.quickAccessButtonContainer} onPress={() => {}}>
                     <View style={styles.quickAccessButtonContent}>
                         <IconButton
@@ -90,7 +85,6 @@ export default function HomeScreen({
                     </View>
                 </Pressable>
 
-                {/*Settings (CURRENTLY BLANK)*/}
                 <Pressable style={styles.quickAccessButtonContainer} onPress={() => {}}>
                     <View style={styles.quickAccessButtonContent}>
                         <IconButton
@@ -104,7 +98,6 @@ export default function HomeScreen({
                     </View>
                 </Pressable>
 
-                {/*Logout (CURRENTLY BLANK)*/}
                 <Pressable style={styles.quickAccessButtonContainer} onPress={() => {}}>
                     <View style={styles.quickAccessButtonContent}>
                         <IconButton
