@@ -20,6 +20,7 @@ const CalendarScreen: React.FC = () => {
 
   const today = dayjs();
 
+  //TODO: allow admin to set this via desktop
   const MaxBookedDays = 2;
 
   const [bookedDays, setBookedDays] = useState<string[]>([]);
@@ -30,6 +31,7 @@ const CalendarScreen: React.FC = () => {
 
   const fetchLeave = async () => {
     try {
+      // Fetches default IP for emulator TODO: Change this to use AppSettings
       const response = await fetch('http://10.0.2.2:8080/api/leave/calendar');
       const data = await response.json();
 

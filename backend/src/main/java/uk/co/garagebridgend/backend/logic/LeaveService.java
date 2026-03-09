@@ -26,12 +26,16 @@ public class LeaveService {
     private final LeaveRepository leaveRepository;
 
     /**
-     * Retrieves all leave entries for calendar display.
+     * Retrieves all approved leave entries for calendar display.
      *
      * @return a list of {@link LeaveCalendarDTO} objects containing leave dates
      */
     public List<LeaveCalendarDTO> getAllLeaveDates() {
-        List<LeaveTable> leaveList = leaveRepository.findAll();
+        // Only fetch approved leaves
+        List<LeaveTable> leaveList = leaveRepository.findAll()
+                .stream()
+                .filter(LeaveTable::isApproved)
+                .toList();
 
         return leaveList.stream()
                 .map(leave -> new LeaveCalendarDTO(
@@ -42,7 +46,7 @@ public class LeaveService {
     }
 
     /**
-     * Retrieves all leave entries for a specific date.
+     * Retrieves all approved leave entries for a specific date.
      *
      * @param date the date to check for leave entries
      * @return a list of {@link LeaveDayDTO} objects representing employees on leave
@@ -56,7 +60,7 @@ public class LeaveService {
                 .map(l -> new LeaveDayDTO(
                         l.getAccount().getFirstName() + " "
                                 + l.getAccount().getLastName(),
-                        "Technician",
+                        "Technician", // Replace with real role if available in future
                         l.getEndDate()
                 ))
                 .collect(Collectors.toList());
