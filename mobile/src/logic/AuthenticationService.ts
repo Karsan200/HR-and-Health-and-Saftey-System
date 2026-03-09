@@ -1,7 +1,13 @@
+import * as Keychain from 'react-native-keychain';
+
 import { AuthRequestModel } from '../model/request/AuthRequestModel.ts';
 import { AppSettings } from '../AppSettings.ts';
 import { HttpException } from '../exception/HttpException.ts';
 
+/**
+ * Service class responsible for handling user authentication operations such as login.
+ * It provides methods to perform API requests related to authentication and manages tokens.
+ */
 class AuthenticationService {
     /**
      * Helper method to perform fetch requests, handling authorisation headers for JWT tokens
@@ -11,6 +17,42 @@ class AuthenticationService {
      */
     static async fetch(url: string, options: RequestInit): Promise<Response> {
         return await fetch(AppSettings.API_URL+ url, options);
+    }
+
+    /**
+     * Stores the access token and refresh token securely in the keychain.
+     * @param accessToken - The JWT access token to be stored
+     * @param refreshToken - The refresh token to be stored
+     * @returns Promise that resolves when the tokens are successfully stored
+     * @throws HttpException with appropriate status code and message if storing credentials in keychain fails
+     */
+    static async putCredentials(accessToken: string, refreshToken: string): Promise<void> {
+        try {
+            await Keychain.setGenericPassword('authTokens', JSON.stringify({ accessToken, refreshToken }));
+        } catch (error) {
+            console.error('Error storing credentials in keychain:', error);
+            throw new HttpException(500, 'Failed to store authentication tokens securely.');
+        }
+    }
+
+    /**
+     * Retrieves the access token and refresh token from the keychain.
+     * @return Promise that resolves to an object containing the access token and refresh token if they exist, otherwise null. Throws an error if retrieval fails.
+     * @throws HttpException with appropriate status code and message if retrieval from keychain fails
+     */
+    static async getCredentials(): Promise<{ accessToken: string; refreshToken: string } | null> {
+        try {
+            const credentials = await Keychain.getGenericPassword();
+            if (credentials) {
+                const { accessToken, refreshToken } = JSON.parse(credentials.password);
+                return { accessToken, refreshToken };
+            }
+            return null;
+        }
+        catch (error) {
+            console.error('Error retrieving credentials from keychain:', error);
+            throw new HttpException(500, 'Failed to retrieve authentication tokens securely.');
+        }
     }
 
     /**
@@ -72,7 +114,8 @@ class AuthenticationService {
         }
         const refreshToken: string = refreshTokenMatch[1];
 
-        //TODO: Store the tokens in react native keychain
+        // Store the access token and refresh token securely in the keychain
+        await this.putCredentials(accessToken, refreshToken);
     }
 }
 
