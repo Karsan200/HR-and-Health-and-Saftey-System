@@ -140,6 +140,64 @@ describe('DateDetailsScreen', () => {
     });
   });
 
+  it('does not show TODAY badge when selected date is not today', async () => {
+    const notToday = dayjs(today).subtract(1, 'day').format('YYYY-MM-DD');
+    fetchMock.mockResolvedValue({ ok: true, text: async () => '[]' });
+
+    const { queryByText } = render(<DateDetailsScreen date={notToday} />);
+
+    await waitFor(() => {
+      expect(queryByText('TODAY')).toBeNull();
+    });
+  });
+
+  it('renders multiple activities for a single day', async () => {
+    const leaveData = [
+      { name: 'Alice', role: 'Designer', endDate: '2026-03-12' },
+      { name: 'Bob', role: 'Developer', endDate: '2026-03-13' },
+    ];
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      text: async () => JSON.stringify(leaveData),
+    });
+
+    const { getByText } = render(<DateDetailsScreen date={today} />);
+
+    await waitFor(() => {
+      expect(getByText('Alice • Designer')).toBeTruthy();
+      expect(getByText('Bob • Developer')).toBeTruthy();
+      expect(getByText('On leave til 12/03/2026')).toBeTruthy();
+      expect(getByText('On leave til 13/03/2026')).toBeTruthy();
+    });
+  });
+
+  it('handles empty response text', async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      text: async () => '',
+    });
+
+    const { getByText } = render(<DateDetailsScreen date={today} />);
+
+    await waitFor(() => {
+      expect(getByText('No leave for this date')).toBeTruthy();
+    });
+  });
+
+  it('uses today when date prop is null', async () => {
+    // fetch will return empty activities
+    fetchMock.mockResolvedValue({ ok: true, text: async () => '[]' });
+
+    const { getByText } = render(<DateDetailsScreen date={null} />);
+
+    const todayLabel = dayjs().format('D MMMM, YYYY');
+    await waitFor(() => {
+      // Check the header shows today
+      expect(getByText(todayLabel)).toBeTruthy();
+      expect(getByText('TODAY')).toBeTruthy();
+    });
+  });
+
   it('shows TODAY badge if selected date is today', async () => {
     fetchMock.mockResolvedValue({ ok: true, text: async () => '[]' });
 
