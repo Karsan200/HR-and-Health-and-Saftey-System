@@ -45,7 +45,7 @@ const DateDetailsScreen: React.FC = () => {
   const fetchLeaveForDate = async (date: string) => {
     try {
       const response = await fetch(
-        `http://10.0.2.2:8080/api/leave/day/${date}`, // correct endpoint
+        `http://10.0.2.2:8080/api/leave/day/${date}`,
       );
 
       if (!response.ok) {
@@ -64,7 +64,7 @@ const DateDetailsScreen: React.FC = () => {
       const data = JSON.parse(text);
 
       const mapped = data.map((leave: any) => ({
-        name: leave.name, // matches LeaveDayDTO
+        name: leave.name,
         role: leave.role,
         until: dayjs(leave.endDate).format('DD/MM/YYYY'),
       }));
@@ -75,10 +75,17 @@ const DateDetailsScreen: React.FC = () => {
     }
   };
 
-  // Fetch leave whenever selected date changes
   useEffect(() => {
     fetchLeaveForDate(selectedDate.format('YYYY-MM-DD'));
   }, [selectedDate]);
+
+  const goToPreviousWeek = () => {
+    setSelectedDate(prev => prev.subtract(7, 'day'));
+  };
+
+  const goToNextWeek = () => {
+    setSelectedDate(prev => prev.add(7, 'day'));
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -92,7 +99,7 @@ const DateDetailsScreen: React.FC = () => {
           {isToday && <Text style={styles.todayText}>TODAY</Text>}
         </View>
 
-        {/* Week Day Selector */}
+        {/* Week Days Row */}
         <View style={styles.weekRow}>
           {weekDays.map(day => {
             const selected = day.isSame(selectedDate, 'day');
@@ -120,6 +127,20 @@ const DateDetailsScreen: React.FC = () => {
               </TouchableOpacity>
             );
           })}
+        </View>
+
+        {/* Week Navigation Buttons */}
+        <View style={styles.weekNavButtons}>
+          <TouchableOpacity
+            style={styles.weekButton}
+            onPress={goToPreviousWeek}
+          >
+            <Text style={styles.weekButtonText}>‹</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.weekButton} onPress={goToNextWeek}>
+            <Text style={styles.weekButtonText}>›</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Activity Cards */}
@@ -186,7 +207,29 @@ const styles = StyleSheet.create({
   weekRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 20,
+  },
+
+  weekNavButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+    gap: 20,
+  },
+
+  weekButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 2,
+    backgroundColor: Colours.white,
+    borderRadius: BorderRadius.largeButtonsAndOutlines,
+    shadowColor: Colours.black,
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+
+  weekButtonText: {
+    fontSize: 20,
+    color: Colours.black,
   },
 
   dayCard: {
