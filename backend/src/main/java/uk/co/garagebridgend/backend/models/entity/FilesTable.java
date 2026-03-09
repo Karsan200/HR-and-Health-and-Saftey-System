@@ -54,7 +54,7 @@ public class FilesTable {
     private AccountTable createdBy;
 
     /** Filename of the uploaded file. */
-    @Column(name = "name", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "name", nullable = false)
     private String name;
 
     /** Extemsion of the uploaded file. */

@@ -47,7 +47,7 @@ public class SessionTable {
     private AccountTable account;
 
     /** Refresh token associated with the session (sensitive). */
-    @Column(name = "refresh_token", length = REFRESH_TOKEN_LENGTH, nullable = false)
+    @Column(columnDefinition = "TEXT", name = "refresh_token", length = REFRESH_TOKEN_LENGTH, nullable = false)
     private String refreshToken;
 
     /** True when two-factor authentication has been completed for

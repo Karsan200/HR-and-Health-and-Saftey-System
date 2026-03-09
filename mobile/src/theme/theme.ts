@@ -15,6 +15,7 @@ export const FontSize = {
   l24: 24,
   xl32: 32,
   xxl36: 36,
+
 };
 
 //Border radius values for different sized components in the app
@@ -23,7 +24,7 @@ export const BorderRadius = {
   smallTextBackground: 6,
   mediumNotification: 8,
   largeButtonsAndOutlines: 12,
-};
+}
 
 // Font family names for the Poppins font in different weights, used throughout the app
 export const Fonts = {
@@ -32,7 +33,7 @@ export const Fonts = {
   semiBold: 'Poppins-SemiBold',
   bold: 'Poppins-Bold',
   extraBold: 'Poppins-ExtraBold',
-};
+}
 
 // Text styles that combine font family and weight to ensure that the weight sticks to the font
 export const TextStyles = {
@@ -55,5 +56,5 @@ export const TextStyles = {
   extraBold: {
     fontFamily: Fonts.extraBold,
     fontWeight: '800' as const,
-  },
-};
+  }
+}
