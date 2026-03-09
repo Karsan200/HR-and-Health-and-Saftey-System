@@ -4,6 +4,8 @@ import { Platform } from 'react-native';
 import HsOverview from '../src/screens/HsOverview';
 import { fireEvent } from '@testing-library/react-native';
 import SummaryCard from '../src/components/summary/SummaryCard';
+import AlertBox from '../src/components/AlertBox';
+import { Colours } from '../src/theme/colours';
 
 // TypeScript-safe global fetch
 declare const global: any;
@@ -155,6 +157,10 @@ describe('HsOverview Screen', () => {
         });
     });
 
+    /**
+     * Summary Card Tests.
+     */
+
     describe('SummaryCard component', () => {
         it('renders label and value', () => {
             const { getByText } = render(<SummaryCard label="Pending Docs" value={5} />);
@@ -186,6 +192,58 @@ describe('HsOverview Screen', () => {
             const { getByText } = render(<SummaryCard label="Clickable" value={10} onPress={onPressMock} />);
             fireEvent.press(getByText('Clickable'));
             expect(onPressMock).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    /**
+     * Alert Box Tests.
+     */
+
+    describe('AlertBox Component', () => {
+        it('renders with default props', () => {
+            const {getByText} = render(<AlertBox/>);
+
+            // Check default label
+            expect(getByText('Document')).toBeTruthy();
+
+            // Check default body
+            expect(getByText('Fire and Safety Policy v2.0 requires a signature')).toBeTruthy();
+        });
+
+        it('renders custom label, body, and colours', () => {
+            const customProps = {
+                label: 'Report',
+                body: 'Hazard #42 requires attention',
+                circleColor: Colours.amberPrimary,
+                labelColor: Colours.amberTextDark,
+                labelBackground: Colours.amberBackgroundLight,
+            };
+
+            const {getByText} = render(<AlertBox {...customProps} />);
+
+            // Check label text
+            expect(getByText(customProps.label)).toBeTruthy();
+
+            // Check body text
+            expect(getByText(customProps.body)).toBeTruthy();
+        });
+
+        it('applies correct label color', () => {
+            const props = {
+                labelColor: Colours.greenTextDark,
+                label: 'SOP',
+            };
+
+            const {getByText} = render(<AlertBox {...props} />);
+
+            // Test for label color
+            const label = getByText('SOP');
+            const stylesArray = Array.isArray(label.props.style) ? label.props.style : [label.props.style];
+
+            // Check that one of the styles has the correct color
+            expect(stylesArray).toEqual(
+                expect.arrayContaining([expect.objectContaining({color: Colours.greenTextDark})])
+            );
         });
     });
 });
