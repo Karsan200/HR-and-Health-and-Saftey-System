@@ -8,3 +8,4 @@ import uk.co.garagebridgend.backend.models.entity.FilesTable;
 public interface FilesRepository extends JpaRepository<FilesTable, Long> {
 
 }
+

@@ -4,22 +4,39 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import uk.co.garagebridgend.backend.models.entity.*;
-import uk.co.garagebridgend.backend.repository.*;
+import uk.co.garagebridgend.backend.models.entity.AccountTable;
+import uk.co.garagebridgend.backend.models.entity.DocumentTable;
+import uk.co.garagebridgend.backend.models.entity.FilesTable;
+import uk.co.garagebridgend.backend.models.entity.HazardTable;
+import uk.co.garagebridgend.backend.models.entity.SignatureTable;
+import uk.co.garagebridgend.backend.repository.AccountRepository;
+import uk.co.garagebridgend.backend.repository.DocumentRepository;
+import uk.co.garagebridgend.backend.repository.FilesRepository;
+import uk.co.garagebridgend.backend.repository.HazardRepository;
+import uk.co.garagebridgend.backend.repository.SignatureRepository;
 
 @Configuration
 @RequiredArgsConstructor
+@org.springframework.context.annotation.Profile("!test")
 public class DataLoader {
 
+    /**
+     * Loads dummy data into the database on application startup if no accounts exist.
+     *
+     * @param accountRepository   repository for AccountTable
+     * @param hazardRepository    repository for HazardTable
+     * @param documentRepository  repository for DocumentTable
+     * @param signatureRepository repository for SignatureTable
+     * @param filesRepository     repository for FilesTable
+     * @return a CommandLineRunner to populate data
+     */
     @Bean
-    CommandLineRunner loadData(
-            AccountRepository accountRepository,
-            HazardRepository hazardRepository,
-            DocumentRepository documentRepository,
-            SignatureRepository signatureRepository,
-            FilesRepository filesRepository
-    ) {
+    public CommandLineRunner loadData(
+            final AccountRepository accountRepository,
+            final HazardRepository hazardRepository,
+            final DocumentRepository documentRepository,
+            final SignatureRepository signatureRepository,
+            final FilesRepository filesRepository) {
 
         return args -> {
 
@@ -38,7 +55,6 @@ public class DataLoader {
             maggie.setSalt("salt");
             maggie.setAddressOne("Test Street");
             maggie.setPostalCode("CF31");
-
             accountRepository.save(maggie);
 
             // Maggie's file
@@ -47,7 +63,6 @@ public class DataLoader {
             maggieFile.setCreatedBy(maggie);
             maggieFile.setName("safety_policy");
             maggieFile.setExtension("pdf");
-
             filesRepository.save(maggieFile);
 
             // Maggie's documents
@@ -111,7 +126,6 @@ public class DataLoader {
             john.setSalt("salt");
             john.setAddressOne("Example Street");
             john.setPostalCode("CF32");
-
             accountRepository.save(john);
 
             // John's file

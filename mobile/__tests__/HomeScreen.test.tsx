@@ -2,6 +2,12 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import HomeScreen from '../src/screens/HomeScreen';
 
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: jest.fn(() => ({
+    navigate: jest.fn(),
+  })),
+}));
+
 describe('HomeScreen', () => {
   it('renders all main headings', () => {
     const { getByText } = render(<HomeScreen />);

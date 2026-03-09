@@ -5,8 +5,17 @@ import org.springframework.stereotype.Repository;
 import uk.co.garagebridgend.backend.models.entity.SignatureTable;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 
+/**
+ * Repository for managing SignatureTable entities.
+ */
 @Repository
 public interface SignatureRepository extends JpaRepository<SignatureTable, Long> {
-    // Count signatures for a specific user
+
+    /**
+     * Counts the number of signatures associated with the given account.
+     *
+     * @param account the account to count signatures for
+     * @return the number of signatures for the account
+     */
     int countByAccount(AccountTable account);
 }
