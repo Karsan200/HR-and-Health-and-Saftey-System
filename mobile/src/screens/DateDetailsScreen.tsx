@@ -295,14 +295,14 @@ const styles = StyleSheet.create({
   },
 
   nameTag: {
-    backgroundColor: '#F6CDD0',
+    backgroundColor: Colours.redBackgroundLight,
     paddingHorizontal: 6,
     paddingVertical: 3,
     borderRadius: 6,
   },
 
   nameText: {
-    color: '#AE010B',
+    color: Colours.redTextDark,
   },
 
   activitySubtext: {
