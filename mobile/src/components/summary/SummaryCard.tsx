@@ -17,14 +17,14 @@ interface SummaryCardProps {
 }
 
 const SummaryCard: React.FC<SummaryCardProps> = ({
-  label,
-  value,
-  icon,
-  colour = 'neutral',
-  iconColor,
-  iconBackgroundColor,
-  onPress,
-}) => {
+                                                   label,
+                                                   value,
+                                                   icon,
+                                                   colour = 'neutral',
+                                                   iconColor,
+                                                   iconBackgroundColor,
+                                                   onPress,
+                                                 }) => {
   const Container = onPress ? Pressable : View;
 
   // Colour mapping

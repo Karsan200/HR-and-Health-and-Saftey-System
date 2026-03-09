@@ -24,7 +24,7 @@ jest.mock('react-native-paper', () => {
       Icon: (props: any) => mockReact.createElement(View, props),
     },
     IconButton: (props: any) =>
-      mockReact.createElement(Text, { onPress: props.onPress }, props.icon || 'icon-button'),
+        mockReact.createElement(Text, { onPress: props.onPress }, props.icon || 'icon-button'),
   };
 });
 

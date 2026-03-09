@@ -8,9 +8,10 @@
 import React, {useState} from 'react';
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import {
-  SafeAreaProvider,
+    SafeAreaProvider,
 } from 'react-native-safe-area-context';
 import HomeScreen from "./src/screens/HomeScreen.tsx";
+import HsOverview from './src/screens/HsOverview';
 import BottomNavBar from "./src/components/BottomNavBar.tsx";
 import {AppSection, ScreenKey} from "./src/logic/NavigationConfiguration.ts";
 import TopNavBar from './src/components/TopNavBar.tsx';
@@ -19,7 +20,7 @@ import DateDetailsScreen from './src/screens/DateDetailsScreen';
 
 
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+    const isDarkMode = useColorScheme() === 'dark';
 
   return (
     <SafeAreaProvider>
@@ -102,60 +103,50 @@ function AppContent() {
           );
 
         case 'payslips':
-          return (
-            <>
-              <TopNavBar title="Payslips" />
-              <View style={styles.content} />
-            </>
-          );
+          return <>
+            <TopNavBar title="Payslips" />
+            <View style={styles.content} />
+          </>;
 
         case 'handbook':
-          return (
-            <>
-              <TopNavBar title="Handbook" />
-              <View style={styles.content} />
-            </>
-          );
+          return <>
+            <TopNavBar title="Handbook" />
+            <View style={styles.content} />
+          </>;
 
         case 'clockIn':
-          return (
-            <>
-              <TopNavBar title="Clock-In" />
-              <View style={styles.content} />
-            </>
-          );
+          return <>
+            <TopNavBar title="Clock-In" />
+            <View style={styles.content} />
+          </>;
 
-        case 'overview':
-          return (
-            <>
-              <TopNavBar title="Overview" />
-              <View style={styles.content} />
-            </>
-          );
+            case 'overview':
+                return (
+                    <>
+                        <TopNavBar title="Overview" />
+                        <View style={styles.content}>
+                            <HsOverview />
+                        </View>
+                    </>
+                );
 
         case 'documents':
-          return (
-            <>
-              <TopNavBar title="Documents" />
-              <View style={styles.content} />
-            </>
-          );
+          return <>
+            <TopNavBar title="Documents" />
+            <View style={styles.content} />
+          </>;
 
         case 'risk':
-          return (
-            <>
-              <TopNavBar title="Risk" />
-              <View style={styles.content} />
-            </>
-          );
+          return <>
+            <TopNavBar title="Risk" />
+            <View style={styles.content} />
+          </>;
 
         case 'personal':
-          return (
-            <>
-              <TopNavBar title="Personal" />
-              <View style={styles.content} />
-            </>
-          );
+          return <>
+            <TopNavBar title="Personal" />
+            <View style={styles.content} />
+          </>;
 
         /*
         How to add the top nav bar to a screen:
