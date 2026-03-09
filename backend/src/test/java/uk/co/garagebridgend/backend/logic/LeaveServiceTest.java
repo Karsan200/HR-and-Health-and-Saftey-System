@@ -39,6 +39,7 @@ public class LeaveServiceTest {
         LeaveTable leave = new LeaveTable();
         leave.setStartDate(LocalDateTime.now());
         leave.setEndDate(LocalDateTime.now().plusDays(2));
+        leave.setApproved(true);
 
         when(leaveRepository.findAll()).thenReturn(List.of(leave));
 
@@ -70,6 +71,7 @@ public class LeaveServiceTest {
         leave.setAccount(account);
         leave.setStartDate(LocalDateTime.now());
         leave.setEndDate(LocalDateTime.now().plusDays(1));
+        leave.setApproved(true);
 
         when(leaveRepository.findLeaveForDate(LocalDate.parse("2026-03-01").atStartOfDay()))
                 .thenReturn(List.of(leave));
