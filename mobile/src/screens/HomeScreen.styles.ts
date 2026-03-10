@@ -1,8 +1,8 @@
 import { StyleSheet } from 'react-native';
-import { Colours } from '../theme/colours';
 import { Spacing, FontSize, BorderRadius, TextStyles } from '../theme/theme';
 
-export const homeStyles = StyleSheet.create({
+export const homeStyles = (theme: any) =>
+    StyleSheet.create({
   /**
    * Root container for the screen scroll content.
    * Applies horizontal padding and top offset.
@@ -40,7 +40,7 @@ export const homeStyles = StyleSheet.create({
     ...TextStyles.medium,
     textAlign: 'center',
     marginBottom: 40,
-    color: Colours.greyPrimaryMainText,
+    color: theme.greyPrimaryMainText,
   },
 
   /**
@@ -50,7 +50,7 @@ export const homeStyles = StyleSheet.create({
     fontSize: FontSize.l24,
     ...TextStyles.semiBold,
     textAlign: 'center',
-    color: Colours.greyIconLight,
+    color: theme.greyIconLight,
     marginBottom: 10,
   },
 
@@ -59,11 +59,11 @@ export const homeStyles = StyleSheet.create({
    */
   sectionButton: {
     borderWidth: 0.6,
-    borderColor: Colours.redPrimary,
+    borderColor: theme.redPrimary,
     borderRadius: BorderRadius.largeButtonsAndOutlines,
     marginBottom: 20,
     alignItems: 'center',
-    backgroundColor: Colours.redBackgroundLight,
+    backgroundColor: theme.redBackgroundLight,
   },
 
   /**
@@ -83,7 +83,7 @@ export const homeStyles = StyleSheet.create({
   sectionButtonText: {
     fontSize: FontSize.l24,
     ...TextStyles.semiBold,
-    color: Colours.black,
+    color: theme.black,
     textAlign: 'left',
     marginLeft: 12,
   },
@@ -110,7 +110,7 @@ export const homeStyles = StyleSheet.create({
     fontSize: FontSize.m20,
     ...TextStyles.semiBold,
     textAlign: 'left',
-    color: Colours.greyIconLight,
+    color: theme.greyIconLight,
     marginBottom: 10,
   },
 
@@ -142,7 +142,7 @@ export const homeStyles = StyleSheet.create({
     fontSize: FontSize.s16,
     ...TextStyles.medium,
     textAlign: 'left',
-    color: Colours.black,
+    color: theme.black,
     marginLeft: 12,
   },
 });

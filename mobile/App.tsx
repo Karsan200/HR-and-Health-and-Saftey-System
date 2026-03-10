@@ -3,6 +3,7 @@ import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import {
     SafeAreaProvider,
 } from 'react-native-safe-area-context';
+import { ThemeProvider } from "./src/theme/colourController.tsx";
 import HomeScreen from "./src/screens/HomeScreen.tsx";
 import HsOverview from './src/screens/HsOverview.tsx';
 import BottomNavBar from "./src/components/BottomNavBar.tsx";
@@ -17,10 +18,12 @@ function App() {
     const isDarkMode = useColorScheme() === 'dark';
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <ThemeProvider>
+      <SafeAreaProvider>
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+        <AppContent />
+      </SafeAreaProvider>
+    </ThemeProvider>
   );
 }
 

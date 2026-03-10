@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import {Pressable, ScrollView, Text, View} from 'react-native';
 import ColorPicker from 'react-native-wheel-color-picker';
-import { settingsStyles as styles } from './SettingsScreen.styles';
+import { useContext } from "react";
+import { ThemeContext } from "../../theme/colourController.tsx";
+import { settingsStyles } from './SettingsScreen.styles';
+import { DefaultColours } from '../../theme/colours.ts';
 
 type HSL = {
   h: number;
@@ -112,8 +115,17 @@ function generateColorSet(primaryHex: string): ColorSet {
 
 export default function SettingsScreen() {
 
+  console.log("ThemeContext:", useContext(ThemeContext));
+  console.warn("ThemeContext:", useContext(ThemeContext));
+
   const [pickerVisible, setPickerVisible] = useState(false);
   const [editingColor, setEditingColor] = useState<string | null>(null);
+  const context = useContext(ThemeContext);
+  const theme = context?.theme ?? DefaultColours;
+  const updateTheme = context?.updateTheme ?? (() => {});
+  const styles = settingsStyles(theme);
+
+  console.log(theme);
 
   const [pickColors, setPickColors] = useState({
     background: "#EEEEF3",
@@ -134,14 +146,37 @@ export default function SettingsScreen() {
 
 
   function updateColor(hex: string) {
+
     if (!editingColor) return;
 
     setPickColors({
       ...pickColors,
       [editingColor]: hex
     });
+
     const newColors = generateColorSet(hex);
     setColors(newColors);
+
+    if (editingColor === "accent") {
+      updateTheme({
+        redPrimary: newColors.primary,
+        redTextDark: newColors.dark,
+        redBackgroundLight: newColors.light
+      });
+    }
+
+    if (editingColor === "text") {
+      updateTheme({
+        black: hex,
+        greyPrimaryMainText: hex
+      });
+    }
+
+    if (editingColor === "background") {
+      updateTheme({
+        greyBackground: hex
+      });
+    }
   }
 
   return (

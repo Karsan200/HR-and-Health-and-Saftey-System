@@ -1,15 +1,15 @@
 import { StyleSheet } from 'react-native';
-import { Colours } from '../theme/colours.ts';
 import { FontSize, Spacing, TextStyles } from '../theme/theme.ts';
 
-export const topNavStyles = StyleSheet.create({
+export const topNavStyles = (theme: any) =>
+  StyleSheet.create({
   container: {
     height: 75,
     paddingHorizontal: Spacing.mediumPadding,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colours.white,
+    backgroundColor: theme.white,
     borderBottomWidth: 1,
     borderBottomColor: '#D9D9D9',
   },
@@ -38,7 +38,7 @@ export const topNavStyles = StyleSheet.create({
   title: {
     fontSize: FontSize.l24,
     ...TextStyles.medium,
-    color: Colours.black,
+    color: theme.black,
     includeFontPadding: false,
     textAlignVertical: 'center',
   },
@@ -54,14 +54,14 @@ export const topNavStyles = StyleSheet.create({
     minWidth: 15,
     height: 15,
     borderRadius: 7.5,
-    backgroundColor: Colours.redPrimary,
+    backgroundColor: theme.redPrimary,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 2,
   },
   notificationBadgeText: {
     fontSize: 9,
-    color: Colours.white,
+    color: theme.white,
     ...TextStyles.medium,
     lineHeight: 10,
     includeFontPadding: false,

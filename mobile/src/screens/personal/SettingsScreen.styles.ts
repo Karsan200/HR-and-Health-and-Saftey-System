@@ -1,8 +1,8 @@
 import { StyleSheet } from 'react-native';
-import { Colours } from '../../theme/colours';
 import { Spacing, FontSize, TextStyles } from '../../theme/theme';
 
-export const settingsStyles = StyleSheet.create({
+export const settingsStyles = (theme: any) =>
+  StyleSheet.create({
   /**
    * Root container for the screen scroll content.
    * Applies horizontal padding and top offset.
@@ -20,8 +20,8 @@ export const settingsStyles = StyleSheet.create({
     padding: Spacing.mediumPadding,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: Colours.greyIconLight,
-    backgroundColor: Colours.greyBackground,
+    borderColor: theme.greyIconLight,
+    backgroundColor: theme.greyBackground,
   },
 
   /**
@@ -31,7 +31,7 @@ export const settingsStyles = StyleSheet.create({
     fontSize: FontSize.l24,
     ...TextStyles.semiBold,
     textAlign: 'center',
-    color: Colours.greyIconLight,
+    color: theme.greyIconLight,
     marginBottom: 10,
   },
 
@@ -50,7 +50,7 @@ export const settingsStyles = StyleSheet.create({
     fontSize: FontSize.m20,
     ...TextStyles.semiBold,
     textAlign: 'left',
-    color: Colours.greyIconLight,
+    color: theme.greyIconLight,
     marginBottom: 10,
   },
 
@@ -72,8 +72,8 @@ export const settingsStyles = StyleSheet.create({
     padding: 16,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: Colours.greyIconLight,
-    backgroundColor: Colours.white,
+    borderColor: theme.greyIconLight,
+    backgroundColor: theme.white,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
@@ -95,7 +95,7 @@ export const settingsStyles = StyleSheet.create({
   label: {
     fontSize: FontSize.m20,
     ...TextStyles.semiBold,
-    color: Colours.greyIconLight,
+    color: theme.greyIconLight,
     marginTop: 10,
     marginBottom: 6,
   },
@@ -109,8 +109,8 @@ export const settingsStyles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colours.greyIconLight,
-    backgroundColor: Colours.white,
+    borderColor: theme.greyIconLight,
+    backgroundColor: theme.white,
     marginBottom: 12,
   },
 
@@ -123,6 +123,6 @@ export const settingsStyles = StyleSheet.create({
     borderRadius: 4,
     marginRight: 10,
     borderWidth: 1,
-    borderColor: Colours.greyIconLight,
+    borderColor: theme.greyIconLight,
   },
 });
