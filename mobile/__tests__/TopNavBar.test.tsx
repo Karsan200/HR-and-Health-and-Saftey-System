@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import TopNavBar from '../src/components/TopNavBar.tsx';
 import { topNavStyles } from '../src/components/TopNavBar.styles';
-import { Colours } from '../src/theme/colours';
+import { colours } from '../src/theme/colours';
 import { fireEvent, render } from '@testing-library/react-native';
 
 // Mocking react-native-paper components used in the TopNavBar
@@ -28,13 +28,13 @@ describe('TopNavBar.styles', () => {
     expect(container.flexDirection).toBe('row');
     expect(container.justifyContent).toBe('space-between');
     expect(container.alignItems).toBe('center');
-    expect(container.backgroundColor).toBe(Colours.white);
-    expect(title.color).toBe(Colours.black);
+    expect(container.backgroundColor).toBe(colours.white);
+    expect(title.color).toBe(colours.black);
     expect(title.includeFontPadding).toBe(false);
     expect(title.textAlignVertical).toBe('center');
     expect(rightSection.justifyContent).toBe('flex-end');
-    expect(notificationBadge.backgroundColor).toBe(Colours.redPrimary);
-    expect(notificationBadgeText.color).toBe(Colours.white);
+    expect(notificationBadge.backgroundColor).toBe(colours.redPrimary);
+    expect(notificationBadgeText.color).toBe(colours.white);
     expect(notificationBadgeText.textAlign).toBe('center');
   });
 });

@@ -7,13 +7,13 @@
 
 import React, {useState} from 'react';
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import HomeScreen from './src/screens/HomeScreen.tsx';
+import HomeScreen from './src/screens/HomeScreen';
 import { PaperProvider } from 'react-native-paper';
 import { paperTheme } from './src/theme/paperTheme.ts';
 import HsOverview from './src/screens/HsOverview';
-import BottomNavBar from "./src/components/BottomNavBar.tsx";
+import BottomNavBar from "./src/components/BottomNavBar";
 import {AppSection, ScreenKey} from "./src/logic/NavigationConfiguration.ts";
-import TopNavBar from './src/components/TopNavBar.tsx';
+import TopNavBar from './src/components/TopNavBar';
 import CalendarScreen from './src/screens/CalendarScreen';
 import DateDetailsScreen from './src/screens/DateDetailsScreen';
 

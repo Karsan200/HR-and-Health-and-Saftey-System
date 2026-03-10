@@ -13,12 +13,17 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
+jest.mock('../src/theme/paperTheme', () => ({
+  paperTheme: {},
+}));
+
 // Mocking react-native-paper components used in the app
 jest.mock('react-native-paper', () => {
   const mockReact = require('react');
   const { Text, View } = require('react-native');
 
   return {
+    PaperProvider: ({ children }: { children: React.ReactNode }) => children,
     Icon: (props: any) => mockReact.createElement(Text, props, props.source || 'icon'),
     Avatar: {
       Icon: (props: any) => mockReact.createElement(View, props),

@@ -1,15 +1,15 @@
 import { StyleSheet } from 'react-native';
-import {Colours} from "../theme/colours.ts";
-import {BorderRadius, FontSize, Spacing, TextStyles} from "../theme/theme.ts";
+import { colours } from "../theme/colours.ts";
+import { theme } from "../theme/theme.ts";
 
 export const dateDetailsStyles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colours.greyBackground,
+        backgroundColor: colours.greyBackground,
     },
 
     content: {
-        paddingHorizontal: Spacing.largePadding,
+        paddingHorizontal: theme.spacing.largePadding,
         paddingTop: 40,
         paddingBottom: 120,
         gap: 20,
@@ -20,14 +20,14 @@ export const dateDetailsStyles = StyleSheet.create({
     },
 
     dateText: {
-        fontFamily: TextStyles.regular.fontFamily,
-        fontWeight: TextStyles.regular.fontWeight,
+        fontFamily: theme.textStyles.regular.fontFamily,
+        fontWeight: theme.textStyles.regular.fontWeight,
         fontSize: 24,
-        color: Colours.black,
+        color: colours.black,
     },
 
     todayText: {
-        color: Colours.redPrimary,
+        color: colours.redPrimary,
     },
 
     weekRow: {
@@ -45,9 +45,9 @@ export const dateDetailsStyles = StyleSheet.create({
     weekButton: {
         paddingHorizontal: 12,
         paddingVertical: 2,
-        backgroundColor: Colours.white,
-        borderRadius: BorderRadius.largeButtonsAndOutlines,
-        shadowColor: Colours.black,
+        backgroundColor: colours.white,
+        borderRadius: theme.borderRadius.largeButtonsAndOutlines,
+        shadowColor: colours.black,
         shadowOpacity: 0.1,
         shadowRadius: 3,
         elevation: 2,
@@ -55,49 +55,49 @@ export const dateDetailsStyles = StyleSheet.create({
 
     weekButtonText: {
         fontSize: 20,
-        color: Colours.black,
+        color: colours.black,
     },
 
     dayCard: {
         width: 45,
         height: 70,
-        borderRadius: BorderRadius.largeButtonsAndOutlines,
-        backgroundColor: Colours.white,
+        borderRadius: theme.borderRadius.largeButtonsAndOutlines,
+        backgroundColor: colours.white,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: Colours.black,
+        shadowColor: colours.black,
         shadowOpacity: 0.15,
         shadowRadius: 4,
         elevation: 3,
     },
 
     dayCardSelected: {
-        backgroundColor: Colours.redPrimary,
+        backgroundColor: colours.redPrimary,
     },
 
     dayLabel: {
-        fontSize: FontSize.xs14,
-        color: Colours.greyPrimaryMainText,
+        fontSize: theme.fontSize.xs14,
+        color: colours.greyPrimaryMainText,
     },
 
     dayLabelSelected: {
-        color: Colours.white,
+        color: colours.white,
     },
 
     dayNumber: {
         fontSize: 24,
-        color: Colours.black,
+        color: colours.black,
     },
 
     dayNumberSelected: {
-        color: Colours.white,
+        color: colours.white,
     },
 
     activityCard: {
-        backgroundColor: Colours.white,
+        backgroundColor: colours.white,
         borderRadius: 12,
         padding: 12,
-        shadowColor: Colours.black,
+        shadowColor: colours.black,
         shadowOpacity: 0.15,
         shadowRadius: 4,
         elevation: 3,
@@ -116,24 +116,24 @@ export const dateDetailsStyles = StyleSheet.create({
     activityDot: {
         width: 10,
         height: 10,
-        backgroundColor: Colours.redPrimary,
+        backgroundColor: colours.redPrimary,
         borderRadius: 10,
     },
 
     nameTag: {
-        backgroundColor: Colours.redBackgroundLight,
+        backgroundColor: colours.redBackgroundLight,
         paddingHorizontal: 6,
         paddingVertical: 3,
         borderRadius: 6,
     },
 
     nameText: {
-        color: Colours.redTextDark,
+        color: colours.redTextDark,
     },
 
     activitySubtext: {
-        fontSize: FontSize.xs14,
-        color: Colours.black,
+        fontSize: theme.fontSize.xs14,
+        color: colours.black,
         paddingLeft: 20,
     },
 
@@ -145,15 +145,15 @@ export const dateDetailsStyles = StyleSheet.create({
         height: 70,
         borderRadius: 35,
         borderWidth: 4,
-        borderColor: Colours.redPrimary,
+        borderColor: colours.redPrimary,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: Colours.white,
+        backgroundColor: colours.white,
     },
 
     addIcon: {
         fontSize: 36,
-        color: Colours.redPrimary,
+        color: colours.redPrimary,
         marginTop: -2,
     },
 });

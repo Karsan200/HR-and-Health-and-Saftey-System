@@ -38,7 +38,7 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
   const fetchLeaveForDate = async (date: string) => {
     try {
       const response = await AuthenticationService.fetch(
-        `http://10.0.2.2:8080/api/leave/day/${date}`, {}
+        `/api/leave/day/${date}`
       );
 
       if (!response.ok) {
