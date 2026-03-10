@@ -7,9 +7,13 @@ import { Colours } from '../theme/colours'; //getting the colours from the set l
 type HomeScreenProps = {
     onSelectHr: () => void;
     onSelectHealthSafety: () => void;
+    onSelectSettings: () => void;
+    onSelectProfile: () => void;
+    onSelectLogout: () => void;
+    onSelectNotifications: () => void;
 };
 
-export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScreenProps) {
+export default function HomeScreen({ onSelectHr, onSelectHealthSafety, onSelectSettings, onSelectLogout, onSelectNotifications, onSelectProfile }: HomeScreenProps) {
     return (
         <ScrollView contentContainerStyle={styles.container}>
             {/* Profile Icon */}
@@ -59,7 +63,7 @@ export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScr
             <View style={styles.quickAccessContainer}>
                 <Text style={styles.quickAccessTitle}>QUICK ACCESS</Text>
 
-                <Pressable style={styles.quickAccessButtonContainer} onPress={() => {}}>
+                <Pressable style={styles.quickAccessButtonContainer} onPress={onSelectProfile}>
                     <View style={styles.quickAccessButtonContent}>
                         <IconButton
                             icon="account-circle"
@@ -72,7 +76,8 @@ export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScr
                     </View>
                 </Pressable>
 
-                <Pressable style={styles.quickAccessButtonContainer} onPress={() => {}}>
+              {/* Notifications */}
+                <Pressable style={styles.quickAccessButtonContainer} onPress={onSelectNotifications}>
                     <View style={styles.quickAccessButtonContent}>
                         <IconButton
                             icon="bell-outline"
@@ -85,7 +90,8 @@ export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScr
                     </View>
                 </Pressable>
 
-                <Pressable style={styles.quickAccessButtonContainer} onPress={() => {}}>
+              {/* Settings */}
+                <Pressable style={styles.quickAccessButtonContainer} onPress={onSelectSettings}>
                     <View style={styles.quickAccessButtonContent}>
                         <IconButton
                             icon="cog"
@@ -98,7 +104,8 @@ export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScr
                     </View>
                 </Pressable>
 
-                <Pressable style={styles.quickAccessButtonContainer} onPress={() => {}}>
+              {/* Logout */}
+                <Pressable style={styles.quickAccessButtonContainer} onPress={onSelectLogout}>
                     <View style={styles.quickAccessButtonContent}>
                         <IconButton
                             icon="logout"

@@ -1,21 +1,14 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import React, {useState} from 'react';
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import {
     SafeAreaProvider,
 } from 'react-native-safe-area-context';
 import HomeScreen from "./src/screens/HomeScreen.tsx";
-import HsOverview from './src/screens/HsOverview';
+import HsOverview from './src/screens/HsOverview.tsx';
 import BottomNavBar from "./src/components/BottomNavBar.tsx";
 import {AppSection, ScreenKey} from "./src/logic/NavigationConfiguration.ts";
 import TopNavBar from './src/components/TopNavBar.tsx';
-// import SettingsScreen from './src/screens/personal/SettingsScreen.tsx';
+import SettingsScreen from './src/screens/personal/SettingsScreen.tsx';
 
 
 function App() {
@@ -45,14 +38,13 @@ function AppContent() {
         setCurrentScreen('overview');
     };
 
-    // When the home screen is selected, the user is taken back to the HomeScreen
+    // Used for general navigation - pass in a screen (If it's new, add to ScreenKey and add a case handle in renderScreen)
     const handleNavigate = (screen: ScreenKey) => {
         if (screen === 'home') {
             setSection(null);
             setCurrentScreen('home');
             return;
         }
-
         setCurrentScreen(screen);
     };
 
@@ -68,6 +60,10 @@ function AppContent() {
                     <HomeScreen
                         onSelectHr={handleSelectHr}
                         onSelectHealthSafety={handleSelectHealthSafety}
+                        onSelectSettings={() => handleNavigate('settings')}
+                        onSelectLogout={() => handleNavigate('logout')}
+                        onSelectProfile={() => handleNavigate('profile')}
+                        onSelectNotifications={() => handleNavigate('notifications')}
                     />
                 );
 
@@ -118,10 +114,21 @@ function AppContent() {
                 </>;
 
             case 'personal':
-                return <>
+                return<>
                     <TopNavBar title="Personal" />
                     <View style={styles.content} />
                 </>;
+
+            case 'settings':
+              return <>
+                <TopNavBar title="Settings"
+                           showBackButton={true}
+                           onBackPress={() => handleNavigate('home')}
+                />
+                <View style={styles.content}>
+                  <SettingsScreen />
+                </View>
+              </>;
 
             /*
             How to add the top nav bar to a screen:
@@ -134,7 +141,7 @@ function AppContent() {
             <TopNavBar
               title="NameOfTheScreen"
               showBackButton={true}
-              onBackPress={handleBack}
+              onBackPress={handleBack} <-- Replace handle back with () => handleNavigate('#previousPage#')
             />
              */
 
@@ -144,6 +151,10 @@ function AppContent() {
                     <HomeScreen
                         onSelectHr={handleSelectHr}
                         onSelectHealthSafety={handleSelectHealthSafety}
+                        onSelectSettings={() => handleNavigate('settings')}
+                        onSelectLogout={() => handleNavigate('logout')}
+                        onSelectNotifications={() => handleNavigate('notifications')}
+                        onSelectProfile={() => handleNavigate('profile')}
                     />
                 );
         }

@@ -9,7 +9,11 @@ export type ScreenKey =
     | 'overview'
     | 'documents'
     | 'risk'
-    | 'personal';
+    | 'personal'
+    | 'settings'
+    | 'logout'
+    | 'profile'
+    | 'notifications';
 
 export type BottomNavItem = {
     key: ScreenKey;
