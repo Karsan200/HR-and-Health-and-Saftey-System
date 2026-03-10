@@ -1,4 +1,4 @@
-export const Colours = {
+export const DefaultColours = {
     // Basic colours
     black: '#000000', // Used For Text <-- Changed By Text Colour in Theme Settings (Dark)
     white: '#FFFFFF', // Used As Midground <-- Changed By Background Colour in Theme Settings (Primary)
