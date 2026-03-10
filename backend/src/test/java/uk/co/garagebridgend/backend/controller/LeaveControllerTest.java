@@ -10,8 +10,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import uk.co.garagebridgend.backend.logic.LeaveService;
-import uk.co.garagebridgend.backend.models.dto.LeaveCalendarDTO;
-import uk.co.garagebridgend.backend.models.dto.LeaveDayDTO;
+import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
+import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -43,8 +43,8 @@ public class LeaveControllerTest {
     @Test
     void testGetCalendarLeave() throws Exception {
 
-        List<LeaveCalendarDTO> mockData = List.of(
-                new LeaveCalendarDTO(
+        List<LeaveCalendarResponse> mockData = List.of(
+                new LeaveCalendarResponse(
                         LocalDateTime.now(),
                         LocalDateTime.now().plusDays(1)
                 )
@@ -59,8 +59,8 @@ public class LeaveControllerTest {
     @Test
     void testGetLeaveForDayValid() throws Exception {
 
-        List<LeaveDayDTO> mockData = List.of(
-                new LeaveDayDTO(
+        List<LeaveDayResponse> mockData = List.of(
+                new LeaveDayResponse(
                         "John Doe",
                         "Technician",
                         LocalDateTime.now().plusDays(2)

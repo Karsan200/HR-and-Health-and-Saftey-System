@@ -1,4 +1,4 @@
-package uk.co.garagebridgend.backend.models.dto;
+package uk.co.garagebridgend.backend.models.response;
 
 import java.time.LocalDateTime;
 
@@ -12,7 +12,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class LeaveCalendarDTO {
+public class LeaveCalendarResponse {
 
     /**
      * The start date and time of the leave period.

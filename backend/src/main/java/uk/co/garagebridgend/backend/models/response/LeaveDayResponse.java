@@ -1,4 +1,4 @@
-package uk.co.garagebridgend.backend.models.dto;
+package uk.co.garagebridgend.backend.models.response;
 
 import java.time.LocalDateTime;
 
@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class LeaveDayDTO {
+public class LeaveDayResponse {
 
     /**
      * The name of the employee on leave.

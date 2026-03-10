@@ -5,6 +5,11 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import CalendarScreen from '../src/screens/CalendarScreen';
+import AuthenticationService from "../src/logic/AuthenticationService.ts";
+
+jest.mock('../src/logic/AuthenticationService.ts', () => ({
+  fetch: jest.fn(),
+}));
 
 // Mock react-native-calendars
 jest.mock('react-native-calendars', () => {
@@ -44,9 +49,7 @@ describe('CalendarScreen', () => {
   let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    fetchMock = jest.fn();
-    // @ts-ignore
-    global.fetch = fetchMock;
+    fetchMock = AuthenticationService.fetch as jest.Mock;
 
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });

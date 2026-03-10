@@ -63,10 +63,6 @@ function AppContent() {
       setCurrentScreen('dateDetails');
     };
 
-    const handleBack = () => {
-      setCurrentScreen('calendar');
-    };
-
     /*
     Rendering in the main content area based on the current screen.
     Using switch cases to select the screen to load in.
@@ -96,7 +92,7 @@ function AppContent() {
               <TopNavBar
                 title=""
                 showBackButton={true}
-                onBackPress={handleBack}
+                onBackPress={() => handleNavigate('calendar')}
               />
               <DateDetailsScreen date={selectedDate} />
             </>

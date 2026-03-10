@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import uk.co.garagebridgend.backend.models.dto.LeaveCalendarDTO;
-import uk.co.garagebridgend.backend.models.dto.LeaveDayDTO;
+import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
+import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 import uk.co.garagebridgend.backend.models.entity.LeaveTable;
 import uk.co.garagebridgend.backend.repository.LeaveRepository;
 
@@ -28,9 +28,9 @@ public class LeaveService {
     /**
      * Retrieves all approved leave entries for calendar display.
      *
-     * @return a list of {@link LeaveCalendarDTO} objects containing leave dates
+     * @return a list of {@link LeaveCalendarResponse} objects containing leave dates
      */
-    public List<LeaveCalendarDTO> getAllLeaveDates() {
+    public List<LeaveCalendarResponse> getAllLeaveDates() {
         // Only fetch approved leaves
         List<LeaveTable> leaveList = leaveRepository.findAll()
                 .stream()
@@ -38,7 +38,7 @@ public class LeaveService {
                 .toList();
 
         return leaveList.stream()
-                .map(leave -> new LeaveCalendarDTO(
+                .map(leave -> new LeaveCalendarResponse(
                         leave.getStartDate(),
                         leave.getEndDate()
                 ))
@@ -49,15 +49,15 @@ public class LeaveService {
      * Retrieves all approved leave entries for a specific date.
      *
      * @param date the date to check for leave entries
-     * @return a list of {@link LeaveDayDTO} objects representing employees on leave
+     * @return a list of {@link LeaveDayResponse} objects representing employees on leave
      */
-    public List<LeaveDayDTO> getLeaveForDate(final LocalDate date) {
+    public List<LeaveDayResponse> getLeaveForDate(final LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
 
         List<LeaveTable> leave = leaveRepository.findLeaveForDate(startOfDay);
 
         return leave.stream()
-                .map(l -> new LeaveDayDTO(
+                .map(l -> new LeaveDayResponse(
                         l.getAccount().getFirstName() + " "
                                 + l.getAccount().getLastName(),
                         "Technician", // Replace with real role if available in future

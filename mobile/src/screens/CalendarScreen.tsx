@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar, DateData } from 'react-native-calendars';
 import dayjs from 'dayjs';
 
-import { Spacing, FontSize, BorderRadius, TextStyles } from '../theme/theme';
 import { Colours } from '../theme/colours';
+import { calendarScreenStyles as styles } from './CalendarScreen.styles';
 import SummaryCard from '../components/summary/SummaryCard';
 import SummaryRow from '../components/summary/SummaryRow';
+import AuthenticationService from "../logic/AuthenticationService.ts";
 
 type Props = {
   onDayPress: (date: string) => void;
@@ -27,8 +28,8 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
 
   const fetchLeave = async () => {
     try {
-      // Fetches default IP for emulator TODO: Change this to use AppSettings
-      const response = await fetch('http://10.0.2.2:8080/api/leave/calendar');
+      // Fetches default IP for emulator
+      const response = await AuthenticationService.fetch('/api/leave/calendar', {});
       const data = await response.json();
 
       const dates: string[] = [];
@@ -190,66 +191,3 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
 };
 
 export default CalendarScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colours.greyBackground,
-  },
-
-  summaryWrapper: {
-    paddingTop: Spacing.largePadding,
-    marginBottom: Spacing.largePadding,
-  },
-
-  calendarContainer: {
-    marginHorizontal: Spacing.largePadding,
-    borderRadius: BorderRadius.largeButtonsAndOutlines,
-    backgroundColor: Colours.white,
-    padding: Spacing.smallPadding,
-    shadowColor: Colours.black,
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-
-  redStripe: {
-    height: 2,
-    backgroundColor: Colours.redPrimary,
-    marginVertical: 6,
-    borderRadius: 1,
-  },
-
-  keyContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 20,
-    paddingVertical: 10,
-  },
-
-  keyItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-
-  fullyBookedCircle: {
-    width: 13,
-    height: 13,
-    backgroundColor: Colours.redPrimary,
-    borderRadius: 100,
-  },
-
-  partialBookedCircle: {
-    width: 13,
-    height: 13,
-    backgroundColor: Colours.amberPrimary,
-    borderRadius: 100,
-  },
-
-  keyText: {
-    ...TextStyles.regular,
-    fontSize: FontSize.xs14,
-    color: Colours.black,
-  },
-});

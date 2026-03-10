@@ -5,6 +5,7 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import DateDetailsScreen from '../src/screens/DateDetailsScreen';
 import dayjs from 'dayjs';
+import AuthenticationService from "../src/logic/AuthenticationService.ts";
 
 // Mock SafeAreaView to render children directly
 jest.mock('react-native-safe-area-context', () => ({
@@ -32,6 +33,10 @@ jest.mock('../src/theme/theme', () => ({
   TextStyles: { regular: {} },
 }));
 
+jest.mock('../src/logic/AuthenticationService.ts', () => ({
+  fetch: jest.fn(),
+}));
+
 describe('DateDetailsScreen', () => {
   const today = dayjs().format('YYYY-MM-DD');
   let fetchMock: jest.Mock;
@@ -39,9 +44,7 @@ describe('DateDetailsScreen', () => {
   let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    fetchMock = jest.fn();
-    // @ts-ignore
-    global.fetch = fetchMock;
+    fetchMock = AuthenticationService.fetch as jest.Mock;
 
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});

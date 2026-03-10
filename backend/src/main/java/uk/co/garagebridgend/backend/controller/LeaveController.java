@@ -3,7 +3,6 @@ package uk.co.garagebridgend.backend.controller;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import uk.co.garagebridgend.backend.logic.LeaveService;
-import uk.co.garagebridgend.backend.models.dto.LeaveCalendarDTO;
-import uk.co.garagebridgend.backend.models.dto.LeaveDayDTO;
+import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
+import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,7 +22,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/leave")
 @RequiredArgsConstructor
-@CrossOrigin
 public class LeaveController {
 
     /** Service responsible for handling leave-related business logic. */
@@ -32,10 +30,10 @@ public class LeaveController {
     /**
      * Retrieves all leave entries formatted for calendar display.
      *
-     * @return a list of {@link LeaveCalendarDTO} objects containing leave start and end dates
+     * @return a list of {@link LeaveCalendarResponse} objects containing leave start and end dates
      */
     @GetMapping("/calendar")
-    public List<LeaveCalendarDTO> getCalendarLeave() {
+    public List<LeaveCalendarResponse> getCalendarLeave() {
         return leaveService.getAllLeaveDates();
     }
 
@@ -43,10 +41,10 @@ public class LeaveController {
      * Retrieves all employees on leave for a specific day.
      *
      * @param date the date string provided in the request path
-     * @return a list of {@link LeaveDayDTO} objects representing employees on leave
+     * @return a list of {@link LeaveDayResponse} objects representing employees on leave
      */
     @GetMapping("/day/{date}")
-    public List<LeaveDayDTO> getLeaveForDay(final @PathVariable String date) {
+    public List<LeaveDayResponse> getLeaveForDay(final @PathVariable String date) {
         try {
             LocalDate parsedDate = LocalDate.parse(date);
             return leaveService.getLeaveForDate(parsedDate);
