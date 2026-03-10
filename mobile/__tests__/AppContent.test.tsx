@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import App from '../App.tsx';
 
 // Mocking safe area to prevent errors with missing native modules
@@ -15,6 +15,10 @@ jest.mock('react-native-safe-area-context', () => {
 
 jest.mock('../src/theme/paperTheme', () => ({
   paperTheme: {},
+}));
+
+jest.mock('../src/logic/AuthenticationService', () => ({
+  refresh: jest.fn().mockResolvedValue(true),
 }));
 
 // Mocking react-native-paper components used in the app
@@ -42,11 +46,15 @@ jest.mock('../src/screens/CalendarScreen', () => {
 });
 
 describe('App navigation flow', () => {
-  it('starts on the home screen', () => {
+  it('starts on the home screen', async () => {
     const { getByText, queryByText } = render(<App />);
 
+    // Wait for initial authentication check to complete and home screen to render
+    await waitFor(() => {
+      expect(getByText('Welcome Back')).toBeTruthy();
+    });
+
     // Ensuring the app opens on the HomeScreen by default
-    expect(getByText('Welcome Back')).toBeTruthy();
     expect(getByText('HR Portal')).toBeTruthy();
     expect(getByText('Health & Safety')).toBeTruthy();
 
@@ -55,8 +63,13 @@ describe('App navigation flow', () => {
     expect(queryByText('Documents')).toBeNull();
   });
 
-  it('opens HR section and shows the HR top and bottom navigation', () => {
+  it('opens HR section and shows the HR top and bottom navigation', async () => {
     const { getByText, getAllByText, queryByText } = render(<App />);
+
+    // Wait for initial authentication check to complete and home screen to render
+    await waitFor(() => {
+      expect(getByText('Welcome Back')).toBeTruthy();
+    });
 
     // When the HR button is pressed
     fireEvent.press(getByText('HR Portal'));
@@ -78,8 +91,13 @@ describe('App navigation flow', () => {
     expect(queryByText('Overview')).toBeNull();
   });
 
-  it('opens health and safety section and shows the health and safety top and bottom navigation', () => {
+  it('opens health and safety section and shows the health and safety top and bottom navigation', async () => {
     const { getByText, getAllByText, queryByText } = render(<App />);
+
+    // Wait for initial authentication check to complete and home screen to render
+    await waitFor(() => {
+      expect(getByText('Welcome Back')).toBeTruthy();
+    });
 
     // When Health and Safety is pressed
     fireEvent.press(getByText('Health & Safety'));
@@ -101,8 +119,13 @@ describe('App navigation flow', () => {
     expect(queryByText('Handbook')).toBeNull();
   });
 
-  it('returns to the home screen when Home is pressed in the bottom nav', () => {
+  it('returns to the home screen when Home is pressed in the bottom nav', async () => {
     const { getByText, getAllByText, queryByText } = render(<App />);
+
+    // Wait for initial authentication check to complete and home screen to render
+    await waitFor(() => {
+      expect(getByText('Welcome Back')).toBeTruthy();
+    });
 
     // Given the user has entered the HR section
     fireEvent.press(getByText('HR Portal'));

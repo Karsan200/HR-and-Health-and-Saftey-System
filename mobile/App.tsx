@@ -5,26 +5,56 @@
  * @format
  */
 
-import React, {useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import HomeScreen from './src/screens/HomeScreen';
 import { PaperProvider } from 'react-native-paper';
+
+import AuthenticationService from './src/logic/AuthenticationService.ts';
+import { AppSection, ScreenKey } from "./src/logic/NavigationConfiguration.ts";
+
 import { paperTheme } from './src/theme/paperTheme.ts';
-import HsOverview from './src/screens/HsOverview';
+import { HttpException } from './src/exception/HttpException.ts';
+
 import BottomNavBar from "./src/components/BottomNavBar";
-import {AppSection, ScreenKey} from "./src/logic/NavigationConfiguration.ts";
 import TopNavBar from './src/components/TopNavBar';
+import LogoActivityIndicator from './src/components/auth/LogoActivityIndicator.tsx';
+
+import HomeScreen from './src/screens/HomeScreen';
+import HsOverview from './src/screens/HsOverview';
 import CalendarScreen from './src/screens/CalendarScreen';
 import DateDetailsScreen from './src/screens/DateDetailsScreen';
-
+import PasswordAuthScreen from './src/screens/auth/PasswordAuthScreen.tsx';
 
 function App() {
     const isDarkMode = useColorScheme() === 'dark';
 
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                await AuthenticationService.refresh();
+                setIsAuthenticated(true);
+            } catch (error) {
+              if (error instanceof HttpException && error.statusCode === 401) {
+                setIsAuthenticated(false);
+              }
+            }
+        }
+
+        checkAuth();
+    }, []);
+
   return (
     <PaperProvider theme={paperTheme}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
+      {isAuthenticated === null ? (
+        <LogoActivityIndicator />
+      ) : isAuthenticated ? (
+        <AppContent />
+      ) : (
+        <PasswordAuthScreen />
+      )}
     </PaperProvider >
   );
 }
