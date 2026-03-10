@@ -52,7 +52,8 @@ export const styles = StyleSheet.create({
      */
     headerTitle: {
         marginLeft: 8,
-        ...theme.textStyles.medium,
+        fontFamily: theme.textStyles.medium.fontFamily,
+        fontWeight: theme.textStyles.medium.fontWeight,
         fontSize: theme.fontSize.l24,
         color: colours.black,
     },
@@ -77,7 +78,8 @@ export const styles = StyleSheet.create({
      */
     headerBadgeText: {
         color: colours.white,
-        ...theme.textStyles.semiBold,
+        fontFamily: theme.textStyles.semiBold.fontFamily,
+        fontWeight: theme.textStyles.semiBold.fontWeight,
         fontSize: theme.fontSize.s16,
         lineHeight: 28,
     },
@@ -96,7 +98,8 @@ export const styles = StyleSheet.create({
      * Matches the header title typography.
      */
     sectionHeading: {
-        ...theme.textStyles.medium,
+        fontFamily: theme.textStyles.medium.fontFamily,
+        fontWeight: theme.textStyles.medium.fontWeight,
         fontSize: theme.fontSize.l24,
         color: colours.black,
     },
@@ -172,7 +175,8 @@ export const localStyles = StyleSheet.create({
      * Uses medium font family and medium-large font size.
      */
     count: {
-        ...theme.textStyles.medium,
+        fontFamily: theme.textStyles.medium.fontFamily,
+        fontWeight: theme.textStyles.medium.fontWeight,
         fontSize: theme.fontSize.m20,
         color: colours.black,
     },
@@ -182,7 +186,8 @@ export const localStyles = StyleSheet.create({
      * Uses smaller font size and grey tone for secondary emphasis.
      */
     label: {
-        ...theme.textStyles.medium,
+        fontFamily: theme.textStyles.medium.fontFamily,
+        fontWeight: theme.textStyles.medium.fontWeight,
         fontSize: theme.fontSize.xs14,
         color: colours.greyPrimaryMainText,
         textAlign: 'center',
@@ -225,7 +230,8 @@ export const localStyles = StyleSheet.create({
      * Uses medium weight and small font size for compact appearance.
      */
     riskLabel: {
-        ...theme.textStyles.medium,
+        fontFamily: theme.textStyles.medium.fontFamily,
+        fontWeight: theme.textStyles.medium.fontWeight,
         fontSize: theme.fontSize.s16,
         color: colours.black,
         textAlign: 'center',

@@ -1,4 +1,5 @@
 import AuthenticationService from '../../src/logic/AuthenticationService';
+import {AppSettings} from "../../src/AppSettings.ts";
 
 describe('AuthenticationService', () => {
   beforeEach(() => {
@@ -17,15 +18,15 @@ describe('AuthenticationService', () => {
   });
 
   it('fetch method should return a Promise', async () => {
-    const result = AuthenticationService.fetch('https://example.com', {});
+    const result = AuthenticationService.fetch('', {});
     expect(result).toBeInstanceOf(Promise);
     await result;
   });
 
   it('should call fetch with correct arguments', async () => {
-    await AuthenticationService.fetch('https://example.com', { method: 'GET' });
+    await AuthenticationService.fetch('', { method: 'GET' });
 
-    expect(globalThis.fetch).toHaveBeenCalledWith('https://example.com', {
+    expect(globalThis.fetch).toHaveBeenCalledWith(AppSettings.API_URL, {
       method: 'GET',
     });
   });

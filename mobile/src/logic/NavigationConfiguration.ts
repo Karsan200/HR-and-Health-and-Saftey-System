@@ -9,7 +9,8 @@ export type ScreenKey =
     | 'overview'
     | 'documents'
     | 'risk'
-    | 'personal';
+    | 'personal'
+    | 'dateDetails';
 
 export type BottomNavItem = {
     key: ScreenKey;

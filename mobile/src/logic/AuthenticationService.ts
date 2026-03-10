@@ -16,8 +16,8 @@ class AuthenticationService {
      * @param options - RequestInit options for the fetch request, including method, headers, body, etc.
      * @returns Promise that resolves to the Response object from the fetch request
      */
-    static async fetch(url: string, options: RequestInit): Promise<Response> {
-        return await fetch(url, options);
+    static async fetch(url: string, options: RequestInit = {}): Promise<Response> {
+      return await fetch(AppSettings.API_URL + url, options);
     }
 
     /**
