@@ -72,7 +72,7 @@ public class SecurityConfig {
                 // Configure endpoint authorization
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
-                        // TODO: REMOVE HS OVERVIEW AND LEAVE AFTER LOGIN IS DONE
+                        // FUTURE: REMOVE HS OVERVIEW AND LEAVE AFTER LOGIN IS DONE
                         .requestMatchers("/auth/refresh", "/api/hs-overview", "/api/leave/**").permitAll()
 
                         // Role-based endpoints (order matters - most specific first)
