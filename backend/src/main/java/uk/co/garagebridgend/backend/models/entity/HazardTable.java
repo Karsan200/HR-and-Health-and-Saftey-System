@@ -67,6 +67,10 @@ public class HazardTable {
     @JoinColumn(columnDefinition = "TEXT", name = "question_six", nullable = false)
     private String questionSix;
 
+    /** True if the hazard is saved as a draft */
+    @Column(columnDefinition = "BOOLEAN DEFAULT TRUE", name = "is_draft", nullable = false)
+    private boolean isDraft;
+
     /** The priority of the hazard. */
     @Column(columnDefinition = "TINYINT", name = "priority")
     private int priority;
