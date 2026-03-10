@@ -1,9 +1,11 @@
 import * as Keychain from 'react-native-keychain';
+import { jwtDecode } from 'jwt-decode';
 
 import { AppSettings } from '../AppSettings.ts';
 import { HttpException } from '../exception/HttpException.ts';
 import { TokenResponseModel } from "../model/response/TokenResponseModel.ts";
 import { AuthRequestModel } from '../model/request/AuthRequestModel.ts';
+import { JwTClaimsModel } from '../model/JwTClaimsModel.ts';
 
 /**
  * Service class responsible for handling user authentication operations such as login.
@@ -14,10 +16,65 @@ class AuthenticationService {
      * Helper method to perform fetch requests, handling authorisation headers for JWT tokens
      * @param url - The endpoint URL to send the request to
      * @param options - RequestInit options for the fetch request, including method, headers, body, etc.
+     * @param hasRefreshed - Internal flag to prevent infinite refresh loops, should not be set by external callers
      * @returns Promise that resolves to the Response object from the fetch request
      */
-    static async fetch(url: string, options: RequestInit = {}): Promise<Response> {
-      return await fetch(AppSettings.API_URL + url, options);
+    static async fetch(url: string, options: RequestInit = {}, hasRefreshed: boolean = false): Promise<Response> {
+      // Get the access token from the keychain
+      const credentials = await this.getCredentials();
+      const accessToken = credentials?.accessToken;
+
+      // If an access token does not exist, throw an error indicating that the user is not authenticated
+      if (!accessToken) {
+        throw new HttpException(401, 'No authentication tokens found.');
+      }
+
+      // Add the Authorization header with the access token to the request options
+      options.headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${accessToken}`,
+      }
+
+      const response = await fetch(AppSettings.API_URL + url, options);
+
+      // Try to refresh the access token if the response indicates an unauthorized error
+      if (response.status === 401 && !hasRefreshed) {
+        await this.refresh();
+        await this.fetch(url, options, true)
+      }
+      // If the response is still unauthorized after attempting to refresh, throw an error indicating the refresh token is invalid
+      else if (response.status === 401 && hasRefreshed) {
+        throw new HttpException(401, 'Invalid refresh token.');
+      }
+
+      return response;
+    }
+
+  /**
+   * Extracts and returns the JWT claims from the access token stored in the keychain.
+   * @returns Promise that resolves to an object containing the JWT claims (accountId, issuedAt, expiresAt) if the access token is valid, otherwise throws an error
+   * @throws HttpException with appropriate status code and message for different failure scenarios such as missing tokens or invalid JWT format
+   */
+  static async extractClaims(): Promise<JwTClaimsModel> {
+        const credentials = await this.getCredentials();
+
+        if (!credentials) {
+            throw new HttpException(401, 'No authentication tokens found.');
+        }
+
+        const accessToken = credentials.accessToken;
+
+        try {
+            const claims: any = jwtDecode(accessToken);
+            return {
+              accountId: parseInt(claims.sub, 10),
+              issuedAt: claims.iat,
+              expiresAt: claims.exp,
+            }
+        } catch (error) {
+            console.error('Error extracting JWT claims:', error);
+            throw new HttpException(500, 'Failed to extract JWT claims.');
+        }
     }
 
     /**

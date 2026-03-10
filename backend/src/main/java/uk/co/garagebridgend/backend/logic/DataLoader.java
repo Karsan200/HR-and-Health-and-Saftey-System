@@ -52,7 +52,6 @@ public class DataLoader {
             maggie.setUsername("MMay");
             maggie.setEmail("MMay@test.com");
             maggie.setPassword("password");
-            maggie.setSalt("salt");
             maggie.setAddressOne("Test Street");
             maggie.setPostalCode("CF31");
             accountRepository.save(maggie);
@@ -123,7 +122,6 @@ public class DataLoader {
             john.setUsername("JDoe");
             john.setEmail("JDoe@test.com");
             john.setPassword("password");
-            john.setSalt("salt");
             john.setAddressOne("Example Street");
             john.setPostalCode("CF32");
             accountRepository.save(john);

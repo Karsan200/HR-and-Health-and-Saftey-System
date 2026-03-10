@@ -78,7 +78,6 @@ public class HsOverviewControllerTest {
         user.setUsername("MMay");
         user.setEmail("mmay@test.com");
         user.setPassword("password");
-        user.setSalt("salt");
         user.setAddressOne("Test Street");
         user.setPostalCode("CF31");
 
