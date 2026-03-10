@@ -28,6 +28,14 @@ jest.mock('react-native-paper', () => {
   };
 });
 
+// Mock CalendarScreen to just render a placeholder
+jest.mock('../src/screens/CalendarScreen', () => {
+  const mockReact = require('react');
+  const { View, Text } = require('react-native');
+
+  return () => mockReact.createElement(View, null, mockReact.createElement(Text, null, 'Calendar'));
+});
+
 describe('App navigation flow', () => {
   it('starts on the home screen', () => {
     const { getByText, queryByText } = render(<App />);
@@ -49,7 +57,7 @@ describe('App navigation flow', () => {
     fireEvent.press(getByText('HR Portal'));
 
     // Then the word calendar should appear in the top navbar and bottom navbar
-    expect(getAllByText('Calendar')).toHaveLength(2);
+    expect(getAllByText('Calendar')).toHaveLength(3);
 
     // Then the HR top navigation icons should be visible
     expect(getByText('bell')).toBeTruthy();
@@ -93,7 +101,7 @@ describe('App navigation flow', () => {
 
     // Given the user has entered the HR section
     fireEvent.press(getByText('HR Portal'));
-    expect(getAllByText('Calendar')).toHaveLength(2);
+    expect(getAllByText('Calendar')).toHaveLength(3);
 
     // When Home is pressed in the bottom navigation
     fireEvent.press(getByText('Home'));

@@ -137,7 +137,7 @@ public class HsOverviewControllerTest {
     @WithMockUser(username = "MMay")
     void testHsOverviewSuccess() throws Exception {
 
-        mockMvc.perform(get("/hs-overview"))
+        mockMvc.perform(get("/api/hs-overview"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pendingDocs").value(2))
                 .andExpect(jsonPath("$.signed").value(1))
@@ -154,7 +154,7 @@ public class HsOverviewControllerTest {
 
         SecurityContextHolder.clearContext();
 
-        mockMvc.perform(get("/hs-overview"))
+        mockMvc.perform(get("/api/hs-overview"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -167,6 +167,6 @@ public class HsOverviewControllerTest {
     @WithMockUser(username = "unknownUser")
     void testHsOverviewUserNotFound() throws Exception {
 
-        mockMvc.perform(get("/hs-overview"))
+        mockMvc.perform(get("/api/hs-overview"))
                 .andExpect(status().isNotFound());    }
 }

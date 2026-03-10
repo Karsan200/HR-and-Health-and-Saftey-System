@@ -9,22 +9,25 @@ import BottomNavBar from "./src/components/BottomNavBar.tsx";
 import {AppSection, ScreenKey} from "./src/logic/NavigationConfiguration.ts";
 import TopNavBar from './src/components/TopNavBar.tsx';
 import SettingsScreen from './src/screens/personal/SettingsScreen.tsx';
+import CalendarScreen from './src/screens/CalendarScreen';
+import DateDetailsScreen from './src/screens/DateDetailsScreen';
 
 
 function App() {
     const isDarkMode = useColorScheme() === 'dark';
 
-    return (
-        <SafeAreaProvider>
-            <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-            <AppContent />
-        </SafeAreaProvider>
-    );
+  return (
+    <SafeAreaProvider>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      <AppContent />
+    </SafeAreaProvider>
+  );
 }
 
 function AppContent() {
     const [section, setSection] = useState<AppSection>(null);
     const [currentScreen, setCurrentScreen] = useState<ScreenKey>('home');
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
     // Defaulting to the calendar screen when the HR section is selected.
     const handleSelectHr = () => {
@@ -48,6 +51,11 @@ function AppContent() {
         setCurrentScreen(screen);
     };
 
+    const handleOpenDateDetails = (date: string) => {
+      setSelectedDate(date);
+      setCurrentScreen('dateDetails');
+    };
+
     /*
     Rendering in the main content area based on the current screen.
     Using switch cases to select the screen to load in.
@@ -67,11 +75,25 @@ function AppContent() {
                     />
                 );
 
-            case 'calendar':
-                return <>
-                    <TopNavBar title="Calendar" />
-                    <View style={styles.content} />
-                </>;
+        case 'calendar':
+          return (
+            <>
+              <TopNavBar title="Calendar" />
+              <CalendarScreen onDayPress={handleOpenDateDetails} />
+            </>
+          );
+
+        case 'dateDetails':
+          return (
+            <>
+              <TopNavBar
+                title=""
+                showBackButton={true}
+                onBackPress={() => handleNavigate('calendar')}
+              />
+              <DateDetailsScreen date={selectedDate} />
+            </>
+          );
 
             case 'payslips':
                 return <>
@@ -113,29 +135,29 @@ function AppContent() {
                     <View style={styles.content} />
                 </>;
 
-            case 'personal':
-                return<>
-                    <TopNavBar title="Personal" />
-                    <View style={styles.content} />
-                </>;
+        case 'personal':
+          return <>
+            <TopNavBar title="Personal" />
+            <View style={styles.content} />
+          </>;
 
-            case 'settings':
-              return <>
-                <TopNavBar title="Settings"
-                           showBackButton={true}
-                           onBackPress={() => handleNavigate('home')}
-                />
-                <View style={styles.content}>
-                  <SettingsScreen />
-                </View>
-              </>;
+          case 'settings':
+            return <>
+              <TopNavBar title="Settings"
+                         showBackButton={true}
+                         onBackPress={() => handleNavigate('home')}
+              />
+              <View style={styles.content}>
+                <SettingsScreen />
+              </View>
+            </>;
 
-            /*
-            How to add the top nav bar to a screen:
-            Main screen:
-            <TopNavBar
-              title="NameOfTheScreen"
-            />
+        /*
+        How to add the top nav bar to a screen:
+        Main screen:
+        <TopNavBar
+          title="NameOfTheScreen"
+        />
 
             Sub-screen:
             <TopNavBar

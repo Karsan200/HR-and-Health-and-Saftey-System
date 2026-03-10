@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, Text, View, Platform } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import SummaryRow from '../components/summary/SummaryRow';
 import AlertBox from '../components/AlertBox';
 import { styles, localStyles } from './HsOverview.styles';
 import { Colours } from '../theme/colours';
+import AuthenticationService from "../logic/AuthenticationService.ts";
 
 // Props for the small summary component
 interface HsStatProps {
@@ -52,13 +53,7 @@ export default function HsOverview() {
     useEffect(() => {
         const fetchDashboard = async () => {
             try {
-                // Determine backend URL based on platform
-                let backendUrl = 'http://localhost:8080/hs-overview';
-                if (Platform.OS === 'android') {
-                    backendUrl = 'http://10.0.2.2:8080/hs-overview';
-                }
-
-                const response = await fetch(backendUrl);
+                const response = await AuthenticationService.fetch('/api/hs-overview');
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
                 const data: HsOverviewResponse = await response.json();

@@ -52,7 +52,8 @@ export const styles = StyleSheet.create({
      */
     headerTitle: {
         marginLeft: 8,
-        ...TextStyles.medium,
+        fontFamily: TextStyles.medium.fontFamily,
+        fontWeight: TextStyles.medium.fontWeight,
         fontSize: FontSize.l24,
         color: Colours.black,
     },
@@ -77,7 +78,8 @@ export const styles = StyleSheet.create({
      */
     headerBadgeText: {
         color: Colours.white,
-        ...TextStyles.semiBold,
+        fontFamily: TextStyles.semiBold.fontFamily,
+        fontWeight: TextStyles.semiBold.fontWeight,
         fontSize: FontSize.s16,
         lineHeight: 28,
     },
@@ -96,7 +98,8 @@ export const styles = StyleSheet.create({
      * Matches the header title typography.
      */
     sectionHeading: {
-        ...TextStyles.medium,
+        fontFamily: TextStyles.medium.fontFamily,
+        fontWeight: TextStyles.medium.fontWeight,
         fontSize: FontSize.l24,
         color: Colours.black,
     },
@@ -172,7 +175,8 @@ export const localStyles = StyleSheet.create({
      * Uses medium font family and medium-large font size.
      */
     count: {
-        ...TextStyles.medium,
+        fontFamily: TextStyles.medium.fontFamily,
+        fontWeight: TextStyles.medium.fontWeight,
         fontSize: FontSize.m20,
         color: Colours.black,
     },
@@ -182,7 +186,8 @@ export const localStyles = StyleSheet.create({
      * Uses smaller font size and grey tone for secondary emphasis.
      */
     label: {
-        ...TextStyles.medium,
+        fontFamily: TextStyles.medium.fontFamily,
+        fontWeight: TextStyles.medium.fontWeight,
         fontSize: FontSize.xs14,
         color: Colours.greyPrimaryMainText,
         textAlign: 'center',
@@ -225,7 +230,8 @@ export const localStyles = StyleSheet.create({
      * Uses medium weight and small font size for compact appearance.
      */
     riskLabel: {
-        ...TextStyles.medium,
+        fontFamily: TextStyles.medium.fontFamily,
+        fontWeight: TextStyles.medium.fontWeight,
         fontSize: FontSize.s16,
         color: Colours.black,
         textAlign: 'center',

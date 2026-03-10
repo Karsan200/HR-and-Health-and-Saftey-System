@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
@@ -28,6 +29,7 @@ import java.util.Map;
  * from the SecurityContextHolder and uses repository beans to compute counts.
  */
 @RestController
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class HsOverviewController {
     /** Repository to access account data. */
