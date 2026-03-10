@@ -1,8 +1,9 @@
 import * as Keychain from 'react-native-keychain';
 
-import { AuthRequestModel } from '../model/request/AuthRequestModel.ts';
 import { AppSettings } from '../AppSettings.ts';
 import { HttpException } from '../exception/HttpException.ts';
+import { TokenResponseModel } from "../model/response/TokenResponseModel.ts";
+import { AuthRequestModel } from '../model/request/AuthRequestModel.ts';
 
 /**
  * Service class responsible for handling user authentication operations such as login.
@@ -16,7 +17,39 @@ class AuthenticationService {
      * @returns Promise that resolves to the Response object from the fetch request
      */
     static async fetch(url: string, options: RequestInit): Promise<Response> {
-        return await fetch(AppSettings.API_URL+ url, options);
+        return await fetch(url, options);
+    }
+
+    /**
+     * Refreshes the access token using the refresh token stored in the keychain.
+     * @returns Promise that resolves when the access token is successfully refreshed and stored, otherwise throws an error
+     * @throws HttpException with appropriate status code and message for different failure scenarios during token refresh
+     */
+    static async refresh(): Promise<void> {
+        const credentials = await this.getCredentials();
+        if (credentials === null) {
+            throw new HttpException(401, 'No authentication tokens found.');
+        }
+
+        const response = await this.fetch("/auth/refresh", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': `refreshToken=${credentials.refreshToken}`,
+            }
+        });
+
+        if (!response.ok) {
+            throw new HttpException(401, 'Failed to refresh access token.');
+        }
+        else {
+            const data: TokenResponseModel = await response.json();
+
+            const accessToken: string = data.accessToken;
+
+            // Store the new access token securely in the keychain, keeping the same refresh token
+            await this.putCredentials(accessToken, credentials.refreshToken);
+        }
     }
 
     /**
