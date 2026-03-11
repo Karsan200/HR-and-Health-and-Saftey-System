@@ -88,7 +88,7 @@ class AuthenticationService {
             throw new HttpException(401, 'No authentication tokens found.');
         }
 
-        const response = await this.fetch("/auth/refresh", {
+        const response = await this.fetch(AppSettings.API_URL + "/auth/refresh", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
