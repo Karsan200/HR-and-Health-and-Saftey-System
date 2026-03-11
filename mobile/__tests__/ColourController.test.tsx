@@ -1,56 +1,51 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
-import { ThemeProvider, useTheme } from "../src/theme/colourController"; // adjust path
+import { render, act } from "@testing-library/react-native";
+import { ThemeProvider, useTheme } from "../src/theme/colourController";
 import { DefaultColours } from "../src/theme/colours";
-import { Button, Text } from 'react-native';
+import { renderHook } from '@testing-library/react-native';
 
 // Helper component to test the hook
-function TestComponent() {
-  const { theme, updateTheme } = useTheme();
-
-  return (
-    <>
-      <Text testID="background">{theme.greyBackground}</Text>
-      <Text testID="accent">{theme.redPrimary}</Text>
-      <Button
-        testID="updateBackground"
-        title="Update Background"
-        onPress={() => updateTheme({ greyBackground: "#123456" })}
-      />
-      <Button
-        testID="updateAccent"
-        title="Update Accent"
-        onPress={() => updateTheme({ redPrimary: "#ABCDEF" })}
-      />
-    </>
-  );
-}
+const HookTester = ({ callback }: { callback: (themeHook: ReturnType<typeof useTheme>) => void }) => {
+  const themeHook = useTheme();
+  callback(themeHook);
+  return null;
+};
 
 describe("ThemeProvider and useTheme", () => {
-  it("provides default theme initially", () => {
-    const { getByTestId } = render(
+  it("provides default theme values", () => {
+    let hookResult: ReturnType<typeof useTheme> | undefined;
+
+    render(
       <ThemeProvider>
-        <TestComponent />
+        <HookTester callback={(result) => { hookResult = result; }} />
       </ThemeProvider>
     );
 
-    expect(getByTestId("background").props.children).toBe(DefaultColours.greyBackground);
-    expect(getByTestId("accent").props.children).toBe(DefaultColours.redPrimary);
+    expect(hookResult).toBeDefined();
+    expect(hookResult?.theme).toEqual(DefaultColours);
+    expect(typeof hookResult?.updateTheme).toBe("function");
   });
 
   it("updates theme correctly when updateTheme is called", () => {
-    const { getByTestId } = render(
+    let hookResult: ReturnType<typeof useTheme> | undefined;
+
+    render(
       <ThemeProvider>
-        <TestComponent />
+        <HookTester callback={(result) => { hookResult = result; }} />
       </ThemeProvider>
     );
 
-    // Update background
-    fireEvent.press(getByTestId("updateBackground"));
-    expect(getByTestId("background").props.children).toBe("#123456");
+    act(() => {
+      hookResult?.updateTheme({ black: "#111111" });
+    });
 
-    // Update accent
-    fireEvent.press(getByTestId("updateAccent"));
-    expect(getByTestId("accent").props.children).toBe("#ABCDEF");
+    expect(hookResult?.theme.black).toBe("#111111");
+    // Ensure other colours are unchanged
+    expect(hookResult?.theme.white).toBe(DefaultColours.white);
+  });
+
+  it("returns default theme if no provider is present", () => {
+    const { result } = renderHook(() => useTheme());
+    expect(result.current.theme).toEqual(DefaultColours);
   });
 });
