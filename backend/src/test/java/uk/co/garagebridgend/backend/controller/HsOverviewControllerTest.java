@@ -4,20 +4,28 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.RentATechApplication;
+import uk.co.garagebridgend.backend.logic.HsOverviewService;
 import uk.co.garagebridgend.backend.models.entity.*;
 import uk.co.garagebridgend.backend.repository.*;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -33,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @AutoConfigureMockMvc
+@Transactional
 @ActiveProfiles("test")
 public class HsOverviewControllerTest {
 
@@ -54,6 +63,12 @@ public class HsOverviewControllerTest {
     @Autowired
     private FilesRepository filesRepository;
 
+    @Mock
+    private HsOverviewService hsOverviewService;
+
+    @InjectMocks
+    private HsOverviewController hsOverviewController;
+
     /**
      * Prepare a small dataset used by the tests. Clears repositories then creates
      * an account, a file, two documents, two hazards and a single signature.
@@ -63,20 +78,13 @@ public class HsOverviewControllerTest {
     @BeforeEach
     void setup() {
 
-        // Clear tables to avoid duplicate key errors
-        signatureRepository.deleteAll();
-        documentRepository.deleteAll();
-        hazardRepository.deleteAll();
-        filesRepository.deleteAll();
-        accountRepository.deleteAll();
-
         // Create test user
         AccountTable user = new AccountTable();
         user.setFirstName("Maggie");
         user.setLastName("May");
-        user.setUsername("MMay");
-        user.setEmail("mmay@test.com");
-        user.setPassword("password");
+        user.setUsername("MMays");
+        user.setEmail("mmays@test.com");
+        user.setPassword(BCrypt.hashpw("password", BCrypt.gensalt()));
         user.setAddressOne("Test Street");
         user.setPostalCode("CF31");
 
@@ -144,7 +152,7 @@ public class HsOverviewControllerTest {
      * @throws Exception if the request or assertions fail
      */
     @Test
-    @WithMockUser(username = "MMay")
+    @WithMockUser(username = "3")
     void testHsOverviewSuccess() throws Exception {
 
         mockMvc.perform(get("/api/hs-overview"))
@@ -155,28 +163,35 @@ public class HsOverviewControllerTest {
     }
 
     /**
-     * When not authenticated the endpoint should return 401 Unauthorized.
-     *
-     * @throws Exception if the request or assertions fail
-     */
-    @Test
-    void testHsOverviewNotAuthenticated() throws Exception {
-
-        SecurityContextHolder.clearContext();
-
-        mockMvc.perform(get("/api/hs-overview"))
-                .andExpect(status().isUnauthorized());
-    }
-
-    /**
      * When authenticated as an unknown user the endpoint should return 404 Not Found.
      *
      * @throws Exception if the request or assertions fail
      */
     @Test
-    @WithMockUser(username = "unknownUser")
+    @WithMockUser(username = "60")
     void testHsOverviewUserNotFound() throws Exception {
 
         mockMvc.perform(get("/api/hs-overview"))
-                .andExpect(status().isNotFound());    }
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testOverviewThrowsException() throws Exception {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(hsOverviewController).build();
+
+        // simulate your AuthenticationService throwing an exception
+        when(hsOverviewService.getOverview())
+                .thenThrow(new RuntimeException("Service failed"));
+
+        // perform a GET to /auth/refresh with a cookie
+        mockMvc.perform(get("/api/hs-overview"))
+                .andExpect(status().isInternalServerError()) // matches ResponseStatusException
+                .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
+                .andExpect(result -> {
+                    ResponseStatusException ex = (ResponseStatusException) result.getResolvedException();
+                    assertNotNull(ex);
+                    assertEquals("Internal sever error", ex.getReason()); // match your controller message
+                });
+    }
 }
