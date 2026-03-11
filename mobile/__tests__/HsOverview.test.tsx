@@ -5,11 +5,15 @@ import HsOverview from '../src/screens/HsOverview';
 import { fireEvent } from '@testing-library/react-native';
 import SummaryCard from '../src/components/summary/SummaryCard';
 import AlertBox from '../src/components/AlertBox';
-import { Colours } from '../src/theme/colours';
+import { colours } from '../src/theme/colours';
+import AuthenticationService from "../src/logic/AuthenticationService.ts";
 
-// TypeScript-safe global fetch
-declare const global: any;
-global.fetch = jest.fn();
+jest.mock('../src/logic/AuthenticationService.ts', () => ({
+    fetch: jest.fn(),
+}));
+
+// 👇 Cast once here for convenience
+const mockFetch = AuthenticationService.fetch as jest.Mock;
 
 const mockResponse = {
     pendingDocs: 5,
@@ -33,7 +37,7 @@ describe('HsOverview Screen', () => {
      *  - quick actions and a known action label
      */
     it('renders static header, alerts, and quick actions', async () => {
-        (global.fetch as jest.Mock).mockResolvedValueOnce({
+        (mockFetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             json: async () => mockResponse,
         });
@@ -57,7 +61,7 @@ describe('HsOverview Screen', () => {
      * Ensures fetched dashboard statistics are rendered when the fetch resolves successfully.
      */
     it('displays fetched dashboard stats correctly', async () => {
-        (global.fetch as jest.Mock).mockResolvedValueOnce({
+        (mockFetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             json: async () => mockResponse,
         });
@@ -76,7 +80,7 @@ describe('HsOverview Screen', () => {
      * The test stubs console.error to assert it was called with an Error instance.
      */
     it('handles fetch failure gracefully', async () => {
-        (global.fetch as jest.Mock).mockResolvedValueOnce({
+        (mockFetch as jest.Mock).mockResolvedValueOnce({
             ok: false,
             status: 500,
         });
@@ -100,7 +104,7 @@ describe('HsOverview Screen', () => {
      * Temporarily overrides `Platform.OS` to `android` and restores it after the assertion.
      */
     it('calls the correct backend URL for Android', async () => {
-        (global.fetch as jest.Mock).mockResolvedValueOnce({
+        (mockFetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             json: async () => mockResponse,
         });
@@ -112,8 +116,8 @@ describe('HsOverview Screen', () => {
         render(<HsOverview />);
 
         await waitFor(() => {
-            expect(global.fetch).toHaveBeenCalledWith(
-                expect.stringContaining('10.0.2.2:8080/hs-overview')
+            expect(mockFetch).toHaveBeenCalledWith(
+                expect.stringContaining('/api/hs-overview')
             );
         });
 
@@ -121,29 +125,11 @@ describe('HsOverview Screen', () => {
     });
 
     /**
-     * Tests iOS/web backend URL selection (default Platform.OS in test environment).
-     */
-    it('calls the correct backend URL for iOS/web', async () => {
-        (global.fetch as jest.Mock).mockResolvedValueOnce({
-            ok: true,
-            json: async () => mockResponse,
-        });
-
-        render(<HsOverview />);
-
-        await waitFor(() => {
-            expect(global.fetch).toHaveBeenCalledWith(
-                expect.stringContaining('localhost:8080/hs-overview')
-            );
-        });
-    });
-
-    /**
      * Ensures component state updates when fetch returns new data and UI reflects it.
      */
     it('updates state when fetch returns new data', async () => {
         const newData = { pendingDocs: 7, signed: 4, hazards: 1 };
-        (global.fetch as jest.Mock).mockResolvedValueOnce({
+        (mockFetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             json: async () => newData,
         });
@@ -214,9 +200,9 @@ describe('HsOverview Screen', () => {
             const customProps = {
                 label: 'Report',
                 body: 'Hazard #42 requires attention',
-                circleColor: Colours.amberPrimary,
-                labelColor: Colours.amberTextDark,
-                labelBackground: Colours.amberBackgroundLight,
+                circleColor: colours.amberPrimary,
+                labelColor: colours.amberTextDark,
+                labelBackground: colours.amberBackgroundLight,
             };
 
             const {getByText} = render(<AlertBox {...customProps} />);
@@ -230,7 +216,7 @@ describe('HsOverview Screen', () => {
 
         it('applies correct label color', () => {
             const props = {
-                labelColor: Colours.greenTextDark,
+                labelColor: colours.greenTextDark,
                 label: 'SOP',
             };
 
@@ -242,7 +228,7 @@ describe('HsOverview Screen', () => {
 
             // Check that one of the styles has the correct color
             expect(stylesArray).toEqual(
-                expect.arrayContaining([expect.objectContaining({color: Colours.greenTextDark})])
+                expect.arrayContaining([expect.objectContaining({color: colours.greenTextDark})])
             );
         });
     });

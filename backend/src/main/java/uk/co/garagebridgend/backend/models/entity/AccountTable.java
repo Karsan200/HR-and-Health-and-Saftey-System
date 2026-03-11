@@ -25,9 +25,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class AccountTable {
 
-    /** Named constant for salt-related column lengths. */
-    private static final int SALT_LENGTH = 32;
-
     /** Named constant for phone number column length. */
     private static final int PHONE_NUMBER_LENGTH = 17;
 
@@ -66,10 +63,6 @@ public class AccountTable {
     @Column(columnDefinition = "TEXT", name = "password", nullable = false)
     private String password;
 
-    /** Salt for the password hash (stored alongside the hash). */
-    @Column(name = "salt", length = SALT_LENGTH, nullable = false)
-    private String salt;
-
     /** Region code for phone number. */
     @Column(name = "region_code", length = REGION_CODE_LENGTH)
     private String regionCode;
@@ -97,10 +90,6 @@ public class AccountTable {
     /** Optional mobile PIN (should be hashed). */
     @Column(columnDefinition = "TEXT", name = "mobile_pin")
     private String mobilePin;
-
-    /** Salt used for hashing the mobile PIN. */
-    @Column(name = "mobile_pin_salt", length = SALT_LENGTH)
-    private String mobilePinSalt;
 
     /** Creation timestamp (auto-populated, not updatable). */
     @CreationTimestamp

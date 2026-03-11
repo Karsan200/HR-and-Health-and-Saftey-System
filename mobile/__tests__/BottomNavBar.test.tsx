@@ -4,7 +4,7 @@ import { StyleSheet } from 'react-native';
 import BottomNavBar from '../src/components/BottomNavBar';
 import { bottomNavStyles } from '../src/components/BottomNavBar.styles';
 import { getBottomNavItems, hrBottomNavItems, healthSafetyBottomNavItems } from '../src/logic/NavigationConfiguration';
-import { Colours } from '../src/theme/colours';
+import { colours } from '../src/theme/colours';
 
 // Mocking react-native-paper components used in the BottomNavBar
 jest.mock('react-native-paper', () => {
@@ -68,11 +68,11 @@ describe('BottomNavBar.styles', () => {
     // Ensuring the styles are using the correct theme values and layout
     expect(container.flexDirection).toBe('row');
     expect(container.justifyContent).toBe('space-between');
-    expect(container.backgroundColor).toBe(Colours.white);
+    expect(container.backgroundColor).toBe(colours.white);
     expect(navLabel.fontSize).toBe(12);
-    expect(navLabel.color).toBe(Colours.greyPrimaryMainText);
+    expect(navLabel.color).toBe(colours.greyPrimaryMainText);
     expect(navLabel.textAlign).toBe('center');
-    expect(activeNavLabel.color).toBe(Colours.redPrimary);
+    expect(activeNavLabel.color).toBe(colours.redPrimary);
   });
 });
 
@@ -181,9 +181,9 @@ describe('BottomNavBar component', () => {
     const inactiveStyle = StyleSheet.flatten(inactiveLabel.props.style);
 
     // Then the active label should use the active colour
-    expect(activeStyle.color).toBe(Colours.redPrimary);
+    expect(activeStyle.color).toBe(colours.redPrimary);
 
     // Then the inactive label should use the default colour
-    expect(inactiveStyle.color).toBe(Colours.greyPrimaryMainText);
+    expect(inactiveStyle.color).toBe(colours.greyPrimaryMainText);
   });
 });

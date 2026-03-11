@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, Text, View, Pressable } from 'react-native';
 import { Avatar, IconButton } from 'react-native-paper';
 import { homeStyles as styles } from './HomeScreen.styles';
-import { Colours } from '../theme/colours';
+import { colours } from '../theme/colours'; //getting the colours from the set list
 
 type HomeScreenProps = {
     onSelectHr: () => void;
@@ -17,7 +17,7 @@ export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScr
                 size={150}
                 icon="account-circle"
                 style={styles.profileIcon}
-                color={Colours.redPrimary}
+                color={colours.redPrimary}
             />
 
             {/* Welcome Text */}
@@ -33,7 +33,7 @@ export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScr
                     <IconButton
                         icon="briefcase-outline"
                         size={35}
-                        iconColor={Colours.black}
+                        iconColor={colours.black}
                         containerColor="transparent"
                         style={styles.iconButton}
                     />
@@ -47,7 +47,7 @@ export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScr
                     <IconButton
                         icon="shield-outline"
                         size={35}
-                        iconColor={Colours.black}
+                        iconColor={colours.black}
                         containerColor="transparent"
                         style={styles.iconButton}
                     />
@@ -64,7 +64,7 @@ export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScr
                         <IconButton
                             icon="account-circle"
                             size={24}
-                            iconColor={Colours.black}
+                            iconColor={colours.black}
                             containerColor="transparent"
                             style={styles.iconButton}
                         />
@@ -77,7 +77,7 @@ export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScr
                         <IconButton
                             icon="bell-outline"
                             size={24}
-                            iconColor={Colours.black}
+                            iconColor={colours.black}
                             containerColor="transparent"
                             style={styles.iconButton}
                         />
@@ -90,7 +90,7 @@ export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScr
                         <IconButton
                             icon="cog"
                             size={24}
-                            iconColor={Colours.black}
+                            iconColor={colours.black}
                             containerColor="transparent"
                             style={styles.iconButton}
                         />
@@ -103,7 +103,7 @@ export default function HomeScreen({ onSelectHr, onSelectHealthSafety }: HomeScr
                         <IconButton
                             icon="logout"
                             size={24}
-                            iconColor={Colours.black}
+                            iconColor={colours.black}
                             containerColor="transparent"
                             style={styles.iconButton}
                         />

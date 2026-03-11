@@ -40,31 +40,31 @@ public class HazardTable {
     private AccountTable account;
 
     /** Title of the hazard. */
-    @JoinColumn(columnDefinition = "TEXT", name = "title", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "title", nullable = false)
     private String title;
 
     /** first question of the hazard report. */
-    @JoinColumn(columnDefinition = "TEXT", name = "question_one", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "question_one", nullable = false)
     private String questionOne;
 
     /** second question of the hazard report. */
-    @JoinColumn(columnDefinition = "TEXT", name = "question_two", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "question_two", nullable = false)
     private String questionTwo;
 
     /** third question of the hazard report. */
-    @JoinColumn(columnDefinition = "TEXT", name = "question_three", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "question_three", nullable = false)
     private String questionThree;
 
     /** fourth question of the hazard report. */
-    @JoinColumn(columnDefinition = "TEXT", name = "question_four", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "question_four", nullable = false)
     private String questionFour;
 
     /** fifth question of the hazard report. */
-    @JoinColumn(columnDefinition = "TEXT", name = "question_five", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "question_five", nullable = false)
     private String questionFive;
 
     /** sixth question of the hazard report. */
-    @JoinColumn(columnDefinition = "TEXT", name = "question_six", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "question_six", nullable = false)
     private String questionSix;
 
     /** True if the hazard is saved as a draft */

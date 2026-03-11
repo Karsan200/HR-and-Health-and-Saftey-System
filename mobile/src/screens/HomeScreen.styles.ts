@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { Colours } from '../theme/colours';
-import { Spacing, FontSize, BorderRadius, TextStyles } from '../theme/theme';
+import { colours } from '../theme/colours.ts';
+import { theme } from '../theme/theme.ts';
 
 export const homeStyles = StyleSheet.create({
   /**
@@ -8,7 +8,7 @@ export const homeStyles = StyleSheet.create({
    * Applies horizontal padding and top offset.
    */
   container: {
-    paddingHorizontal: Spacing.mediumPadding,
+    paddingHorizontal: theme.spacing.mediumPadding,
     paddingTop: 64,
   },
 
@@ -26,8 +26,8 @@ export const homeStyles = StyleSheet.create({
    * Primary welcome heading style.
    */
   welcomeText: {
-    fontSize: FontSize.xl32,
-    ...TextStyles.medium,
+    fontSize: theme.fontSize.xl32,
+    ...theme.textStyles.medium,
     textAlign: 'center',
     marginBottom: 4,
   },
@@ -36,21 +36,21 @@ export const homeStyles = StyleSheet.create({
    * Username style displayed beneath the welcome heading.
    */
   userName: {
-    fontSize: FontSize.m20,
-    ...TextStyles.medium,
+    fontSize: theme.fontSize.m20,
+    ...theme.textStyles.medium,
     textAlign: 'center',
     marginBottom: 40,
-    color: Colours.greyPrimaryMainText,
+    color: colours.greyPrimaryMainText,
   },
 
   /**
    * Section header text style used for the "CHOOSE A SECTION" label.
    */
   sectionTitle: {
-    fontSize: FontSize.l24,
-    ...TextStyles.semiBold,
+    fontSize: theme.fontSize.l24,
+    ...theme.textStyles.semiBold,
     textAlign: 'center',
-    color: Colours.greyIconLight,
+    color: colours.greyIconLight,
     marginBottom: 10,
   },
 
@@ -59,11 +59,11 @@ export const homeStyles = StyleSheet.create({
    */
   sectionButton: {
     borderWidth: 0.6,
-    borderColor: Colours.redPrimary,
-    borderRadius: BorderRadius.largeButtonsAndOutlines,
+    borderColor: colours.redPrimary,
+    borderRadius: theme.borderRadius.largeButtonsAndOutlines,
     marginBottom: 20,
     alignItems: 'center',
-    backgroundColor: Colours.redBackgroundLight,
+    backgroundColor: colours.redBackgroundLight,
   },
 
   /**
@@ -81,9 +81,9 @@ export const homeStyles = StyleSheet.create({
    * Text style for labels inside section buttons.
    */
   sectionButtonText: {
-    fontSize: FontSize.l24,
-    ...TextStyles.semiBold,
-    color: Colours.black,
+    fontSize: theme.fontSize.l24,
+    ...theme.textStyles.semiBold,
+    color: colours.black,
     textAlign: 'left',
     marginLeft: 12,
   },
@@ -107,10 +107,10 @@ export const homeStyles = StyleSheet.create({
    * Title style for the quick access section.
    */
   quickAccessTitle: {
-    fontSize: FontSize.m20,
-    ...TextStyles.semiBold,
+    fontSize: theme.fontSize.m20,
+    ...theme.textStyles.semiBold,
     textAlign: 'left',
-    color: Colours.greyIconLight,
+    color: colours.greyIconLight,
     marginBottom: 10,
   },
 
@@ -139,10 +139,10 @@ export const homeStyles = StyleSheet.create({
    * Text style for quick access item labels.
    */
   quickAccessButton: {
-    fontSize: FontSize.s16,
-    ...TextStyles.medium,
+    fontSize: theme.fontSize.s16,
+    ...theme.textStyles.medium,
     textAlign: 'left',
-    color: Colours.black,
+    color: colours.black,
     marginLeft: 12,
   },
 });

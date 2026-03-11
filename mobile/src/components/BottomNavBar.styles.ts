@@ -1,18 +1,18 @@
 import { StyleSheet } from 'react-native';
-import { Colours } from '../theme/colours';
-import { Spacing, TextStyles } from '../theme/theme';
+import { colours } from '../theme/colours';
+import { theme } from '../theme/theme';
 
 export const bottomNavStyles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: Spacing.smallPadding,
+    paddingHorizontal: theme.spacing.smallPadding,
     paddingTop: 10,
     paddingBottom: 12,
     borderTopWidth: 1,
-    borderTopColor: Colours.white,
-    backgroundColor: Colours.white,
+    borderTopColor: colours.white,
+    backgroundColor: colours.white,
   },
   navItem: {
     flex: 1,
@@ -22,14 +22,14 @@ export const bottomNavStyles = StyleSheet.create({
   },
   navLabel: {
     fontSize: 12,
-    ...TextStyles.medium,
-    color: Colours.greyPrimaryMainText,
+    ...theme.textStyles.medium,
+    color: colours.greyPrimaryMainText,
     textAlign: 'center',
     marginTop: 4,
 
   },
   activeNavLabel: {
-    color: Colours.redPrimary,
+    color: colours.redPrimary,
   },
 });
 

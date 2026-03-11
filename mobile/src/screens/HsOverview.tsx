@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, Text, View, Platform } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import SummaryRow from '../components/summary/SummaryRow';
 import AlertBox from '../components/AlertBox';
 import { styles, localStyles } from './HsOverview.styles';
-import { Colours } from '../theme/colours';
+import { colours } from '../theme/colours';
+import AuthenticationService from "../logic/AuthenticationService.ts";
 
 // Props for the small summary component
 interface HsStatProps {
@@ -29,7 +30,7 @@ const RiskCard: React.FC = () => (
     <View style={styles.riskWrapper}>
         <View style={localStyles.riskCard}>
             <View style={localStyles.iconBox}>
-                <Icon source="clipboard-alert-outline" size={28} color={Colours.bluePrimary} />
+                <Icon source="clipboard-alert-outline" size={28} color={colours.bluePrimary} />
             </View>
             <Text style={localStyles.riskLabel}>Risk Assessment</Text>
         </View>
@@ -52,13 +53,7 @@ export default function HsOverview() {
     useEffect(() => {
         const fetchDashboard = async () => {
             try {
-                // Determine backend URL based on platform
-                let backendUrl = 'http://localhost:8080/hs-overview';
-                if (Platform.OS === 'android') {
-                    backendUrl = 'http://10.0.2.2:8080/hs-overview';
-                }
-
-                const response = await fetch(backendUrl);
+                const response = await AuthenticationService.fetch('/api/hs-overview');
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
                 const data: HsOverviewResponse = await response.json();
@@ -79,7 +74,7 @@ export default function HsOverview() {
             {/* Header row: icon + title + badge */}
             <View style={styles.headerRow}>
                 <View style={styles.headerLeft}>
-                    <Icon source="alert-circle-outline" size={30} color={Colours.redPrimary} />
+                    <Icon source="alert-circle-outline" size={30} color={colours.redPrimary} />
                     <Text style={styles.headerTitle}>Actions Required</Text>
                 </View>
                 <View style={styles.headerBadge}>
@@ -92,9 +87,9 @@ export default function HsOverview() {
                 <AlertBox
                     label="Document"
                     body="Fire and Safety Policy v2.0 requires a signature"
-                    circleColor={Colours.redPrimary}
-                    labelColor={Colours.redTextDark}
-                    labelBackground={Colours.redBackgroundLight}
+                    circleColor={colours.redPrimary}
+                    labelColor={colours.redTextDark}
+                    labelBackground={colours.redBackgroundLight}
                 />
             </View>
 
@@ -102,9 +97,9 @@ export default function HsOverview() {
                 <AlertBox
                     label="Report"
                     body="Hazard Report #HA-26-001 has been updated"
-                    circleColor={Colours.amberPrimary}
-                    labelColor={Colours.amberTextDark}
-                    labelBackground={Colours.amberBackgroundLight}
+                    circleColor={colours.amberPrimary}
+                    labelColor={colours.amberTextDark}
+                    labelBackground={colours.amberBackgroundLight}
                 />
             </View>
 
@@ -112,9 +107,9 @@ export default function HsOverview() {
                 <AlertBox
                     label="SOP"
                     body="Filler text. dont know what to put here"
-                    circleColor={Colours.amberPrimary}
-                    labelColor={Colours.amberTextDark}
-                    labelBackground={Colours.amberBackgroundLight}
+                    circleColor={colours.amberPrimary}
+                    labelColor={colours.amberTextDark}
+                    labelBackground={colours.amberBackgroundLight}
                 />
             </View>
 

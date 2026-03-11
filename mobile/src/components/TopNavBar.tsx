@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, View, Pressable } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { topNavStyles as styles } from './TopNavBar.styles';
-import { Colours } from '../theme/colours';
+import { colours } from '../theme/colours';
 
 
 type TopNavBarProps = {
@@ -26,7 +26,7 @@ export default function TopNavBar({
       <View style={styles.leftSection}>
         {showBackButton && (
           <Pressable style={styles.backButton} onPress={onBackPress}>
-            <Icon source="arrow-left" size={24} color={Colours.black} />
+            <Icon source="arrow-left" size={24} color={colours.black} />
           </Pressable>
         )}
 
@@ -37,14 +37,14 @@ export default function TopNavBar({
       <View style={styles.rightSection}>
         <Pressable style={styles.iconButton} onPress={onNotificationsPress}>
           <View style={styles.notificationWrapper}>
-            <Icon source="bell" size={22} color={Colours.black} />
+            <Icon source="bell" size={22} color={colours.black} />
             <View style={styles.notificationBadge}>
               <Text style={styles.notificationBadgeText}>1</Text>
             </View>
           </View>
         </Pressable>
         <Pressable style={styles.iconButton} onPress={onProfilePress}>
-          <Icon source="account-circle" size={24} color={Colours.black} />
+          <Icon source="account-circle" size={24} color={colours.black} />
         </Pressable>
       </View>
 

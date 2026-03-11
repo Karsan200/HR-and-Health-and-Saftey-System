@@ -21,7 +21,10 @@ module.exports = {
     {
       displayName: 'Rent-A-Tech HR',
       preset: 'react-native',
-      testMatch: ['**/__tests__/**/*.test.{js,jsx,ts,tsx}', '!**/__tests__/**/*.web.test.{js,jsx,ts,tsx}'],
+      testMatch: ['**/__tests__/**/*.test.{js,jsx,ts,tsx}'],
+      transformIgnorePatterns: [
+        'node_modules/(?!(react-native|@react-native|react-native-paper|react-native-vector-icons|@react-navigation)/)',
+      ],
     },
   ],
 };
