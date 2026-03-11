@@ -30,6 +30,7 @@ export const homeStyles = (theme: any) =>
     ...TextStyles.medium,
     textAlign: 'center',
     marginBottom: 4,
+    color: theme.black,
   },
 
   /**

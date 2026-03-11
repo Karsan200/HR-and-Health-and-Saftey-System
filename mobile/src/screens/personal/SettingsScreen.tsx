@@ -123,15 +123,15 @@ export default function SettingsScreen() {
   console.log(theme);
 
   const [pickColors, setPickColors] = useState({
-    background: "#EEEEF3",
+    background: "#F6F6F8",
     text: "#000000",
     accent: "#D20414"
   });
 
   const [colors, setColors] = useState<ColorSet>({
-    primary: "#D20414",
-    dark: "#000000",
-    light: "#ffffff"
+    primary: "",
+    dark: "",
+    light: ""
   });
 
   function openPicker(type: "background" | "text" | "accent") {
@@ -162,14 +162,16 @@ export default function SettingsScreen() {
 
     if (editingColor === "text") {
       updateTheme({
-        black: hex,
-        greyPrimaryMainText: hex
+        black: newColors.dark,
+        greyPrimaryMainText: newColors.primary,
+        greyIconLight: newColors.light
       });
     }
 
     if (editingColor === "background") {
       updateTheme({
-        greyBackground: hex
+        greyBackground: newColors.primary,
+        white: newColors.light
       });
     }
   }
