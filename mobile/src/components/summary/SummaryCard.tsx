@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import React, { useContext } from 'react';
+import { View, Text, StyleSheet, Pressable, ViewStyle, TextStyle } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { FontSize, BorderRadius, TextStyles } from '../../theme/theme';
-import { Colours } from '../../theme/colours';
+import { ThemeContext } from '../../theme/colourController';
 
 type CardColour = 'red' | 'amber' | 'green' | 'neutral';
 
@@ -25,53 +25,99 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
                                                    iconBackgroundColor,
                                                    onPress,
                                                  }) => {
+  const { theme } = useContext(ThemeContext); // grab theme dynamically
+
   const Container = onPress ? Pressable : View;
 
-  // Colour mapping
-  const colourStyles = {
+  // Colour mapping based on theme
+  const colourStyles: Record<CardColour, { iconColor: string; background: string }> = {
     red: {
-      iconColor: Colours.redPrimary,
-      background: Colours.redBackgroundLight,
+      iconColor: theme.redPrimary,
+      background: theme.redBackgroundLight,
     },
     amber: {
-      iconColor: Colours.amberPrimary,
-      background: Colours.amberBackgroundLight,
+      iconColor: theme.amberPrimary,
+      background: theme.amberBackgroundLight,
     },
     green: {
-      iconColor: Colours.greenPrimary,
-      background: Colours.greenBackgroundLight,
+      iconColor: theme.greenPrimary,
+      background: theme.greenBackgroundLight,
     },
     neutral: {
-      iconColor: Colours.bluePrimary,
-      background: Colours.greyBackground,
+      iconColor: theme.bluePrimary,
+      background: theme.greyBackground,
     },
   };
 
   const resolvedIconColor = iconColor ?? colourStyles[colour].iconColor;
+  const resolvedBackgroundColor = iconBackgroundColor ?? colourStyles[colour].background;
 
-  const resolvedBackgroundColor =
-    iconBackgroundColor ?? colourStyles[colour].background;
+  // Styles that depend on theme must be inside the component
+  const styles = StyleSheet.create({
+    card: {
+      flex: 1,
+      backgroundColor: theme.white,
+      borderRadius: BorderRadius.largeButtonsAndOutlines,
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+      shadowColor: theme.greyIconLight,
+      shadowOpacity: 1,
+      shadowRadius: 4,
+      elevation: 4,
+    } as ViewStyle,
+
+    content: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+    } as ViewStyle,
+
+    topRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    } as ViewStyle,
+
+    bottomRow: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    } as ViewStyle,
+
+    iconContainer: {
+      width: 20,
+      height: 20,
+      borderRadius: BorderRadius.smallTextBackground,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 6,
+      backgroundColor: resolvedBackgroundColor,
+    } as ViewStyle,
+
+    label: {
+      ...TextStyles.regular,
+      fontSize: FontSize.xs14,
+      color: theme.greyIconLight,
+    } as TextStyle,
+
+    value: {
+      ...TextStyles.regular,
+      fontSize: FontSize.l24,
+      color: theme.black,
+    } as TextStyle,
+  });
 
   return (
     <Container style={styles.card} onPress={onPress}>
       <View style={styles.content}>
-        {/* Top Row → Icon + Label */}
         <View style={styles.topRow}>
           {icon && (
-            <View
-              style={[
-                styles.iconContainer,
-                { backgroundColor: resolvedBackgroundColor },
-              ]}
-            >
+            <View style={styles.iconContainer}>
               <Icon source={icon} size={15} color={resolvedIconColor} />
             </View>
           )}
-
           <Text style={styles.label}>{label}</Text>
         </View>
 
-        {/* Bottom Row → Value */}
         <View style={styles.bottomRow}>
           <Text style={styles.value}>{value}</Text>
         </View>
@@ -81,55 +127,3 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
 };
 
 export default SummaryCard;
-
-const styles = StyleSheet.create({
-  card: {
-    flex: 1,
-    backgroundColor: Colours.white,
-    borderRadius: BorderRadius.largeButtonsAndOutlines,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    shadowColor: Colours.greyIconLight,
-    shadowOpacity: 1,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-
-  content: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  bottomRow: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  iconContainer: {
-    width: 20,
-    height: 20,
-    borderRadius: BorderRadius.smallTextBackground,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 6,
-  },
-
-  label: {
-    ...TextStyles.regular,
-    fontSize: FontSize.xs14,
-    color: Colours.greyIconLight,
-  },
-
-  value: {
-    ...TextStyles.regular,
-    fontSize: FontSize.l24,
-    color: Colours.black,
-  },
-});
