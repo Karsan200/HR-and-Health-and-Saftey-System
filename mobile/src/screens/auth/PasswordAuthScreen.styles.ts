@@ -43,5 +43,12 @@ export const passwordAuthScreenStyles = StyleSheet.create({
     fontSize: theme.fontSize.xs14,
     fontFamily: theme.textStyles.regular.fontFamily,
     fontWeight: theme.textStyles.regular.fontWeight
+  },
+
+  dialogText: {
+    fontSize: theme.fontSize.s16,
+    fontFamily: theme.textStyles.regular.fontFamily,
+    fontWeight: theme.textStyles.regular.fontWeight,
+    color: colours.black
   }
 });

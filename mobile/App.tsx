@@ -36,6 +36,7 @@ function App() {
                 await AuthenticationService.refresh();
                 setIsAuthenticated(true);
             } catch (error) {
+              console.log(error)
               if (error instanceof HttpException && error.statusCode === 401) {
                 setIsAuthenticated(false);
               }
@@ -53,7 +54,7 @@ function App() {
       ) : isAuthenticated ? (
         <AppContent />
       ) : (
-        <PasswordAuthScreen />
+        <PasswordAuthScreen isAuth={setIsAuthenticated} />
       )}
     </PaperProvider >
   );

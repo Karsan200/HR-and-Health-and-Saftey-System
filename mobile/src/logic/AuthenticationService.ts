@@ -89,7 +89,7 @@ class AuthenticationService {
         }
 
         const response = await fetch(AppSettings.API_URL + "/auth/refresh", {
-            method: 'POST',
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': `refreshToken=${credentials.refreshToken}`,
@@ -152,7 +152,7 @@ class AuthenticationService {
     * @throws HttpException with appropriate status code and message for different failure scenarios
     */
     static async login(body: AuthRequestModel): Promise<void> {
-        const response = await this.fetch(AppSettings.API_URL + "/auth/login", {
+        const response = await fetch(AppSettings.API_URL + "/auth/login", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

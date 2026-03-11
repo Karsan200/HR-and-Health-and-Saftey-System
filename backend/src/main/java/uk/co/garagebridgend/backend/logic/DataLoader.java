@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.DocumentTable;
 import uk.co.garagebridgend.backend.models.entity.FilesTable;
@@ -51,7 +52,7 @@ public class DataLoader {
             maggie.setLastName("May");
             maggie.setUsername("MMay");
             maggie.setEmail("MMay@test.com");
-            maggie.setPassword("password");
+            maggie.setPassword(BCrypt.hashpw("password", BCrypt.gensalt()));
             maggie.setAddressOne("Test Street");
             maggie.setPostalCode("CF31");
             accountRepository.save(maggie);
@@ -121,7 +122,7 @@ public class DataLoader {
             john.setLastName("Doe");
             john.setUsername("JDoe");
             john.setEmail("JDoe@test.com");
-            john.setPassword("password");
+            john.setPassword(BCrypt.hashpw("password", BCrypt.gensalt()));
             john.setAddressOne("Example Street");
             john.setPostalCode("CF32");
             accountRepository.save(john);

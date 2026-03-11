@@ -19,7 +19,10 @@ export const paperTheme: ThemeProp = {
     ...MD3LightTheme.colors, // Default theme, overridden by custom colors below
     primary: colours.redPrimary,
     onSurfaceVariant: colours.greyPrimaryMainText,
-    outline: colours.greyIconLight
+    outline: colours.greyIconLight,
+    elevation: {
+      level3: colours.greyBackground
+    }
   },
   fonts: {
     default: {
