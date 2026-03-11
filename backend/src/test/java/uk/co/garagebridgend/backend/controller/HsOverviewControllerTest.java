@@ -2,6 +2,7 @@ package uk.co.garagebridgend.backend.controller;
 
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import org.mockito.InjectMocks;
@@ -153,6 +154,7 @@ public class HsOverviewControllerTest {
      */
     @Test
     @WithMockUser(username = "3")
+    @Order(1)
     void testHsOverviewSuccess() throws Exception {
 
         mockMvc.perform(get("/api/hs-overview"))
@@ -169,6 +171,7 @@ public class HsOverviewControllerTest {
      */
     @Test
     @WithMockUser(username = "60")
+    @Order(2)
     void testHsOverviewUserNotFound() throws Exception {
 
         mockMvc.perform(get("/api/hs-overview"))
@@ -176,6 +179,7 @@ public class HsOverviewControllerTest {
     }
 
     @Test
+    @Order(2)
     void testOverviewThrowsException() throws Exception {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(hsOverviewController).build();
