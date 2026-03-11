@@ -45,7 +45,7 @@ describe('AuthenticationService - Credential Store', () => {
   });
 });
 
-describe('refresh - Access token refreshing', () => {
+describe('refresh & extract claims - Access token refreshing, extracting claims', () => {
     let getCredentialsSpy: jest.SpyInstance;
     let putCredentialsSpy: jest.SpyInstance;
     let fetchSpy: jest.SpyInstance;
@@ -69,7 +69,7 @@ describe('refresh - Access token refreshing', () => {
         fetchSpy.mockRestore();
     });
 
-    it('Should return HttpException 401 due to getCredentials returning null', async () => {
+    it('refresh - Should return HttpException 401 due to getCredentials returning null', async () => {
         // Mock getCredentials to return null to simulate missing credentials
         getCredentialsSpy.mockResolvedValue(null);
 
@@ -79,7 +79,7 @@ describe('refresh - Access token refreshing', () => {
         });
     });
 
-    it('Should return HttpException 401 due to failed token refresh', async () => {
+    it('refresh - Should return HttpException 401 due to failed token refresh', async () => {
         // Mock the fetch method to return a failed response
         fetchSpy.mockResolvedValue({
             ok: false,
@@ -92,7 +92,7 @@ describe('refresh - Access token refreshing', () => {
         });
     });
 
-    it('Should refresh access token successfully', async () => {
+    it('refresh - Should refresh access token successfully', async () => {
         // Mock the fetch method to return a successful response with a new access token
         fetchSpy.mockResolvedValue({
             ok: true,
@@ -115,5 +115,35 @@ describe('refresh - Access token refreshing', () => {
 
         // Verify that putCredentials was called to store the new access token
         expect(putCredentialsSpy).toHaveBeenCalledWith('newAccessToken', 'oldRefreshToken');
+    });
+
+    it('claims - Should return HttpException 401 due to getCredentials returning null', async () => {
+        // Mock getCredentials to return null to simulate missing credentials
+        getCredentialsSpy.mockResolvedValue(null);
+
+        await expect(AuthenticationService.extractClaims()).rejects.toMatchObject({
+            statusCode: 401,
+            message: 'No authentication tokens found.',
+        });
+    });
+
+    it('claims - Should extract claims successfully', async () => {
+        // Mock getCredentials to return valid tokens
+        getCredentialsSpy.mockResolvedValue({
+            accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyMzk2MjJ9.3ETlmuYRQ4akrgES3ogapKRYY-Z2VeRDLfBECJNK8JQ",
+            refreshToken: "testRefreshToken"
+        });
+
+        const claims = await AuthenticationService.extractClaims();
+
+        // Verify that getCredentials was called to retrieve existing tokens
+        expect(getCredentialsSpy).toHaveBeenCalled();
+
+        // Verify that the extracted claims match the expected values
+        expect(claims).toEqual({
+            accountId: 2,
+            issuedAt: 1516239022,
+            expiresAt: 1516239622,
+        });
     });
 })
