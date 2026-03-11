@@ -34,7 +34,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 )
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Transactional
 public class HsOverviewControllerTest {
 
     @Autowired
@@ -109,12 +108,24 @@ public class HsOverviewControllerTest {
         HazardTable hazard1 = new HazardTable();
         hazard1.setAccount(user);
         hazard1.setTitle("Loose Cable");
+        hazard1.setQuestionOne("Cable across the floor");
+        hazard1.setQuestionTwo("Office");
+        hazard1.setQuestionThree("Trip risk");
+        hazard1.setQuestionFour("Flood");
+        hazard1.setQuestionFive("Low");
+        hazard1.setQuestionSix("Fix soon");
 
         hazardRepository.save(hazard1);
 
         HazardTable hazard2 = new HazardTable();
         hazard2.setAccount(user);
         hazard2.setTitle("Wet Floor");
+        hazard2.setQuestionOne("Cable across the floor");
+        hazard2.setQuestionTwo("Office");
+        hazard2.setQuestionThree("Trip risk");
+        hazard2.setQuestionFour("Flood");
+        hazard2.setQuestionFive("Low");
+        hazard2.setQuestionSix("Fix soon");
 
         hazardRepository.save(hazard2);
 
