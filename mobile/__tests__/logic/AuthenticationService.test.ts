@@ -109,7 +109,7 @@ describe('AuthenticationService - refresh & extracting claims', () => {
 
         // Verify that fetch was called with the correct parameters
         expect(fetchSpy).toHaveBeenCalledWith(AppSettings.API_URL + "/auth/refresh", {
-            method: 'POST',
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': 'refreshToken=oldRefreshToken',
