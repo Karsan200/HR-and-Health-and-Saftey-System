@@ -21,7 +21,7 @@ INSERT INTO account_table (
           'May',
           'MMay',
           'MMay@test.com',
-          'password',
+          '$2a$10$ZSJDhx5OZeI538IRjHJZx',
           'salt',
           NULL,
           '07700123456',
@@ -38,7 +38,7 @@ INSERT INTO account_table (
           'Doe',
           'JDoe',
           'JDoe@test.com',
-          'password',
+          '$2a$10$ZSJDhx5OZeI538IRjHJZx',
           'salt',
           NULL,
           '07700234567',
@@ -55,7 +55,7 @@ INSERT INTO account_table (
           'Hughes',
           'MHughes',
           'mark.hughes@test.com',
-          'password',
+          '$2a$10$ZSJDhx5OZeI538IRjHJZx',
           'salt',
           NULL,
           '07700456789',
@@ -72,7 +72,7 @@ INSERT INTO account_table (
           'Jones',
           'EJones',
           'emily.jones@test.com',
-          'password',
+          '$2a$10$ZSJDhx5OZeI538IRjHJZx',
           'salt',
           NULL,
           '07700567890',
@@ -89,7 +89,7 @@ INSERT INTO account_table (
           'Roberts',
           'DRoberts',
           'daniel.roberts@test.com',
-          'password',
+          '$2a$10$ZSJDhx5OZeI538IRjHJZx',
           'salt',
           NULL,
           '07700678901',
@@ -106,7 +106,7 @@ INSERT INTO account_table (
           'Williams',
           'LWilliams',
           'laura.williams@test.com',
-          'password',
+          '$2a$10$ZSJDhx5OZeI538IRjHJZx',
           'salt',
           NULL,
           '07700789012',
@@ -123,7 +123,7 @@ INSERT INTO account_table (
           'Davies',
           'ODavies',
           'olivia.davies@test.com',
-          'password',
+          '$2a$10$ZSJDhx5OZeI538IRjHJZx',
           'salt',
           NULL,
           '07700901234',
@@ -140,7 +140,7 @@ INSERT INTO account_table (
           'Price',
           'RPrice',
           'ryan.price@test.com',
-          'password',
+          '$2a$10$ZSJDhx5OZeI538IRjHJZx',
           'salt',
           NULL,
           '07700112233',
@@ -153,5 +153,23 @@ INSERT INTO account_table (
           '2026-01-11 09:34:00'
       );
 
+INSERT INTO files_table (
+    file_id,
+    account_id,
+    created_by,
+    name,
+    extension,
+    created
+) VALUES
+      (UUID(), 1, 1, 'safety_policy', 'pdf', '2025-02-14 10:00:00'),
+      (UUID(), 1, 1, 'fire_safety', 'pdf', '2025-02-14 10:05:00'),
+      (UUID(), 2, 2, 'training_manual', 'pdf', '2025-03-02 11:00:00'),
+      (UUID(), 3, 3, 'hr_guidelines', 'pdf', '2025-04-18 15:00:00'),
+      (UUID(), 4, 4, 'hazard_report_template', 'pdf', '2025-05-29 12:00:00'),
+      (UUID(), 5, 5, 'equipment_safety', 'pdf', '2025-07-12 09:00:00'),
+      (UUID(), 6, 6, 'workshop_rules', 'pdf', '2025-08-20 17:00:00'),
+      (UUID(), 7, 7, 'health_policy', 'pdf', '2025-09-15 14:00:00'),
+      (UUID(), 8, 8, 'emergency_procedures', 'pdf', '2025-10-30 18:00:00'
+      );
 
 
