@@ -19,6 +19,15 @@ describe('AuthenticationService - Credential Store', () => {
     });
   });
 
+  it('putCredentials - Should throw HttpException 500 when Keychain.setGenericPassword fails', async () => {
+    (Keychain.setGenericPassword as jest.Mock).mockRejectedValue(new Error('Keychain error'));
+
+    await expect(AuthenticationService.putCredentials('testAccessToken', 'testRefreshToken')).rejects.toMatchObject({
+      statusCode: 500,
+      message: 'Failed to store authentication tokens securely.',
+    });
+  });
+
   it('putCredentials - Test credentials are set successfully', async () => {
     const accessToken = 'testAccessToken';
     const refreshToken = 'testRefreshToken';
@@ -31,6 +40,23 @@ describe('AuthenticationService - Credential Store', () => {
         'authTokens',
         JSON.stringify({ accessToken, refreshToken })
     );
+  });
+
+  it('getCredentials - Should return null when no credentials are stored', async () => {
+    (Keychain.getGenericPassword as jest.Mock).mockResolvedValue(false);
+
+    const credentials = await AuthenticationService.getCredentials();
+
+    expect(credentials).toBeNull();
+  });
+
+  it('getCredentials - Should throw HttpException 500 when Keychain.getGenericPassword fails', async () => {
+    (Keychain.getGenericPassword as jest.Mock).mockRejectedValue(new Error('Keychain error'));
+
+    await expect(AuthenticationService.getCredentials()).rejects.toMatchObject({
+      statusCode: 500,
+      message: 'Failed to retrieve authentication tokens securely.',
+    });
   });
 
   it('getCredentials - Test credentials are retrieved successfully', async () => {
@@ -127,6 +153,18 @@ describe('AuthenticationService - refresh & extracting claims', () => {
         await expect(AuthenticationService.extractClaims()).rejects.toMatchObject({
             statusCode: 401,
             message: 'No authentication tokens found.',
+        });
+    });
+
+    it('claims - Should throw HttpException 500 when jwtDecode fails', async () => {
+        getCredentialsSpy.mockResolvedValue({
+            accessToken: 'invalid.jwt.token',
+            refreshToken: 'testRefreshToken',
+        });
+
+        await expect(AuthenticationService.extractClaims()).rejects.toMatchObject({
+            statusCode: 500,
+            message: 'Failed to extract JWT claims.',
         });
     });
 

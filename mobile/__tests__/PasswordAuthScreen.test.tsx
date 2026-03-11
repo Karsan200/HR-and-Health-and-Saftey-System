@@ -8,6 +8,77 @@ import { paperTheme } from '../src/theme/paperTheme.ts';
 declare const global: any;
 global.fetch = jest.fn();
 
+describe('PasswordAuthScreen', () => {
+  let mockSetIsAuthenticated: jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockSetIsAuthenticated = jest.fn();
+  });
+
+  it('renders correctly', () => {
+    const { getByText, getAllByTestId } = render(
+      <PaperProvider theme={paperTheme}>
+        <PasswordAuthScreen isAuth={mockSetIsAuthenticated} />
+      </PaperProvider>
+    );
+
+    expect(getByText('Login')).toBeTruthy();
+    expect(getAllByTestId('text-input-outlined')).toHaveLength(2);
+    expect(getByText('Forgot Password')).toBeTruthy();
+  });
+
+  it('dismisses error dialog on OK press', async () => {
+    jest.useFakeTimers();
+
+    const queries = render(
+      <PaperProvider theme={paperTheme}>
+        <PasswordAuthScreen isAuth={mockSetIsAuthenticated} />
+      </PaperProvider>
+    );
+
+    await act(async () => {
+      fireEvent.press(queries.getByText('Login'));
+    });
+
+    expect(queries.getByText('Please enter both a username and password')).toBeTruthy();
+
+    await act(async () => {
+      fireEvent.press(queries.getByText('OK'));
+      jest.runAllTimers();
+    });
+
+    const modalSurface = queries.getByTestId('modal-surface-outer-layer');
+    expect(modalSurface.props.style).toMatchObject({ opacity: 0 });
+
+    jest.useRealTimers();
+  });
+
+  it('dismisses error dialog on backdrop press', async () => {
+    jest.useFakeTimers();
+
+    const queries = render(
+      <PaperProvider theme={paperTheme}>
+        <PasswordAuthScreen isAuth={mockSetIsAuthenticated} />
+      </PaperProvider>
+    );
+
+    await act(async () => {
+      fireEvent.press(queries.getByText('Login'));
+    });
+
+    await act(async () => {
+      fireEvent.press(queries.getByTestId('modal-backdrop'));
+      jest.runAllTimers();
+    });
+
+    const modalSurface = queries.getByTestId('modal-surface-outer-layer');
+    expect(modalSurface.props.style).toMatchObject({ opacity: 0 });
+
+    jest.useRealTimers();
+  });
+})
+
 describe('PasswordAuthScreen Form Functionality', () => {
   let getCredentialsSpy: jest.SpyInstance;
   let putCredentialsSpy: jest.SpyInstance;
@@ -104,7 +175,7 @@ describe('PasswordAuthScreen Form Functionality', () => {
   });
 
   it('Unknown error submission', async () => {
-    fetchSpy.mockRejectedValueOnce({
+    fetchSpy.mockResolvedValueOnce({
       ok: false,
       status: 501
     });
