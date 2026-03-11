@@ -14,7 +14,7 @@ jest.mock('react-native-safe-area-context', () => ({
 
 // Mock Colours to avoid undefined
 jest.mock('../src/theme/colours', () => ({
-  Colours: {
+  DefaultColours: {
     greyBackground: '#eee',
     black: '#000',
     redPrimary: '#f00',

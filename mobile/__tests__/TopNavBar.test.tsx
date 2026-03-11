@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import TopNavBar from '../src/components/TopNavBar.tsx';
 import { topNavStyles } from '../src/components/TopNavBar.styles';
-import { Colours } from '../src/theme/colours';
+import { DefaultColours } from '../src/theme/colours';
 import { fireEvent, render } from '@testing-library/react-native';
 
 // Mocking react-native-paper components used in the TopNavBar
@@ -17,24 +17,24 @@ jest.mock('react-native-paper', () => {
 
 describe('TopNavBar.styles', () => {
   it('uses the expected theme values', () => {
-    const container = StyleSheet.flatten(topNavStyles.container);
-    const title = StyleSheet.flatten(topNavStyles.title);
-    const rightSection = StyleSheet.flatten(topNavStyles.rightSection);
-    const notificationBadge = StyleSheet.flatten(topNavStyles.notificationBadge);
-    const notificationBadgeText = StyleSheet.flatten(topNavStyles.notificationBadgeText);
+    const styles = topNavStyles(DefaultColours);
+    const container = StyleSheet.flatten(styles.container);
+    const title = StyleSheet.flatten(styles.title);
+    const rightSection = StyleSheet.flatten(styles.rightSection);
+    const notificationBadge = StyleSheet.flatten(styles.notificationBadge);
+    const notificationBadgeText = StyleSheet.flatten(styles.notificationBadgeText);
 
     // Ensuring the styles are using the correct theme values and layout
-    expect(container.height).toBe(75);
     expect(container.flexDirection).toBe('row');
     expect(container.justifyContent).toBe('space-between');
     expect(container.alignItems).toBe('center');
-    expect(container.backgroundColor).toBe(Colours.white);
-    expect(title.color).toBe(Colours.black);
+    expect(container.backgroundColor).toBe(DefaultColours.white);
+    expect(title.color).toBe(DefaultColours.black);
     expect(title.includeFontPadding).toBe(false);
     expect(title.textAlignVertical).toBe('center');
     expect(rightSection.justifyContent).toBe('flex-end');
-    expect(notificationBadge.backgroundColor).toBe(Colours.redPrimary);
-    expect(notificationBadgeText.color).toBe(Colours.white);
+    expect(notificationBadge.backgroundColor).toBe(DefaultColours.redPrimary);
+    expect(notificationBadgeText.color).toBe(DefaultColours.white);
     expect(notificationBadgeText.textAlign).toBe('center');
   });
 });

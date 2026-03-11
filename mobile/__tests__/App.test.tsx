@@ -28,6 +28,14 @@ jest.mock('react-native-paper', () => {
   };
 });
 
+// Mock ColorPicker to avoid Jest parsing JSX in node_modules
+jest.mock('react-native-wheel-color-picker', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+
+  return (props: any) => React.createElement(View, props, null);
+});
+
 // Mock CalendarScreen to just render a placeholder
 jest.mock('../src/screens/CalendarScreen', () => {
   const mockReact = require('react');
