@@ -40,11 +40,11 @@ public class AdminNotificationsTable {
     private AccountTable account;
 
     /** Title of the notification. */
-    @JoinColumn(columnDefinition = "TEXT", name = "title", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "title", nullable = false)
     private String title;
 
     /** Description of the notification. */
-    @JoinColumn(columnDefinition = "TEXT", name = "description", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "description", nullable = false)
     private String description;
 
     /** True if the notification has been read by the user. */

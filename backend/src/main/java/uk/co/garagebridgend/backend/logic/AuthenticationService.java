@@ -28,7 +28,9 @@ import uk.co.garagebridgend.backend.models.entity.SessionTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.exception.InvalidPasswordException;
 import uk.co.garagebridgend.backend.models.exception.InvalidRefreshTokenException;
+import uk.co.garagebridgend.backend.models.exception.NotFoundException;
 import uk.co.garagebridgend.backend.models.internal.RotateRefreshTokenInternal;
+import uk.co.garagebridgend.backend.models.request.AuthRequest;
 import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
 import uk.co.garagebridgend.backend.models.response.RefreshTokenResponse;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
@@ -80,6 +82,34 @@ public class AuthenticationService {
     ) {
         this.sessionRepository = sessionRepositoryImpl;
         this.accountRepository = accountRepositoryImpl;
+    }
+
+    /**
+     * Authenticates a user based on the provided username and password. Validates the credentials,
+     * creates a new refresh token for the user, and generates a new access token with appropriate claims.
+     * @param body the request body containing the user's username and password
+     * @return a RotateRefreshTokenInternal object containing the new refresh token and access token
+     * @throws NotFoundException if no account is found with the provided username
+     * @throws InvalidPasswordException if the provided password does not match the stored password
+     */
+    public RotateRefreshTokenInternal authenticate(final AuthRequest body)
+            throws NotFoundException, InvalidPasswordException {
+        // Get the account from the database
+        AccountTable account = accountRepository.findByUsername(body.getUsername())
+                .orElseThrow(() -> new NotFoundException("Account not found"));
+
+        // Validate the provided password
+        if (!BCrypt.checkpw(body.getPassword(), account.getPassword())) {
+            throw new InvalidPasswordException("Invalid password");
+        }
+
+        // Create a new refresh token for the user
+        String refreshToken = createRefreshToken(account.getAccountId(), body.isMobile());
+
+        // Generate new access token
+        RefreshTokenResponse token = refreshAccessToken(refreshToken);
+
+        return new RotateRefreshTokenInternal(refreshToken, token.getAccessToken());
     }
 
     /**

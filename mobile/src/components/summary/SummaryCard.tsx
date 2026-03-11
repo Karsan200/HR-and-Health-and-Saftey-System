@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Icon } from 'react-native-paper';
-import { FontSize, BorderRadius, TextStyles } from '../../theme/theme';
-import { Colours } from '../../theme/colours';
+import { theme } from '../../theme/theme';
+import { colours } from '../../theme/colours';
 
 type CardColour = 'red' | 'amber' | 'green' | 'neutral';
 
@@ -30,20 +30,20 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
   // Colour mapping
   const colourStyles = {
     red: {
-      iconColor: Colours.redPrimary,
-      background: Colours.redBackgroundLight,
+      iconColor: colours.redPrimary,
+      background: colours.redBackgroundLight,
     },
     amber: {
-      iconColor: Colours.amberPrimary,
-      background: Colours.amberBackgroundLight,
+      iconColor: colours.amberPrimary,
+      background: colours.amberBackgroundLight,
     },
     green: {
-      iconColor: Colours.greenPrimary,
-      background: Colours.greenBackgroundLight,
+      iconColor: colours.greenPrimary,
+      background: colours.greenBackgroundLight,
     },
     neutral: {
-      iconColor: Colours.bluePrimary,
-      background: Colours.greyBackground,
+      iconColor: colours.bluePrimary,
+      background: colours.greyBackground,
     },
   };
 
@@ -85,11 +85,11 @@ export default SummaryCard;
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: Colours.white,
-    borderRadius: BorderRadius.largeButtonsAndOutlines,
+    backgroundColor: colours.white,
+    borderRadius: theme.borderRadius.largeButtonsAndOutlines,
     paddingVertical: 8,
     paddingHorizontal: 10,
-    shadowColor: Colours.greyIconLight,
+    shadowColor: colours.greyIconLight,
     shadowOpacity: 1,
     shadowRadius: 4,
     elevation: 4,
@@ -115,21 +115,21 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 20,
     height: 20,
-    borderRadius: BorderRadius.smallTextBackground,
+    borderRadius: theme.borderRadius.smallTextBackground,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 6,
   },
 
   label: {
-    ...TextStyles.regular,
-    fontSize: FontSize.xs14,
-    color: Colours.greyIconLight,
+    ...theme.textStyles.regular,
+    fontSize: theme.fontSize.xs14,
+    color: colours.greyIconLight,
   },
 
   value: {
-    ...TextStyles.regular,
-    fontSize: FontSize.l24,
-    color: Colours.black,
+    ...theme.textStyles.regular,
+    fontSize: theme.fontSize.l24,
+    color: colours.black,
   },
 });

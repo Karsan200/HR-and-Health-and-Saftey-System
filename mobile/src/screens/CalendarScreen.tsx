@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar, DateData } from 'react-native-calendars';
 import dayjs from 'dayjs';
 
-import { Colours } from '../theme/colours';
+import { colours } from '../theme/colours';
 import { calendarScreenStyles as styles } from './CalendarScreen.styles';
 import SummaryCard from '../components/summary/SummaryCard';
 import SummaryRow from '../components/summary/SummaryRow';
@@ -64,12 +64,12 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
 
     greyedDates[date] = {
       selected: true,
-      selectedColor: Colours.greyBackground,
-      selectedTextColor: Colours.greyPrimaryMainText,
+      selectedColor: colours.greyBackground,
+      selectedTextColor: colours.greyPrimaryMainText,
       customStyles: {
         container: { borderRadius: 20 },
         text: {
-          color: Colours.greyPrimaryMainText,
+          color: colours.greyPrimaryMainText,
           textAlign: 'center',
           lineHeight: 32,
         },
@@ -87,12 +87,12 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
 
     bookedDates[date] = {
       selected: true,
-      selectedColor: fullyBooked ? Colours.redPrimary : Colours.amberPrimary,
-      selectedTextColor: Colours.white,
+      selectedColor: fullyBooked ? colours.redPrimary : colours.amberPrimary,
+      selectedTextColor: colours.white,
       customStyles: {
         container: { borderRadius: 20 },
         text: {
-          color: Colours.white,
+          color: colours.white,
           fontWeight: '600',
           textAlign: 'center',
           lineHeight: 32,
@@ -105,12 +105,12 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
   const todayMarking: Record<string, any> = {
     [today.format('YYYY-MM-DD')]: {
       selected: true,
-      selectedColor: Colours.black,
-      selectedTextColor: Colours.white,
+      selectedColor: colours.black,
+      selectedTextColor: colours.white,
       customStyles: {
         container: { borderRadius: 20 },
         text: {
-          color: Colours.white,
+          color: colours.white,
           fontWeight: '600',
           textAlign: 'center',
           lineHeight: 32,
@@ -161,13 +161,13 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
           onDayPress={handleDayPress}
           markedDates={markedDates}
           theme={{
-            calendarBackground: Colours.white,
-            textSectionTitleColor: Colours.greyPrimaryMainText,
-            selectedDayBackgroundColor: Colours.redPrimary,
-            selectedDayTextColor: Colours.white,
-            todayTextColor: Colours.redPrimary,
-            arrowColor: Colours.redPrimary,
-            monthTextColor: Colours.black,
+            calendarBackground: colours.white,
+            textSectionTitleColor: colours.greyPrimaryMainText,
+            selectedDayBackgroundColor: colours.redPrimary,
+            selectedDayTextColor: colours.white,
+            todayTextColor: colours.redPrimary,
+            arrowColor: colours.redPrimary,
+            monthTextColor: colours.black,
           }}
         />
 

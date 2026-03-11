@@ -1,5 +1,6 @@
 package uk.co.garagebridgend.backend.config;
 
+import jakarta.servlet.RequestDispatcher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -66,14 +67,21 @@ public class SecurityConfig {
 
                 // Return 401 for unauthenticated requests
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint((request, response, authException) ->
-                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            // If there's an existing error status (e.g. 404, 500), preserve it
+                            Integer statusCode = (Integer) request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+                            if (statusCode != null) {
+                                response.sendError(statusCode);
+                            } else {
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                            }
+                        }))
 
                 // Configure endpoint authorization
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         // FUTURE: REMOVE HS OVERVIEW AND LEAVE AFTER LOGIN IS DONE
-                        .requestMatchers("/auth/refresh", "/api/hs-overview", "/api/leave/**").permitAll()
+                        .requestMatchers("/auth/refresh", "/auth/login", "/api/leave/**").permitAll()
 
                         // Role-based endpoints (order matters - most specific first)
                         .requestMatchers("/admin/permissions/**").hasAuthority("ROLE_ADMIN")

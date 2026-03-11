@@ -5,7 +5,7 @@ import HsOverview from '../src/screens/HsOverview';
 import { fireEvent } from '@testing-library/react-native';
 import SummaryCard from '../src/components/summary/SummaryCard';
 import AlertBox from '../src/components/AlertBox';
-import { Colours } from '../src/theme/colours';
+import { colours } from '../src/theme/colours';
 import AuthenticationService from "../src/logic/AuthenticationService.ts";
 
 jest.mock('../src/logic/AuthenticationService.ts', () => ({
@@ -200,9 +200,9 @@ describe('HsOverview Screen', () => {
             const customProps = {
                 label: 'Report',
                 body: 'Hazard #42 requires attention',
-                circleColor: Colours.amberPrimary,
-                labelColor: Colours.amberTextDark,
-                labelBackground: Colours.amberBackgroundLight,
+                circleColor: colours.amberPrimary,
+                labelColor: colours.amberTextDark,
+                labelBackground: colours.amberBackgroundLight,
             };
 
             const {getByText} = render(<AlertBox {...customProps} />);
@@ -216,7 +216,7 @@ describe('HsOverview Screen', () => {
 
         it('applies correct label color', () => {
             const props = {
-                labelColor: Colours.greenTextDark,
+                labelColor: colours.greenTextDark,
                 label: 'SOP',
             };
 
@@ -228,7 +228,7 @@ describe('HsOverview Screen', () => {
 
             // Check that one of the styles has the correct color
             expect(stylesArray).toEqual(
-                expect.arrayContaining([expect.objectContaining({color: Colours.greenTextDark})])
+                expect.arrayContaining([expect.objectContaining({color: colours.greenTextDark})])
             );
         });
     });

@@ -1,24 +1,24 @@
 import { StyleSheet } from 'react-native';
-import {Colours} from "../theme/colours.ts";
-import {BorderRadius, FontSize, Spacing, TextStyles} from "../theme/theme.ts";
+import { colours } from "../theme/colours.ts";
+import { theme } from "../theme/theme.ts";
 
 export const calendarScreenStyles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colours.greyBackground,
+        backgroundColor: colours.greyBackground,
     },
 
     summaryWrapper: {
-        paddingTop: Spacing.largePadding,
-        marginBottom: Spacing.largePadding,
+        paddingTop: theme.spacing.largePadding,
+        marginBottom: theme.spacing.largePadding,
     },
 
     calendarContainer: {
-        marginHorizontal: Spacing.largePadding,
-        borderRadius: BorderRadius.largeButtonsAndOutlines,
-        backgroundColor: Colours.white,
-        padding: Spacing.smallPadding,
-        shadowColor: Colours.black,
+        marginHorizontal: theme.spacing.largePadding,
+        borderRadius: theme.borderRadius.largeButtonsAndOutlines,
+        backgroundColor: colours.white,
+        padding: theme.spacing.smallPadding,
+        shadowColor: colours.black,
         shadowOpacity: 0.08,
         shadowRadius: 6,
         elevation: 4,
@@ -26,7 +26,7 @@ export const calendarScreenStyles = StyleSheet.create({
 
     redStripe: {
         height: 2,
-        backgroundColor: Colours.redPrimary,
+        backgroundColor: colours.redPrimary,
         marginVertical: 6,
         borderRadius: 1,
     },
@@ -47,21 +47,21 @@ export const calendarScreenStyles = StyleSheet.create({
     fullyBookedCircle: {
         width: 13,
         height: 13,
-        backgroundColor: Colours.redPrimary,
+        backgroundColor: colours.redPrimary,
         borderRadius: 100,
     },
 
     partialBookedCircle: {
         width: 13,
         height: 13,
-        backgroundColor: Colours.amberPrimary,
+        backgroundColor: colours.amberPrimary,
         borderRadius: 100,
     },
 
     keyText: {
-        fontFamily: TextStyles.medium.fontFamily,
-        fontWeight: TextStyles.medium.fontWeight,
-        fontSize: FontSize.xs14,
-        color: Colours.black,
+        fontFamily: theme.textStyles.medium.fontFamily,
+        fontWeight: theme.textStyles.medium.fontWeight,
+        fontSize: theme.fontSize.xs14,
+        color: colours.black,
     },
 });

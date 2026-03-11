@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { Spacing, FontSize, TextStyles, BorderRadius } from '../theme/theme';
-import { Colours } from '../theme/colours';
+import { theme } from '../theme/theme';
+import { colours } from '../theme/colours';
 
 /**
  * Styles used by the HsOverview screen components.
@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
      */
     screen: {
         flex: 1,
-        backgroundColor: Colours.greyBackground,
+        backgroundColor: colours.greyBackground,
     },
 
     /**
@@ -32,7 +32,7 @@ export const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: Spacing.mediumPadding,
+        paddingHorizontal: theme.spacing.mediumPadding,
         marginBottom: 12,
         paddingTop: 20,
     },
@@ -52,10 +52,10 @@ export const styles = StyleSheet.create({
      */
     headerTitle: {
         marginLeft: 8,
-        fontFamily: TextStyles.medium.fontFamily,
-        fontWeight: TextStyles.medium.fontWeight,
-        fontSize: FontSize.l24,
-        color: Colours.black,
+        fontFamily: theme.textStyles.medium.fontFamily,
+        fontWeight: theme.textStyles.medium.fontWeight,
+        fontSize: theme.fontSize.l24,
+        color: colours.black,
     },
 
     /**
@@ -63,8 +63,8 @@ export const styles = StyleSheet.create({
      * Fixed height/minWidth and centred content for the numeric badge.
      */
     headerBadge: {
-        backgroundColor: Colours.redPrimary,
-        borderRadius: BorderRadius.mediumNotification,
+        backgroundColor: colours.redPrimary,
+        borderRadius: theme.borderRadius.mediumNotification,
         paddingHorizontal: 8,
         height: 28,
         minWidth: 28,
@@ -77,10 +77,10 @@ export const styles = StyleSheet.create({
      * Uses semiBold font and lineHeight matched to badge height for vertical centering.
      */
     headerBadgeText: {
-        color: Colours.white,
-        fontFamily: TextStyles.semiBold.fontFamily,
-        fontWeight: TextStyles.semiBold.fontWeight,
-        fontSize: FontSize.s16,
+        color: colours.white,
+        fontFamily: theme.textStyles.semiBold.fontFamily,
+        fontWeight: theme.textStyles.semiBold.fontWeight,
+        fontSize: theme.fontSize.s16,
         lineHeight: 28,
     },
 
@@ -89,7 +89,7 @@ export const styles = StyleSheet.create({
      * Aligns horizontally with the risk card content padding.
      */
     riskHeadingWrapper: {
-        paddingHorizontal: Spacing.largePadding,
+        paddingHorizontal: theme.spacing.largePadding,
         marginBottom: 8,
     },
 
@@ -98,10 +98,10 @@ export const styles = StyleSheet.create({
      * Matches the header title typography.
      */
     sectionHeading: {
-        fontFamily: TextStyles.medium.fontFamily,
-        fontWeight: TextStyles.medium.fontWeight,
-        fontSize: FontSize.l24,
-        color: Colours.black,
+        fontFamily: theme.textStyles.medium.fontFamily,
+        fontWeight: theme.textStyles.medium.fontWeight,
+        fontSize: theme.fontSize.l24,
+        color: colours.black,
     },
 
     /**
@@ -109,16 +109,16 @@ export const styles = StyleSheet.create({
      */
     title: {
         fontSize: 20,
-        color: Colours.blueDark,
+        color: colours.blueDark,
         marginBottom: 12,
-        paddingHorizontal: Spacing.mediumPadding,
+        paddingHorizontal: theme.spacing.mediumPadding,
     },
 
     /**
      * Wrapper for each AlertBox instance to apply horizontal padding.
      */
     alertWrapper: {
-        paddingHorizontal: Spacing.largePadding,
+        paddingHorizontal: theme.spacing.largePadding,
         marginBottom: 12,
     },
 
@@ -126,7 +126,7 @@ export const styles = StyleSheet.create({
      * Wrapper around the risk card to keep consistent horizontal spacing.
      */
     riskWrapper: {
-        paddingHorizontal: Spacing.largePadding,
+        paddingHorizontal: theme.spacing.largePadding,
         marginBottom: 12,
     },
 
@@ -150,11 +150,11 @@ export const localStyles = StyleSheet.create({
      */
     card: {
         flex: 1,
-        backgroundColor: Colours.white,
-        borderRadius: BorderRadius.largeButtonsAndOutlines,
+        backgroundColor: colours.white,
+        borderRadius: theme.borderRadius.largeButtonsAndOutlines,
         paddingVertical: 8,
         paddingHorizontal: 6,
-        shadowColor: Colours.greyIconLight,
+        shadowColor: colours.greyIconLight,
         shadowOpacity: 1,
         shadowRadius: 4,
         elevation: 4,
@@ -175,10 +175,10 @@ export const localStyles = StyleSheet.create({
      * Uses medium font family and medium-large font size.
      */
     count: {
-        fontFamily: TextStyles.medium.fontFamily,
-        fontWeight: TextStyles.medium.fontWeight,
-        fontSize: FontSize.m20,
-        color: Colours.black,
+        fontFamily: theme.textStyles.medium.fontFamily,
+        fontWeight: theme.textStyles.medium.fontWeight,
+        fontSize: theme.fontSize.m20,
+        color: colours.black,
     },
 
     /**
@@ -186,10 +186,10 @@ export const localStyles = StyleSheet.create({
      * Uses smaller font size and grey tone for secondary emphasis.
      */
     label: {
-        fontFamily: TextStyles.medium.fontFamily,
-        fontWeight: TextStyles.medium.fontWeight,
-        fontSize: FontSize.xs14,
-        color: Colours.greyPrimaryMainText,
+        fontFamily: theme.textStyles.medium.fontFamily,
+        fontWeight: theme.textStyles.medium.fontWeight,
+        fontSize: theme.fontSize.xs14,
+        color: colours.greyPrimaryMainText,
         textAlign: 'center',
     },
 
@@ -199,13 +199,13 @@ export const localStyles = StyleSheet.create({
      */
     riskCard: {
         height: 111,
-        backgroundColor: Colours.white,
-        borderRadius: BorderRadius.largeButtonsAndOutlines,
+        backgroundColor: colours.white,
+        borderRadius: theme.borderRadius.largeButtonsAndOutlines,
         paddingVertical: 12,
         paddingHorizontal: 12,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: Colours.greyIconLight,
+        shadowColor: colours.greyIconLight,
         shadowOpacity: 1,
         shadowRadius: 4,
         elevation: 4,
@@ -219,7 +219,7 @@ export const localStyles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: 6,
-        backgroundColor: Colours.blueLight,
+        backgroundColor: colours.blueLight,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 8,
@@ -230,10 +230,10 @@ export const localStyles = StyleSheet.create({
      * Uses medium weight and small font size for compact appearance.
      */
     riskLabel: {
-        fontFamily: TextStyles.medium.fontFamily,
-        fontWeight: TextStyles.medium.fontWeight,
-        fontSize: FontSize.s16,
-        color: Colours.black,
+        fontFamily: theme.textStyles.medium.fontFamily,
+        fontWeight: theme.textStyles.medium.fontWeight,
+        fontSize: theme.fontSize.s16,
+        color: colours.black,
         textAlign: 'center',
     },
 });
