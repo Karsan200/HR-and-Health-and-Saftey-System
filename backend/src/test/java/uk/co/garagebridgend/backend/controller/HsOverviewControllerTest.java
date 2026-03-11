@@ -153,7 +153,7 @@ public class HsOverviewControllerTest {
      * @throws Exception if the request or assertions fail
      */
     @Test
-    @WithMockUser(username = "1")
+    @WithMockUser(username = "3")
     @Order(1)
     void testHsOverviewSuccess() throws Exception {
 
