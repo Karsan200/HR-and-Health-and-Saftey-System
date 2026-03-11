@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import dayjs from 'dayjs';
 
 import { dateDetailsStyles as styles } from './DateDetailsScreen.styles';
-import AuthenticationService from "../logic/AuthenticationService.ts";
+import AuthenticationService from "../logic/AuthenticationService";
+import { ThemeContext } from '../theme/colourController';
 
 type Props = {
   date: string | null;
@@ -22,6 +23,8 @@ type Activity = {
 };
 
 const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
+  const { theme } = useContext(ThemeContext); // Get current theme
+
   const initialDate = initialDateStr || dayjs().format('YYYY-MM-DD');
 
   const [selectedDate, setSelectedDate] = useState(dayjs(initialDate));
@@ -81,38 +84,38 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
+    <SafeAreaView style={styles(theme).container}>
+      <ScrollView contentContainerStyle={styles(theme).content}>
         {/* Date Header */}
-        <View style={styles.dateHeader}>
-          <Text style={styles.dateText}>
+        <View style={styles(theme).dateHeader}>
+          <Text style={styles(theme).dateText}>
             {selectedDate.format('D MMMM, YYYY')}
           </Text>
 
-          {isToday && <Text style={styles.todayText}>TODAY</Text>}
+          {isToday && <Text style={styles(theme).todayText}>TODAY</Text>}
         </View>
 
         {/* Week Days Row */}
-        <View style={styles.weekRow}>
+        <View style={styles(theme).weekRow}>
           {weekDays.map(day => {
             const selected = day.isSame(selectedDate, 'day');
 
             return (
               <TouchableOpacity
                 key={day.format('YYYY-MM-DD')}
-                style={[styles.dayCard, selected && styles.dayCardSelected]}
+                style={[styles(theme).dayCard, selected && styles(theme).dayCardSelected]}
                 onPress={() => setSelectedDate(day)}
               >
                 <Text
-                  style={[styles.dayLabel, selected && styles.dayLabelSelected]}
+                  style={[styles(theme).dayLabel, selected && styles(theme).dayLabelSelected]}
                 >
                   {day.format('ddd').toUpperCase()}
                 </Text>
 
                 <Text
                   style={[
-                    styles.dayNumber,
-                    selected && styles.dayNumberSelected,
+                    styles(theme).dayNumber,
+                    selected && styles(theme).dayNumberSelected,
                   ]}
                 >
                   {day.format('D')}
@@ -123,36 +126,36 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
         </View>
 
         {/* Week Navigation Buttons */}
-        <View style={styles.weekNavButtons}>
+        <View style={styles(theme).weekNavButtons}>
           <TouchableOpacity
-            style={styles.weekButton}
+            style={styles(theme).weekButton}
             onPress={goToPreviousWeek}
           >
-            <Text style={styles.weekButtonText}>‹</Text>
+            <Text style={styles(theme).weekButtonText}>‹</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.weekButton} onPress={goToNextWeek}>
-            <Text style={styles.weekButtonText}>›</Text>
+          <TouchableOpacity style={styles(theme).weekButton} onPress={goToNextWeek}>
+            <Text style={styles(theme).weekButtonText}>›</Text>
           </TouchableOpacity>
         </View>
 
         {/* Activity Cards */}
-        {activities.length === 0 && <Text>No leave for this date</Text>}
+        {activities.length === 0 && <Text style={{ color: theme.greyPrimaryMainText }}>No leave for this date</Text>}
 
         {activities.map((activity, index) => (
-          <View key={index} style={styles.activityCard}>
-            <View style={styles.activityRow}>
-              <View style={styles.activityTitle}>
-                <View style={styles.activityDot} />
+          <View key={index} style={styles(theme).activityCard}>
+            <View style={styles(theme).activityRow}>
+              <View style={styles(theme).activityTitle}>
+                <View style={styles(theme).activityDot} />
 
-                <View style={styles.nameTag}>
-                  <Text style={styles.nameText}>
+                <View style={styles(theme).nameTag}>
+                  <Text style={styles(theme).nameText}>
                     {activity.name} • {activity.role}
                   </Text>
                 </View>
               </View>
 
-              <Text style={styles.activitySubtext}>
+              <Text style={styles(theme).activitySubtext}>
                 On leave til {activity.until}
               </Text>
             </View>
@@ -161,8 +164,8 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
       </ScrollView>
 
       {/* Add Button */}
-      <TouchableOpacity style={styles.addButton}>
-        <Text style={styles.addIcon}>+</Text>
+      <TouchableOpacity style={styles(theme).addButton}>
+        <Text style={styles(theme).addIcon}>+</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

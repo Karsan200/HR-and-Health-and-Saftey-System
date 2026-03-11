@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import {BorderRadius, FontSize, Spacing, TextStyles} from "../theme/theme.ts";
+import {BorderRadius, FontSize, Spacing, TextStyles} from "../theme/theme";
 
 export const dateDetailsStyles = (theme: any) =>
   StyleSheet.create({

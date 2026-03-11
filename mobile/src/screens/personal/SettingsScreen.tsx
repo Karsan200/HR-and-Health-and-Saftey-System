@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import {Pressable, ScrollView, Text, View} from 'react-native';
 import ColorPicker from 'react-native-wheel-color-picker';
-import { useContext } from "react";
-import { ThemeContext } from "../../theme/colourController.tsx";
+import { useTheme } from "../../theme/colourController";
 import { settingsStyles } from './SettingsScreen.styles';
-import { DefaultColours } from '../../theme/colours.ts';
 
 type HSL = {
   h: number;
@@ -115,14 +113,11 @@ function generateColorSet(primaryHex: string): ColorSet {
 
 export default function SettingsScreen() {
 
-  console.log("ThemeContext:", useContext(ThemeContext));
-  console.warn("ThemeContext:", useContext(ThemeContext));
+  const { theme, updateTheme } = useTheme();
 
   const [pickerVisible, setPickerVisible] = useState(false);
   const [editingColor, setEditingColor] = useState<string | null>(null);
-  const context = useContext(ThemeContext);
-  const theme = context?.theme ?? DefaultColours;
-  const updateTheme = context?.updateTheme ?? (() => {});
+
   const styles = settingsStyles(theme);
 
   console.log(theme);

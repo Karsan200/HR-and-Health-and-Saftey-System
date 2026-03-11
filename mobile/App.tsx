@@ -3,13 +3,13 @@ import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import {
     SafeAreaProvider,
 } from 'react-native-safe-area-context';
-import { ThemeProvider } from "./src/theme/colourController.tsx";
-import HomeScreen from "./src/screens/HomeScreen.tsx";
-import HsOverview from './src/screens/HsOverview.tsx';
-import BottomNavBar from "./src/components/BottomNavBar.tsx";
-import {AppSection, ScreenKey} from "./src/logic/NavigationConfiguration.ts";
-import TopNavBar from './src/components/TopNavBar.tsx';
-import SettingsScreen from './src/screens/personal/SettingsScreen.tsx';
+import { ThemeProvider } from "./src/theme/colourController";
+import HomeScreen from "./src/screens/HomeScreen";
+import HsOverview from './src/screens/HsOverview';
+import BottomNavBar from "./src/components/BottomNavBar";
+import {AppSection, ScreenKey} from "./src/logic/NavigationConfiguration";
+import TopNavBar from './src/components/TopNavBar';
+import SettingsScreen from './src/screens/personal/SettingsScreen';
 import CalendarScreen from './src/screens/CalendarScreen';
 import DateDetailsScreen from './src/screens/DateDetailsScreen';
 
