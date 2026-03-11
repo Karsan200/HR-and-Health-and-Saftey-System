@@ -1,5 +1,6 @@
 package uk.co.garagebridgend.backend.controller;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.test.context.support.WithMockUser;
 
@@ -20,10 +22,14 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.ObjectMapper;
 import uk.co.garagebridgend.backend.RentATechApplication;
 import uk.co.garagebridgend.backend.logic.HsOverviewService;
 import uk.co.garagebridgend.backend.models.entity.*;
 import uk.co.garagebridgend.backend.repository.*;
+
+import java.time.Clock;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -64,6 +70,9 @@ public class HsOverviewControllerTest {
     @Autowired
     private FilesRepository filesRepository;
 
+    @Autowired
+    private SessionRepository sessionRepository;
+
     @Mock
     private HsOverviewService hsOverviewService;
 
@@ -90,6 +99,15 @@ public class HsOverviewControllerTest {
         user.setPostalCode("CF31");
 
         accountRepository.save(user);
+
+        // Create test session for user (with known refresh token)
+        SessionTable session = new SessionTable();
+        session.setAccount(user);
+        session.setRefreshToken("validTestRefreshToken");
+        session.setTwoFactor(true);
+        session.setMobile(false);
+        session.setExpires(LocalDateTime.now(Clock.systemUTC()).plusHours(2));
+        sessionRepository.save(session);
 
         // Create file
         FilesTable file = new FilesTable();
@@ -146,6 +164,30 @@ public class HsOverviewControllerTest {
         signatureRepository.save(signature);
     }
 
+    private String getAccessToken(String refreshToken) throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(get("/auth/refresh")
+                        .cookie(new Cookie("refreshToken", refreshToken)))
+                .andReturn()
+                .getResponse();
+
+        if (response.getStatus() != 200) {
+            throw new IllegalStateException(
+                    "Expected 200 but got " + response.getStatus()
+            );
+        }
+
+        String body = response.getContentAsString();
+
+        if (body.isBlank()) {
+            throw new IllegalStateException("Response body was empty");
+        }
+
+        return new ObjectMapper()
+                .readTree(body)
+                .path("accessToken")
+                .asString();
+    }
+
     /**
      * Happy-path: authenticated user with existing account should receive the
      * overview JSON containing counts for pending docs, signed docs and hazards.
@@ -153,11 +195,13 @@ public class HsOverviewControllerTest {
      * @throws Exception if the request or assertions fail
      */
     @Test
-    @WithMockUser(username = "3")
     @Order(1)
     void testHsOverviewSuccess() throws Exception {
 
-        mockMvc.perform(get("/api/hs-overview"))
+        String accessToken = getAccessToken("validTestRefreshToken");
+
+        mockMvc.perform(get("/api/hs-overview")
+                 .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pendingDocs").value(2))
                 .andExpect(jsonPath("$.signed").value(1))
