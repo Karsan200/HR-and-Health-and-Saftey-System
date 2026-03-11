@@ -143,6 +143,9 @@ export default function SettingsScreen() {
       text: DefaultColours.black,
       accent: DefaultColours.redPrimary
     });
+
+    setPickerVisible(false);
+    setEditingColor(null);
   }
 
   function applyBlueTheme() {
@@ -158,6 +161,8 @@ export default function SettingsScreen() {
       text: "#000000",
       accent: "#0066FF"
     });
+    setPickerVisible(false);
+    setEditingColor(null);
   }
 
   function applyGreenTheme() {
@@ -173,9 +178,18 @@ export default function SettingsScreen() {
       text: "#000000",
       accent: "#2E7D32"
     });
+    setPickerVisible(false);
+    setEditingColor(null);
   }
 
   function openPicker(type: "background" | "text" | "accent") {
+
+    if (editingColor === type && pickerVisible) {
+      setPickerVisible(false);
+      setEditingColor(null);
+      return;
+    }
+
     setEditingColor(type);
     setPickerVisible(true);
   }
@@ -232,6 +246,20 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Accessibility Settings</Text>
           {/* TO DO: Toggles for settings*/}
+          <Text style={styles.previewText}>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
+            tempor incididunt ut labore et dolore magna aliqua.
+          </Text>
+
+          <Text style={styles.previewText}>
+            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
+            ut aliquip ex ea commodo consequat.
+          </Text>
+
+          <Text style={styles.previewText}>
+            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+            dolore eu fugiat nulla pariatur.
+          </Text>
         </View>
 
         <View style={styles.section}>
@@ -240,18 +268,22 @@ export default function SettingsScreen() {
 
           <View style={styles.schemeGrid}>
             <Pressable style={[styles.schemeButton, isDefault && styles.activeScheme]} onPress={applyDefaultTheme}>
+              <View style={[styles.schemeSwatch]} />
               <Text>Default</Text>
             </Pressable>
 
             <Pressable style={[styles.schemeButton, isBlue && styles.activeScheme]} onPress={applyBlueTheme}>
+              <View style={[styles.schemeSwatchBlue]} />
               <Text>Blue</Text>
             </Pressable>
 
             <Pressable style={[styles.schemeButton, isGreen && styles.activeScheme]} onPress={applyGreenTheme}>
+              <View style={[styles.schemeSwatchGreen]} />
               <Text>Green</Text>
             </Pressable>
 
             <Pressable style={[styles.schemeButton, isCustom && styles.activeScheme]}>
+              <View style={[styles.schemeSwatchCustom]} />
               <Text>Custom</Text>
             </Pressable>
           </View>
@@ -259,8 +291,11 @@ export default function SettingsScreen() {
           {/* Background Colour */}
           <Text style={styles.label}>Background Colour</Text>
           <Pressable
-              style={styles.colourRow}
-              onPress={() => openPicker("background")}
+            style={[
+              styles.colourRow,
+              editingColor === "background" && styles.activeColourRow
+            ]}
+            onPress={() => openPicker("background")}
           >
             <View
                 style={[
@@ -274,8 +309,11 @@ export default function SettingsScreen() {
           {/* Text Colour */}
           <Text style={styles.label}>Text Colour</Text>
           <Pressable
-              style={styles.colourRow}
-              onPress={() => openPicker("text")}
+            style={[
+              styles.colourRow,
+              editingColor === "text" && styles.activeColourRow
+            ]}
+            onPress={() => openPicker("text")}
           >
             <View
                 style={[
@@ -289,8 +327,11 @@ export default function SettingsScreen() {
           {/* Accent Colour */}
           <Text style={styles.label}>Accent Colour</Text>
           <Pressable
-              style={styles.colourRow}
-              onPress={() => openPicker("accent")}
+            style={[
+              styles.colourRow,
+              editingColor === "accent" && styles.activeColourRow
+            ]}
+            onPress={() => openPicker("accent")}
           >
             <View
                 style={[
@@ -302,59 +343,39 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
 
-          {pickerVisible && (
-            <View style={{ marginTop: 30 }}>
-              <ColorPicker
-                color={colors.primary}
-                onColorChangeComplete={updateColor}
-                thumbSize={40}
-                sliderSize={30}
-                noSnap={true}
-                row={false}
-              />
-            </View>
-          )}
+        {pickerVisible && (
+          <View style={styles.pickerDropdown}>
 
-          <View style={{ flexDirection: "row", marginTop: 20 }}>
+            <Text style={styles.pickerHeader}>
+              Editing {editingColor} colour
+            </Text>
 
-            <View
-              style={{
-                flex: 1,
-                height: 60,
-                backgroundColor: colors.primary,
-                justifyContent: "center",
-                alignItems: "center"
-              }}
-            >
-              <Text>{colors.primary}</Text>
-            </View>
+            <ColorPicker
+              color={colors.primary}
+              onColorChangeComplete={updateColor}
+              thumbSize={40}
+              sliderSize={30}
+              noSnap={true}
+              row={false}
+            />
 
-            <View
-              style={{
-                flex: 1,
-                height: 60,
-                backgroundColor: colors.dark,
-                justifyContent: "center",
-                alignItems: "center"
-              }}
-            >
-              <Text>{colors.dark}</Text>
-            </View>
+            <View style={styles.previewRow}>
 
-            <View
-              style={{
-                flex: 1,
-                height: 60,
-                backgroundColor: colors.light,
-                justifyContent: "center",
-                alignItems: "center"
-              }}
-            >
-              <Text>{colors.light}</Text>
+              <View style={[styles.previewBox, { backgroundColor: colors.primary }]}>
+                <Text style={styles.previewText}>{colors.primary}</Text>
+              </View>
+
+              <View style={[styles.previewBox, { backgroundColor: colors.dark }]}>
+                <Text style={styles.previewText}>{colors.dark}</Text>
+              </View>
+
+              <View style={[styles.previewBox, { backgroundColor: colors.light }]}>
+                <Text style={styles.previewText}>{colors.light}</Text>
+              </View>
             </View>
           </View>
-        </View>
-
+        )}
+      </View>
     </ScrollView>
   );
 }

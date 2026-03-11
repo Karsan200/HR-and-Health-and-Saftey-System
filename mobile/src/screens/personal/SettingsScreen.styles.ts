@@ -9,14 +9,14 @@ export const settingsStyles = (theme: any) =>
    */
   container: {
     paddingHorizontal: Spacing.mediumPadding,
-    paddingTop: 64,
   },
 
   /**
    * A Section wrapper for parts of a screen given smaller boxes
    */
   section: {
-    marginTop: 32,
+    marginTop: 16,
+    marginBottom: 16,
     padding: Spacing.mediumPadding,
     borderRadius: 12,
     borderWidth: 1,
@@ -39,7 +39,6 @@ export const settingsStyles = (theme: any) =>
    * Wrapper for the quick access list with top spacing.
    */
   quickAccessContainer: {
-    marginTop: 40,
     alignItems: 'stretch',
   },
 
@@ -87,6 +86,31 @@ export const settingsStyles = (theme: any) =>
     height: 16,
     borderRadius: 3,
     marginRight: 10,
+    backgroundColor: "#D20414",
+  },
+
+  schemeSwatchBlue: {
+    width: 16,
+    height: 16,
+    borderRadius: 3,
+    marginRight: 10,
+    backgroundColor: "#0066FF",
+  },
+
+  schemeSwatchGreen: {
+    width: 16,
+    height: 16,
+    borderRadius: 3,
+    marginRight: 10,
+    backgroundColor: "#2E7D32",
+  },
+
+  schemeSwatchCustom: {
+    width: 16,
+    height: 16,
+    borderRadius: 3,
+    marginRight: 10,
+    backgroundColor: theme.redPrimary,
   },
 
   activeScheme: {
@@ -127,7 +151,61 @@ export const settingsStyles = (theme: any) =>
     height: 20,
     borderRadius: 4,
     marginRight: 10,
+    borderWidth: 2,
+    borderColor: theme.greyIconLight,
+  },
+
+  activeColourRow: {
+    borderWidth: 2,
+    borderColor: theme.redPrimary,
+  },
+
+  /**
+   * Small preview for the picker
+   */
+  pickerContainer: {
+    marginTop: 30,
+  },
+
+  /**
+   * Dropdown box for the colour picker
+   */
+  pickerDropdown: {
+    marginTop: 32,
+    padding: Spacing.mediumPadding,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: theme.greyIconLight,
+    backgroundColor: theme.greyBackground,
+  },
+
+  pickerHeader: {
+    fontSize: FontSize.m20,
+    ...TextStyles.semiBold,
+    textAlign: 'left',
+    color: theme.greyIconLight,
+    marginBottom: 10,
+  },
+
+  previewRow: {
+    flexDirection: "row",
+    padding: Spacing.mediumPadding,
+    borderRadius: 12,
+  },
+
+  previewBox: {
+    flex: 1,
+    margin: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: theme.black,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  previewText: {
+    fontSize: 12,
+    color: theme.black,
+    margin: 16,
   },
 });
