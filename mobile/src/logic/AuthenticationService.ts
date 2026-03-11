@@ -40,7 +40,7 @@ class AuthenticationService {
       // Try to refresh the access token if the response indicates an unauthorized error
       if (response.status === 401 && !hasRefreshed) {
         await this.refresh();
-        await this.fetch(url, options, true)
+        return await this.fetch(url, options, true)
       }
       // If the response is still unauthorized after attempting to refresh, throw an error indicating the refresh token is invalid
       else if (response.status === 401 && hasRefreshed) {
@@ -88,7 +88,7 @@ class AuthenticationService {
             throw new HttpException(401, 'No authentication tokens found.');
         }
 
-        const response = await this.fetch(AppSettings.API_URL + "/auth/refresh", {
+        const response = await fetch(AppSettings.API_URL + "/auth/refresh", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

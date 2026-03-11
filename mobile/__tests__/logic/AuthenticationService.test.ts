@@ -3,6 +3,9 @@ import * as Keychain from 'react-native-keychain';
 import AuthenticationService from '../../src/logic/AuthenticationService';
 import { AppSettings } from "../../src/AppSettings.ts";
 
+declare const global: any;
+global.fetch = jest.fn();
+
 jest.mock('react-native-keychain');
 
 describe('AuthenticationService - Credential Store', () => {
@@ -45,7 +48,7 @@ describe('AuthenticationService - Credential Store', () => {
   });
 });
 
-describe('refresh & extract claims - Access token refreshing, extracting claims', () => {
+describe('AuthenticationService - refresh & extracting claims', () => {
     let getCredentialsSpy: jest.SpyInstance;
     let putCredentialsSpy: jest.SpyInstance;
     let fetchSpy: jest.SpyInstance;
@@ -60,7 +63,7 @@ describe('refresh & extract claims - Access token refreshing, extracting claims'
         // Spy on putCredentials to resolve successfully
         putCredentialsSpy = jest.spyOn(AuthenticationService, 'putCredentials').mockResolvedValue(undefined);
         // Spy on fetch method
-        fetchSpy = jest.spyOn(AuthenticationService, 'fetch');
+        fetchSpy = jest.spyOn(global, 'fetch');
     });
 
     afterEach(() => {
@@ -147,3 +150,112 @@ describe('refresh & extract claims - Access token refreshing, extracting claims'
         });
     });
 })
+
+describe("AuthenticationService - fetch", () => {
+    let getCredentialsSpy: jest.SpyInstance;
+    let refreshSpy: jest.SpyInstance;
+    let fetchSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        // Spy on getCredentials to return valid tokens
+        getCredentialsSpy = jest.spyOn(AuthenticationService, 'getCredentials').mockResolvedValue({
+            accessToken: 'testAccessToken',
+            refreshToken: 'testRefreshToken',
+        });
+
+        // Spy on refresh to resolve successfully
+        refreshSpy = jest.spyOn(AuthenticationService, 'refresh').mockResolvedValue(undefined);
+
+        // Spy on fetch method
+        fetchSpy = jest.spyOn(global, 'fetch');
+    });
+
+    afterEach(() => {
+        getCredentialsSpy.mockRestore();
+        fetchSpy.mockRestore();
+    });
+
+    it ('fetch - Should return HttpException 401 due to getCredentials returning null', async () => {
+        // Mock getCredentials to return null to simulate missing credentials
+        getCredentialsSpy.mockResolvedValue(null);
+
+        await expect(AuthenticationService.fetch('/api/data', { method: 'GET' })).rejects.toMatchObject({
+            statusCode: 401,
+            message: 'No authentication tokens found.',
+        });
+    });
+
+    it('fetch - Expired access token, should refresh and then reveal the refresh token is invalid', async () => {
+        // Mock fetch to first return a 401 for the initial request, then a 401 for the refresh attempt
+        fetchSpy
+            .mockResolvedValueOnce({ ok: false, status: 401 }) // Initial request with expired token
+
+        // Mock the refresh attempt to also fail with a 401, simulating an invalid refresh token
+        refreshSpy.mockRejectedValueOnce({
+            statusCode: 401,
+            message: 'Failed to refresh access token.',
+        });
+
+        await expect(AuthenticationService.fetch('/api/data', { method: 'GET' })).rejects.toMatchObject({
+            statusCode: 401,
+            message: 'Failed to refresh access token.',
+        });
+    });
+
+    it('fetch - Expired access token, should refresh and then succeed', async () => {
+        // Mock fetch to first return a 401 for the initial request, then a successful response after refresh
+        fetchSpy
+            .mockResolvedValueOnce({ ok: false, status: 401 }) // Initial request with expired token
+            .mockResolvedValueOnce({ // Request after refresh
+                ok: true,
+                json: async () => ({ success: true }),
+            });
+
+        await expect(AuthenticationService.fetch('/api/data', { method: 'GET' })).resolves.toEqual({
+            ok: true,
+            json: expect.any(Function),
+        });
+    });
+
+    it('fetch - Should return HttpException 401 if token refresh fails after initial 401', async () => {
+        // Mock fetch to first return a 401 for the initial request, then a 401 for the refresh attempt
+        fetchSpy
+            .mockResolvedValueOnce({ ok: false, status: 401 }) // Initial request with expired token
+            .mockResolvedValueOnce({ ok: false, status: 401 }); // Refresh attempt fails
+
+        await expect(AuthenticationService.fetch('/api/data', { method: 'GET' })).rejects.toMatchObject({
+            statusCode: 401,
+            message: 'Invalid refresh token.',
+        });
+    });
+
+    it('fetch - Should include access token in Authorization header (successful)', async () => {
+        // Mock the fetch method to return a successful response
+        fetchSpy.mockResolvedValue({
+            ok: true,
+            json: async () => ({ success: true }),
+        });
+
+        const response = await AuthenticationService.fetch('/api/data', {
+            method: 'GET',
+        });
+
+        // Verify that getCredentials was called to retrieve existing tokens
+        expect(getCredentialsSpy).toHaveBeenCalled();
+
+        // Verify that fetch was called with the correct parameters including the Authorization header
+        expect(fetchSpy).toHaveBeenCalledWith(AppSettings.API_URL + '/api/data', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer testAccessToken',
+            },
+        });
+
+        // Verify that the response is as expected
+        expect(response).toEqual({
+            ok: true,
+            json: expect.any(Function),
+        });
+    });
+});
