@@ -89,6 +89,11 @@ export const settingsStyles = (theme: any) =>
     marginRight: 10,
   },
 
+  activeScheme: {
+    borderWidth: 2,
+    borderColor: theme.redPrimary
+  },
+
   /**
    * Label text above colour rows
    */

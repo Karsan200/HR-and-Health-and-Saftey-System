@@ -3,6 +3,7 @@ import {Pressable, ScrollView, Text, View} from 'react-native';
 import ColorPicker from 'react-native-wheel-color-picker';
 import { useTheme } from "../../theme/colourController";
 import { settingsStyles } from './SettingsScreen.styles';
+import { DefaultColours } from "../../theme/colours";
 
 type HSL = {
   h: number;
@@ -134,6 +135,46 @@ export default function SettingsScreen() {
     light: ""
   });
 
+  function applyDefaultTheme() {
+    updateTheme(DefaultColours);
+
+    setPickColors({
+      background: DefaultColours.greyBackground,
+      text: DefaultColours.black,
+      accent: DefaultColours.redPrimary
+    });
+  }
+
+  function applyBlueTheme() {
+    updateTheme(DefaultColours);
+    updateTheme({
+      redPrimary: "#0066FF",
+      redTextDark: "#003A99",
+      redBackgroundLight: "#DCE8FF"
+    });
+
+    setPickColors({
+      background: "#F6F6F8",
+      text: "#000000",
+      accent: "#0066FF"
+    });
+  }
+
+  function applyGreenTheme() {
+    updateTheme(DefaultColours);
+    updateTheme({
+      redPrimary: "#2E7D32",
+      redTextDark: "#1B5E20",
+      redBackgroundLight: "#C8E6C9"
+    });
+
+    setPickColors({
+      background: "#F6F6F8",
+      text: "#000000",
+      accent: "#2E7D32"
+    });
+  }
+
   function openPicker(type: "background" | "text" | "accent") {
     setEditingColor(type);
     setPickerVisible(true);
@@ -176,6 +217,12 @@ export default function SettingsScreen() {
     }
   }
 
+  const isDefault = theme.redPrimary === "#D20414";
+  const isBlue = theme.redPrimary === "#0066FF";
+  const isGreen = theme.redPrimary === "#2E7D32";
+
+  const isCustom = !isDefault && !isBlue && !isGreen;
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
 
@@ -192,22 +239,21 @@ export default function SettingsScreen() {
           <Text style={styles.quickAccessTitle}>Colour Themes</Text>
 
           <View style={styles.schemeGrid}>
-            <Pressable style={styles.schemeButton}>
+            <Pressable style={[styles.schemeButton, isDefault && styles.activeScheme]} onPress={applyDefaultTheme}>
               <Text>Default</Text>
             </Pressable>
 
-            <Pressable style={styles.schemeButton}>
+            <Pressable style={[styles.schemeButton, isBlue && styles.activeScheme]} onPress={applyBlueTheme}>
               <Text>Blue</Text>
             </Pressable>
 
-            <Pressable style={styles.schemeButton}>
+            <Pressable style={[styles.schemeButton, isGreen && styles.activeScheme]} onPress={applyGreenTheme}>
               <Text>Green</Text>
             </Pressable>
 
-            <Pressable style={styles.schemeButton}>
+            <Pressable style={[styles.schemeButton, isCustom && styles.activeScheme]}>
               <Text>Custom</Text>
             </Pressable>
-
           </View>
 
           {/* Background Colour */}
