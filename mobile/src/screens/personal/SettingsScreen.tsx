@@ -182,6 +182,43 @@ export default function SettingsScreen() {
     setEditingColor(null);
   }
 
+  function applyDarkTheme() {
+    updateTheme({
+      // Basic colours
+      black: '#FFFFFF',
+      white: '#2B2B2B',
+
+      // Basic Red Colours
+      redPrimary: '#D20414',
+      redTextDark: '#F6CDD0',
+      redBackgroundLight: '#AE010B',
+
+      // Traffic Light Colours
+      redTrafficPrimary: '#D20414',
+      redTrafficTextDark: '#F6CDD0',
+      redTrafficBackgroundLight: '#AE010B',
+
+      amberPrimary: '#E8960A',
+      amberTextDark: '#FFECCD',
+      amberBackgroundLight: '#9B6302',
+
+      greenPrimary: '#14A45A',
+      greenTextDark: '#D0EDDE',
+      greenBackgroundLight: '#0D7B42',
+
+      greyPrimaryMainText: '#ABABB3', // Main text
+      greyIconLight: '#F6F6F8', // Icons and secondary text
+      greyBackground: '#000000', // Background of App
+
+      // Miscellaneous colours
+      bluePrimary: '#588FFF',
+      blueDark: '#E6ECF9',
+      blueLight: '#002A80',
+    });
+    setPickerVisible(false);
+    setEditingColor(null);
+  }
+
   function openPicker(type: "background" | "text" | "accent") {
 
     if (editingColor === type && pickerVisible) {
@@ -234,6 +271,7 @@ export default function SettingsScreen() {
   const isDefault = theme.redPrimary === "#D20414";
   const isBlue = theme.redPrimary === "#0066FF";
   const isGreen = theme.redPrimary === "#2E7D32";
+  const isDark = theme.redPrimary === "#AE010B";
 
   const isCustom = !isDefault && !isBlue && !isGreen;
 
@@ -269,22 +307,27 @@ export default function SettingsScreen() {
           <View style={styles.schemeGrid}>
             <Pressable style={[styles.schemeButton, isDefault && styles.activeScheme]} onPress={applyDefaultTheme}>
               <View style={[styles.schemeSwatch]} />
-              <Text>Default</Text>
+              <Text style={styles.smallLabel}>Default</Text>
             </Pressable>
 
             <Pressable style={[styles.schemeButton, isBlue && styles.activeScheme]} onPress={applyBlueTheme}>
               <View style={[styles.schemeSwatchBlue]} />
-              <Text>Blue</Text>
+              <Text style={styles.smallLabel}>Blue</Text>
             </Pressable>
 
             <Pressable style={[styles.schemeButton, isGreen && styles.activeScheme]} onPress={applyGreenTheme}>
               <View style={[styles.schemeSwatchGreen]} />
-              <Text>Green</Text>
+              <Text style={styles.smallLabel}>Green</Text>
+            </Pressable>
+
+            <Pressable style={[styles.schemeButton, isDark && styles.activeScheme]} onPress={applyDarkTheme}>
+              <View style={[styles.schemeSwatchDark]} />
+              <Text style={styles.smallLabel}>Dark</Text>
             </Pressable>
 
             <Pressable style={[styles.schemeButton, isCustom && styles.activeScheme]}>
               <View style={[styles.schemeSwatchCustom]} />
-              <Text>Custom</Text>
+              <Text style={styles.smallLabel}>Custom</Text>
             </Pressable>
           </View>
 
@@ -303,7 +346,7 @@ export default function SettingsScreen() {
                   { backgroundColor: pickColors.background }
                 ]}
             />
-            <Text>{pickColors.background}</Text>
+            <Text style={styles.smallLabel}>{pickColors.background}</Text>
           </Pressable>
 
           {/* Text Colour */}
@@ -321,7 +364,7 @@ export default function SettingsScreen() {
                   { backgroundColor: pickColors.text }
                 ]}
             />
-            <Text>{pickColors.text}</Text>
+            <Text style={styles.smallLabel}>{pickColors.text}</Text>
           </Pressable>
 
           {/* Accent Colour */}
@@ -339,7 +382,7 @@ export default function SettingsScreen() {
                   { backgroundColor: pickColors.accent }
                 ]}
             />
-            <Text>{pickColors.accent}</Text>
+            <Text style={styles.smallLabel}>{pickColors.accent}</Text>
           </Pressable>
         </View>
 

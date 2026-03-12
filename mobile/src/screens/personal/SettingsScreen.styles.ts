@@ -105,6 +105,14 @@ export const settingsStyles = (theme: any) =>
     backgroundColor: "#2E7D32",
   },
 
+  schemeSwatchDark: {
+    width: 16,
+    height: 16,
+    borderRadius: 3,
+    marginRight: 10,
+    backgroundColor: "#AE010B",
+  },
+
   schemeSwatchCustom: {
     width: 16,
     height: 16,
@@ -127,6 +135,15 @@ export const settingsStyles = (theme: any) =>
     color: theme.greyIconLight,
     marginTop: 10,
     marginBottom: 6,
+  },
+
+  /**
+   * Smaller Label
+   */
+  smallLabel: {
+    fontSize: FontSize.s16,
+    color: theme.greyIconLight,
+    marginVertical: 4,
   },
 
   /**
