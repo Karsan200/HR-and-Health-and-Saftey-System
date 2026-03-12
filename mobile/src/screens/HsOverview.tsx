@@ -1,24 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import SummaryRow from '../components/summary/SummaryRow';
 import AlertBox from '../components/AlertBox';
-import { styles, localStyles } from './HsOverview.styles';
-import { colours } from '../theme/colours';
-import AuthenticationService from "../logic/AuthenticationService.ts";
+import { styles as baseStyles, localStyles as baseLocalStyles } from './HsOverview.styles';
+import { ThemeContext } from '../theme/colourController';
+import AuthenticationService from "../logic/AuthenticationService";
 
 // Props for the small summary component
 interface HsStatProps {
     count: string | number;
     label: string;
+    styles: ReturnType<typeof baseLocalStyles>; // pass in themed styles
 }
 
 // Small summary card showing a number and label
-const HsStat: React.FC<HsStatProps> = ({ count, label }) => (
-    <View style={localStyles.card}>
-        <View style={localStyles.content}>
-            <Text style={localStyles.count}>{count}</Text>
-            <Text style={localStyles.label} numberOfLines={1} ellipsizeMode="tail">
+const HsStat: React.FC<HsStatProps> = ({ count, label, styles }) => (
+    <View style={styles.card}>
+        <View style={styles.content}>
+            <Text style={styles.count}>{count}</Text>
+            <Text style={styles.label} numberOfLines={1} ellipsizeMode="tail">
                 {label}
             </Text>
         </View>
@@ -26,13 +27,13 @@ const HsStat: React.FC<HsStatProps> = ({ count, label }) => (
 );
 
 // Quick Actions card that displays the Risk Assessment tile
-const RiskCard: React.FC = () => (
-    <View style={styles.riskWrapper}>
-        <View style={localStyles.riskCard}>
-            <View style={localStyles.iconBox}>
+const RiskCard: React.FC<{ styles: ReturnType<typeof baseLocalStyles>, colours: any }> = ({ styles, colours }) => (
+    <View style={colours.riskWrapper}>
+        <View style={styles.riskCard}>
+            <View style={styles.iconBox}>
                 <Icon source="clipboard-alert-outline" size={28} color={colours.bluePrimary} />
             </View>
-            <Text style={localStyles.riskLabel}>Risk Assessment</Text>
+            <Text style={styles.riskLabel}>Risk Assessment</Text>
         </View>
     </View>
 );
@@ -46,6 +47,11 @@ interface HsOverviewResponse {
 
 // Main HsOverview screen component
 export default function HsOverview() {
+    const { theme } = useContext(ThemeContext); // get current theme
+
+    const styles = baseStyles(theme); // themed styles
+    const localStyles = baseLocalStyles(theme); // themed local styles
+
     const [pendingDocs, setPendingDocs] = useState<number>(0);
     const [signedDocs, setSignedDocs] = useState<number>(0);
     const [hazards, setHazards] = useState<number>(0);
@@ -60,7 +66,6 @@ export default function HsOverview() {
                 setPendingDocs(data.pendingDocs);
                 setSignedDocs(data.signed);
                 setHazards(data.hazards);
-
             } catch (error) {
                 console.error('Failed to load dashboard data:', error);
             }
@@ -74,7 +79,7 @@ export default function HsOverview() {
             {/* Header row: icon + title + badge */}
             <View style={styles.headerRow}>
                 <View style={styles.headerLeft}>
-                    <Icon source="alert-circle-outline" size={30} color={colours.redPrimary} />
+                    <Icon source="alert-circle-outline" size={30} color={theme.redPrimary} />
                     <Text style={styles.headerTitle}>Actions Required</Text>
                 </View>
                 <View style={styles.headerBadge}>
@@ -87,9 +92,9 @@ export default function HsOverview() {
                 <AlertBox
                     label="Document"
                     body="Fire and Safety Policy v2.0 requires a signature"
-                    circleColor={colours.redPrimary}
-                    labelColor={colours.redTextDark}
-                    labelBackground={colours.redBackgroundLight}
+                    circleColor={theme.redPrimary}
+                    labelColor={theme.redTextDark}
+                    labelBackground={theme.redBackgroundLight}
                 />
             </View>
 
@@ -97,9 +102,9 @@ export default function HsOverview() {
                 <AlertBox
                     label="Report"
                     body="Hazard Report #HA-26-001 has been updated"
-                    circleColor={colours.amberPrimary}
-                    labelColor={colours.amberTextDark}
-                    labelBackground={colours.amberBackgroundLight}
+                    circleColor={theme.amberPrimary}
+                    labelColor={theme.amberTextDark}
+                    labelBackground={theme.amberBackgroundLight}
                 />
             </View>
 
@@ -107,9 +112,9 @@ export default function HsOverview() {
                 <AlertBox
                     label="SOP"
                     body="Filler text. dont know what to put here"
-                    circleColor={colours.amberPrimary}
-                    labelColor={colours.amberTextDark}
-                    labelBackground={colours.amberBackgroundLight}
+                    circleColor={theme.amberPrimary}
+                    labelColor={theme.amberTextDark}
+                    labelBackground={theme.amberBackgroundLight}
                 />
             </View>
 
@@ -117,14 +122,14 @@ export default function HsOverview() {
             <View style={styles.riskHeadingWrapper}>
                 <Text style={styles.sectionHeading}>Quick Actions</Text>
             </View>
-            <RiskCard />
+            <RiskCard styles={localStyles} colours={theme} />
 
             {/* Summary stat cards row */}
             <View style={styles.cardsWrapper}>
                 <SummaryRow>
-                    <HsStat count={pendingDocs} label="Pending Docs" />
-                    <HsStat count={signedDocs} label="Signed" />
-                    <HsStat count={hazards} label="Hazards" />
+                    <HsStat count={pendingDocs} label="Pending Docs" styles={localStyles} />
+                    <HsStat count={signedDocs} label="Signed" styles={localStyles} />
+                    <HsStat count={hazards} label="Hazards" styles={localStyles} />
                 </SummaryRow>
             </View>
         </ScrollView>

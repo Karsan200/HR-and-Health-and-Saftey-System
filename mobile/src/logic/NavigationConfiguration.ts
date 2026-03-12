@@ -10,6 +10,10 @@ export type ScreenKey =
     | 'documents'
     | 'risk'
     | 'personal'
+    | 'settings'
+    | 'logout'
+    | 'profile'
+    | 'notifications'
     | 'dateDetails';
 
 export type BottomNavItem = {

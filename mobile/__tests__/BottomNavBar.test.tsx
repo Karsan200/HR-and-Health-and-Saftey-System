@@ -4,7 +4,7 @@ import { StyleSheet } from 'react-native';
 import BottomNavBar from '../src/components/BottomNavBar';
 import { bottomNavStyles } from '../src/components/BottomNavBar.styles';
 import { getBottomNavItems, hrBottomNavItems, healthSafetyBottomNavItems } from '../src/logic/NavigationConfiguration';
-import { colours } from '../src/theme/colours';
+import { DefaultColours } from '../src/theme/colours';
 
 // Mocking react-native-paper components used in the BottomNavBar
 jest.mock('react-native-paper', () => {
@@ -61,18 +61,19 @@ describe('NavigationConfiguration', () => {
 
 describe('BottomNavBar.styles', () => {
   it('uses the expected theme values', () => {
-    const container = StyleSheet.flatten(bottomNavStyles.container);
-    const navLabel = StyleSheet.flatten(bottomNavStyles.navLabel);
-    const activeNavLabel = StyleSheet.flatten(bottomNavStyles.activeNavLabel);
+    const styles = bottomNavStyles(DefaultColours);
+    const container = StyleSheet.flatten(styles.container);
+    const navLabel = StyleSheet.flatten(styles.navLabel);
+    const activeNavLabel = StyleSheet.flatten(styles.activeNavLabel);
 
     // Ensuring the styles are using the correct theme values and layout
     expect(container.flexDirection).toBe('row');
     expect(container.justifyContent).toBe('space-between');
-    expect(container.backgroundColor).toBe(colours.white);
+    expect(container.backgroundColor).toBe(DefaultColours.white);
     expect(navLabel.fontSize).toBe(12);
-    expect(navLabel.color).toBe(colours.greyPrimaryMainText);
+    expect(navLabel.color).toBe(DefaultColours.greyPrimaryMainText);
     expect(navLabel.textAlign).toBe('center');
-    expect(activeNavLabel.color).toBe(colours.redPrimary);
+    expect(activeNavLabel.color).toBe(DefaultColours.redPrimary);
   });
 });
 
@@ -181,9 +182,9 @@ describe('BottomNavBar component', () => {
     const inactiveStyle = StyleSheet.flatten(inactiveLabel.props.style);
 
     // Then the active label should use the active colour
-    expect(activeStyle.color).toBe(colours.redPrimary);
+    expect(activeStyle.color).toBe(DefaultColours.redPrimary);
 
     // Then the inactive label should use the default colour
-    expect(inactiveStyle.color).toBe(colours.greyPrimaryMainText);
+    expect(inactiveStyle.color).toBe(DefaultColours.greyPrimaryMainText);
   });
 });

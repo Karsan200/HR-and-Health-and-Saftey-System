@@ -12,6 +12,27 @@ jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
 }));
 
+// Mock Colours to avoid undefined
+jest.mock('../src/theme/colours', () => ({
+  DefaultColours: {
+    greyBackground: '#eee',
+    black: '#000',
+    redPrimary: '#f00',
+    white: '#fff',
+    greyPrimaryMainText: '#666',
+    redBackgroundLight: '#fcc',
+    redTextDark: '#900',
+  },
+}));
+
+// Mock Theme values
+jest.mock('../src/theme/theme', () => ({
+  Spacing: { largePadding: 10 },
+  BorderRadius: { largeButtonsAndOutlines: 8 },
+  FontSize: { xs14: 12 },
+  TextStyles: { regular: {} },
+}));
+
 jest.mock('../src/logic/AuthenticationService.ts', () => ({
   fetch: jest.fn(),
 }));

@@ -14,7 +14,7 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 jest.mock('../src/theme/paperTheme', () => ({
-  paperTheme: {},
+  paperTheme: () => ({}),
 }));
 
 jest.mock('../src/logic/AuthenticationService', () => ({
@@ -35,6 +35,14 @@ jest.mock('react-native-paper', () => {
     IconButton: (props: any) =>
         mockReact.createElement(Text, { onPress: props.onPress }, props.icon || 'icon-button'),
   };
+});
+
+// Mock ColorPicker to avoid Jest parsing JSX in node_modules
+jest.mock('react-native-wheel-color-picker', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+
+  return (props: any) => React.createElement(View, props, null);
 });
 
 // Mock CalendarScreen to just render a placeholder

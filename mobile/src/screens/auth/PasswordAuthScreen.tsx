@@ -1,14 +1,14 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React, {Dispatch, SetStateAction, useContext} from 'react';
 import { useState } from 'react';
 import { Text, Image, ScrollView } from 'react-native';
 import { TextInput, Button, Avatar, Dialog, Portal } from 'react-native-paper';
 
-import { colours } from '../../theme/colours.ts';
 import { passwordAuthScreenStyles as styles } from './PasswordAuthScreen.styles.ts';
 import { homeStyles } from '../HomeScreen.styles.ts';
 import authenticationService from '../../logic/AuthenticationService.ts';
 import { HttpException } from '../../exception/HttpException.ts';
 import { JSX } from 'react/jsx-runtime';
+import { ThemeContext } from "../../theme/colourController.tsx";
 
 export default function PasswordAuthScreen(props: { isAuth: Dispatch<SetStateAction<boolean | null>> }): JSX.Element {
   const [username, setUsername] = useState('');
@@ -16,6 +16,8 @@ export default function PasswordAuthScreen(props: { isAuth: Dispatch<SetStateAct
 
   const [visible, setVisible] = useState(false);
   const [error, setError] = useState('');
+
+  const { theme } = useContext(ThemeContext)
 
   async function handleLogin() {
     // Check that there is a username and password entered
@@ -52,54 +54,54 @@ export default function PasswordAuthScreen(props: { isAuth: Dispatch<SetStateAct
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <ScrollView contentContainerStyle={styles.imageContainer}>
+    <ScrollView contentContainerStyle={styles(theme).container}>
+      <ScrollView contentContainerStyle={styles(theme).imageContainer}>
         <Image
           source={require('../../assets/images/Rent-a-Tech-Logo.png')}
-          style={styles.image}
+          style={styles(theme).image}
         />
       </ScrollView>
       <Avatar.Icon
         size={300}
         icon="account-circle"
-        style={homeStyles.profileIcon}
-        color={colours.redPrimary}
+        style={homeStyles(theme).profileIcon}
+        color={theme.redPrimary}
       />
       <TextInput
         label="Username"
         mode="outlined"
-        style={styles.inputStyle}
+        style={styles(theme).inputStyle}
         value={username}
         onChangeText={setUsername}
       />
       <TextInput
         label="Password"
         mode="outlined"
-        style={styles.inputStyle}
+        style={styles(theme).inputStyle}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
       <Button
-        buttonColor={colours.redPrimary}
-        textColor={colours.white}
-        style={styles.inputStyle}
+        buttonColor={theme.redPrimary}
+        textColor={theme.white}
+        style={styles(theme).inputStyle}
         onPress={() => handleLogin()}
       >
         Login
       </Button>
       {/** TODO: Add forgot password functionality */}
-      <Text style={styles.forgotPasswordText}>Forgot Password</Text>
+      <Text style={styles(theme).forgotPasswordText}>Forgot Password</Text>
       {/** Error message dialog */}
       <Portal>
           <Dialog visible={visible} onDismiss={() => setVisible(false)}>
               <Dialog.Title>Error</Dialog.Title>
               <Dialog.Content>
-                  <Text style={styles.dialogText}>{error}</Text>
+                  <Text style={styles(theme).dialogText}>{error}</Text>
               </Dialog.Content>
               <Dialog.Actions>
                   <Button
-                      textColor={colours.redTextDark}
+                      textColor={theme.redTextDark}
                       onPress={() => setVisible(false)}
                   >OK</Button>
               </Dialog.Actions>
