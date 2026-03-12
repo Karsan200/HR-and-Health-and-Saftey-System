@@ -8,7 +8,6 @@ import SettingsScreen, { generateColorSet } from '../src/screens/personal/Settin
 import { useTheme } from '../src/theme/colourController';
 import { DefaultColours } from '../src/theme/colours';
 import { StyleSheet } from 'react-native';
-import { getByText } from '@testing-library/dom';
 
 // Mock the useTheme hook
 jest.mock('../src/theme/colourController', () => ({
