@@ -1,11 +1,12 @@
 import { StyleSheet } from 'react-native';
-import {BorderRadius, FontSize, Spacing, TextStyles} from "../theme/theme";
+import { BorderRadius, FontSize, Spacing, TextStyles } from "../theme/theme";
+import { DefaultColours } from "../theme/colours";
 
 export const dateDetailsStyles = (theme: any) =>
   StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colours.greyBackground,
+        backgroundColor: DefaultColours.greyBackground,
     },
 
     content: {

@@ -24,6 +24,7 @@ import HsOverview from './src/screens/HsOverview';
 import CalendarScreen from './src/screens/CalendarScreen';
 import DateDetailsScreen from './src/screens/DateDetailsScreen';
 import PasswordAuthScreen from './src/screens/auth/PasswordAuthScreen.tsx';
+import SettingsScreen from "./src/screens/personal/SettingsScreen.tsx";
 
 function App() {
     const isDarkMode = useColorScheme() === 'dark';

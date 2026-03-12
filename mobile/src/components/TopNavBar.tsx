@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { Text, View, Pressable } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { topNavStyles as styles } from './TopNavBar.styles';
-import { Colours } from '../theme/colours';
+import { ThemeContext } from "../theme/colourController";
 
 
 type TopNavBarProps = {

@@ -25,6 +25,8 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
                                                    iconBackgroundColor,
                                                    onPress,
                                                  }) => {
+  const { theme } = useContext(ThemeContext); // grab theme dynamically
+
   const Container = onPress ? Pressable : View;
 
   // Colour mapping based on theme

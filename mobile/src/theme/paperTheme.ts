@@ -1,8 +1,10 @@
+import { useContext } from "react";
 import { MD3LightTheme } from 'react-native-paper';
 import { ThemeProp } from 'react-native-paper/lib/typescript/types';
+import { FontSize, TextStyles } from "./theme.ts";
+import { ThemeContext } from "../theme/colourController.ts";
 
-import { colours } from './colours.ts';
-import { theme } from './theme.ts';
+const { theme } = useContext(ThemeContext)
 
 /** Default light theme for react native paper components. <p>
  * Refer to:
@@ -17,92 +19,92 @@ export const paperTheme: ThemeProp = {
   roundness: 1.8,
   colors: {
     ...MD3LightTheme.colors, // Default theme, overridden by custom colors below
-    primary: colours.redPrimary,
-    onSurfaceVariant: colours.greyPrimaryMainText,
-    outline: colours.greyIconLight,
+    primary: theme.redPrimary,
+    onSurfaceVariant: theme.greyPrimaryMainText,
+    outline: theme.greyIconLight,
     elevation: {
-      level3: colours.greyBackground
+      level3: theme.greyBackground
     }
   },
   fonts: {
     default: {
-      fontFamily: theme.textStyles.regular.fontFamily,
-      fontWeight: theme.textStyles.regular.fontWeight
+      fontFamily: TextStyles.regular.fontFamily,
+      fontWeight: TextStyles.regular.fontWeight
     },
     bodySmall: {
-      fontFamily: theme.textStyles.regular.fontFamily,
-      fontSize: theme.fontSize.xxs12,
-      fontWeight: theme.textStyles.regular.fontWeight
+      fontFamily: TextStyles.regular.fontFamily,
+      fontSize: FontSize.xxs12,
+      fontWeight: TextStyles.regular.fontWeight
     },
     bodyMedium: {
-      fontFamily: theme.textStyles.regular.fontFamily,
-      fontSize: theme.fontSize.s16,
-      fontWeight: theme.textStyles.regular.fontWeight
+      fontFamily: TextStyles.regular.fontFamily,
+      fontSize: FontSize.s16,
+      fontWeight: TextStyles.regular.fontWeight
     },
     bodyLarge: {
-      fontFamily: theme.textStyles.regular.fontFamily,
-      fontSize: theme.fontSize.m20,
-      fontWeight: theme.textStyles.regular.fontWeight
+      fontFamily: TextStyles.regular.fontFamily,
+      fontSize: FontSize.m20,
+      fontWeight: TextStyles.regular.fontWeight
     },
     labelSmall: {
-      fontFamily: theme.textStyles.medium.fontFamily,
-      fontSize: theme.fontSize.xxs12,
-      fontWeight: theme.textStyles.medium.fontWeight
+      fontFamily: TextStyles.medium.fontFamily,
+      fontSize: FontSize.xxs12,
+      fontWeight: TextStyles.medium.fontWeight
     },
     labelMedium: {
-      fontFamily: theme.textStyles.medium.fontFamily,
-      fontSize: theme.fontSize.s16,
-      fontWeight: theme.textStyles.medium.fontWeight
+      fontFamily: TextStyles.medium.fontFamily,
+      fontSize: FontSize.s16,
+      fontWeight: TextStyles.medium.fontWeight
     },
     labelLarge: {
-      fontFamily: theme.textStyles.medium.fontFamily,
-      fontSize: theme.fontSize.l24,
-      fontWeight: theme.textStyles.medium.fontWeight
+      fontFamily: TextStyles.medium.fontFamily,
+      fontSize: FontSize.l24,
+      fontWeight: TextStyles.medium.fontWeight
     },
     titleSmall: {
-      fontFamily: theme.textStyles.semiBold.fontFamily,
-      fontSize: theme.fontSize.s16,
-      fontWeight: theme.textStyles.semiBold.fontWeight
+      fontFamily: TextStyles.semiBold.fontFamily,
+      fontSize: FontSize.s16,
+      fontWeight: TextStyles.semiBold.fontWeight
     },
     titleMedium: {
-      fontFamily: theme.textStyles.semiBold.fontFamily,
-      fontSize: theme.fontSize.m20,
-      fontWeight: theme.textStyles.semiBold.fontWeight
+      fontFamily: TextStyles.semiBold.fontFamily,
+      fontSize: FontSize.m20,
+      fontWeight: TextStyles.semiBold.fontWeight
     },
     titleLarge: {
-      fontFamily: theme.textStyles.semiBold.fontFamily,
-      fontSize: theme.fontSize.l24,
-      fontWeight: theme.textStyles.semiBold.fontWeight
+      fontFamily: TextStyles.semiBold.fontFamily,
+      fontSize: FontSize.l24,
+      fontWeight: TextStyles.semiBold.fontWeight
     },
     headlineSmall: {
-      fontFamily: theme.textStyles.extraBold.fontFamily,
-      fontSize: theme.fontSize.m20,
-      fontWeight: theme.textStyles.extraBold.fontWeight
+      fontFamily: TextStyles.extraBold.fontFamily,
+      fontSize: FontSize.m20,
+      fontWeight: TextStyles.extraBold.fontWeight
     },
     headlineMedium: {
-      fontFamily: theme.textStyles.extraBold.fontFamily,
-      fontSize: theme.fontSize.l24,
-      fontWeight: theme.textStyles.extraBold.fontWeight
+      fontFamily: TextStyles.extraBold.fontFamily,
+      fontSize: FontSize.l24,
+      fontWeight: TextStyles.extraBold.fontWeight
     },
     headlineLarge: {
-      fontFamily: theme.textStyles.extraBold.fontFamily,
-      fontSize: theme.fontSize.xl32,
-      fontWeight: theme.textStyles.extraBold.fontWeight
+      fontFamily: TextStyles.extraBold.fontFamily,
+      fontSize: FontSize.xl32,
+      fontWeight: TextStyles.extraBold.fontWeight
     },
     displaySmall: {
-      fontFamily: theme.textStyles.extraBold.fontFamily,
-      fontSize: theme.fontSize.l24,
-      fontWeight: theme.textStyles.extraBold.fontWeight
+      fontFamily: TextStyles.extraBold.fontFamily,
+      fontSize: FontSize.l24,
+      fontWeight: TextStyles.extraBold.fontWeight
     },
     displayMedium: {
-      fontFamily: theme.textStyles.extraBold.fontFamily,
-      fontSize: theme.fontSize.xl32,
-      fontWeight: theme.textStyles.extraBold.fontWeight
+      fontFamily: TextStyles.extraBold.fontFamily,
+      fontSize: FontSize.xl32,
+      fontWeight: TextStyles.extraBold.fontWeight
     },
     displayLarge: {
-      fontFamily: theme.textStyles.extraBold.fontFamily,
-      fontSize: theme.fontSize.xxl36,
-      fontWeight: theme.textStyles.extraBold.fontWeight
+      fontFamily: TextStyles.extraBold.fontFamily,
+      fontSize: FontSize.xxl36,
+      fontWeight: TextStyles.extraBold.fontWeight
     }
   },
   animation: {

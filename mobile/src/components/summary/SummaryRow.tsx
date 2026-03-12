@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { theme } from '../../theme/theme';
+import { Spacing } from "../../theme/theme.ts";
 
 interface SummaryRowProps {
   children: React.ReactNode;
@@ -16,8 +16,8 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: theme.spacing.largePadding,
-    marginBottom: theme.spacing.mediumPadding,
+    paddingHorizontal: Spacing.largePadding,
+    marginBottom: Spacing.mediumPadding,
     gap: 12,
   },
 });
