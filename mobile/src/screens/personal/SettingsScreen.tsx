@@ -305,22 +305,22 @@ export default function SettingsScreen() {
           <Text style={styles.quickAccessTitle}>Colour Themes</Text>
 
           <View style={styles.schemeGrid}>
-            <Pressable style={[styles.schemeButton, isDefault && styles.activeScheme]} onPress={applyDefaultTheme}>
+            <Pressable testID="theme-default-button" style={[styles.schemeButton, isDefault && styles.activeScheme]} onPress={applyDefaultTheme}>
               <View style={[styles.schemeSwatch]} />
               <Text style={styles.smallLabel}>Default</Text>
             </Pressable>
 
-            <Pressable style={[styles.schemeButton, isBlue && styles.activeScheme]} onPress={applyBlueTheme}>
+            <Pressable testID="theme-blue-button" style={[styles.schemeButton, isBlue && styles.activeScheme]} onPress={applyBlueTheme}>
               <View style={[styles.schemeSwatchBlue]} />
               <Text style={styles.smallLabel}>Blue</Text>
             </Pressable>
 
-            <Pressable style={[styles.schemeButton, isGreen && styles.activeScheme]} onPress={applyGreenTheme}>
+            <Pressable testID="theme-green-button"  style={[styles.schemeButton, isGreen && styles.activeScheme]} onPress={applyGreenTheme}>
               <View style={[styles.schemeSwatchGreen]} />
               <Text style={styles.smallLabel}>Green</Text>
             </Pressable>
 
-            <Pressable style={[styles.schemeButton, isDark && styles.activeScheme]} onPress={applyDarkTheme}>
+            <Pressable testID="theme-dark-button"  style={[styles.schemeButton, isDark && styles.activeScheme]} onPress={applyDarkTheme}>
               <View style={[styles.schemeSwatchDark]} />
               <Text style={styles.smallLabel}>Dark</Text>
             </Pressable>

@@ -2,11 +2,12 @@
  * @format
  */
 
-import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import React, { act } from 'react';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import SettingsScreen from '../src/screens/personal/SettingsScreen';
 import { useTheme } from '../src/theme/colourController';
 import { DefaultColours } from '../src/theme/colours';
+import { StyleSheet } from 'react-native';
 
 // Mock the useTheme hook
 jest.mock('../src/theme/colourController', () => ({
@@ -73,33 +74,36 @@ describe('SettingsScreen', () => {
         );
     });
 
-    // it('opens the colour picker when background colour is pressed', async () => {
-    //     const { getByText, findByText, getByTestId } = render(<SettingsScreen />);
-    //
-    //     // Use act to ensure state updates flush
-    //     await act(async () => {
-    //         fireEvent.press(getByText('Background Colour'));
-    //     });
-    //
-    //     // findByText waits for the element to appear
-    //     const pickerHeader = await findByText('Editing background colour');
-    //     expect(pickerHeader).toBeTruthy();
-    //
-    //     // Confirm the color picker component is visible
-    //     expect(getByTestId('mock-color-picker')).toBeTruthy();
-    // });
-    //
-    // it('highlights the active theme', () => {
-    //     const { getAllByText } = render(<SettingsScreen />);
-    //
-    //     const defaultPressables = getAllByText('Default');
-    //     const defaultButton = defaultPressables[0].parent;
-    //
-    //     // Flatten styles
-    //     const flattenStyles = defaultButton?.props.style.flat ? defaultButton.props.style.flat() : defaultButton?.props.style;
-    //
-    //     expect(flattenStyles).toEqual(
-    //         expect.arrayContaining([expect.objectContaining({ borderWidth: 2 })])
-    //     );
-    // });
+  it('applies dark theme when dark button is pressed', () => {
+    const { getByText } = render(<SettingsScreen />);
+    fireEvent.press(getByText('Dark'));
+    expect(mockUpdateTheme).toHaveBeenCalledWith(
+      expect.objectContaining({"amberBackgroundLight": "#9B6302", "amberPrimary": "#E8960A", "amberTextDark": "#FFECCD", "black": "#FFFFFF", "blueDark": "#E6ECF9",
+        "blueLight": "#002A80", "bluePrimary": "#588FFF", "greenBackgroundLight": "#0D7B42", "greenPrimary": "#14A45A", "greenTextDark": "#D0EDDE", "greyBackground": "#000000", "greyIconLight": "#F6F6F8", "greyPrimaryMainText": "#ABABB3", "redBackgroundLight": "#AE010B", "redPrimary": "#D20414", "redTextDark": "#F6CDD0", "redTrafficBackgroundLight": "#AE010B", "redTrafficPrimary": "#D20414", "redTrafficTextDark": "#F6CDD0", "white": "#2B2B2B"
+      } )
+    );
+  });
+
+    it('opens the colour picker when background colour is pressed', async () => {
+      const { getByText, getByTestId } = render(<SettingsScreen />);
+
+      fireEvent.press(getByText('#F6F6F8')); // press the pressable row, not the label
+
+      await waitFor(() => {
+        expect(getByText('Editing background colour')).toBeTruthy();
+      });
+
+      expect(getByTestId('mock-color-picker')).toBeTruthy();
+    });
+
+    it('highlights the active theme', async () => {
+      const { getByTestId } = render(<SettingsScreen />);
+
+      const defaultButton = getByTestId('theme-default-button');
+      const flattenStyles = StyleSheet.flatten(defaultButton.props.style);
+
+      expect(flattenStyles).toMatchObject({ borderWidth: 2 });
+    });
+
+
 });
