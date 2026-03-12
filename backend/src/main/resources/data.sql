@@ -550,3 +550,20 @@ INSERT INTO signature_table (
        NULL,
        NULL,
        '2025-10-30 18:20:00');
+
+DESCRIBE risk_assessment_table;
+
+INSERT INTO risk_assessment_table (
+   risk_assessment_id,
+   file_id,
+   title,
+   created
+) VALUES
+    (1, (SELECT file_id FROM files_table WHERE name = 'safety_policy'), 'Risk Assessment for Safety Policy', '2025-02-14 10:45:00'),
+    (2, (SELECT file_id FROM files_table WHERE name = 'fire_safety'), 'Risk Assessment for Fire Safety', '2025-02-14 10:50:00'),
+    (3, (SELECT file_id FROM files_table WHERE name = 'training_manual'), 'Risk Assessment for Training Manual', '2025-03-02 11:30:00'),
+    (4, (SELECT file_id FROM files_table WHERE name = 'hr_guidelines'), 'Risk Assessment for HR Guidelines', '2025-04-18 15:30:00'),
+    (5, (SELECT file_id FROM files_table WHERE name = 'hazard_report_template'), 'Risk Assessment for Hazard Report Template', '2025-05-29 12:30:00'),
+    (6, (SELECT file_id FROM files_table WHERE name = 'equipment_safety'), 'Risk Assessment for Equipment Safety', '2025-07-12 09:30:00')
+
+
