@@ -39,7 +39,7 @@ public class DocumentTable {
     private FilesTable file;
 
     /** Title of the notification. */
-    @JoinColumn(columnDefinition = "TEXT", name = "title", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "title", nullable = false)
     private String title;
 
     /** Creation timestamp (auto-populated, not updatable). */

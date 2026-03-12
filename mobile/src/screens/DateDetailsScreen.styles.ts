@@ -5,7 +5,7 @@ export const dateDetailsStyles = (theme: any) =>
   StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: theme.greyBackground,
+        backgroundColor: Colours.greyBackground,
     },
 
     content: {

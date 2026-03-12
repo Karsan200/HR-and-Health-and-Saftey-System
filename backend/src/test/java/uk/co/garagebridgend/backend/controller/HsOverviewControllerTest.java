@@ -1,23 +1,38 @@
 package uk.co.garagebridgend.backend.controller;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.ObjectMapper;
 import uk.co.garagebridgend.backend.RentATechApplication;
+import uk.co.garagebridgend.backend.logic.HsOverviewService;
 import uk.co.garagebridgend.backend.models.entity.*;
 import uk.co.garagebridgend.backend.repository.*;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -33,8 +48,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
 @Transactional
+@ActiveProfiles("test")
 public class HsOverviewControllerTest {
 
     @Autowired
@@ -55,6 +70,15 @@ public class HsOverviewControllerTest {
     @Autowired
     private FilesRepository filesRepository;
 
+    @Autowired
+    private SessionRepository sessionRepository;
+
+    @Mock
+    private HsOverviewService hsOverviewService;
+
+    @InjectMocks
+    private HsOverviewController hsOverviewController;
+
     /**
      * Prepare a small dataset used by the tests. Clears repositories then creates
      * an account, a file, two documents, two hazards and a single signature.
@@ -64,25 +88,26 @@ public class HsOverviewControllerTest {
     @BeforeEach
     void setup() {
 
-        // Clear tables to avoid duplicate key errors
-        signatureRepository.deleteAll();
-        documentRepository.deleteAll();
-        hazardRepository.deleteAll();
-        filesRepository.deleteAll();
-        accountRepository.deleteAll();
-
         // Create test user
         AccountTable user = new AccountTable();
         user.setFirstName("Maggie");
         user.setLastName("May");
-        user.setUsername("MMay");
-        user.setEmail("mmay@test.com");
-        user.setPassword("password");
-        user.setSalt("salt");
+        user.setUsername("MMays");
+        user.setEmail("mmays@test.com");
+        user.setPassword(BCrypt.hashpw("password", BCrypt.gensalt()));
         user.setAddressOne("Test Street");
         user.setPostalCode("CF31");
 
         accountRepository.save(user);
+
+        // Create test session for user (with known refresh token)
+        SessionTable session = new SessionTable();
+        session.setAccount(user);
+        session.setRefreshToken("validTestRefreshToken");
+        session.setTwoFactor(true);
+        session.setMobile(false);
+        session.setExpires(LocalDateTime.now(Clock.systemUTC()).plusHours(2));
+        sessionRepository.save(session);
 
         // Create file
         FilesTable file = new FilesTable();
@@ -110,12 +135,24 @@ public class HsOverviewControllerTest {
         HazardTable hazard1 = new HazardTable();
         hazard1.setAccount(user);
         hazard1.setTitle("Loose Cable");
+        hazard1.setQuestionOne("Cable across the floor");
+        hazard1.setQuestionTwo("Office");
+        hazard1.setQuestionThree("Trip risk");
+        hazard1.setQuestionFour("Flood");
+        hazard1.setQuestionFive("Low");
+        hazard1.setQuestionSix("Fix soon");
 
         hazardRepository.save(hazard1);
 
         HazardTable hazard2 = new HazardTable();
         hazard2.setAccount(user);
         hazard2.setTitle("Wet Floor");
+        hazard2.setQuestionOne("Cable across the floor");
+        hazard2.setQuestionTwo("Office");
+        hazard2.setQuestionThree("Trip risk");
+        hazard2.setQuestionFour("Flood");
+        hazard2.setQuestionFive("Low");
+        hazard2.setQuestionSix("Fix soon");
 
         hazardRepository.save(hazard2);
 
@@ -127,6 +164,30 @@ public class HsOverviewControllerTest {
         signatureRepository.save(signature);
     }
 
+    private String getAccessToken(String refreshToken) throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(get("/auth/refresh")
+                        .cookie(new Cookie("refreshToken", refreshToken)))
+                .andReturn()
+                .getResponse();
+
+        if (response.getStatus() != 200) {
+            throw new IllegalStateException(
+                    "Expected 200 but got " + response.getStatus()
+            );
+        }
+
+        String body = response.getContentAsString();
+
+        if (body.isBlank()) {
+            throw new IllegalStateException("Response body was empty");
+        }
+
+        return new ObjectMapper()
+                .readTree(body)
+                .path("accessToken")
+                .asString();
+    }
+
     /**
      * Happy-path: authenticated user with existing account should receive the
      * overview JSON containing counts for pending docs, signed docs and hazards.
@@ -134,28 +195,17 @@ public class HsOverviewControllerTest {
      * @throws Exception if the request or assertions fail
      */
     @Test
-    @WithMockUser(username = "MMay")
+    @Order(1)
     void testHsOverviewSuccess() throws Exception {
 
-        mockMvc.perform(get("/api/hs-overview"))
+        String accessToken = getAccessToken("validTestRefreshToken");
+
+        mockMvc.perform(get("/api/hs-overview")
+                 .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pendingDocs").value(2))
                 .andExpect(jsonPath("$.signed").value(1))
                 .andExpect(jsonPath("$.hazards").value(2));
-    }
-
-    /**
-     * When not authenticated the endpoint should return 401 Unauthorized.
-     *
-     * @throws Exception if the request or assertions fail
-     */
-    @Test
-    void testHsOverviewNotAuthenticated() throws Exception {
-
-        SecurityContextHolder.clearContext();
-
-        mockMvc.perform(get("/api/hs-overview"))
-                .andExpect(status().isUnauthorized());
     }
 
     /**
@@ -164,9 +214,32 @@ public class HsOverviewControllerTest {
      * @throws Exception if the request or assertions fail
      */
     @Test
-    @WithMockUser(username = "unknownUser")
+    @WithMockUser(username = "60")
+    @Order(2)
     void testHsOverviewUserNotFound() throws Exception {
 
         mockMvc.perform(get("/api/hs-overview"))
-                .andExpect(status().isNotFound());    }
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @Order(2)
+    void testOverviewThrowsException() throws Exception {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(hsOverviewController).build();
+
+        // simulate your AuthenticationService throwing an exception
+        when(hsOverviewService.getOverview())
+                .thenThrow(new RuntimeException("Service failed"));
+
+        // perform a GET to /auth/refresh with a cookie
+        mockMvc.perform(get("/api/hs-overview"))
+                .andExpect(status().isInternalServerError()) // matches ResponseStatusException
+                .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
+                .andExpect(result -> {
+                    ResponseStatusException ex = (ResponseStatusException) result.getResolvedException();
+                    assertNotNull(ex);
+                    assertEquals("Internal sever error", ex.getReason()); // match your controller message
+                });
+    }
 }

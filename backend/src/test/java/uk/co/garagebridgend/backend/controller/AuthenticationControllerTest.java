@@ -24,7 +24,7 @@ import uk.co.garagebridgend.backend.logic.AuthenticationService;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.PermissionsTable;
 import uk.co.garagebridgend.backend.models.entity.SessionTable;
-import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
+import uk.co.garagebridgend.backend.models.request.AuthRequest;
 import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.PermissionsRepository;
@@ -35,8 +35,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -72,19 +70,14 @@ public class AuthenticationControllerTest {
 
     @BeforeEach
     void setup() {
-        // Create salt
-        String salt = BCrypt.gensalt();
-
         // Create account
         AccountTable account = new AccountTable();
         account.setFirstName("John");
         account.setLastName("Doe");
         account.setUsername("johnd18");
         account.setEmail("johnd@test.com");
-        account.setPassword(BCrypt.hashpw("hashedPassword", salt));
-        account.setSalt(salt);
-        account.setMobilePin(BCrypt.hashpw("123456", salt));
-        account.setMobilePinSalt(salt);
+        account.setPassword(BCrypt.hashpw("hashedPassword", BCrypt.gensalt()));
+        account.setMobilePin(BCrypt.hashpw("123456", BCrypt.gensalt()));
         account.setAddressOne("123 Main St");
         account.setPostalCode("12345");
         accountRepository.save(account);
@@ -118,7 +111,6 @@ public class AuthenticationControllerTest {
 
         // Create a new account (for mobile)
         var mobilePin = "654321";
-        var mobilePinSalt = BCrypt.gensalt();
 
         AccountTable mobile = new AccountTable();
         mobile.setFirstName("Jane");
@@ -129,13 +121,10 @@ public class AuthenticationControllerTest {
         mobile.setPostalCode("12345");
 
         // Password for login
-        var passwordSalt = BCrypt.gensalt();
-        mobile.setPassword(BCrypt.hashpw("hashedPassword", passwordSalt));
-        mobile.setSalt(passwordSalt);
+        mobile.setPassword(BCrypt.hashpw("hashedPassword", BCrypt.gensalt()));
 
         // Mobile PIN for refresh rotation
-        mobile.setMobilePin(BCrypt.hashpw(mobilePin, mobilePinSalt));
-        mobile.setMobilePinSalt(mobilePinSalt);
+        mobile.setMobilePin(BCrypt.hashpw(mobilePin, BCrypt.gensalt()));
 
         accountRepository.save(mobile);
 
@@ -179,6 +168,122 @@ public class AuthenticationControllerTest {
                 .readTree(body)
                 .path("accessToken")
                 .asString();
+    }
+
+    @Test
+    @Order(1)
+    void testAuthenticateMobileSuccess() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "username": "johnd18",
+                        "password": "hashedPassword",
+                        "isMobile": true
+                    }"""))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    String responseBody = result.getResponse().getContentAsString();
+                    assertFalse(responseBody.isBlank(), "Response body should not be empty");
+
+                    // Check access token in response
+                    String accessToken = new ObjectMapper()
+                            .readTree(responseBody)
+                            .path("accessToken")
+                            .asString();
+                    assertFalse(accessToken.isBlank(), "Access token should not be empty");
+
+                    // Check refresh token cookie
+                    Cookie refreshCookie = result.getResponse().getCookie("refreshToken");
+                    assertNotNull(refreshCookie, "Refresh token cookie should be set");
+                    assertFalse(refreshCookie.getValue().isBlank(), "Refresh token cookie value should not be empty");
+                });
+    }
+
+    @Test
+    @Order(1)
+    void testAuthenticateWebSuccess() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "username": "johnd18",
+                        "password": "hashedPassword",
+                        "isMobile": false
+                    }"""))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    String responseBody = result.getResponse().getContentAsString();
+                    assertFalse(responseBody.isBlank(), "Response body should not be empty");
+
+                    // Check access token in response
+                    String accessToken = new ObjectMapper()
+                            .readTree(responseBody)
+                            .path("accessToken")
+                            .asString();
+                    assertFalse(accessToken.isBlank(), "Access token should not be empty");
+
+                    // Check refresh token cookie
+                    Cookie refreshCookie = result.getResponse().getCookie("refreshToken");
+                    assertNotNull(refreshCookie, "Refresh token cookie should be set");
+                    assertFalse(refreshCookie.getValue().isBlank(), "Refresh token cookie value should not be empty");
+                });
+    }
+
+    @Test
+    @Order(1)
+    void testAuthenticateInvalidCredentials() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "username": "johnd18",
+                        "password": "wrongPassword",
+                        "isMobile": false
+                    }"""))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @Order(1)
+    void testAuthenticateAccountNotFound() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "username": "nonexistent",
+                        "password": "hashedPassword",
+                        "isMobile": false
+                    }"""))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Order(1)
+    void testAuthenticateThrowsException() throws Exception {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(authenticationController).build();
+
+        // simulate your AuthenticationService throwing an exception
+        when(authenticationService.authenticate(new AuthRequest()))
+                .thenThrow(new RuntimeException("Service failed"));
+
+        // perform a POST to /auth/login
+        mockMvc.perform(post("/auth/login")
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "username": "johnd18",
+                        "password": "hashedPassword",
+                        "isMobile": false
+                    }"""))
+                .andExpect(status().isInternalServerError()) // matches ResponseStatusException
+                .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
+                .andExpect(result -> {
+                    ResponseStatusException ex = (ResponseStatusException) result.getResolvedException();
+                    assertNotNull(ex);
+                    assertEquals("Internal sever error", ex.getReason()); // match your controller message
+                });
     }
 
     @Test

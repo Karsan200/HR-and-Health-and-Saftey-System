@@ -2,7 +2,8 @@ import React, { useContext } from 'react';
 import { Text, View, Pressable } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { topNavStyles as styles } from './TopNavBar.styles';
-import { ThemeContext } from '../theme/colourController';
+import { Colours } from '../theme/colours';
+
 
 type TopNavBarProps = {
   title: string;
@@ -46,6 +47,7 @@ export default function TopNavBar({
           <Icon source="account-circle" size={24} color={theme.black} />
         </Pressable>
       </View>
+
     </View>
   );
 }
