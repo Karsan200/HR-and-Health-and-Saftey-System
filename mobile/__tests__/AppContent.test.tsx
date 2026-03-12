@@ -14,7 +14,7 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 jest.mock('../src/theme/paperTheme', () => ({
-  paperTheme: {},
+  paperTheme: () => ({}),
 }));
 
 jest.mock('../src/logic/AuthenticationService', () => ({
