@@ -121,7 +121,7 @@ export default function SettingsScreen() {
 
   const styles = settingsStyles(theme);
 
-  console.log(theme);
+  //console.log(theme);
 
   const [pickColors, setPickColors] = useState({
     background: "#F6F6F8",
@@ -149,8 +149,8 @@ export default function SettingsScreen() {
   }
 
   function applyBlueTheme() {
-    updateTheme(DefaultColours);
     updateTheme({
+      ...DefaultColours,
       redPrimary: "#0066FF",
       redTextDark: "#003A99",
       redBackgroundLight: "#DCE8FF"
@@ -166,8 +166,8 @@ export default function SettingsScreen() {
   }
 
   function applyGreenTheme() {
-    updateTheme(DefaultColours);
     updateTheme({
+      ...DefaultColours,
       redPrimary: "#2E7D32",
       redTextDark: "#1B5E20",
       redBackgroundLight: "#C8E6C9"
@@ -199,10 +199,10 @@ export default function SettingsScreen() {
 
     if (!editingColor) return;
 
-    setPickColors({
-      ...pickColors,
+    setPickColors(prev => ({
+      ...prev,
       [editingColor]: hex
-    });
+    }));
 
     const newColors = generateColorSet(hex);
     setColors(newColors);

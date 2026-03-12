@@ -13,6 +13,7 @@ import AuthenticationService from './src/logic/AuthenticationService.ts';
 import { AppSection, ScreenKey } from "./src/logic/NavigationConfiguration.ts";
 
 import { paperTheme } from './src/theme/paperTheme.ts';
+import { ThemeProvider } from './src/theme/colourController.tsx'
 import { ThemeContext } from './src/theme/colourController.tsx';
 import { HttpException } from './src/exception/HttpException.ts';
 
@@ -28,39 +29,41 @@ import PasswordAuthScreen from './src/screens/auth/PasswordAuthScreen.tsx';
 import SettingsScreen from "./src/screens/personal/SettingsScreen.tsx";
 
 function App() {
-    const isDarkMode = useColorScheme() === 'dark';
+  const isDarkMode = useColorScheme() === 'dark';
 
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                await AuthenticationService.refresh();
-                setIsAuthenticated(true);
-            } catch (error) {
-              console.log(error)
-              if (error instanceof HttpException && error.statusCode === 401) {
-                setIsAuthenticated(false);
-              }
-            }
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await AuthenticationService.refresh();
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.log(error);
+        if (error instanceof HttpException && error.statusCode === 401) {
+          setIsAuthenticated(false);
         }
+      }
+    };
 
-        checkAuth();
-    }, []);
+    checkAuth();
+  }, []);
 
-    const theme = useContext(ThemeContext);
+  const theme = useContext(ThemeContext);
 
   return (
-    <PaperProvider theme={paperTheme(theme)}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      {isAuthenticated === null ? (
-        <LogoActivityIndicator />
-      ) : isAuthenticated ? (
-        <AppContent />
-      ) : (
-        <PasswordAuthScreen isAuth={setIsAuthenticated} />
-      )}
-    </PaperProvider >
+    <ThemeProvider>
+      <PaperProvider theme={paperTheme(theme)}>
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+        {isAuthenticated === null ? (
+          <LogoActivityIndicator />
+        ) : isAuthenticated ? (
+          <AppContent />
+        ) : (
+          <PasswordAuthScreen isAuth={setIsAuthenticated} />
+        )}
+      </PaperProvider>
+    </ThemeProvider>
   );
 }
 
