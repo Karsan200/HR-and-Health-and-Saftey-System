@@ -1,12 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import { DefaultColours } from "./colours";
-
-type ThemeType = typeof DefaultColours;
-
-type ThemeContextType = {
-  theme: ThemeType;
-  updateTheme: (newColours: Partial<ThemeType>) => void;
-};
+import { ThemeContextType } from "../model/ThemeContextType.ts";
 
 export const ThemeContext = createContext<ThemeContextType>({
   theme: DefaultColours,

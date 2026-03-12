@@ -1,14 +1,14 @@
 import { StyleSheet } from 'react-native';
-import { theme } from '../../theme/theme.ts';
-import { colours } from '../../theme/colours.ts';
+import { FontSize, Spacing, TextStyles } from "../../theme/theme.ts";
 
 /** Styles for the Password Authentication Screen, defining layout and visual properties for the screen components. */
-export const passwordAuthScreenStyles = StyleSheet.create({
-  /** Root container for the screen scroll content.
+export const passwordAuthScreenStyles = (theme: any) =>
+    StyleSheet.create({
+      /** Root container for the screen scroll content.
    * Applies horizontal padding and top offset.
    */
   container: {
-    paddingHorizontal: theme.spacing.largePadding,
+    paddingHorizontal: Spacing.largePadding,
     paddingTop: 100,
   },
 
@@ -39,16 +39,17 @@ export const passwordAuthScreenStyles = StyleSheet.create({
   forgotPasswordText: {
     marginTop: -10,
     alignSelf: 'center',
-    color: colours.greyPrimaryMainText,
-    fontSize: theme.fontSize.xs14,
-    fontFamily: theme.textStyles.regular.fontFamily,
-    fontWeight: theme.textStyles.regular.fontWeight
+    color: theme.greyPrimaryMainText,
+    fontSize: FontSize.xs14,
+    fontFamily: TextStyles.regular.fontFamily,
+    fontWeight: TextStyles.regular.fontWeight
   },
 
+  /** Style for error message text in the dialog. */
   dialogText: {
-    fontSize: theme.fontSize.s16,
-    fontFamily: theme.textStyles.regular.fontFamily,
-    fontWeight: theme.textStyles.regular.fontWeight,
-    color: colours.black
+    fontSize: FontSize.s16,
+    fontFamily: TextStyles.regular.fontFamily,
+    fontWeight: TextStyles.regular.fontWeight,
+    color: theme.black
   }
 });

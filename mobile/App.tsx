@@ -5,7 +5,7 @@
  * @format
  */
 
-import React, { useEffect, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 
@@ -13,6 +13,7 @@ import AuthenticationService from './src/logic/AuthenticationService.ts';
 import { AppSection, ScreenKey } from "./src/logic/NavigationConfiguration.ts";
 
 import { paperTheme } from './src/theme/paperTheme.ts';
+import { ThemeContext } from './src/theme/colourController.tsx';
 import { HttpException } from './src/exception/HttpException.ts';
 
 import BottomNavBar from "./src/components/BottomNavBar";
@@ -47,8 +48,10 @@ function App() {
         checkAuth();
     }, []);
 
+    const theme = useContext(ThemeContext);
+
   return (
-    <PaperProvider theme={paperTheme}>
+    <PaperProvider theme={paperTheme(theme)}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       {isAuthenticated === null ? (
         <LogoActivityIndicator />

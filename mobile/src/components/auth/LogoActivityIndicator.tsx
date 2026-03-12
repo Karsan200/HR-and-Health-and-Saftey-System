@@ -1,6 +1,6 @@
 import { ActivityIndicator, Image, View } from 'react-native';
 import React, {useContext} from 'react';
-import { ThemeContext } from '../../theme/colourController.ts';
+import { ThemeContext } from '../../theme/colourController.tsx';
 
 import { logoActivityIndicatorStyles as styles } from './LogoActivityIndicator.styles.ts';
 
