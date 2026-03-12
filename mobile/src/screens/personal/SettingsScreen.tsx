@@ -82,7 +82,7 @@ function hslToHex(h: number, s: number, l: number): string {
   return `#${rHex}${gHex}${bHex}`;
 }
 
-function generateColorSet(primaryHex: string): ColorSet {
+export function generateColorSet(primaryHex: string): ColorSet {
   const { h, s, l } = hexToHSL(primaryHex);
 
   let lightS = s * 0.6;
@@ -268,12 +268,8 @@ export default function SettingsScreen() {
     }
   }
 
-  const isDefault = theme.redPrimary === "#D20414";
-  const isBlue = theme.redPrimary === "#0066FF";
-  const isGreen = theme.redPrimary === "#2E7D32";
-  const isDark = theme.redPrimary === "#AE010B";
-
-  const isCustom = !isDefault && !isBlue && !isGreen;
+  const PRESET_COLOURS = ["#D20414", "#0066FF", "#2E7D32", "#AE010B"];
+  const isCustom = !PRESET_COLOURS.includes(theme.redPrimary);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -305,27 +301,27 @@ export default function SettingsScreen() {
           <Text style={styles.quickAccessTitle}>Colour Themes</Text>
 
           <View style={styles.schemeGrid}>
-            <Pressable testID="theme-default-button" style={[styles.schemeButton, isDefault && styles.activeScheme]} onPress={applyDefaultTheme}>
+            <Pressable testID="theme-default-button" style={[styles.schemeButton, PRESET_COLOURS[0] && styles.activeScheme]} onPress={applyDefaultTheme}>
               <View style={[styles.schemeSwatch]} />
               <Text style={styles.smallLabel}>Default</Text>
             </Pressable>
 
-            <Pressable testID="theme-blue-button" style={[styles.schemeButton, isBlue && styles.activeScheme]} onPress={applyBlueTheme}>
+            <Pressable testID="theme-blue-button" style={[styles.schemeButton, PRESET_COLOURS[1] && styles.activeScheme]} onPress={applyBlueTheme}>
               <View style={[styles.schemeSwatchBlue]} />
               <Text style={styles.smallLabel}>Blue</Text>
             </Pressable>
 
-            <Pressable testID="theme-green-button"  style={[styles.schemeButton, isGreen && styles.activeScheme]} onPress={applyGreenTheme}>
+            <Pressable testID="theme-green-button"  style={[styles.schemeButton, PRESET_COLOURS[2] && styles.activeScheme]} onPress={applyGreenTheme}>
               <View style={[styles.schemeSwatchGreen]} />
               <Text style={styles.smallLabel}>Green</Text>
             </Pressable>
 
-            <Pressable testID="theme-dark-button"  style={[styles.schemeButton, isDark && styles.activeScheme]} onPress={applyDarkTheme}>
+            <Pressable testID="theme-dark-button"  style={[styles.schemeButton, PRESET_COLOURS[3] && styles.activeScheme]} onPress={applyDarkTheme}>
               <View style={[styles.schemeSwatchDark]} />
               <Text style={styles.smallLabel}>Dark</Text>
             </Pressable>
 
-            <Pressable style={[styles.schemeButton, isCustom && styles.activeScheme]}>
+            <Pressable testID="theme-custom-button" style={[styles.schemeButton, isCustom && styles.activeScheme]}>
               <View style={[styles.schemeSwatchCustom]} />
               <Text style={styles.smallLabel}>Custom</Text>
             </Pressable>
