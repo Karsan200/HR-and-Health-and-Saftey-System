@@ -160,8 +160,66 @@ INSERT INTO files_table (
       (UUID(), 5, 5, 'equipment_safety', 'pdf', '2025-07-12 09:00:00'),
       (UUID(), 6, 6, 'workshop_rules', 'pdf', '2025-08-20 17:00:00'),
       (UUID(), 7, 7, 'health_policy', 'pdf', '2025-09-15 14:00:00'),
-      (UUID(), 8, 8, 'emergency_procedures', 'pdf', '2025-10-30 18:00:00'
-      );
+      (UUID(), 8, 8, 'emergency_procedures', 'pdf', '2025-10-30 18:00:00');
 
+INSERT INTO document_table (
+    file_id,
+    title,
+    created
+) VALUES
+      ((SELECT file_id FROM files_table WHERE name = 'safety_policy'), 'Company Safety Policy', '2025-02-14 10:00:00'),
+      ((SELECT file_id FROM files_table WHERE name = 'fire_safety'), 'Fire Safety Guidelines', '2025-02-14 10:05:00'),
+      ((SELECT file_id FROM files_table WHERE name = 'training_manual'), 'Employee Training Manual', '2025-03-02 11:00:00'),
+      ((SELECT file_id FROM files_table WHERE name = 'hr_guidelines'), 'HR Guidelines', '2025-04-18 15:00:00'),
+      ((SELECT file_id FROM files_table WHERE name = 'hazard_report_template'), 'Hazard Report Template', '2025-05-29 12:00:00'),
+      ((SELECT file_id FROM files_table WHERE name = 'equipment_safety'), 'Equipment Safety Procedures', '2025-07-12 09:00:00'),
+      ((SELECT file_id FROM files_table WHERE name = 'workshop_rules'), 'Workshop Rules', '2025-08-20 17:00:00'),
+      ((SELECT file_id FROM files_table WHERE name = 'health_policy'), 'Health and Safety Policy', '2025-09-15 14:00:00'),
+      ((SELECT file_id FROM files_table WHERE name = 'emergency_procedures'), 'Emergency Procedures', '2025-10-30 18:00:00');
 
-DESCRIBE account_table;
+INSERT INTO hazard_table (
+    account_id,
+    title,
+    question_one,
+    question_two,
+    question_three,
+    question_four,
+    question_five,
+    question_six,
+    is_draft,
+    priority,
+    action_complete,
+    created
+) VALUES
+      (1, 'Tyre fitting Machine Fault', 'Tyre not spinning when the machine is being operated', 'Sudden tyre spinning can injure the operator', 'The machine is unplugged', 'The machine needs to be checked over and repaired', 'Maintenance Technician', '2026-04-02 09:00:00', FALSE, 3, NULL, CURRENT_TIMESTAMP),
+      (1, 'Tyre fitting Machine Fault', 'Tyre not spinning when the machine is being operated', 'Sudden tyre spinning can injure the operator', 'The machine is unplugged', 'The machine needs to be checked over and repaired', 'Maintenance Technician', '2026-04-02 09:00:00', FALSE, 3, NULL, CURRENT_TIMESTAMP),
+      (2, 'Oil Spill Near Lift', 'Oil spill near vehicle lift creating slippery surface', 'Technicians may slip and suffer injuries', 'Area marked with warning cone', 'Clean spill and restock spill kits', 'Workshop Supervisor', '2026-04-02 10:00:00', FALSE, 2, '2026-04-02 11:00:00', CURRENT_TIMESTAMP),
+      (3, 'Damaged Air Hose', 'Compressed air hose showing cracks', 'Hose could burst causing whipping injury', 'Hose removed from service', 'Replace damaged hose and inspect others', 'Maintenance Technician', '2026-04-02 11:30:00', FALSE, 4, NULL, CURRENT_TIMESTAMP),
+      (4, 'Loose Wheel Nuts', 'Wheel nuts not torqued correctly after service', 'Wheel could detach while driving', 'Vehicle held in workshop', 'Implement torque verification check', 'Senior Technician', '2026-04-03 08:30:00', FALSE, 5, '2026-04-03 09:45:00', CURRENT_TIMESTAMP),
+      (5, 'Broken Workshop Light', 'Light fixture above bay flickering', 'Poor visibility could cause mistakes', 'Temporary lighting installed', 'Replace faulty light unit', 'Maintenance Technician', '2026-04-03 09:00:00', FALSE, 1, '2026-04-03 12:00:00', CURRENT_TIMESTAMP),
+      (6, 'Blocked Fire Exit', 'Fire exit blocked by stacked tyres', 'Could delay evacuation in emergency', 'Tyres temporarily moved', 'Reorganise tyre storage area', 'Health and Safety Officer', '2026-04-03 10:00:00', FALSE, 4, NULL, CURRENT_TIMESTAMP),
+      (2, 'Vehicle Lift Warning Alarm Fault', 'Lift alarm not sounding during descent', 'Technician may not be alerted to hazards', 'Lift isolated from use', 'Repair lift alarm system', 'Maintenance Engineer', '2026-04-03 11:00:00', FALSE, 5, NULL, CURRENT_TIMESTAMP),
+      (3, 'Coolant Leak', 'Coolant leaking from vehicle during service', 'Spill may cause slip hazard', 'Drip tray placed under vehicle', 'Clean area and repair leak', 'Workshop Technician', '2026-04-04 08:00:00', FALSE, 2, '2026-04-04 09:00:00', CURRENT_TIMESTAMP),
+      (4, 'Battery Acid Leak', 'Vehicle battery leaking acid', 'Acid exposure may cause burns', 'Battery isolated and PPE used', 'Dispose and replace battery safely', 'Workshop Manager', '2026-04-04 09:15:00', FALSE, 4, NULL, CURRENT_TIMESTAMP),
+      (5, 'Faulty Jack Stand', 'Jack stand showing structural damage', 'Vehicle could fall causing crush injury', 'Stand removed from use', 'Replace with certified stand', 'Maintenance Technician', '2026-04-04 10:30:00', FALSE, 5, NULL, CURRENT_TIMESTAMP),
+      (6, 'Air Compressor Overheating', 'Compressor running hotter than normal', 'May cause equipment failure or fire risk', 'Machine turned off for cooling', 'Inspect cooling system', 'Maintenance Engineer', '2026-04-05 08:30:00', FALSE, 3, NULL, CURRENT_TIMESTAMP),
+      (1, 'Loose Floor Tile', 'Tile loose near inspection pit', 'Technician may trip and fall', 'Area temporarily taped', 'Replace damaged tile', 'Facilities Manager', '2026-04-05 09:00:00', FALSE, 2, '2026-04-05 13:00:00', CURRENT_TIMESTAMP),
+      (2, 'Damaged Extension Cable', 'Cable insulation worn', 'Risk of electric shock', 'Cable unplugged', 'Replace damaged cable', 'Maintenance Technician', '2026-04-05 10:00:00', FALSE, 4, NULL, CURRENT_TIMESTAMP),
+      (3, 'Wheel Balancer Error', 'Machine displaying calibration error', 'Incorrect balancing may cause unsafe driving', 'Machine taken out of use', 'Recalibrate equipment', 'Workshop Technician', '2026-04-06 08:00:00', FALSE, 3, NULL, CURRENT_TIMESTAMP),
+      (4, 'Fuel Spill', 'Fuel spilled during vehicle inspection', 'Flammable hazard and slip risk', 'Absorbent pads used', 'Dispose of contaminated materials', 'Workshop Supervisor', '2026-04-06 09:00:00', FALSE, 5, '2026-04-06 10:30:00', CURRENT_TIMESTAMP),
+      (5, 'Worn Brake Test Rollers', 'Brake test machine rollers worn', 'May give inaccurate results', 'Machine flagged for maintenance', 'Replace rollers', 'Maintenance Technician', '2026-04-06 10:15:00', FALSE, 3, NULL, CURRENT_TIMESTAMP),
+      (6, 'Unsecured Ladder', 'Ladder left unsecured near shelves', 'Technician may fall while climbing', 'Ladder moved and secured', 'Provide ladder storage rack', 'Facilities Manager', '2026-04-07 08:45:00', FALSE, 2, '2026-04-07 09:15:00', CURRENT_TIMESTAMP),
+      (1, 'Sharp Metal Edge', 'Sharp edge on workbench discovered', 'Risk of hand injury', 'Edge taped temporarily', 'File down and cover edge', 'Workshop Supervisor', '2026-04-07 09:30:00', FALSE, 2, NULL, CURRENT_TIMESTAMP),
+      (2, 'Tyre Storage Collapse Risk', 'Stacked tyres leaning', 'Tyres could fall onto staff', 'Stack stabilised', 'Install proper tyre racking', 'Workshop Manager', '2026-04-07 10:00:00', FALSE, 4, NULL, CURRENT_TIMESTAMP),
+      (3, 'Missing Fire Extinguisher', 'Extinguisher removed from mount', 'Fire response equipment unavailable', 'Temporary extinguisher placed', 'Replace missing unit', 'Health and Safety Officer', '2026-04-08 08:15:00', FALSE, 5, NULL, CURRENT_TIMESTAMP),
+      (4, 'Computer Diagnostic Fault', 'Diagnostic PC freezing during use', 'May delay safety checks', 'System restarted', 'IT inspection required', 'IT Support', '2026-04-08 09:00:00', TRUE, 1, NULL, CURRENT_TIMESTAMP),
+      (5, 'Oil Filter Disposal Overflow', 'Waste oil filter bin overflowing', 'Risk of contamination and spill', 'Bin sealed temporarily', 'Arrange waste collection', 'Workshop Supervisor', '2026-04-08 09:45:00', FALSE, 2, '2026-04-08 12:00:00', CURRENT_TIMESTAMP),
+      (6, 'Cracked Windshield During Inspection', 'Windshield cracked while testing', 'Glass shards may cause injury', 'Vehicle secured', 'Replace windshield safely', 'Technician', '2026-04-08 10:30:00', FALSE, 3, NULL, CURRENT_TIMESTAMP),
+      (1, 'Glove Shortage', 'Protective gloves running low', 'Staff may handle chemicals without PPE', 'Remaining gloves distributed carefully', 'Order new PPE supplies', 'Workshop Manager', '2026-04-09 08:00:00', TRUE, 1, NULL, CURRENT_TIMESTAMP),
+      (2, 'Exposed Wiring', 'Electrical wiring visible near workbench', 'Risk of shock or fire', 'Power supply switched off', 'Repair wiring insulation', 'Electrician', '2026-04-09 09:10:00', FALSE, 5, NULL, CURRENT_TIMESTAMP),
+      (3, 'Coolant Container Unlabelled', 'Chemical container missing label', 'Incorrect handling risk', 'Container isolated', 'Add correct labeling', 'Safety Officer', '2026-04-09 10:00:00', FALSE, 2, '2026-04-09 10:40:00', CURRENT_TIMESTAMP),
+      (4, 'Trip Hazard From Tools', 'Tools left scattered on floor', 'Staff could trip and fall', 'Tools cleared away', 'Implement tool storage policy', 'Workshop Supervisor', '2026-04-10 08:20:00', FALSE, 2, NULL, CURRENT_TIMESTAMP),
+      (5, 'Brake Fluid Spill', 'Brake fluid spilled on floor', 'Slip hazard and chemical exposure', 'Area cleaned with absorbent pads', 'Review fluid handling procedure', 'Senior Technician', '2026-04-10 09:00:00', FALSE, 3, '2026-04-10 09:45:00', CURRENT_TIMESTAMP),
+      (6, 'Vehicle Lift Hydraulic Leak', 'Hydraulic oil leaking from lift', 'Lift failure may cause vehicle fall', 'Lift taken out of service', 'Repair hydraulic system', 'Maintenance Engineer', '2026-04-10 10:15:00', FALSE, 5, NULL, CURRENT_TIMESTAMP),
+      (3, 'Workshop Door Jammed', 'Rear door difficult to open', 'Emergency exit could be delayed', 'Door lubricated temporarily', 'Repair door mechanism', 'Facilities Manager', '2026-04-10 11:00:00', FALSE, 3, NULL, CURRENT_TIMESTAMP);
+

@@ -64,10 +64,10 @@ public class HazardTable {
     private String questionFive;
 
     /** sixth question of the hazard report. */
-    @Column(columnDefinition = "TEXT", name = "question_six", nullable = false)
-    private String questionSix;
+    @Column(name = "question_six", nullable = false)
+    private LocalDateTime questionSix;
 
-    /** True if the hazard is saved as a draft */
+    /** True if the hazard is saved as a draft. */
     @Column(columnDefinition = "BOOLEAN DEFAULT TRUE", name = "is_draft", nullable = false)
     private boolean isDraft;
 
