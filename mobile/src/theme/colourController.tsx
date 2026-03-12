@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState } from "react";
-import { DefaultColours } from "./colours";
-import { ThemeContextType } from "../model/ThemeContextType.ts";
+import React, { createContext, useContext, useState } from 'react';
+import { DefaultColours } from './colours';
+import { ThemeContextType } from '../model/ThemeContextType.ts';
 
 export const ThemeContext = createContext<ThemeContextType>({
   theme: DefaultColours,
@@ -25,11 +25,5 @@ export function ThemeProvider({ children }: any) {
 }
 
 export function useTheme() {
-  const context = useContext(ThemeContext);
-
-  if (!context) {
-    throw new Error("useTheme must be used inside ThemeProvider");
-  }
-
-  return context;
+  return useContext(ThemeContext);
 }
