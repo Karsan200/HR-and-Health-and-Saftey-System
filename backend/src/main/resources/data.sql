@@ -551,19 +551,83 @@ INSERT INTO signature_table (
        NULL,
        '2025-10-30 18:20:00');
 
-DESCRIBE risk_assessment_table;
-
 INSERT INTO risk_assessment_table (
    risk_assessment_id,
    file_id,
    title,
    created
 ) VALUES
-    (1, (SELECT file_id FROM files_table WHERE name = 'safety_policy'), 'Risk Assessment for Safety Policy', '2025-02-14 10:45:00'),
-    (2, (SELECT file_id FROM files_table WHERE name = 'fire_safety'), 'Risk Assessment for Fire Safety', '2025-02-14 10:50:00'),
-    (3, (SELECT file_id FROM files_table WHERE name = 'training_manual'), 'Risk Assessment for Training Manual', '2025-03-02 11:30:00'),
-    (4, (SELECT file_id FROM files_table WHERE name = 'hr_guidelines'), 'Risk Assessment for HR Guidelines', '2025-04-18 15:30:00'),
-    (5, (SELECT file_id FROM files_table WHERE name = 'hazard_report_template'), 'Risk Assessment for Hazard Report Template', '2025-05-29 12:30:00'),
-    (6, (SELECT file_id FROM files_table WHERE name = 'equipment_safety'), 'Risk Assessment for Equipment Safety', '2025-07-12 09:30:00')
+    (1,
+     (SELECT file_id FROM files_table WHERE name = 'safety_policy'),
+     'Risk Assessment for Safety Policy',
+     '2025-02-14 10:45:00'),
+
+    (2,
+     (SELECT file_id FROM files_table WHERE name = 'fire_safety'),
+     'Risk Assessment for Fire Safety',
+     '2025-02-14 10:50:00'),
+
+    (3,
+     (SELECT file_id FROM files_table WHERE name = 'training_manual'),
+     'Risk Assessment for Training Manual', '2025-03-02 11:30:00'),
+
+    (4,
+     (SELECT file_id FROM files_table WHERE name = 'hr_guidelines'),
+     'Risk Assessment for HR Guidelines', '2025-04-18 15:30:00'),
+
+    (5,
+     (SELECT file_id FROM files_table WHERE name = 'hazard_report_template'),
+     'Risk Assessment for Hazard Report Template',
+     '2025-05-29 12:30:00'),
+
+    (6,
+     (SELECT file_id FROM files_table WHERE name = 'equipment_safety'),
+     'Risk Assessment for Equipment Safety',
+     '2025-07-12 09:30:00');
+
+
+INSERT INTO risk_assessment_hazard_table (
+    risk_assessment_id,
+    hazard_id,
+    created
+) VALUES
+      (1, 13, CURRENT_TIMESTAMP),
+      (1, 18, CURRENT_TIMESTAMP),
+      (1, 19, CURRENT_TIMESTAMP),
+      (1, 28, CURRENT_TIMESTAMP),
+
+      (2, 7, CURRENT_TIMESTAMP),
+      (2, 21, CURRENT_TIMESTAMP),
+      (2, 31, CURRENT_TIMESTAMP),
+
+      (3, 1, CURRENT_TIMESTAMP),
+      (3, 2, CURRENT_TIMESTAMP),
+      (3, 5, CURRENT_TIMESTAMP),
+      (3, 15, CURRENT_TIMESTAMP),
+      (3, 17, CURRENT_TIMESTAMP),
+      (3, 20, CURRENT_TIMESTAMP),
+
+      (4, 22, CURRENT_TIMESTAMP),
+      (4, 25, CURRENT_TIMESTAMP),
+      (4, 27, CURRENT_TIMESTAMP),
+
+      (5, 3, CURRENT_TIMESTAMP),
+      (5, 8, CURRENT_TIMESTAMP),
+      (5, 11, CURRENT_TIMESTAMP),
+      (5, 24, CURRENT_TIMESTAMP),
+      (5, 30, CURRENT_TIMESTAMP),
+
+      (6, 4, CURRENT_TIMESTAMP),
+      (6, 6, CURRENT_TIMESTAMP),
+      (6, 9, CURRENT_TIMESTAMP),
+      (6, 10, CURRENT_TIMESTAMP),
+      (6, 12, CURRENT_TIMESTAMP),
+      (6, 14, CURRENT_TIMESTAMP),
+      (6, 16, CURRENT_TIMESTAMP),
+      (6, 23, CURRENT_TIMESTAMP),
+      (6, 26, CURRENT_TIMESTAMP),
+      (6, 29, CURRENT_TIMESTAMP);
+
+
 
 
