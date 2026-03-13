@@ -1,14 +1,14 @@
 import { StyleSheet } from 'react-native';
-import { colours } from '../theme/colours.ts';
-import { theme } from '../theme/theme.ts';
+import { Spacing, FontSize, BorderRadius, TextStyles } from '../theme/theme';
 
-export const homeStyles = StyleSheet.create({
+export const homeStyles = (theme: any) =>
+    StyleSheet.create({
   /**
    * Root container for the screen scroll content.
    * Applies horizontal padding and top offset.
    */
   container: {
-    paddingHorizontal: theme.spacing.mediumPadding,
+    paddingHorizontal: Spacing.mediumPadding,
     paddingTop: 64,
   },
 
@@ -26,31 +26,32 @@ export const homeStyles = StyleSheet.create({
    * Primary welcome heading style.
    */
   welcomeText: {
-    fontSize: theme.fontSize.xl32,
-    ...theme.textStyles.medium,
+    fontSize: FontSize.xl32,
+    ...TextStyles.medium,
     textAlign: 'center',
     marginBottom: 4,
+    color: theme.black,
   },
 
   /**
    * Username style displayed beneath the welcome heading.
    */
   userName: {
-    fontSize: theme.fontSize.m20,
-    ...theme.textStyles.medium,
+    fontSize: FontSize.m20,
+    ...TextStyles.medium,
     textAlign: 'center',
     marginBottom: 40,
-    color: colours.greyPrimaryMainText,
+    color: theme.greyPrimaryMainText,
   },
 
   /**
    * Section header text style used for the "CHOOSE A SECTION" label.
    */
   sectionTitle: {
-    fontSize: theme.fontSize.l24,
-    ...theme.textStyles.semiBold,
+    fontSize: FontSize.l24,
+    ...TextStyles.semiBold,
     textAlign: 'center',
-    color: colours.greyIconLight,
+    color: theme.greyIconLight,
     marginBottom: 10,
   },
 
@@ -59,11 +60,11 @@ export const homeStyles = StyleSheet.create({
    */
   sectionButton: {
     borderWidth: 0.6,
-    borderColor: colours.redPrimary,
-    borderRadius: theme.borderRadius.largeButtonsAndOutlines,
+    borderColor: theme.redPrimary,
+    borderRadius: BorderRadius.largeButtonsAndOutlines,
     marginBottom: 20,
     alignItems: 'center',
-    backgroundColor: colours.redBackgroundLight,
+    backgroundColor: theme.redBackgroundLight,
   },
 
   /**
@@ -81,9 +82,9 @@ export const homeStyles = StyleSheet.create({
    * Text style for labels inside section buttons.
    */
   sectionButtonText: {
-    fontSize: theme.fontSize.l24,
-    ...theme.textStyles.semiBold,
-    color: colours.black,
+    fontSize: FontSize.l24,
+    ...TextStyles.semiBold,
+    color: theme.black,
     textAlign: 'left',
     marginLeft: 12,
   },
@@ -107,10 +108,10 @@ export const homeStyles = StyleSheet.create({
    * Title style for the quick access section.
    */
   quickAccessTitle: {
-    fontSize: theme.fontSize.m20,
-    ...theme.textStyles.semiBold,
+    fontSize: FontSize.m20,
+    ...TextStyles.semiBold,
     textAlign: 'left',
-    color: colours.greyIconLight,
+    color: theme.greyIconLight,
     marginBottom: 10,
   },
 
@@ -139,10 +140,10 @@ export const homeStyles = StyleSheet.create({
    * Text style for quick access item labels.
    */
   quickAccessButton: {
-    fontSize: theme.fontSize.s16,
-    ...theme.textStyles.medium,
+    fontSize: FontSize.s16,
+    ...TextStyles.medium,
     textAlign: 'left',
-    color: colours.black,
+    color: theme.black,
     marginLeft: 12,
   },
 });

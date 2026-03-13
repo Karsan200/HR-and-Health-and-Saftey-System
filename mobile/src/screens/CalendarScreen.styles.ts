@@ -1,24 +1,24 @@
 import { StyleSheet } from 'react-native';
-import { colours } from "../theme/colours.ts";
-import { theme } from "../theme/theme.ts";
+import {BorderRadius, FontSize, Spacing, TextStyles} from "../theme/theme.ts";
 
-export const calendarScreenStyles = StyleSheet.create({
+export const calendarScreenStyles = (theme: any) =>
+  StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colours.greyBackground,
+        backgroundColor: theme.greyBackground,
     },
 
     summaryWrapper: {
-        paddingTop: theme.spacing.largePadding,
-        marginBottom: theme.spacing.largePadding,
+        paddingTop: Spacing.largePadding,
+        marginBottom: Spacing.largePadding,
     },
 
     calendarContainer: {
-        marginHorizontal: theme.spacing.largePadding,
-        borderRadius: theme.borderRadius.largeButtonsAndOutlines,
-        backgroundColor: colours.white,
-        padding: theme.spacing.smallPadding,
-        shadowColor: colours.black,
+        marginHorizontal: Spacing.largePadding,
+        borderRadius: BorderRadius.largeButtonsAndOutlines,
+        backgroundColor: theme.white,
+        padding: Spacing.smallPadding,
+        shadowColor: theme.black,
         shadowOpacity: 0.08,
         shadowRadius: 6,
         elevation: 4,
@@ -26,7 +26,7 @@ export const calendarScreenStyles = StyleSheet.create({
 
     redStripe: {
         height: 2,
-        backgroundColor: colours.redPrimary,
+        backgroundColor: theme.redPrimary,
         marginVertical: 6,
         borderRadius: 1,
     },
@@ -47,21 +47,21 @@ export const calendarScreenStyles = StyleSheet.create({
     fullyBookedCircle: {
         width: 13,
         height: 13,
-        backgroundColor: colours.redPrimary,
+        backgroundColor: theme.redPrimary,
         borderRadius: 100,
     },
 
     partialBookedCircle: {
         width: 13,
         height: 13,
-        backgroundColor: colours.amberPrimary,
+        backgroundColor: theme.amberPrimary,
         borderRadius: 100,
     },
 
     keyText: {
-        fontFamily: theme.textStyles.medium.fontFamily,
-        fontWeight: theme.textStyles.medium.fontWeight,
-        fontSize: theme.fontSize.xs14,
-        color: colours.black,
+        fontFamily: TextStyles.medium.fontFamily,
+        fontWeight: TextStyles.medium.fontWeight,
+        fontSize: FontSize.xs14,
+        color: theme.black,
     },
 });

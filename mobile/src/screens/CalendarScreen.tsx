@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar, DateData } from 'react-native-calendars';
 import dayjs from 'dayjs';
 
-import { colours } from '../theme/colours';
 import { calendarScreenStyles as styles } from './CalendarScreen.styles';
 import SummaryCard from '../components/summary/SummaryCard';
 import SummaryRow from '../components/summary/SummaryRow';
-import AuthenticationService from "../logic/AuthenticationService.ts";
+import AuthenticationService from "../logic/AuthenticationService";
+import { ThemeContext } from '../theme/colourController';
 
 type Props = {
   onDayPress: (date: string) => void;
 };
 
 const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
+  const { theme } = useContext(ThemeContext); // Get current theme
   const today = dayjs();
 
   //TODO: allow admin to set this via desktop
@@ -28,7 +29,6 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
 
   const fetchLeave = async () => {
     try {
-      // Fetches default IP for emulator
       const response = await AuthenticationService.fetch('/api/leave/calendar', {});
       const data = await response.json();
 
@@ -52,7 +52,6 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
 
   // Count bookings per date
   const bookingCount: Record<string, number> = {};
-
   bookedDays.forEach(date => {
     bookingCount[date] = (bookingCount[date] || 0) + 1;
   });
@@ -64,12 +63,12 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
 
     greyedDates[date] = {
       selected: true,
-      selectedColor: colours.greyBackground,
-      selectedTextColor: colours.greyPrimaryMainText,
+      selectedColor: theme.greyBackground,
+      selectedTextColor: theme.greyPrimaryMainText,
       customStyles: {
         container: { borderRadius: 20 },
         text: {
-          color: colours.greyPrimaryMainText,
+          color: theme.greyPrimaryMainText,
           textAlign: 'center',
           lineHeight: 32,
         },
@@ -81,18 +80,17 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
 
   // Booked days logic
   const bookedDates: Record<string, any> = {};
-
   Object.entries(bookingCount).forEach(([date, count]) => {
     const fullyBooked = count >= MaxBookedDays;
 
     bookedDates[date] = {
       selected: true,
-      selectedColor: fullyBooked ? colours.redPrimary : colours.amberPrimary,
-      selectedTextColor: colours.white,
+      selectedColor: fullyBooked ? theme.redPrimary : theme.amberPrimary,
+      selectedTextColor: theme.white,
       customStyles: {
         container: { borderRadius: 20 },
         text: {
-          color: colours.white,
+          color: theme.white,
           fontWeight: '600',
           textAlign: 'center',
           lineHeight: 32,
@@ -105,12 +103,12 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
   const todayMarking: Record<string, any> = {
     [today.format('YYYY-MM-DD')]: {
       selected: true,
-      selectedColor: colours.black,
-      selectedTextColor: colours.white,
+      selectedColor: theme.black,
+      selectedTextColor: theme.white,
       customStyles: {
         container: { borderRadius: 20 },
         text: {
-          color: colours.white,
+          color: theme.white,
           fontWeight: '600',
           textAlign: 'center',
           lineHeight: 32,
@@ -130,8 +128,8 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.summaryWrapper}>
+    <SafeAreaView style={styles(theme).container}>
+      <View style={styles(theme).summaryWrapper}>
         <SummaryRow>
           <SummaryCard
             label="Hours"
@@ -156,33 +154,33 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
         </SummaryRow>
       </View>
 
-      <View style={styles.calendarContainer}>
+      <View style={styles(theme).calendarContainer}>
         <Calendar
           onDayPress={handleDayPress}
           markedDates={markedDates}
           theme={{
-            calendarBackground: colours.white,
-            textSectionTitleColor: colours.greyPrimaryMainText,
-            selectedDayBackgroundColor: colours.redPrimary,
-            selectedDayTextColor: colours.white,
-            todayTextColor: colours.redPrimary,
-            arrowColor: colours.redPrimary,
-            monthTextColor: colours.black,
+            calendarBackground: theme.white,
+            textSectionTitleColor: theme.greyPrimaryMainText,
+            selectedDayBackgroundColor: theme.redPrimary,
+            selectedDayTextColor: theme.white,
+            todayTextColor: theme.redPrimary,
+            arrowColor: theme.redPrimary,
+            monthTextColor: theme.black,
           }}
         />
 
-        <View style={styles.redStripe} />
+        <View style={styles(theme).redStripe} />
 
         {/* Key */}
-        <View style={styles.keyContainer}>
-          <View style={styles.keyItem}>
-            <View style={styles.fullyBookedCircle} />
-            <Text style={styles.keyText}>Fully Booked Days</Text>
+        <View style={styles(theme).keyContainer}>
+          <View style={styles(theme).keyItem}>
+            <View style={styles(theme).fullyBookedCircle} />
+            <Text style={styles(theme).keyText}>Fully Booked Days</Text>
           </View>
 
-          <View style={styles.keyItem}>
-            <View style={styles.partialBookedCircle} />
-            <Text style={styles.keyText}>Partial Booked Days</Text>
+          <View style={styles(theme).keyItem}>
+            <View style={styles(theme).partialBookedCircle} />
+            <Text style={styles(theme).keyText}>Partial Booked Days</Text>
           </View>
         </View>
       </View>

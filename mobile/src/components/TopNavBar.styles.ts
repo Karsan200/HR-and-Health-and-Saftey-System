@@ -1,15 +1,15 @@
 import { StyleSheet } from 'react-native';
-import { colours } from '../theme/colours.ts';
-import { theme } from '../theme/theme.ts';
+import { FontSize, Spacing, TextStyles } from '../theme/theme.ts';
 
-export const topNavStyles = StyleSheet.create({
+export const topNavStyles = (theme: any) =>
+  StyleSheet.create({
   container: {
     height: 75,
-    paddingHorizontal: theme.spacing.mediumPadding,
+    paddingHorizontal: Spacing.mediumPadding,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colours.white,
+    backgroundColor: theme.white,
     borderBottomWidth: 1,
     borderBottomColor: '#D9D9D9',
   },
@@ -36,9 +36,9 @@ export const topNavStyles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: theme.fontSize.l24,
-    ...theme.textStyles.medium,
-    color: colours.black,
+    fontSize: FontSize.l24,
+    ...TextStyles.medium,
+    color: theme.black,
     includeFontPadding: false,
     textAlignVertical: 'center',
   },
@@ -54,15 +54,15 @@ export const topNavStyles = StyleSheet.create({
     minWidth: 15,
     height: 15,
     borderRadius: 7.5,
-    backgroundColor: colours.redPrimary,
+    backgroundColor: theme.redPrimary,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 2,
   },
   notificationBadgeText: {
     fontSize: 9,
-    color: colours.white,
-    ...theme.textStyles.medium,
+    color: theme.white,
+    ...TextStyles.medium,
     lineHeight: 10,
     includeFontPadding: false,
     textAlign: 'center',

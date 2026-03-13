@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Text, View, Pressable } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { topNavStyles as styles } from './TopNavBar.styles';
-import { colours } from '../theme/colours';
+import { ThemeContext } from "../theme/colourController";
 
 
 type TopNavBarProps = {
@@ -20,31 +20,31 @@ export default function TopNavBar({
                                     onNotificationsPress,
                                     onProfilePress,
                                   }: TopNavBarProps) {
+  const { theme } = useContext(ThemeContext); // get theme from context
+
   return (
-    // Adding the back button on the far left, if it is required
-    <View style={styles.container}>
-      <View style={styles.leftSection}>
+    <View style={styles(theme).container}>
+      <View style={styles(theme).leftSection}>
         {showBackButton && (
-          <Pressable style={styles.backButton} onPress={onBackPress}>
-            <Icon source="arrow-left" size={24} color={colours.black} />
+          <Pressable style={styles(theme).backButton} onPress={onBackPress}>
+            <Icon source="arrow-left" size={24} color={theme.black} />
           </Pressable>
         )}
 
-        <Text style={styles.title}>{title}</Text>
+        <Text style={styles(theme).title}>{title}</Text>
       </View>
 
-      {/* Adding the notification bell and profile icon on the far right*/}
-      <View style={styles.rightSection}>
-        <Pressable style={styles.iconButton} onPress={onNotificationsPress}>
-          <View style={styles.notificationWrapper}>
-            <Icon source="bell" size={22} color={colours.black} />
-            <View style={styles.notificationBadge}>
-              <Text style={styles.notificationBadgeText}>1</Text>
+      <View style={styles(theme).rightSection}>
+        <Pressable style={styles(theme).iconButton} onPress={onNotificationsPress}>
+          <View style={styles(theme).notificationWrapper}>
+            <Icon source="bell" size={22} color={theme.black} />
+            <View style={styles(theme).notificationBadge}>
+              <Text style={styles(theme).notificationBadgeText}>1</Text>
             </View>
           </View>
         </Pressable>
-        <Pressable style={styles.iconButton} onPress={onProfilePress}>
-          <Icon source="account-circle" size={24} color={colours.black} />
+        <Pressable style={styles(theme).iconButton} onPress={onProfilePress}>
+          <Icon source="account-circle" size={24} color={theme.black} />
         </Pressable>
       </View>
 

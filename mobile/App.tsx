@@ -5,7 +5,7 @@
  * @format
  */
 
-import React, { useEffect, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 
@@ -13,6 +13,8 @@ import AuthenticationService from './src/logic/AuthenticationService.ts';
 import { AppSection, ScreenKey } from "./src/logic/NavigationConfiguration.ts";
 
 import { paperTheme } from './src/theme/paperTheme.ts';
+import { ThemeProvider } from './src/theme/colourController.tsx'
+import { ThemeContext } from './src/theme/colourController.tsx';
 import { HttpException } from './src/exception/HttpException.ts';
 
 import BottomNavBar from "./src/components/BottomNavBar";
@@ -24,39 +26,44 @@ import HsOverview from './src/screens/HsOverview';
 import CalendarScreen from './src/screens/CalendarScreen';
 import DateDetailsScreen from './src/screens/DateDetailsScreen';
 import PasswordAuthScreen from './src/screens/auth/PasswordAuthScreen.tsx';
+import SettingsScreen from "./src/screens/personal/SettingsScreen.tsx";
 
 function App() {
-    const isDarkMode = useColorScheme() === 'dark';
+  const isDarkMode = useColorScheme() === 'dark';
 
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                await AuthenticationService.refresh();
-                setIsAuthenticated(true);
-            } catch (error) {
-              console.log(error)
-              if (error instanceof HttpException && error.statusCode === 401) {
-                setIsAuthenticated(false);
-              }
-            }
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await AuthenticationService.refresh();
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.log(error);
+        if (error instanceof HttpException && error.statusCode === 401) {
+          setIsAuthenticated(false);
         }
+      }
+    };
 
-        checkAuth();
-    }, []);
+    checkAuth();
+  }, []);
+
+  const theme = useContext(ThemeContext);
 
   return (
-    <PaperProvider theme={paperTheme}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      {isAuthenticated === null ? (
-        <LogoActivityIndicator />
-      ) : isAuthenticated ? (
-        <AppContent />
-      ) : (
-        <PasswordAuthScreen isAuth={setIsAuthenticated} />
-      )}
-    </PaperProvider >
+    <ThemeProvider>
+      <PaperProvider theme={paperTheme(theme)}>
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+        {isAuthenticated === null ? (
+          <LogoActivityIndicator />
+        ) : isAuthenticated ? (
+          <AppContent />
+        ) : (
+          <PasswordAuthScreen isAuth={setIsAuthenticated} />
+        )}
+      </PaperProvider>
+    </ThemeProvider>
   );
 }
 
@@ -77,7 +84,7 @@ function AppContent() {
         setCurrentScreen('overview');
     };
 
-    // When the home screen is selected, the user is taken back to the HomeScreen
+    // Used for general navigation - pass in a screen (If it's new, add to ScreenKey and add a case handle in renderScreen)
     const handleNavigate = (screen: ScreenKey) => {
         if (screen === 'home') {
             setSection(null);
@@ -99,14 +106,18 @@ function AppContent() {
     At the moment they are all blank view, they will need to be replaced by the screen components when they are created.
      */
     const renderScreen = () => {
-      switch (currentScreen) {
-        case 'home':
-          return (
-            <HomeScreen
-              onSelectHr={handleSelectHr}
-              onSelectHealthSafety={handleSelectHealthSafety}
-            />
-          );
+        switch (currentScreen) {
+            case 'home':
+                return (
+                    <HomeScreen
+                        onSelectHr={handleSelectHr}
+                        onSelectHealthSafety={handleSelectHealthSafety}
+                        onSelectSettings={() => handleNavigate('settings')}
+                        onSelectLogout={() => handleNavigate('logout')}
+                        onSelectProfile={() => handleNavigate('profile')}
+                        onSelectNotifications={() => handleNavigate('notifications')}
+                    />
+                );
 
         case 'calendar':
           return (
@@ -128,23 +139,23 @@ function AppContent() {
             </>
           );
 
-        case 'payslips':
-          return <>
-            <TopNavBar title="Payslips" />
-            <View style={styles.content} />
-          </>;
+            case 'payslips':
+                return <>
+                    <TopNavBar title="Payslips" />
+                    <View style={styles.content} />
+                </>;
 
-        case 'handbook':
-          return <>
-            <TopNavBar title="Handbook" />
-            <View style={styles.content} />
-          </>;
+            case 'handbook':
+                return <>
+                    <TopNavBar title="Handbook" />
+                    <View style={styles.content} />
+                </>;
 
-        case 'clockIn':
-          return <>
-            <TopNavBar title="Clock-In" />
-            <View style={styles.content} />
-          </>;
+            case 'clockIn':
+                return <>
+                    <TopNavBar title="Clock-In" />
+                    <View style={styles.content} />
+                </>;
 
             case 'overview':
                 return (
@@ -156,23 +167,34 @@ function AppContent() {
                     </>
                 );
 
-        case 'documents':
-          return <>
-            <TopNavBar title="Documents" />
-            <View style={styles.content} />
-          </>;
+            case 'documents':
+                return <>
+                    <TopNavBar title="Documents" />
+                    <View style={styles.content} />
+                </>;
 
-        case 'risk':
-          return <>
-            <TopNavBar title="Risk" />
-            <View style={styles.content} />
-          </>;
+            case 'risk':
+                return <>
+                    <TopNavBar title="Risk" />
+                    <View style={styles.content} />
+                </>;
 
         case 'personal':
           return <>
             <TopNavBar title="Personal" />
             <View style={styles.content} />
           </>;
+
+          case 'settings':
+            return <>
+              <TopNavBar title="Settings"
+                         showBackButton={true}
+                         onBackPress={() => handleNavigate('home')}
+              />
+              <View style={styles.content}>
+                <SettingsScreen />
+              </View>
+            </>;
 
         /*
         How to add the top nav bar to a screen:
@@ -181,45 +203,49 @@ function AppContent() {
           title="NameOfTheScreen"
         />
 
-        Sub-screen:
-        <TopNavBar
-          title="NameOfTheScreen"
-          showBackButton={true}
-          onBackPress={handleBack}
-        />
-         */
-
-        // Defaulting to the home screen
-        default:
-          return (
-            <HomeScreen
-              onSelectHr={handleSelectHr}
-              onSelectHealthSafety={handleSelectHealthSafety}
+            Sub-screen:
+            <TopNavBar
+              title="NameOfTheScreen"
+              showBackButton={true}
+              onBackPress={handleBack} <-- Replace handle back with () => handleNavigate('#previousPage#')
             />
-          );
-      }
+             */
+
+            // Defaulting to the home screen
+            default:
+                return (
+                    <HomeScreen
+                        onSelectHr={handleSelectHr}
+                        onSelectHealthSafety={handleSelectHealthSafety}
+                        onSelectSettings={() => handleNavigate('settings')}
+                        onSelectLogout={() => handleNavigate('logout')}
+                        onSelectNotifications={() => handleNavigate('notifications')}
+                        onSelectProfile={() => handleNavigate('profile')}
+                    />
+                );
+        }
     };
 
 
     // returning the main content and the bottom navbar
     return (
-      <>
-        <View style={styles.content}>{renderScreen()}</View>
-        <BottomNavBar
-          section={section}
-          currentScreen={currentScreen}
-          onNavigate={handleNavigate}
-        />
-      </>
+        <>
+            <View style={styles.content}>{renderScreen()}</View>
+            <BottomNavBar
+                section={section}
+                currentScreen={currentScreen}
+                onNavigate={handleNavigate}
+            />
+        </>
     );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+    container: {
+        flex: 1,
+    },
     content: {
-    flex: 1,
+        flex: 1,
     }
 });
 

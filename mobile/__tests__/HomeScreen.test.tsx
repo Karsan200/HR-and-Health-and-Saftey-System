@@ -18,10 +18,14 @@ jest.mock('react-native-paper', () => {
 describe('HomeScreen', () => {
   it('renders all main headings', () => {
     const { getByText } = render(
-        <HomeScreen
-            onSelectHr={() => {}}
-            onSelectHealthSafety={() => {}}
-        />,
+      <HomeScreen
+        onSelectHr={() => {}}
+        onSelectHealthSafety={() => {}}
+        onSelectSettings={() => {}}
+        onSelectProfile={() => {}}
+        onSelectNotifications={() => {}}
+        onSelectLogout={() => {}}
+      />,
     );
 
     expect(getByText('Welcome Back')).toBeTruthy();
@@ -35,6 +39,10 @@ describe('HomeScreen', () => {
         <HomeScreen
             onSelectHr={() => {}}
             onSelectHealthSafety={() => {}}
+            onSelectSettings={() => {}}
+            onSelectProfile={() => {}}
+            onSelectNotifications={() => {}}
+            onSelectLogout={() => {}}
         />,
     );
 
@@ -51,6 +59,10 @@ describe('HomeScreen', () => {
         <HomeScreen
             onSelectHr={() => {}}
             onSelectHealthSafety={() => {}}
+            onSelectSettings={() => {}}
+            onSelectProfile={() => {}}
+            onSelectNotifications={() => {}}
+            onSelectLogout={() => {}}
         />,
     );
 
