@@ -757,4 +757,75 @@ INSERT INTO settings_table (
       (8, FALSE, FALSE,
        FALSE, FALSE, NULL, NULL);
 
+INSERT INTO themes_table (
+    account_id,
+    background,
+    midground,
+    text,
+    accent
+) VALUES
+      (2, 'F6F6F8', 'FFFFFF','000000', 'D20414'),
+      (4, 'F6F6F8', 'FFFFFF', '000000', '0066FF');
 
+
+INSERT INTO leave_type_table (
+    name,
+    colour_icon,
+    colour_bg,
+    icon_type
+) VALUES
+      ('Holiday', '14A45A', 'D0EDDE', 'sunbed'),
+      ('Sick Leave', 'D20414', 'F6CDD0', 'medical'),
+      ('Emergency Leave', 'E8960A', 'FFECCD', 'warning'),
+      ('Maternity/Paternity Leave', 'D20414', 'F6CDD0', 'medical'),
+      ('Unpaid Leave', '588FFF', 'E6ECF9', 'cross');
+
+INSERT INTO leave_table (
+    account_id,
+    leave_type_id,
+    start_date,
+    end_date,
+    is_approved,
+    notes,
+    response,
+    created
+) VALUES
+      (2, 1,
+      '2026-06-01 00:00:00',
+      '2026-06-07 00:00:00',
+      TRUE,
+      'Family holiday booked earlier this year.',
+      'Approved by manager.',
+      CURRENT_TIMESTAMP),
+
+      (3,2,
+      '2026-04-12 00:00:00',
+      '2026-04-14 00:00:00',
+      TRUE,
+      'Flu symptoms and doctor advised rest.',
+      'Get well soon.',
+      CURRENT_TIMESTAMP),
+
+      (4,1,
+      '2026-07-20 00:00:00',
+      '2026-07-25 00:00:00',
+      FALSE,
+      'Trip abroad planned.',
+      'Rejected due to staffing shortage that week.',
+      CURRENT_TIMESTAMP),
+
+      (5,3,
+      '2026-05-10 00:00:00',
+      '2026-05-11 00:00:00',
+      TRUE,
+      'Family emergency.',
+      'Approved immediately.',
+      CURRENT_TIMESTAMP),
+
+      (6,4,
+      '2026-08-01 00:00:00',
+      '2026-08-10 00:00:00',
+      FALSE,
+      'Personal time off requested.',
+      'Pending review.',
+      CURRENT_TIMESTAMP);
