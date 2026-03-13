@@ -201,22 +201,85 @@ INSERT INTO files_table (
        'lift_hydraulic_leak_photo', 'jpg', CURRENT_TIMESTAMP),
 
       (UUID(), 3, 3,
-       'missing_fire_extinguisher_photo', 'jpg', CURRENT_TIMESTAMP);
+       'missing_fire_extinguisher_photo', 'jpg', CURRENT_TIMESTAMP),
+
+      (UUID(), 1, 2,
+       'payslip_jan_2026_mmay', 'pdf', '2026-01-31 17:00:00'),
+
+      (UUID(), 1, 2,
+       'payslip_feb_2026_mmay', 'pdf', '2026-02-28 17:00:00'),
+
+      (UUID(), 5, 2,
+       'payslip_jan_2026_droberts', 'pdf', '2026-01-31 17:00:00'),
+
+      (UUID(), 5, 2,
+       'payslip_feb_2026_droberts', 'pdf', '2026-02-28 17:00:00'),
+
+
+      (UUID(), 6, 2,
+       'payslip_jan_2026_lwilliams', 'pdf', '2026-01-31 17:00:00'),
+
+      (UUID(), 6, 2,
+       'payslip_feb_2026_lwilliams', 'pdf', '2026-02-28 17:00:00'),
+
+      (UUID(), 7, 2,
+       'payslip_jan_2026_odavies', 'pdf', '2026-01-31 17:00:00'),
+
+      (UUID(), 7, 2,
+       'payslip_feb_2026_odavies', 'pdf', '2026-02-28 17:00:00'),
+
+      (UUID(), 8, 2,
+       'payslip_jan_2026_rprice', 'pdf', '2026-01-31 17:00:00'),
+
+      (UUID(), 8, 2,
+       'payslip_feb_2026_rprice', 'pdf', '2026-02-28 17:00:00'),
+
+      (UUID(), 5, 2,
+       'nvq_level3_motor_vehicle_droberts', 'pdf', '2024-06-12 10:00:00'),
+
+      (UUID(), 6, 2,
+       'health_safety_certificate_lwilliams', 'pdf', '2024-09-18 09:30:00'),
+
+      (UUID(), 7, 2,
+       'first_aid_at_work_odavies', 'pdf', '2025-01-20 14:00:00'),
+
+      (UUID(), 8, 2,
+       'hybrid_vehicle_training_rprice', 'pdf', '2025-03-05 11:15:00'),
+
+      (UUID(), 5, 2,
+       'mot_tester_certificate_droberts', 'pdf', '2023-11-10 16:00:00');
 
 INSERT INTO document_table (
     file_id,
     title,
     created
 ) VALUES
-      ((SELECT file_id FROM files_table WHERE name = 'safety_policy'), 'Company Safety Policy', '2025-02-14 10:00:00'),
-      ((SELECT file_id FROM files_table WHERE name = 'fire_safety'), 'Fire Safety Guidelines', '2025-02-14 10:05:00'),
-      ((SELECT file_id FROM files_table WHERE name = 'training_manual'), 'Employee Training Manual', '2025-03-02 11:00:00'),
-      ((SELECT file_id FROM files_table WHERE name = 'hr_guidelines'), 'HR Guidelines', '2025-04-18 15:00:00'),
-      ((SELECT file_id FROM files_table WHERE name = 'hazard_report_template'), 'Hazard Report Template', '2025-05-29 12:00:00'),
-      ((SELECT file_id FROM files_table WHERE name = 'equipment_safety'), 'Equipment Safety Procedures', '2025-07-12 09:00:00'),
-      ((SELECT file_id FROM files_table WHERE name = 'workshop_rules'), 'Workshop Rules', '2025-08-20 17:00:00'),
-      ((SELECT file_id FROM files_table WHERE name = 'health_policy'), 'Health and Safety Policy', '2025-09-15 14:00:00'),
-      ((SELECT file_id FROM files_table WHERE name = 'emergency_procedures'), 'Emergency Procedures', '2025-10-30 18:00:00');
+      ((SELECT file_id FROM files_table WHERE name = 'safety_policy'),
+       'Company Safety Policy', '2025-02-14 10:00:00'),
+
+      ((SELECT file_id FROM files_table WHERE name = 'fire_safety'),
+       'Fire Safety Guidelines', '2025-02-14 10:05:00'),
+
+      ((SELECT file_id FROM files_table WHERE name = 'training_manual'),
+       'Employee Training Manual', '2025-03-02 11:00:00'),
+
+      ((SELECT file_id FROM files_table WHERE name = 'hr_guidelines'),
+       'HR Guidelines', '2025-04-18 15:00:00'),
+
+      ((SELECT file_id FROM files_table WHERE name = 'hazard_report_template'),
+       'Hazard Report Template', '2025-05-29 12:00:00'),
+
+      ((SELECT file_id FROM files_table WHERE name = 'equipment_safety'),
+       'Equipment Safety Procedures', '2025-07-12 09:00:00'),
+
+      ((SELECT file_id FROM files_table WHERE name = 'workshop_rules'),
+       'Workshop Rules', '2025-08-20 17:00:00'),
+
+      ((SELECT file_id FROM files_table WHERE name = 'health_policy'),
+       'Health and Safety Policy', '2025-09-15 14:00:00'),
+
+      ((SELECT file_id FROM files_table WHERE name = 'emergency_procedures'),
+       'Emergency Procedures', '2025-10-30 18:00:00');
 
 INSERT INTO hazard_table (
     account_id,
@@ -829,3 +892,145 @@ INSERT INTO leave_table (
       'Personal time off requested.',
       'Pending review.',
       CURRENT_TIMESTAMP);
+
+INSERT INTO clock_in_table (
+    clock_id,
+    account_id,
+    clock_in,
+    clock_out,
+    created
+) VALUES
+      (UUID(), 1, '08:00:00', '17:00:00', '2026-04-01 08:00:00'),
+      (UUID(), 2, '08:15:00', '17:10:00', '2026-04-01 08:15:00'),
+      (UUID(), 3, '08:05:00', '17:05:00', '2026-04-01 08:05:00'),
+      (UUID(), 4, '09:00:00', '17:30:00', '2026-04-01 09:00:00'),
+      (UUID(), 5, '08:20:00', '17:15:00', '2026-04-01 08:20:00'),
+      (UUID(), 6, '08:10:00', '17:00:00', '2026-04-01 08:10:00'),
+
+      (UUID(), 1, '08:02:00', '17:01:00', '2026-04-02 08:02:00'),
+      (UUID(), 2, '08:18:00', '17:12:00', '2026-04-02 08:18:00'),
+      (UUID(), 3, '08:00:00', '16:55:00', '2026-04-02 08:00:00'),
+      (UUID(), 4, '09:05:00', '17:40:00', '2026-04-02 09:05:00');
+
+INSERT INTO clock_in_event_table (
+    account_id,
+    created
+) VALUES
+      (1, '2026-04-01 08:00:00'),
+      (2, '2026-04-01 08:15:00'),
+      (3, '2026-04-01 08:05:00'),
+      (4, '2026-04-01 09:00:00'),
+      (5, '2026-04-01 08:20:00'),
+      (6, '2026-04-01 08:10:00'),
+
+      (1, '2026-04-02 08:02:00'),
+      (2, '2026-04-02 08:18:00'),
+      (3, '2026-04-02 08:00:00'),
+      (4, '2026-04-02 09:05:00');
+
+INSERT INTO admin_notifications_table (
+    account_id,
+    title,
+    description,
+    is_acknowledged,
+    priority,
+    created
+) VALUES
+      (2,'Safety Training Required',
+       'Please complete the updated workshop safety training by the end of the week.',
+       FALSE,
+       3,
+       CURRENT_TIMESTAMP),
+
+      (3,'Hazard Report Updated',
+       'The hazard report regarding the damaged air hose has been updated.',
+       TRUE,
+       2,
+       CURRENT_TIMESTAMP),
+
+      (4,
+       'New Safety Policy',
+       'A new version of the company safety policy has been uploaded and requires acknowledgement.',
+       FALSE,
+       4,
+       CURRENT_TIMESTAMP),
+
+      (5,'Equipment Maintenance Scheduled',
+       'Workshop lift maintenance will occur tomorrow morning.',
+       FALSE,
+       2,
+       CURRENT_TIMESTAMP);
+
+INSERT INTO payslips_table (
+    file_id,
+    year,
+    month,
+    is_p_sixty
+) VALUES
+      ((SELECT file_id FROM files_table WHERE name = 'payslip_jan_2026_mmay'),
+       2026, 1, FALSE),
+
+      ((SELECT file_id FROM files_table WHERE name = 'payslip_feb_2026_mmay'),
+       2026, 2, FALSE),
+
+      ((SELECT file_id FROM files_table WHERE name = 'payslip_jan_2026_droberts'),
+       2026, 1, FALSE),
+
+      ((SELECT file_id FROM files_table WHERE name = 'payslip_feb_2026_droberts'),
+       2026, 2, FALSE),
+
+      ((SELECT file_id FROM files_table WHERE name = 'payslip_jan_2026_lwilliams'),
+       2026, 1, FALSE),
+
+      ((SELECT file_id FROM files_table WHERE name = 'payslip_feb_2026_lwilliams'),
+       2026, 2, FALSE),
+
+      ((SELECT file_id FROM files_table WHERE name = 'payslip_jan_2026_odavies'),
+       2026, 1, FALSE),
+
+      ((SELECT file_id FROM files_table WHERE name = 'payslip_feb_2026_odavies'),
+       2026, 2, FALSE),
+
+      ((SELECT file_id FROM files_table WHERE name = 'payslip_jan_2026_rprice'),
+       2026, 1, FALSE),
+
+      ((SELECT file_id FROM files_table WHERE name = 'payslip_feb_2026_rprice'),
+       2026, 2, FALSE);
+
+INSERT INTO qualifications_table (
+    account_id,
+    file_id,
+    title,
+    details,
+    created
+) VALUES
+
+      (5,
+      (SELECT file_id FROM files_table WHERE name = 'nvq_level3_motor_vehicle_droberts'),
+      'NVQ Level 3 Motor Vehicle Maintenance',
+      'Level 3 qualification in diagnosing and repairing light vehicles.',
+      '2024-06-12 10:05:00'),
+
+      (5,
+      (SELECT file_id FROM files_table WHERE name = 'mot_tester_certificate_droberts'),
+      'DVSA MOT Tester Certification',
+      'Authorised MOT tester certification issued by DVSA.',
+      '2023-11-10 16:10:00'),
+
+      (6,
+      (SELECT file_id FROM files_table WHERE name = 'health_safety_certificate_lwilliams'),
+      'Health and Safety in the Workplace',
+      'Certified course covering workplace hazard awareness and risk management.',
+      '2024-09-18 09:45:00'),
+
+      (7,
+      (SELECT file_id FROM files_table WHERE name = 'first_aid_at_work_odavies'),
+      'First Aid at Work',
+      'Three day emergency first aid training including CPR and AED use.',
+      '2025-01-20 14:15:00'),
+
+      (8,
+      (SELECT file_id FROM files_table WHERE name = 'hybrid_vehicle_training_rprice'),
+      'Hybrid and Electric Vehicle Awareness',
+      'Training course on safe servicing of hybrid and electric vehicles.',
+      '2025-03-05 11:30:00');
