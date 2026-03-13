@@ -33,19 +33,19 @@ INSERT INTO account_table (
       ),
       (
           2,
-       'John',
-          'Doe',
-          'JDoe',
-          'JDoe@test.com',
+       'Craig',
+          'Sheppard',
+          'CSheppard',
+          'CSheppard@test.com',
           '$2a$10$ZSJDhx5OZeI538IRjHJZx',
           NULL,
           '07700234567',
-          '8 Example Street',
+          '51 Chilcott Ave',
           NULL,
-          'CF32 0AB',
+          'CF32 9RQ',
           NULL,
           NULL,
-          '2025-03-02 10:45:00'
+          '2020-03-02 10:45:00'
       ),
       (
           3,
@@ -152,15 +152,56 @@ INSERT INTO files_table (
     extension,
     created
 ) VALUES
-      (UUID(), 1, 1, 'safety_policy', 'pdf', '2025-02-14 10:00:00'),
-      (UUID(), 1, 1, 'fire_safety', 'pdf', '2025-02-14 10:05:00'),
-      (UUID(), 2, 2, 'training_manual', 'pdf', '2025-03-02 11:00:00'),
-      (UUID(), 3, 3, 'hr_guidelines', 'pdf', '2025-04-18 15:00:00'),
-      (UUID(), 4, 4, 'hazard_report_template', 'pdf', '2025-05-29 12:00:00'),
-      (UUID(), 5, 5, 'equipment_safety', 'pdf', '2025-07-12 09:00:00'),
-      (UUID(), 6, 6, 'workshop_rules', 'pdf', '2025-08-20 17:00:00'),
-      (UUID(), 7, 7, 'health_policy', 'pdf', '2025-09-15 14:00:00'),
-      (UUID(), 8, 8, 'emergency_procedures', 'pdf', '2025-10-30 18:00:00');
+      (UUID(), 1, 1,
+       'safety_policy', 'pdf', '2025-02-14 10:00:00'),
+
+      (UUID(), 1, 1,
+       'fire_safety', 'pdf', '2025-02-14 10:05:00'),
+
+      (UUID(), 2, 2,
+       'training_manual', 'pdf', '2025-03-02 11:00:00'),
+
+      (UUID(), 3, 3,
+       'hr_guidelines', 'pdf', '2025-04-18 15:00:00'),
+
+      (UUID(), 4, 4,
+       'hazard_report_template', 'pdf', '2025-05-29 12:00:00'),
+
+      (UUID(), 5, 5,
+       'equipment_safety', 'pdf', '2025-07-12 09:00:00'),
+
+      (UUID(), 6, 6,
+       'workshop_rules', 'pdf', '2025-08-20 17:00:00'),
+
+      (UUID(), 7, 7,
+       'health_policy', 'pdf', '2025-09-15 14:00:00'),
+
+      (UUID(), 8, 8,
+       'emergency_procedures', 'pdf', '2025-10-30 18:00:00'),
+
+      (UUID(), 2,2,
+       'oil_spill_lift_photo', 'jpg', CURRENT_TIMESTAMP),
+
+      (UUID(), 3, 3,
+       'damaged_air_hose_photo', 'jpg', CURRENT_TIMESTAMP),
+
+      (UUID(), 6, 6,
+       'blocked_fire_exit_photo', 'jpg', CURRENT_TIMESTAMP),
+
+      (UUID(), 4, 4,
+       'loose_wheel_nuts_report', 'pdf', CURRENT_TIMESTAMP),
+
+      (UUID(), 5, 5,
+       'faulty_jack_stand_photo', 'jpg', CURRENT_TIMESTAMP),
+
+      (UUID(), 2, 2,
+       'exposed_wiring_photo', 'jpg', CURRENT_TIMESTAMP),
+
+      (UUID(), 6, 6,
+       'lift_hydraulic_leak_photo', 'jpg', CURRENT_TIMESTAMP),
+
+      (UUID(), 3, 3,
+       'missing_fire_extinguisher_photo', 'jpg', CURRENT_TIMESTAMP);
 
 INSERT INTO document_table (
     file_id,
@@ -628,6 +669,92 @@ INSERT INTO risk_assessment_hazard_table (
       (6, 26, CURRENT_TIMESTAMP),
       (6, 29, CURRENT_TIMESTAMP);
 
+INSERT INTO hazard_files_table (
+    file_id,
+    hazard_id,
+    created
+) VALUES
+      ((SELECT file_id FROM files_table WHERE name = 'oil_spill_lift_photo'),
+       (SELECT hazard_id FROM hazard_table WHERE title = 'Oil Spill Near Lift'),
+       CURRENT_TIMESTAMP),
 
+      ((SELECT file_id FROM files_table WHERE name = 'damaged_air_hose_photo'),
+       (SELECT hazard_id FROM hazard_table WHERE title = 'Damaged Air Hose'),
+       CURRENT_TIMESTAMP),
+
+      ((SELECT file_id FROM files_table WHERE name = 'blocked_fire_exit_photo'),
+       (SELECT hazard_id FROM hazard_table WHERE title = 'Blocked Fire Exit'),
+       CURRENT_TIMESTAMP),
+
+      ((SELECT file_id FROM files_table WHERE name = 'loose_wheel_nuts_report'),
+       (SELECT hazard_id FROM hazard_table WHERE title = 'Loose Wheel Nuts'),
+       CURRENT_TIMESTAMP),
+
+      ((SELECT file_id FROM files_table WHERE name = 'faulty_jack_stand_photo'),
+       (SELECT hazard_id FROM hazard_table WHERE title = 'Faulty Jack Stand'),
+       CURRENT_TIMESTAMP),
+
+      ((SELECT file_id FROM files_table WHERE name = 'exposed_wiring_photo'),
+       (SELECT hazard_id FROM hazard_table WHERE title = 'Exposed Wiring'),
+       CURRENT_TIMESTAMP),
+
+      ((SELECT file_id FROM files_table WHERE name = 'lift_hydraulic_leak_photo'),
+       (SELECT hazard_id FROM hazard_table WHERE title = 'Vehicle Lift Hydraulic Leak'),
+       CURRENT_TIMESTAMP),
+
+      ((SELECT file_id FROM files_table WHERE name = 'missing_fire_extinguisher_photo'),
+       (SELECT hazard_id FROM hazard_table WHERE title = 'Missing Fire Extinguisher'),
+       CURRENT_TIMESTAMP);
+
+
+INSERT INTO permissions_table (
+    account_id,
+    assigned_by,
+    is_admin,
+    is_manager,
+    created
+) VALUES
+      (1, 2, FALSE, FALSE, CURRENT_TIMESTAMP),
+      (2, NULL, TRUE, TRUE, CURRENT_TIMESTAMP),
+      (3, 2, FALSE, TRUE, CURRENT_TIMESTAMP),
+      (4, 2, FALSE, TRUE, CURRENT_TIMESTAMP),
+      (5, 2, FALSE, FALSE, CURRENT_TIMESTAMP),
+      (6, 2, FALSE, FALSE, CURRENT_TIMESTAMP),
+      (7, 2, FALSE, FALSE, CURRENT_TIMESTAMP),
+      (8, 2, FALSE, FALSE, CURRENT_TIMESTAMP);
+
+
+INSERT INTO settings_table (
+    account_id,
+    large_text,
+    dyslexic_font,
+    text_to_speech,
+    dictation,
+    silent_start,
+    silent_end
+) VALUES
+      (1, FALSE, FALSE, FALSE,
+       FALSE, NULL, NULL),
+
+      (2, FALSE, FALSE,
+       FALSE, FALSE, '22:00:00', '07:00:00'),
+
+      (3, TRUE,  TRUE,
+       FALSE, FALSE, '18:00:00', '05:00:00'),
+
+      (4, FALSE, FALSE,
+       TRUE,  FALSE, '18:00:00', '06:00:00'),
+
+      (5, FALSE, FALSE,
+       FALSE, FALSE, NULL, NULL),
+
+      (6, TRUE,  FALSE,
+       TRUE,  FALSE, NULL, NULL),
+
+      (7, FALSE, TRUE,
+       FALSE, TRUE,  NULL, NULL),
+
+      (8, FALSE, FALSE,
+       FALSE, FALSE, NULL, NULL);
 
 
