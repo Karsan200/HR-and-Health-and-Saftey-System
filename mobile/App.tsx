@@ -6,7 +6,7 @@
  */
 
 import React, {useContext, useEffect, useState} from 'react';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import { StatusBar, useColorScheme, View } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 
 import AuthenticationService from './src/logic/AuthenticationService.ts';
