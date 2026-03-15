@@ -23,7 +23,6 @@ jest.mock('../src/logic/AuthenticationService', () => ({
 }));
 
 jest.mock('../src/screens/HsOverview', () => {
-  const mockReact = require('react');
   const { View, Text } = require('react-native');
 
   return () => mockReact.createElement(View, null, mockReact.createElement(Text, null, 'Overview Screen'));
@@ -31,7 +30,6 @@ jest.mock('../src/screens/HsOverview', () => {
 
 // Mocking HomeScreen to render the available buttons
 jest.mock('../src/screens/HomeScreen', () => {
-  const mockReact = require('react');
   const { View, Text } = require('react-native');
 
   return (props: any) =>
@@ -50,7 +48,6 @@ jest.mock('../src/screens/HomeScreen', () => {
 
 // Mocking react-native-paper components used in the app
 jest.mock('react-native-paper', () => {
-  const mockReact = require('react');
   const { Text, View } = require('react-native');
 
   return {
@@ -73,7 +70,6 @@ jest.mock('react-native-wheel-color-picker', () => {
 
 // Mock CalendarScreen to just render a placeholder
 jest.mock('../src/screens/CalendarScreen', () => {
-  const mockReact = require('react');
   const { View, Text } = require('react-native');
 
   return (props: any) =>
@@ -87,7 +83,6 @@ jest.mock('../src/screens/CalendarScreen', () => {
 
 // Mocking DateDetailsScreen to render the selected date
 jest.mock('../src/screens/DateDetailsScreen', () => {
-  const mockReact = require('react');
   const { View, Text } = require('react-native');
 
   return (props: any) =>
@@ -96,7 +91,6 @@ jest.mock('../src/screens/DateDetailsScreen', () => {
 
 // Mocking SettingsScreen to render a placeholder
 jest.mock('../src/screens/personal/SettingsScreen', () => {
-  const mockReact = require('react');
   const { View, Text } = require('react-native');
 
   return () => mockReact.createElement(View, null, mockReact.createElement(Text, null, 'Settings Screen'));
