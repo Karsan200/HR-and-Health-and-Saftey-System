@@ -41,7 +41,7 @@ public class PayslipsTable {
     private FilesTable file;
 
     /** Year the payslip is for. */
-    @Column(columnDefinition = "TINYINT", name = "year", nullable = false)
+    @Column(columnDefinition = "SMALLINT", name = "year", nullable = false)
     private Integer year;
 
     /** Month the payslip is for. */

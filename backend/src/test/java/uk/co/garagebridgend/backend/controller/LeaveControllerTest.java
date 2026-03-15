@@ -1,14 +1,21 @@
 package uk.co.garagebridgend.backend.controller;
 
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import uk.co.garagebridgend.backend.RentATechApplication;
 import uk.co.garagebridgend.backend.logic.LeaveService;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
@@ -24,6 +31,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Tests for {@link LeaveController}.
  */
+@SpringBootTest(
+        classes = RentATechApplication.class,
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+)
+@AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@ActiveProfiles("test")
+@Transactional
 public class LeaveControllerTest {
 
     private MockMvc mockMvc;

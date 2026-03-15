@@ -18,7 +18,6 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
   const { theme } = useContext(ThemeContext); // Get current theme
   const today = dayjs();
 
-  //TODO: allow admin to set this via desktop
   const MaxBookedDays = 2;
 
   const [bookedDays, setBookedDays] = useState<string[]>([]);

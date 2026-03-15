@@ -140,7 +140,7 @@ public class HsOverviewControllerTest {
         hazard1.setQuestionThree("Trip risk");
         hazard1.setQuestionFour("Flood");
         hazard1.setQuestionFive("Low");
-        hazard1.setQuestionSix("Fix soon");
+        hazard1.setQuestionSix(LocalDateTime.now(Clock.systemUTC()));
 
         hazardRepository.save(hazard1);
 
@@ -152,7 +152,7 @@ public class HsOverviewControllerTest {
         hazard2.setQuestionThree("Trip risk");
         hazard2.setQuestionFour("Flood");
         hazard2.setQuestionFive("Low");
-        hazard2.setQuestionSix("Fix soon");
+        hazard2.setQuestionSix(LocalDateTime.now(Clock.systemUTC()));
 
         hazardRepository.save(hazard2);
 

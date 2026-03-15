@@ -1,11 +1,13 @@
 package uk.co.garagebridgend.backend.logic;
 
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import org.springframework.test.context.ActiveProfiles;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.LeaveTable;
 import uk.co.garagebridgend.backend.repository.LeaveRepository;
@@ -20,6 +22,8 @@ import static org.mockito.Mockito.when;
 /**
  * Tests for {@link LeaveService}.
  */
+@ActiveProfiles("test")
+@Transactional
 public class LeaveServiceTest {
 
     @Mock

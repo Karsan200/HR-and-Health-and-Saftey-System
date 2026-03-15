@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
  * Account entity mapped to the database.
  * <p>
  * Stores the basic profile and authentication data for a user account.
- * Keep sensitive values (passwords, PINs) hashed and salted.
+ * Keep sensitive values (passwords, PINs) hashed.
  */
 @Entity
 @Data
