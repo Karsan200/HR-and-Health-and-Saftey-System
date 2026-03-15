@@ -41,18 +41,6 @@ export function ScreenConfig(body: ScreenConfigProps) {
   };
 
   switch (body.currentScreen) {
-    case 'home':
-      return (
-        <HomeScreen
-          onSelectHr={handleSelectHr}
-          onSelectHealthSafety={handleSelectHealthSafety}
-          onSelectSettings={() => handleNavigate('settings')}
-          onSelectLogout={() => handleNavigate('logout')}
-          onSelectProfile={() => handleNavigate('profile')}
-          onSelectNotifications={() => handleNavigate('notifications')}
-        />
-      );
-
     case 'calendar':
       return (
         <>
@@ -168,8 +156,8 @@ export function ScreenConfig(body: ScreenConfigProps) {
           onSelectHealthSafety={handleSelectHealthSafety}
           onSelectSettings={() => handleNavigate('settings')}
           onSelectLogout={() => handleNavigate('logout')}
-          onSelectNotifications={() => handleNavigate('notifications')}
           onSelectProfile={() => handleNavigate('profile')}
+          onSelectNotifications={() => handleNavigate('notifications')}
         />
       );
   }
