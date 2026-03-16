@@ -120,7 +120,7 @@ export default function SettingsScreen() {
   const [pickerVisible, setPickerVisible] = useState(false);
   const [editingColor, setEditingColor] = useState<string | null>(null);
 
-  const styles = settingsStyles(theme);
+  const styles = settingsStyles(theme, accessibility);
 
   const [highlightSmallText, setHighlightSmallText] = React.useState(false);
 

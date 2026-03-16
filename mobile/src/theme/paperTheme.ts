@@ -1,122 +1,120 @@
 import { MD3LightTheme } from 'react-native-paper';
 import { ThemeProp } from 'react-native-paper/lib/typescript/types';
-import { FontSize, TextStyles } from "./theme.ts";
+import { FontSize, TextStyles, Fonts } from "./theme.ts";
 import { ThemeContextType } from "../model/ThemeContextType.ts";
 
-/** Default light theme for react native paper components. <p>
- * Refer to:
- * https://oss.callstack.com/react-native-paper/docs/guides/theming
- * for information on how to edit themes for react native paper components.
+/**
+ * Default light theme for React Native Paper components.
+ * Now supports accessibility settings: large text & dyslexic font.
  */
-
 export const paperTheme = (themeContext: ThemeContextType): ThemeProp => {
   const theme = themeContext.theme;
   const accessibility = themeContext.accessibility;
 
+  // Text scaling for large text
   const fontScale = accessibility.largeText ? 1.3 : 1;
 
-  const fontFamily = accessibility.dyslexicFont
-    ? 'OpenDyslexic'
-    : TextStyles.regular.fontFamily;
+  // Choose font families dynamically
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
 
   return {
-    ...MD3LightTheme, // Default theme, overridden by custom properties below
+    ...MD3LightTheme,
     dark: false,
     version: 3,
     mode: 'exact',
     roundness: 1.8,
     colors: {
-      ...MD3LightTheme.colors, // Default theme, overridden by custom colors below
+      ...MD3LightTheme.colors,
       primary: theme.redPrimary,
       onSurfaceVariant: theme.greyPrimaryMainText,
       outline: theme.greyIconLight,
       elevation: {
-        level3: theme.greyBackground
-      }
+        level3: theme.greyBackground,
+      },
     },
     fonts: {
       default: {
-        fontFamily,
-        fontWeight: TextStyles.regular.fontWeight
+        fontFamily: fontFamilies.regular,
+        fontWeight: TextStyles.regular.fontWeight,
       },
       bodySmall: {
-        fontFamily,
+        fontFamily: fontFamilies.regular,
         fontSize: FontSize.xxs12 * fontScale,
-        fontWeight: TextStyles.regular.fontWeight
+        fontWeight: TextStyles.regular.fontWeight,
       },
       bodyMedium: {
-        fontFamily,
+        fontFamily: fontFamilies.regular,
         fontSize: FontSize.s16 * fontScale,
-        fontWeight: TextStyles.regular.fontWeight
+        fontWeight: TextStyles.regular.fontWeight,
       },
       bodyLarge: {
-        fontFamily,
+        fontFamily: fontFamilies.regular,
         fontSize: FontSize.m20 * fontScale,
-        fontWeight: TextStyles.regular.fontWeight
+        fontWeight: TextStyles.regular.fontWeight,
       },
       labelSmall: {
-        fontFamily,
+        fontFamily: fontFamilies.medium,
         fontSize: FontSize.xxs12 * fontScale,
-        fontWeight: TextStyles.medium.fontWeight
+        fontWeight: TextStyles.medium.fontWeight,
       },
       labelMedium: {
-        fontFamily,
+        fontFamily: fontFamilies.medium,
         fontSize: FontSize.s16 * fontScale,
-        fontWeight: TextStyles.medium.fontWeight
+        fontWeight: TextStyles.medium.fontWeight,
       },
       labelLarge: {
-        fontFamily,
+        fontFamily: fontFamilies.medium,
         fontSize: FontSize.l24 * fontScale,
-        fontWeight: TextStyles.medium.fontWeight
+        fontWeight: TextStyles.medium.fontWeight,
       },
       titleSmall: {
-        fontFamily,
+        fontFamily: fontFamilies.semiBold,
         fontSize: FontSize.s16 * fontScale,
-        fontWeight: TextStyles.semiBold.fontWeight
+        fontWeight: TextStyles.semiBold.fontWeight,
       },
       titleMedium: {
-        fontFamily,
+        fontFamily: fontFamilies.semiBold,
         fontSize: FontSize.m20 * fontScale,
-        fontWeight: TextStyles.semiBold.fontWeight
+        fontWeight: TextStyles.semiBold.fontWeight,
       },
       titleLarge: {
-        fontFamily,
+        fontFamily: fontFamilies.semiBold,
         fontSize: FontSize.l24 * fontScale,
-        fontWeight: TextStyles.semiBold.fontWeight
+        fontWeight: TextStyles.semiBold.fontWeight,
       },
       headlineSmall: {
-        fontFamily,
+        fontFamily: fontFamilies.extraBold,
         fontSize: FontSize.m20 * fontScale,
-        fontWeight: TextStyles.extraBold.fontWeight
+        fontWeight: TextStyles.extraBold.fontWeight,
       },
       headlineMedium: {
-        fontFamily,
+        fontFamily: fontFamilies.extraBold,
         fontSize: FontSize.l24 * fontScale,
-        fontWeight: TextStyles.extraBold.fontWeight
+        fontWeight: TextStyles.extraBold.fontWeight,
       },
       headlineLarge: {
-        fontFamily,
+        fontFamily: fontFamilies.extraBold,
         fontSize: FontSize.xl32 * fontScale,
-        fontWeight: TextStyles.extraBold.fontWeight
+        fontWeight: TextStyles.extraBold.fontWeight,
       },
       displaySmall: {
-        fontFamily,
+        fontFamily: fontFamilies.extraBold,
         fontSize: FontSize.l24 * fontScale,
-        fontWeight: TextStyles.extraBold.fontWeight
+        fontWeight: TextStyles.extraBold.fontWeight,
       },
       displayMedium: {
-        fontFamily,
+        fontFamily: fontFamilies.extraBold,
         fontSize: FontSize.xl32 * fontScale,
-        fontWeight: TextStyles.extraBold.fontWeight
+        fontWeight: TextStyles.extraBold.fontWeight,
       },
       displayLarge: {
-        fontFamily,
+        fontFamily: fontFamilies.extraBold,
         fontSize: FontSize.xxl36 * fontScale,
-        fontWeight: TextStyles.extraBold.fontWeight
-      }
+        fontWeight: TextStyles.extraBold.fontWeight,
+      },
     },
     animation: {
-      scale: 1.0
-    }
-  }
-}
+      scale: 1.0,
+    },
+  };
+};

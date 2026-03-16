@@ -26,35 +26,50 @@ export const BorderRadius = {
   largeButtonsAndOutlines: 12,
 }
 
-// Font family names for the Poppins font in different weights, used throughout the app
+// Font families used in the app
 export const Fonts = {
-  regular: 'Poppins-Regular',
-  medium: 'Poppins-Medium',
-  semiBold: 'Poppins-SemiBold',
-  bold: 'Poppins-Bold',
-  extraBold: 'Poppins-ExtraBold',
+
+  // Default font (Poppins)
+  poppins: {
+    regular: 'Poppins-Regular',
+    medium: 'Poppins-Medium',
+    semiBold: 'Poppins-SemiBold',
+    bold: 'Poppins-Bold',
+    extraBold: 'Poppins-ExtraBold',
+  },
+
+  // Accessibility font
+  dyslexic: {
+    regular: 'OpenDyslexic-Regular',
+    medium: 'OpenDyslexic-Bold',
+    semiBold: 'OpenDyslexic-Bold',
+    bold: 'OpenDyslexic-Bold',
+    extraBold: 'OpenDyslexic-Bold',
+  }
+
 }
 
 // Text styles that combine font family and weight to ensure that the weight sticks to the font
+// Default text styles (used as fallback)
 export const TextStyles = {
   regular: {
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.poppins.regular,
     fontWeight: '400' as const,
   },
   medium: {
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.poppins.medium,
     fontWeight: '500' as const,
   },
   semiBold: {
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.poppins.semiBold,
     fontWeight: '600' as const,
   },
   bold: {
-    fontFamily: Fonts.bold,
+    fontFamily: Fonts.poppins.bold,
     fontWeight: '700' as const,
   },
   extraBold: {
-    fontFamily: Fonts.extraBold,
+    fontFamily: Fonts.poppins.extraBold,
     fontWeight: '800' as const,
   }
 }

@@ -2,13 +2,15 @@ import React, { createContext, useContext, useState } from 'react';
 import { DefaultColours } from './colours';
 import { ThemeContextType } from '../model/ThemeContextType.ts';
 
+const defaultAccessibility = {
+  largeText: false,
+  dyslexicFont: false,
+  highlightText: false,
+};
+
 export const ThemeContext = createContext<ThemeContextType>({
   theme: DefaultColours,
-  accessibility: {
-    largeText: false,
-    dyslexicFont: false,
-    highlightText: false,
-  },
+  accessibility: defaultAccessibility,
   updateTheme: () => {},
   updateAccessibility: () => {},
 });
