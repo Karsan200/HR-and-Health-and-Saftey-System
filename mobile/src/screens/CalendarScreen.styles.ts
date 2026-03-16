@@ -1,8 +1,12 @@
 import { StyleSheet } from 'react-native';
-import {BorderRadius, FontSize, Spacing, TextStyles} from "../theme/theme.ts";
+import { BorderRadius, Fonts, FontSize, Spacing, TextStyles } from '../theme/theme.ts';
 
-export const calendarScreenStyles = (theme: any) =>
-  StyleSheet.create({
+export const calendarScreenStyles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
+
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
+
+  return StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: theme.greyBackground,
@@ -59,9 +63,10 @@ export const calendarScreenStyles = (theme: any) =>
     },
 
     keyText: {
-        fontFamily: TextStyles.medium.fontFamily,
+        fontFamily: fontFamilies.regular,
         fontWeight: TextStyles.medium.fontWeight,
-        fontSize: FontSize.xs14,
+        fontSize: FontSize.xs14 * fontScale,
         color: theme.black,
     },
-});
+  });
+};

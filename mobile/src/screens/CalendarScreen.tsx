@@ -15,7 +15,8 @@ type Props = {
 };
 
 const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
-  const { theme } = useContext(ThemeContext); // Get current theme
+  const { theme, accessibility } = useContext(ThemeContext); // Get current theme
+  const themedStyles = styles(theme, accessibility);
   const today = dayjs();
 
   const MaxBookedDays = 2;
@@ -127,8 +128,8 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
   };
 
   return (
-    <SafeAreaView style={styles(theme).container}>
-      <View style={styles(theme).summaryWrapper}>
+    <SafeAreaView style={themedStyles.container}>
+      <View style={themedStyles.summaryWrapper}>
         <SummaryRow>
           <SummaryCard
             label="Hours"
@@ -153,7 +154,7 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
         </SummaryRow>
       </View>
 
-      <View style={styles(theme).calendarContainer}>
+      <View style={themedStyles.calendarContainer}>
         <Calendar
           onDayPress={handleDayPress}
           markedDates={markedDates}
@@ -168,18 +169,18 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
           }}
         />
 
-        <View style={styles(theme).redStripe} />
+        <View style={themedStyles.redStripe} />
 
         {/* Key */}
-        <View style={styles(theme).keyContainer}>
-          <View style={styles(theme).keyItem}>
-            <View style={styles(theme).fullyBookedCircle} />
-            <Text style={styles(theme).keyText}>Fully Booked Days</Text>
+        <View style={themedStyles.keyContainer}>
+          <View style={themedStyles.keyItem}>
+            <View style={themedStyles.fullyBookedCircle} />
+            <Text style={themedStyles.keyText}>Fully Booked Days</Text>
           </View>
 
-          <View style={styles(theme).keyItem}>
-            <View style={styles(theme).partialBookedCircle} />
-            <Text style={styles(theme).keyText}>Partial Booked Days</Text>
+          <View style={themedStyles.keyItem}>
+            <View style={themedStyles.partialBookedCircle} />
+            <Text style={themedStyles.keyText}>Partial Booked Days</Text>
           </View>
         </View>
       </View>

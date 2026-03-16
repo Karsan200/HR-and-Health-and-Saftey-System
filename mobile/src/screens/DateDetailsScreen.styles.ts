@@ -1,12 +1,15 @@
 import { StyleSheet } from 'react-native';
-import { BorderRadius, FontSize, Spacing, TextStyles } from "../theme/theme";
-import { DefaultColours } from "../theme/colours";
+import { BorderRadius, Fonts, FontSize, Spacing, TextStyles } from '../theme/theme';
 
-export const dateDetailsStyles = (theme: any) =>
-  StyleSheet.create({
+export const dateDetailsStyles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
+
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
+
+  return StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: DefaultColours.greyBackground,
+        backgroundColor: theme.greyBackground,
     },
 
     content: {
@@ -21,9 +24,9 @@ export const dateDetailsStyles = (theme: any) =>
     },
 
     dateText: {
-        fontFamily: TextStyles.regular.fontFamily,
-        fontWeight: TextStyles.regular.fontWeight,
-        fontSize: 24,
+        fontWeight: TextStyles.medium.fontWeight,
+        fontFamily: fontFamilies.regular,
+        fontSize: FontSize.l24 * fontScale,
         color: theme.black,
     },
 
@@ -55,7 +58,7 @@ export const dateDetailsStyles = (theme: any) =>
     },
 
     weekButtonText: {
-        fontSize: 20,
+        fontSize: FontSize.m20 * fontScale,
         color: theme.black,
     },
 
@@ -157,4 +160,5 @@ export const dateDetailsStyles = (theme: any) =>
         color: theme.redPrimary,
         marginTop: -2,
     },
-});
+  });
+};
