@@ -4,8 +4,11 @@ import { Spacing, FontSize, TextStyles, BorderRadius } from '../theme/theme';
 /**
  * Styles used by the HsOverview screen components.
  */
-export const styles = (theme: any) =>
-  StyleSheet.create({
+export const styles= (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+  const fontFamily = accessibility.dyslexicFont ? 'OpenDyslexic' : TextStyles.regular.fontFamily;
+
+  return StyleSheet.create({
     /**
      * Root container for the screen background and full height.
      * Applies the app background colour and flex expansion.
@@ -52,9 +55,9 @@ export const styles = (theme: any) =>
      */
     headerTitle: {
         marginLeft: 8,
-        fontFamily: TextStyles.medium.fontFamily,
+        fontFamily,
         fontWeight: TextStyles.medium.fontWeight,
-        fontSize: FontSize.l24,
+        fontSize: FontSize.l24 * fontScale,
         color: theme.black,
     },
 
@@ -78,9 +81,9 @@ export const styles = (theme: any) =>
      */
     headerBadgeText: {
         color: theme.white,
-        fontFamily: TextStyles.semiBold.fontFamily,
+        fontFamily,
         fontWeight: TextStyles.semiBold.fontWeight,
-        fontSize: FontSize.s16,
+        fontSize: FontSize.s16 * fontScale,
         lineHeight: 28,
     },
 
@@ -98,9 +101,9 @@ export const styles = (theme: any) =>
      * Matches the header title typography.
      */
     sectionHeading: {
-        fontFamily: TextStyles.medium.fontFamily,
+        fontFamily,
         fontWeight: TextStyles.medium.fontWeight,
-        fontSize: FontSize.l24,
+        fontSize: FontSize.l24 * fontScale,
         color: theme.black,
     },
 
@@ -108,7 +111,8 @@ export const styles = (theme: any) =>
      * Generic title style used elsewhere on the screen.
      */
     title: {
-        fontSize: 20,
+        fontFamily,
+        fontSize: FontSize.m20 * fontScale,
         color: theme.blueDark,
         marginBottom: 12,
         paddingHorizontal: Spacing.mediumPadding,
@@ -137,14 +141,18 @@ export const styles = (theme: any) =>
     cardsWrapper: {
         marginTop: 8,
     },
-});
+  });
+};
 
 /**
  * Local styles used by small, reusable components inside this screen.
  * Kept separate from `styles` to indicate scoped usage (cards, labels, icons).
  */
-export const localStyles = (theme: any) =>
-  StyleSheet.create({
+export const localStyles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+  const fontFamily = accessibility.dyslexicFont ? 'OpenDyslexic' : TextStyles.regular.fontFamily;
+
+  return StyleSheet.create({
     /**
      * Generic card container used for summary tiles.
      * Applies background, border radius and elevation for a raised look.
@@ -176,9 +184,9 @@ export const localStyles = (theme: any) =>
      * Uses medium font family and medium-large font size.
      */
     count: {
-        fontFamily: TextStyles.medium.fontFamily,
+        fontFamily,
         fontWeight: TextStyles.medium.fontWeight,
-        fontSize: FontSize.m20,
+        fontSize: FontSize.m20 * fontScale,
         color: theme.black,
     },
 
@@ -187,9 +195,9 @@ export const localStyles = (theme: any) =>
      * Uses smaller font size and grey tone for secondary emphasis.
      */
     label: {
-        fontFamily: TextStyles.medium.fontFamily,
+        fontFamily,
         fontWeight: TextStyles.medium.fontWeight,
-        fontSize: FontSize.xs14,
+        fontSize: FontSize.xs14 * fontScale,
         color: theme.greyPrimaryMainText,
         textAlign: 'center',
     },
@@ -231,10 +239,11 @@ export const localStyles = (theme: any) =>
      * Uses medium weight and small font size for compact appearance.
      */
     riskLabel: {
-        fontFamily: TextStyles.medium.fontFamily,
+        fontFamily,
         fontWeight: TextStyles.medium.fontWeight,
-        fontSize: FontSize.s16,
+        fontSize: FontSize.s16 * fontScale,
         color: theme.black,
         textAlign: 'center',
     },
-});
+  });
+};
