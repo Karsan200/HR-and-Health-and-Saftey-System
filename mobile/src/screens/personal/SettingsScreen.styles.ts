@@ -225,4 +225,11 @@ export const settingsStyles = (theme: any) =>
     color: theme.black,
     margin: 16,
   },
+
+  settingRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 8
+  },
 });

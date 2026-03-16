@@ -4,6 +4,7 @@ import ColorPicker from 'react-native-wheel-color-picker';
 import { useTheme } from "../../theme/colourController";
 import { settingsStyles } from './SettingsScreen.styles';
 import { DefaultColours } from "../../theme/colours";
+import SwitchToggle from "../../components/SwitchToggle.tsx";
 
 type HSL = {
   h: number;
@@ -121,7 +122,9 @@ export default function SettingsScreen() {
 
   const styles = settingsStyles(theme);
 
-  //console.log(theme);
+  const [useDyslexicFont, setUseDyslexicFont] = React.useState(false);
+  const [increaseTextSize, setIncreaseTextSize] = React.useState(false);
+  const [highlightSmallText, setHighlightSmallText] = React.useState(false);
 
   const [pickColors, setPickColors] = useState({
     background: "#F6F6F8",
@@ -189,7 +192,7 @@ export default function SettingsScreen() {
       white: '#1D1D1D',
 
       // Basic Red Colours
-      redPrimary: '#D20414',
+      redPrimary: '#D20413',
       redTextDark: '#F6CDD0',
       redBackgroundLight: '#AE010B',
 
@@ -268,7 +271,7 @@ export default function SettingsScreen() {
     }
   }
 
-  const PRESET_COLOURS = ["#D20414", "#0066FF", "#2E7D32", "#AE010B"];
+  const PRESET_COLOURS = ["#D20414", "#0066FF", "#2E7D32", "#D20413"];
   const isCustom = !PRESET_COLOURS.includes(theme.redPrimary);
 
   return (
@@ -280,20 +283,36 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Accessibility Settings</Text>
           {/* TO DO: Toggles for settings*/}
-          <Text style={styles.previewText}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
-            tempor incididunt ut labore et dolore magna aliqua.
-          </Text>
 
-          <Text style={styles.previewText}>
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
-            ut aliquip ex ea commodo consequat.
-          </Text>
+          <View style={styles.settingRow}>
+            <Text style={styles.previewText}>
+              Use OpenDyslexic Font.
+            </Text>
+            <SwitchToggle
+                value={useDyslexicFont}
+                onToggle={() => setUseDyslexicFont(!useDyslexicFont)}
+            />
+          </View>
 
-          <Text style={styles.previewText}>
-            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-            dolore eu fugiat nulla pariatur.
-          </Text>
+          <View style={styles.settingRow}>
+            <Text style={styles.previewText}>
+              Increase the Text Size.
+            </Text>
+            <SwitchToggle
+                value={increaseTextSize}
+                onToggle={() => setIncreaseTextSize(!increaseTextSize)}
+            />
+          </View>
+
+          <View style={styles.settingRow}>
+            <Text style={styles.previewText}>
+              Highlight Small Text.
+            </Text>
+            <SwitchToggle
+                value={highlightSmallText}
+                onToggle={() => setHighlightSmallText(!highlightSmallText)}
+            />
+          </View>
         </View>
 
         <View style={styles.section}>
