@@ -222,6 +222,23 @@ export default function SettingsScreen() {
     setEditingColor(null);
   }
 
+  function handleHighlightToggle() {
+    const newValue = !highlightSmallText;
+    setHighlightSmallText(newValue);
+
+    if (newValue) {
+      updateTheme({
+        greyPrimaryMainText: '#FFEE00',
+        black: '#FFEE00',
+      })
+    } else {
+      updateTheme({
+        greyPrimaryMainText: '#767676',
+        black: '#000000',
+      })
+    }
+  }
+
   function openPicker(type: "background" | "text" | "accent") {
 
     if (editingColor === type && pickerVisible) {
@@ -310,7 +327,7 @@ export default function SettingsScreen() {
             </Text>
             <SwitchToggle
                 value={highlightSmallText}
-                onToggle={() => setHighlightSmallText(!highlightSmallText)}
+                onToggle={handleHighlightToggle}
             />
           </View>
         </View>
