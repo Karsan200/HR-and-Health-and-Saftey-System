@@ -19,6 +19,6 @@ public class FileUploadRequest {
     /** Extension of the file being uploaded (e.g., "pdf", "jpg"). */
     private String extension;
 
-    /** Content type of the file being uploaded (e.g., "application/pdf", "image/jpeg"). */
-    private String contentType;
+    /** The actual file being uploaded. */
+    private String content;
 }

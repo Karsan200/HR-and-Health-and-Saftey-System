@@ -39,6 +39,11 @@ public class HazardController {
                     HttpStatus.UNAUTHORIZED,
                     "Authenticated account not found."
             );
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    e.getMessage()
+            );
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
