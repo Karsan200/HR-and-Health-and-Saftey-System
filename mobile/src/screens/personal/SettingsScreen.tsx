@@ -115,15 +115,13 @@ export function generateColorSet(primaryHex: string): ColorSet {
 
 export default function SettingsScreen() {
 
-  const { theme, updateTheme } = useTheme();
+  const { theme, updateTheme, accessibility, updateAccessibility } = useTheme();
 
   const [pickerVisible, setPickerVisible] = useState(false);
   const [editingColor, setEditingColor] = useState<string | null>(null);
 
   const styles = settingsStyles(theme);
 
-  const [useDyslexicFont, setUseDyslexicFont] = React.useState(false);
-  const [increaseTextSize, setIncreaseTextSize] = React.useState(false);
   const [highlightSmallText, setHighlightSmallText] = React.useState(false);
 
   const [pickColors, setPickColors] = useState({
@@ -311,8 +309,12 @@ export default function SettingsScreen() {
               </Text>
             </View>
             <SwitchToggle
-                value={useDyslexicFont}
-                onToggle={() => setUseDyslexicFont(!useDyslexicFont)}
+              value={accessibility.dyslexicFont}
+              onToggle={() =>
+                updateAccessibility({
+                  dyslexicFont: !accessibility.dyslexicFont
+                })
+              }
             />
           </View>
 
@@ -326,8 +328,12 @@ export default function SettingsScreen() {
               </Text>
             </View>
             <SwitchToggle
-                value={increaseTextSize}
-                onToggle={() => setIncreaseTextSize(!increaseTextSize)}
+              value={accessibility.largeText}
+              onToggle={() =>
+                updateAccessibility({
+                  largeText: !accessibility.largeText
+                })
+              }
             />
           </View>
 

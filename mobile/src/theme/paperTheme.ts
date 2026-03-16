@@ -11,6 +11,13 @@ import { ThemeContextType } from "../model/ThemeContextType.ts";
 
 export const paperTheme = (themeContext: ThemeContextType): ThemeProp => {
   const theme = themeContext.theme;
+  const accessibility = themeContext.accessibility;
+
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+
+  const fontFamily = accessibility.dyslexicFont
+    ? 'OpenDyslexic'
+    : TextStyles.regular.fontFamily;
 
   return {
     ...MD3LightTheme, // Default theme, overridden by custom properties below
@@ -29,82 +36,82 @@ export const paperTheme = (themeContext: ThemeContextType): ThemeProp => {
     },
     fonts: {
       default: {
-        fontFamily: TextStyles.regular.fontFamily,
+        fontFamily,
         fontWeight: TextStyles.regular.fontWeight
       },
       bodySmall: {
-        fontFamily: TextStyles.regular.fontFamily,
-        fontSize: FontSize.xxs12,
+        fontFamily,
+        fontSize: FontSize.xxs12 * fontScale,
         fontWeight: TextStyles.regular.fontWeight
       },
       bodyMedium: {
-        fontFamily: TextStyles.regular.fontFamily,
-        fontSize: FontSize.s16,
+        fontFamily,
+        fontSize: FontSize.s16 * fontScale,
         fontWeight: TextStyles.regular.fontWeight
       },
       bodyLarge: {
-        fontFamily: TextStyles.regular.fontFamily,
-        fontSize: FontSize.m20,
+        fontFamily,
+        fontSize: FontSize.m20 * fontScale,
         fontWeight: TextStyles.regular.fontWeight
       },
       labelSmall: {
-        fontFamily: TextStyles.medium.fontFamily,
-        fontSize: FontSize.xxs12,
+        fontFamily,
+        fontSize: FontSize.xxs12 * fontScale,
         fontWeight: TextStyles.medium.fontWeight
       },
       labelMedium: {
-        fontFamily: TextStyles.medium.fontFamily,
-        fontSize: FontSize.s16,
+        fontFamily,
+        fontSize: FontSize.s16 * fontScale,
         fontWeight: TextStyles.medium.fontWeight
       },
       labelLarge: {
-        fontFamily: TextStyles.medium.fontFamily,
-        fontSize: FontSize.l24,
+        fontFamily,
+        fontSize: FontSize.l24 * fontScale,
         fontWeight: TextStyles.medium.fontWeight
       },
       titleSmall: {
-        fontFamily: TextStyles.semiBold.fontFamily,
-        fontSize: FontSize.s16,
+        fontFamily,
+        fontSize: FontSize.s16 * fontScale,
         fontWeight: TextStyles.semiBold.fontWeight
       },
       titleMedium: {
-        fontFamily: TextStyles.semiBold.fontFamily,
-        fontSize: FontSize.m20,
+        fontFamily,
+        fontSize: FontSize.m20 * fontScale,
         fontWeight: TextStyles.semiBold.fontWeight
       },
       titleLarge: {
-        fontFamily: TextStyles.semiBold.fontFamily,
-        fontSize: FontSize.l24,
+        fontFamily,
+        fontSize: FontSize.l24 * fontScale,
         fontWeight: TextStyles.semiBold.fontWeight
       },
       headlineSmall: {
-        fontFamily: TextStyles.extraBold.fontFamily,
-        fontSize: FontSize.m20,
+        fontFamily,
+        fontSize: FontSize.m20 * fontScale,
         fontWeight: TextStyles.extraBold.fontWeight
       },
       headlineMedium: {
-        fontFamily: TextStyles.extraBold.fontFamily,
-        fontSize: FontSize.l24,
+        fontFamily,
+        fontSize: FontSize.l24 * fontScale,
         fontWeight: TextStyles.extraBold.fontWeight
       },
       headlineLarge: {
-        fontFamily: TextStyles.extraBold.fontFamily,
-        fontSize: FontSize.xl32,
+        fontFamily,
+        fontSize: FontSize.xl32 * fontScale,
         fontWeight: TextStyles.extraBold.fontWeight
       },
       displaySmall: {
-        fontFamily: TextStyles.extraBold.fontFamily,
-        fontSize: FontSize.l24,
+        fontFamily,
+        fontSize: FontSize.l24 * fontScale,
         fontWeight: TextStyles.extraBold.fontWeight
       },
       displayMedium: {
-        fontFamily: TextStyles.extraBold.fontFamily,
-        fontSize: FontSize.xl32,
+        fontFamily,
+        fontSize: FontSize.xl32 * fontScale,
         fontWeight: TextStyles.extraBold.fontWeight
       },
       displayLarge: {
-        fontFamily: TextStyles.extraBold.fontFamily,
-        fontSize: FontSize.xxl36,
+        fontFamily,
+        fontSize: FontSize.xxl36 * fontScale,
         fontWeight: TextStyles.extraBold.fontWeight
       }
     },
