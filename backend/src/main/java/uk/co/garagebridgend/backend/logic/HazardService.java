@@ -2,13 +2,17 @@ package uk.co.garagebridgend.backend.logic;
 
 import org.springframework.stereotype.Service;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
+import uk.co.garagebridgend.backend.models.entity.FilesTable;
+import uk.co.garagebridgend.backend.models.entity.HazardFilesTable;
 import uk.co.garagebridgend.backend.models.entity.HazardTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.request.HazardReportRequest;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
+import uk.co.garagebridgend.backend.repository.FilesRepository;
 import uk.co.garagebridgend.backend.repository.HazardFilesRepository;
 import uk.co.garagebridgend.backend.repository.HazardRepository;
 
+import java.io.ByteArrayInputStream;
 import java.time.Clock;
 import java.time.LocalDateTime;
 
@@ -30,6 +34,7 @@ public class HazardService {
 
     /** Repository for managing hazard file data. */
     private final HazardFilesRepository hazardFilesRepository;
+    private final FilesRepository filesRepository;
 
     /**
      * Constructs the HazardService with the required dependencies.
@@ -43,12 +48,13 @@ public class HazardService {
             StorageService storageServiceImpl,
             AccountRepository accountRepositoryImpl,
             HazardRepository hazardRepositoryImpl,
-            HazardFilesRepository hazardFilesRepositoryImpl
-    ) {
+            HazardFilesRepository hazardFilesRepositoryImpl,
+            FilesRepository filesRepository) {
         this.storageService = storageServiceImpl;
         this.accountRepository = accountRepositoryImpl;
         this.hazardRepository = hazardRepositoryImpl;
         this.hazardFilesRepository = hazardFilesRepositoryImpl;
+        this.filesRepository = filesRepository;
     }
 
     /**
@@ -103,6 +109,26 @@ public class HazardService {
         if (!body.getFiles().isEmpty()) {
             for (var file : body.getFiles()) {
                 var decodedFile = storageService.decodeBase64(file.getContent());
+
+                // Add the file to the database
+                var fileObj = new FilesTable();
+                fileObj.setCreatedBy(account);
+                fileObj.setName(file.getName());
+                fileObj.setExtension(file.getExtension().toLowerCase());
+                filesRepository.save(fileObj);
+
+                // Associate the file with the hazard
+                var hazardFile = new HazardFilesTable();
+                hazardFile.setHazard(hazard);
+                hazardFile.setFile(fileObj);
+                hazardFilesRepository.save(hazardFile);
+
+                // Upload the file to object storage and get the URL
+                storageService.uploadFile(
+                        fileObj.getFileId().toString(),
+                        new ByteArrayInputStream(decodedFile),
+                        file.getExtension()
+                );
             }
         }
     }

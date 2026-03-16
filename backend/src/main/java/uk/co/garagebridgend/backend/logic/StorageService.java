@@ -30,10 +30,21 @@ public class StorageService {
     /** Uploads a file to the MinIO storage.
      * @param objectName the name of the object to be stored in MinIO
      * @param inputStream the InputStream of the file to be uploaded
-     * @param contentType the MIME type of the file being uploaded
+     * @param extension the file extension to determine the content type
      * @throws RuntimeException if any error occurs during the upload process
      */
-    public void uploadFile(String objectName, InputStream inputStream, String contentType) {
+    public void uploadFile(String objectName, InputStream inputStream, String extension)
+            throws RuntimeException {
+        // Determine the content type based on the file extension
+        String contentType = switch (extension.toLowerCase()) {
+            case "jpg", "jpeg" -> "image/jpeg";
+            case "png" -> "image/png";
+            case "gif" -> "image/gif";
+            case "pdf" -> "application/pdf";
+            case "doc", "docx" -> "application/msword";
+            default -> "application/octet-stream"; // Default binary type for unknown extensions
+        };
+
         try {
             boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
             if (!found) {
