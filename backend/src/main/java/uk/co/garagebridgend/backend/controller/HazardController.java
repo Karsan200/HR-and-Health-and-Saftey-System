@@ -31,7 +31,7 @@ public class HazardController {
      * @param body The request body containing the hazard report details and files to upload.
      */
     @PostMapping("/report")
-    public void reportHazard(@RequestBody HazardReportRequest body) {
+    public void reportHazard(final @RequestBody HazardReportRequest body) {
         try {
             hazardService.report(body);
         } catch (AuthenticatedAccountNotFoundException e) {

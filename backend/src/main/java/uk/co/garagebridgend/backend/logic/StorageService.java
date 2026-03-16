@@ -33,7 +33,7 @@ public class StorageService {
      * @param extension the file extension to determine the content type
      * @throws RuntimeException if any error occurs during the upload process
      */
-    public void uploadFile(String objectName, InputStream inputStream, String extension)
+    public void uploadFile(final String objectName, final InputStream inputStream, final String extension)
             throws RuntimeException {
         // Determine the content type based on the file extension
         String contentType = switch (extension.toLowerCase()) {
@@ -64,7 +64,7 @@ public class StorageService {
      * @param base64Data the Base64-encoded string to decode
      * @return a byte array containing the decoded data
      */
-    public byte[] decodeBase64(String base64Data) {
+    public byte[] decodeBase64(final String base64Data) {
         return java.util.Base64.getDecoder().decode(base64Data);
     }
 }

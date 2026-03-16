@@ -37,7 +37,7 @@ public class HazardReportRequest {
     /** The due date of the hazard. */
     private LocalDateTime questionSix;
 
-    /** Whether the hazard is a draft */
+    /** Whether the hazard is a draft. */
     private boolean isDraft;
 
     /** Whether the hazard report has been completed. */

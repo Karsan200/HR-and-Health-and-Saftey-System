@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
  */
 @Service
 public class HazardService {
+    /** Constant for converting bytes to kilobytes. */
     private static final int BYTES_TO_KB = 1024;
 
     /** Service for handling object storage interactions. */
@@ -34,6 +35,8 @@ public class HazardService {
 
     /** Repository for managing hazard file data. */
     private final HazardFilesRepository hazardFilesRepository;
+
+    /** Repository for managing file data. */
     private final FilesRepository filesRepository;
 
     /**
@@ -43,18 +46,19 @@ public class HazardService {
      * @param accountRepositoryImpl    repository for managing account data
      * @param hazardRepositoryImpl     repository for managing hazard data
      * @param hazardFilesRepositoryImpl repository for managing hazard file data
+     * @param filesRepositoryImpl      repository for managing file data
      */
     public HazardService(
-            StorageService storageServiceImpl,
-            AccountRepository accountRepositoryImpl,
-            HazardRepository hazardRepositoryImpl,
-            HazardFilesRepository hazardFilesRepositoryImpl,
-            FilesRepository filesRepository) {
+            final StorageService storageServiceImpl,
+            final AccountRepository accountRepositoryImpl,
+            final HazardRepository hazardRepositoryImpl,
+            final HazardFilesRepository hazardFilesRepositoryImpl,
+            final FilesRepository filesRepositoryImpl) {
         this.storageService = storageServiceImpl;
         this.accountRepository = accountRepositoryImpl;
         this.hazardRepository = hazardRepositoryImpl;
         this.hazardFilesRepository = hazardFilesRepositoryImpl;
-        this.filesRepository = filesRepository;
+        this.filesRepository = filesRepositoryImpl;
     }
 
     /**
@@ -64,7 +68,7 @@ public class HazardService {
      * @throws AuthenticatedAccountNotFoundException if the authenticated account cannot be found
      * @throws IllegalArgumentException if any of the uploaded files exceed the maximum allowed size
      */
-    public void report(HazardReportRequest body)
+    public void report(final HazardReportRequest body)
             throws AuthenticatedAccountNotFoundException, IllegalArgumentException {
         // Get the current authenticated user
         var user = AuthenticationService.getCurrentUser();
