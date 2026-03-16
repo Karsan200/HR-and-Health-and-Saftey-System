@@ -1,8 +1,12 @@
 import { StyleSheet } from 'react-native';
-import { Spacing, TextStyles } from '../theme/theme';
+import { Fonts, FontSize, Spacing, TextStyles } from '../theme/theme';
 
-export const bottomNavStyles = (theme: any) =>
-  StyleSheet.create({
+export const bottomNavStyles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
+
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
+
+  return StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -21,8 +25,9 @@ export const bottomNavStyles = (theme: any) =>
     paddingVertical: 6,
   },
   navLabel: {
-    fontSize: 12,
-    ...TextStyles.medium,
+    fontSize: FontSize.xxs12 * fontScale,
+    fontFamily: fontFamilies.regular,
+    fontWeight: TextStyles.medium.fontWeight,
     color: theme.greyPrimaryMainText,
     textAlign: 'center',
     marginTop: 4,
@@ -31,5 +36,6 @@ export const bottomNavStyles = (theme: any) =>
   activeNavLabel: {
     color: theme.redPrimary,
   },
-});
+  });
+};
 

@@ -14,7 +14,8 @@ type BottomNavBarProps = {
 export default function BottomNavBar({
                                        section, currentScreen, onNavigate
                                      }: BottomNavBarProps) {
-  const { theme } = useContext(ThemeContext); // get dynamic theme
+  const { theme, accessibility } = useContext(ThemeContext); // get theme from context
+  const themedStyles = styles(theme, accessibility);
   const items = getBottomNavItems(section);
 
   // Hide the bottom navbar if not needed
@@ -23,14 +24,14 @@ export default function BottomNavBar({
   }
 
   return (
-    <View style={styles(theme).container}>
+    <View style={themedStyles.container}>
       {items.map(item => {
         const isActive = item.key === currentScreen;
 
         return (
           <Pressable
             key={item.key}
-            style={styles(theme).navItem}
+            style={themedStyles.navItem}
             onPress={() => onNavigate(item.key)}
           >
             <Icon
@@ -39,7 +40,7 @@ export default function BottomNavBar({
               color={isActive ? theme.redPrimary : theme.greyIconLight}
             />
             <Text
-              style={[styles(theme).navLabel, isActive && styles(theme).activeNavLabel]}
+              style={[themedStyles.navLabel, isActive && themedStyles.activeNavLabel]}
             >
               {item.label}
             </Text>
