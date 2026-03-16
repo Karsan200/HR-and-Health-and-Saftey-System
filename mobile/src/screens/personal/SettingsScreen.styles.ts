@@ -232,4 +232,12 @@ export const settingsStyles = (theme: any) =>
     alignItems: "center",
     marginVertical: 8
   },
+
+  settingHeader: {
+    fontSize: FontSize.s16,
+    ...TextStyles.semiBold,
+    textAlign: 'left',
+    color: theme.greyIconLight,
+    marginBottom: 10,
+  },
 });

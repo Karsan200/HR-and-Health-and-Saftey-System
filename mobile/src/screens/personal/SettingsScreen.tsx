@@ -302,9 +302,14 @@ export default function SettingsScreen() {
           {/* TO DO: Toggles for settings*/}
 
           <View style={styles.settingRow}>
-            <Text style={styles.previewText}>
-              Use OpenDyslexic Font.
-            </Text>
+            <View style={styles.container}>
+              <Text style={styles.settingHeader}>
+                Dyslexic Font
+              </Text>
+              <Text style={styles.previewText}>
+                Use OpenDyslexic Font.
+              </Text>
+            </View>
             <SwitchToggle
                 value={useDyslexicFont}
                 onToggle={() => setUseDyslexicFont(!useDyslexicFont)}
@@ -312,9 +317,14 @@ export default function SettingsScreen() {
           </View>
 
           <View style={styles.settingRow}>
-            <Text style={styles.previewText}>
-              Increase the Text Size.
-            </Text>
+            <View style={styles.container}>
+              <Text style={styles.settingHeader}>
+                Large Text
+              </Text>
+              <Text style={styles.previewText}>
+                Increase the Text Size.
+              </Text>
+            </View>
             <SwitchToggle
                 value={increaseTextSize}
                 onToggle={() => setIncreaseTextSize(!increaseTextSize)}
@@ -322,9 +332,14 @@ export default function SettingsScreen() {
           </View>
 
           <View style={styles.settingRow}>
-            <Text style={styles.previewText}>
-              Highlight Small Text.
-            </Text>
+            <View style={styles.container}>
+              <Text style={styles.settingHeader}>
+                Highlight Text
+              </Text>
+              <Text style={styles.previewText}>
+                Highlights Small Text.
+              </Text>
+            </View>
             <SwitchToggle
                 value={highlightSmallText}
                 onToggle={handleHighlightToggle}
