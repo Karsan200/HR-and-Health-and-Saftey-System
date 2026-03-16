@@ -11,15 +11,19 @@ import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 
+/** Service class responsible for handling file storage operations using MinIO. */
 @Service
 public class StorageService {
+    /** The name of the MinIO bucket to use for storing files, configured via application properties. */
     @Value("${minio.bucket.name}")
     private String bucketName;
 
+    /** The maximum file size allowed for uploads, configured via application properties.*/
     @Getter
     @Value("${minio.file.maxsize}")
     private int maxFileSize;
 
+    /** MinIO client for interacting with the MinIO storage service. */
     @Autowired
     private MinioClient minioClient;
 

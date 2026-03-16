@@ -13,7 +13,7 @@ public class MinioConfig {
     @Value("${minio.access.key}")
     private String accessKey;
 
-    @Value("${minio.secret.key}")
+    @Value("${minio.access.secret}")
     private String secretKey;
 
     @Bean
