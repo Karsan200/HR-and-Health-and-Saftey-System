@@ -24,6 +24,7 @@ import uk.co.garagebridgend.backend.repository.SessionRepository;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -105,6 +106,35 @@ public class HazardControllerTest {
 
         // Get access token
         this.accessToken = this.getAccessToken();
+    }
+
+    @Test
+    void testHazardFileTooLarge() throws Exception {
+        String largeBase64 = Base64.getEncoder().encodeToString(new byte[1024 * 1024 * 13]); // 13MB
+
+        mockMvc.perform(post("/api/hazard/report")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                {
+                    "title": "Test",
+                    "questionOne": "",
+                    "questionTwo": "",
+                    "questionThree": "",
+                    "questionFour": "",
+                    "questionFive": "",
+                    "questionSix": "2026-03-16T12:00:00",
+                    "isDraft": false,
+                    "isCompleted": true,
+                    "files": [{"name": "test", "extension": "png", "content": "%s"}]
+                }""".formatted(largeBase64)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> {
+                    ResponseStatusException ex =
+                            (ResponseStatusException) result.getResolvedException();
+                    assertNotNull(ex);
+                    assertEquals("File size exceeds the maximum limit.", ex.getReason());
+                });
     }
 
     @Test
