@@ -301,22 +301,22 @@ export default function SettingsScreen() {
           <Text style={styles.quickAccessTitle}>Colour Themes</Text>
 
           <View style={styles.schemeGrid}>
-            <Pressable testID="theme-default-button" style={[styles.schemeButton, PRESET_COLOURS[0] && styles.activeScheme]} onPress={applyDefaultTheme}>
+            <Pressable testID="theme-default-button" style={[styles.schemeButton, PRESET_COLOURS[0] === theme.redPrimary  && styles.activeScheme]} onPress={applyDefaultTheme}>
               <View style={[styles.schemeSwatch]} />
               <Text style={styles.smallLabel}>Default</Text>
             </Pressable>
 
-            <Pressable testID="theme-blue-button" style={[styles.schemeButton, PRESET_COLOURS[1] && styles.activeScheme]} onPress={applyBlueTheme}>
+            <Pressable testID="theme-blue-button" style={[styles.schemeButton, PRESET_COLOURS[1] === theme.redPrimary && styles.activeScheme]} onPress={applyBlueTheme}>
               <View style={[styles.schemeSwatchBlue]} />
               <Text style={styles.smallLabel}>Blue</Text>
             </Pressable>
 
-            <Pressable testID="theme-green-button"  style={[styles.schemeButton, PRESET_COLOURS[2] && styles.activeScheme]} onPress={applyGreenTheme}>
+            <Pressable testID="theme-green-button"  style={[styles.schemeButton, PRESET_COLOURS[2] === theme.redPrimary && styles.activeScheme]} onPress={applyGreenTheme}>
               <View style={[styles.schemeSwatchGreen]} />
               <Text style={styles.smallLabel}>Green</Text>
             </Pressable>
 
-            <Pressable testID="theme-dark-button"  style={[styles.schemeButton, PRESET_COLOURS[3] && styles.activeScheme]} onPress={applyDarkTheme}>
+            <Pressable testID="theme-dark-button"  style={[styles.schemeButton, PRESET_COLOURS[3] === theme.redPrimary && styles.activeScheme]} onPress={applyDarkTheme}>
               <View style={[styles.schemeSwatchDark]} />
               <Text style={styles.smallLabel}>Dark</Text>
             </Pressable>
