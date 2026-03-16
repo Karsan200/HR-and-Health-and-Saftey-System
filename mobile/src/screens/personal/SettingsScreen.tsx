@@ -186,7 +186,7 @@ export default function SettingsScreen() {
     updateTheme({
       // Basic colours
       black: '#FFFFFF',
-      white: '#2B2B2B',
+      white: '#1D1D1D',
 
       // Basic Red Colours
       redPrimary: '#D20414',
@@ -207,8 +207,8 @@ export default function SettingsScreen() {
       greenBackgroundLight: '#0D7B42',
 
       greyPrimaryMainText: '#ABABB3', // Main text
-      greyIconLight: '#F6F6F8', // Icons and secondary text
-      greyBackground: '#000000', // Background of App
+      greyIconLight: '#FFFFFF', // Icons and secondary text
+      greyBackground: '#101010', // Background of App
 
       // Miscellaneous colours
       bluePrimary: '#588FFF',
