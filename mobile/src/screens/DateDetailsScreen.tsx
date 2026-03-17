@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 import { dateDetailsStyles as styles } from './DateDetailsScreen.styles';
 import AuthenticationService from "../logic/AuthenticationService";
 import { ThemeContext } from '../theme/colourController';
+import BookLeaveModal from './BookLeaveModal.tsx';
 
 type Props = {
   date: string | null;
@@ -37,6 +38,15 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
   );
 
   const isToday = selectedDate.isSame(dayjs(), 'day');
+  const [isBookLeaveModalVisible, setIsBookLeaveModalVisible] = useState(false);
+  const refreshSelectedDateData = async () => {
+    await fetchLeaveForDate(selectedDate.format('YYYY-MM-DD'));
+  };
+
+  const DaysInAdvance = 14;
+  const minimumBookableDate = dayjs()
+    .add(DaysInAdvance, 'day').startOf('day');
+  const canBookLeave = !selectedDate.isBefore(minimumBookableDate, 'day');
 
   const fetchLeaveForDate = async (date: string) => {
     try {
@@ -164,9 +174,25 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
       </ScrollView>
 
       {/* Add Button */}
-      <TouchableOpacity style={styles(theme).addButton}>
+      <TouchableOpacity
+        style={[
+          styles(theme).addButton,
+          !canBookLeave && styles(theme).addButtonDisabled,
+        ]}
+        onPress={() => {
+          if (canBookLeave) {
+            setIsBookLeaveModalVisible(true);
+          }
+        }}
+      >
         <Text style={styles(theme).addIcon}>+</Text>
       </TouchableOpacity>
+      <BookLeaveModal
+        visible={isBookLeaveModalVisible}
+        initialDate={selectedDate.format('YYYY-MM-DD')}
+        onClose={() => setIsBookLeaveModalVisible(false)}
+        onSuccess={refreshSelectedDateData}
+      />
     </SafeAreaView>
   );
 };
