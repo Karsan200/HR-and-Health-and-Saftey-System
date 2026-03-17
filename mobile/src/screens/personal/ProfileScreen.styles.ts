@@ -95,4 +95,10 @@ export const profileStyles = (theme: any) =>
       fontSize: 14,
       color: theme.black,
     },
+
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
   });

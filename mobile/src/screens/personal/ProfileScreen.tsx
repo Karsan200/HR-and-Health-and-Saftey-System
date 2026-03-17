@@ -1,11 +1,44 @@
-import React, { useContext } from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, Text, ScrollView, Pressable, ActivityIndicator, } from 'react-native';
 import { Avatar, IconButton } from 'react-native-paper';
+
 import { ThemeContext } from '../../theme/colourController';
 import { profileStyles as styles } from './ProfileScreen.styles';
 
+import ProfileService, { ProfileModel } from '../../logic/ProfileService.ts';
+
 const ProfileScreen = () => {
   const { theme } = useContext(ThemeContext);
+
+  const [profile, setProfile] = useState<ProfileModel | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    try {
+      const data = await ProfileService.getProfile();
+      setProfile(data);
+    } catch (error) {
+      console.error('Failed to load profile:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles(theme).loadingContainer}>
+        <ActivityIndicator size="large" color={theme.redPrimary} />
+      </View>
+    );
+  }
+
+  if (!profile) {
+    return <Text>Error loading profile</Text>;
+  }
 
   return (
     <ScrollView contentContainerStyle={styles(theme).container}>
@@ -17,24 +50,21 @@ const ProfileScreen = () => {
         style={styles(theme).avatar}
       />
 
-      {/* Name + Role */}
+      {/* Name */}
       <View style={styles(theme).textContainer}>
-        <Text style={styles(theme).name}>Maggie May</Text>
+        <Text style={styles(theme).name}>
+          {profile.firstName} {profile.lastName}
+        </Text>
         <Text style={styles(theme).role}>Technician</Text>
-        <Text style={styles(theme).employeeId}>ID: EMP-302-354-001</Text>
       </View>
 
       {/* Edit Button */}
       <Pressable style={styles(theme).editButton}>
-        <IconButton
-          icon="pencil"
-          size={16}
-          iconColor={theme.white}
-        />
+        <IconButton icon="pencil" size={16} iconColor={theme.white} />
         <Text style={styles(theme).editText}>Edit Profile</Text>
       </Pressable>
 
-      {/* Personal Info */}
+      {/* Personal Details */}
       <View style={styles(theme).card}>
         <Text style={styles(theme).cardTitle}>Personal Details</Text>
 
@@ -54,7 +84,7 @@ const ProfileScreen = () => {
           </View>
           <View>
             <Text style={styles(theme).label}>Email</Text>
-            <Text style={styles(theme).value}>maggie@email.com</Text>
+            <Text style={styles(theme).value}>{profile.email}</Text>
           </View>
         </View>
 
@@ -74,7 +104,9 @@ const ProfileScreen = () => {
           </View>
           <View>
             <Text style={styles(theme).label}>Phone</Text>
-            <Text style={styles(theme).value}>555-555-555</Text>
+            <Text style={styles(theme).value}>
+              {profile.phoneNumber}
+            </Text>
           </View>
         </View>
       </View>
@@ -83,7 +115,7 @@ const ProfileScreen = () => {
       <View style={styles(theme).card}>
         <Text style={styles(theme).cardTitle}>Employee Details</Text>
 
-        {/* Position */}
+        {/* Hardcoded Position */}
         <View style={styles(theme).row}>
           <View
             style={[
@@ -119,7 +151,7 @@ const ProfileScreen = () => {
           </View>
           <View>
             <Text style={styles(theme).label}>Join Date</Text>
-            <Text style={styles(theme).value}>15 March 2013</Text>
+            <Text style={styles(theme).value}>{profile.created}</Text>
           </View>
         </View>
       </View>
