@@ -51,7 +51,10 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'calendar':
       return (
         <>
-          <TopNavBar title="Calendar" />
+          <TopNavBar
+            title="Calendar"
+            onProfilePress={() => handleNavigate('profile')}
+          />
           <CalendarScreen onDayPress={handleOpenDateDetails} />
         </>
       );
@@ -63,6 +66,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
             title=""
             showBackButton={true}
             onBackPress={() => handleNavigate('calendar')}
+            onProfilePress={() => handleNavigate('profile')}
           />
           <DateDetailsScreen date={body.selectedDate} />
         </>
@@ -71,7 +75,10 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'payslips':
       return (
         <>
-          <TopNavBar title="Payslips" />
+          <TopNavBar
+            title="Payslips"
+            onProfilePress={() => handleNavigate('profile')}
+          />
           <View style={styles.content} />
         </>
       );
@@ -79,7 +86,10 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'handbook':
       return (
         <>
-          <TopNavBar title="Handbook" />
+          <TopNavBar
+            title="Handbook"
+            onProfilePress={() => handleNavigate('profile')}
+          />
           <View style={styles.content} />
         </>
       );
@@ -87,7 +97,10 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'clockIn':
       return (
         <>
-          <TopNavBar title="Clock-In" />
+          <TopNavBar
+            title="Clock-In"
+            onProfilePress={() => handleNavigate('profile')}
+          />
           <View style={styles.content} />
         </>
       );
@@ -95,7 +108,10 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'overview':
       return (
         <>
-          <TopNavBar title="Overview" />
+          <TopNavBar
+            title="Overview"
+            onProfilePress={() => handleNavigate('profile')}
+          />
           <View style={styles.content}>
             <HsOverview />
           </View>
@@ -105,7 +121,10 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'documents':
       return (
         <>
-          <TopNavBar title="Documents" />
+          <TopNavBar
+            title="Documents"
+            onProfilePress={() => handleNavigate('profile')}
+          />
           <View style={styles.content} />
         </>
       );
@@ -113,7 +132,10 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'risk':
       return (
         <>
-          <TopNavBar title="Risk" />
+          <TopNavBar
+            title="Risk"
+            onProfilePress={() => handleNavigate('profile')}
+          />
           <View style={styles.content} />
         </>
       );
@@ -121,7 +143,10 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'personal':
       return (
         <>
-          <TopNavBar title="Personal" />
+          <TopNavBar
+            title="Personal"
+            onProfilePress={() => handleNavigate('profile')}
+          />
           <View style={styles.content} />
         </>
       );
@@ -133,6 +158,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
             title="Settings"
             showBackButton={true}
             onBackPress={() => handleNavigate('home')}
+            onProfilePress={() => handleNavigate('profile')}
           />
           <View style={styles.content}>
             <SettingsScreen />
@@ -143,7 +169,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'profile':
       return (
         <>
-        <TopNavBar
+          <TopNavBar
             title="Profile"
             showBackButton={true}
             onBackPress={() => handleNavigate('home')}
