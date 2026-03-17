@@ -32,6 +32,12 @@ export function ScreenConfig(body: ScreenConfigProps) {
       body.setCurrentScreen('home');
       return;
     }
+    else if (screen === 'profile') {
+      body.setSection(null);
+      body.setCurrentScreen('profile');
+      return;
+    }
+
 
     body.setCurrentScreen(screen);
   };
