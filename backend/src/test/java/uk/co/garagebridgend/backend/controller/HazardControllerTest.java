@@ -1,5 +1,9 @@
 package uk.co.garagebridgend.backend.controller;
 
+import io.minio.BucketExistsArgs;
+import io.minio.MakeBucketArgs;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
@@ -12,6 +16,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.ObjectMapper;
@@ -27,6 +32,9 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -51,6 +59,9 @@ public class HazardControllerTest {
 
     @InjectMocks
     private HazardController hazardController;
+
+    @MockitoBean
+    private MinioClient minioClient;
 
     @Autowired
     private MockMvc mockMvc;
@@ -109,6 +120,91 @@ public class HazardControllerTest {
     }
 
     @Test
+    void testHazard5Files() throws Exception {
+        // Mock MinioClient
+        when(minioClient.bucketExists(any(BucketExistsArgs.class))).thenReturn(true);
+        when(minioClient.putObject(any(PutObjectArgs.class))).thenReturn(null);
+
+        String base64Content = Base64.getEncoder().encodeToString("test content".getBytes());
+
+        mockMvc.perform(post("/api/hazard/report")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                {
+                    "title": "testHazard5Files",
+                    "questionOne": "",
+                    "questionTwo": "",
+                    "questionThree": "",
+                    "questionFour": "",
+                    "questionFive": "",
+                    "questionSix": "2026-03-16T12:00:00",
+                    "isDraft": false,
+                    "isCompleted": true,
+                    "files": [
+                        {"name": "file1", "extension": "jpg", "content": "%s"},
+                        {"name": "file2", "extension": "jpeg", "content": "%s"},
+                        {"name": "file3", "extension": "gif", "content": "%s"},
+                        {"name": "file4", "extension": "pdf", "content": "%s"},
+                        {"name": "file5", "extension": "doc", "content": "%s"}
+                    ]
+                }""".formatted(base64Content, base64Content, base64Content, base64Content, base64Content)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testHazardReport2Files() throws Exception {
+        // Mock MinioClient
+        when(minioClient.bucketExists(any(BucketExistsArgs.class))).thenReturn(false);
+        doNothing().when(minioClient).makeBucket(any(MakeBucketArgs.class));
+        when(minioClient.putObject(any(PutObjectArgs.class))).thenReturn(null);
+
+        String base64Content = Base64.getEncoder().encodeToString("test content".getBytes());
+
+        mockMvc.perform(post("/api/hazard/report")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                {
+                    "title": "testHazardReport2Files",
+                    "questionOne": "",
+                    "questionTwo": "",
+                    "questionThree": "",
+                    "questionFour": "",
+                    "questionFive": "",
+                    "questionSix": "2026-03-16T12:00:00",
+                    "isDraft": false,
+                    "isCompleted": true,
+                    "files": [
+                        {"name": "file1", "extension": "txt", "content": "%s"},
+                        {"name": "file2", "extension": "txt", "content": "%s"}
+                    ]
+                }""".formatted(base64Content, base64Content)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testHazardNoFiles() throws  Exception {
+        mockMvc.perform(post("/api/hazard/report")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                {
+                    "title": "testHazardNoFiles",
+                    "questionOne": "",
+                    "questionTwo": "",
+                    "questionThree": "",
+                    "questionFour": "",
+                    "questionFive": "",
+                    "questionSix": "2026-03-16T12:00:00",
+                    "isDraft": false,
+                    "isCompleted": false,
+                    "files": []
+                }"""))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void testHazardFileTooLarge() throws Exception {
         String largeBase64 = Base64.getEncoder().encodeToString(new byte[1024 * 1024 * 13]); // 13MB
 
@@ -117,7 +213,7 @@ public class HazardControllerTest {
                         .contentType(String.valueOf(MediaType.APPLICATION_JSON))
                         .content("""
                 {
-                    "title": "Test",
+                    "title": "testHazardFileTooLarge",
                     "questionOne": "",
                     "questionTwo": "",
                     "questionThree": "",
@@ -145,7 +241,7 @@ public class HazardControllerTest {
                         .contentType(String.valueOf(MediaType.APPLICATION_JSON))
                         .content("""
                     {
-                        "title": "",
+                        "title": "testHazardReportUserNotFound",
                         "questionOne": "",
                         "questionTwo": "",
                         "questionThree": "",
@@ -161,12 +257,15 @@ public class HazardControllerTest {
 
     @Test
     void testReportThrowsException() throws Exception {
+        // Mock MinioClient
+        when(minioClient.bucketExists(any(BucketExistsArgs.class))).thenThrow(RuntimeException.class);
+
         mockMvc.perform(post("/api/hazard/report")
                         .header("Authorization", "Bearer " + accessToken)
                         .contentType(String.valueOf(MediaType.APPLICATION_JSON))
                         .content("""
                     {
-                        "title": "Test",
+                        "title": "testReportThrowsException",
                         "questionOne": "",
                         "questionTwo": "",
                         "questionThree": "",
