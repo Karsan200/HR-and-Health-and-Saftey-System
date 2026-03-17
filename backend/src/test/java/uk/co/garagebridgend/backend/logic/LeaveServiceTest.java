@@ -80,7 +80,7 @@ public class LeaveServiceTest {
         when(leaveRepository.findLeaveForDate(LocalDate.parse("2026-03-01").atStartOfDay()))
                 .thenReturn(List.of(leave));
 
-        var result = leaveService.getLeaveForDate(LocalDate.parse("2026-03-01"));
+        var result = leaveService.getLeaveForDate("2026-03-01");
 
         assertEquals(1, result.size());
         assertEquals("John Doe", result.getFirst().getName());
@@ -93,8 +93,15 @@ public class LeaveServiceTest {
         when(leaveRepository.findLeaveForDate(LocalDate.parse("2026-03-01").atStartOfDay()))
                 .thenReturn(List.of());
 
-        var result = leaveService.getLeaveForDate(LocalDate.parse("2026-03-01"));
+        var result = leaveService.getLeaveForDate("2026-03-01");
 
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetLeaveForDateInvalidFormat() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            leaveService.getLeaveForDate("invalid-date");
+        });
     }
 }
