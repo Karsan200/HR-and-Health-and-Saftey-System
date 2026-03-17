@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { Spacing, BorderRadius, TextStyles } from '../../theme/theme';
+import { Spacing, BorderRadius, TextStyles, FontSize } from '../../theme/theme';
 
 export const profileStyles = (theme: any) =>
   StyleSheet.create({
@@ -22,19 +22,18 @@ export const profileStyles = (theme: any) =>
     },
 
     name: {
-      fontFamily: TextStyles.medium.fontFamily,
-      fontWeight: '500',
-      fontSize: 32,
+      ...TextStyles.semiBold,
+      fontSize: FontSize.xl32,
       color: theme.black,
     },
 
     role: {
-      fontSize: 20,
+      fontSize: FontSize.m20,
       color: theme.greyPrimaryMainText,
     },
 
     employeeId: {
-      fontSize: 14,
+      fontSize: FontSize.m20,
       color: theme.greyIconLight,
     },
 
@@ -42,16 +41,15 @@ export const profileStyles = (theme: any) =>
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: theme.redPrimary,
-      paddingHorizontal: 8,
-      paddingVertical: 4,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
       borderRadius: BorderRadius.largeButtonsAndOutlines,
-      gap: 4,
       elevation: 3,
     },
 
     editText: {
       color: theme.white,
-      fontSize: 12,
+      fontSize: FontSize.xs14,
     },
 
     card: {
@@ -67,8 +65,8 @@ export const profileStyles = (theme: any) =>
     },
 
     cardTitle: {
-      fontSize: 18,
-      fontWeight: '500',
+      fontSize: FontSize.m20,
+      ...TextStyles.semiBold,
       color: theme.black,
     },
 
@@ -87,12 +85,12 @@ export const profileStyles = (theme: any) =>
     },
 
     label: {
-      fontSize: 12,
+      fontSize: FontSize.xs14,
       color: theme.greyPrimaryMainText,
     },
 
     value: {
-      fontSize: 14,
+      fontSize: FontSize.s16,
       color: theme.black,
     },
 
