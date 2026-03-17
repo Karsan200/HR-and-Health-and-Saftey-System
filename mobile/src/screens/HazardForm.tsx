@@ -402,6 +402,7 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
                     {/*action complete checkbox*/}
                     <View style={styles.checkboxRow}>
                         <Checkbox
+                            testID={"actionCompletedCheckbox"}
                             status={actionCompleted ? 'checked' : 'unchecked'}
                             onPress={() => setActionCompleted(prev => !prev)}
                             color={theme.redPrimary}
