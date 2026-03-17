@@ -1,5 +1,6 @@
 package uk.co.garagebridgend.backend.logic;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -66,9 +67,13 @@ public final class JwtAuthFilter extends OncePerRequestFilter {
         String username = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            // "Bearer " prefix length
             token = authHeader.substring(tokenBeginIndex);
-            username = authenticationService.extractUsername(token);
+            try {
+                username = authenticationService.extractUsername(token);
+            } catch (ExpiredJwtException e) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Access token expired");
+                return;
+            }
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
