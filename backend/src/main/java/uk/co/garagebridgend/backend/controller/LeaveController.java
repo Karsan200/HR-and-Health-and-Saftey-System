@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.LeaveService;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
+import uk.co.garagebridgend.backend.models.response.LeaveTypeResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -52,6 +53,22 @@ public class LeaveController {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Invalid date format"
+            );
+        }
+    }
+    /**
+     * Endpoint to retrieve all leave types for the booking modal.
+     *
+     * @return a list of available leave types
+     */
+    @GetMapping("/types")
+    public List<LeaveTypeResponse> getLeaveTypes() {
+        try {
+            return leaveService.getLeaveTypes();
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal server error"
             );
         }
     }

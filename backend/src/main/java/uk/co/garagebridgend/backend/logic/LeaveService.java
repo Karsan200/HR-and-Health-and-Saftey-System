@@ -12,6 +12,9 @@ import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 import uk.co.garagebridgend.backend.models.entity.LeaveTable;
 import uk.co.garagebridgend.backend.repository.LeaveRepository;
+import uk.co.garagebridgend.backend.models.entity.LeaveTypeTable;
+import uk.co.garagebridgend.backend.models.response.LeaveTypeResponse;
+import uk.co.garagebridgend.backend.repository.LeaveTypeRepository;
 
 /**
  * Service responsible for handling business logic related to employee leave.
@@ -24,6 +27,11 @@ public class LeaveService {
      * Repository used to access leave data from the database.
      */
     private final LeaveRepository leaveRepository;
+
+    /**
+     * Repository used to access leave type data from the database.
+     */
+    private final LeaveTypeRepository leaveTypeRepository;
 
     /**
      * Retrieves all approved leave entries for calendar display.
@@ -62,6 +70,25 @@ public class LeaveService {
                                 + l.getAccount().getLastName(),
                         "Technician", // Replace with real role if available in future
                         l.getEndDate()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves all leave types available for booking.
+     *
+     * @return a list of {@link LeaveTypeResponse} objects
+     */
+    public List<LeaveTypeResponse> getLeaveTypes() {
+        List<LeaveTypeTable> leaveTypes = leaveTypeRepository.findAll();
+
+        return leaveTypes.stream()
+                .map(leaveType -> new LeaveTypeResponse(
+                        leaveType.getLeaveTypeId(),
+                        leaveType.getName(),
+                        leaveType.getColourIcon(),
+                        leaveType.getColourBg(),
+                        leaveType.getIconType()
                 ))
                 .collect(Collectors.toList());
     }

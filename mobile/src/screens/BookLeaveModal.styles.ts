@@ -173,4 +173,33 @@ export const styles = (theme: any) =>
       fontSize: FontSize.m20,
       color: theme.black,
     },
+
+    /**
+     * Menu for selecting the leave type.
+     */
+    dropdownButton: {
+      borderWidth: 1,
+      borderColor: theme.greyIconLight,
+      borderRadius: BorderRadius.mediumNotification,
+      backgroundColor: theme.white,
+      paddingHorizontal: 12,
+      paddingVertical: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+
+    dropdownButtonText: {
+      fontFamily: TextStyles.regular.fontFamily,
+      fontWeight: TextStyles.regular.fontWeight,
+      fontSize: FontSize.s16,
+      color: theme.black,
+    },
+
+    dropdownArrow: {
+      fontFamily: TextStyles.regular.fontFamily,
+      fontWeight: TextStyles.regular.fontWeight,
+      fontSize: FontSize.s16,
+      color: theme.greyPrimaryMainText,
+    },
   });

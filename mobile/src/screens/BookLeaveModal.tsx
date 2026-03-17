@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Menu } from 'react-native-paper';
 import dayjs from 'dayjs';
 
 import AuthenticationService from '../logic/AuthenticationService';
@@ -57,7 +58,22 @@ export default function BookLeaveModal({
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoadingLeaveTypes, setIsLoadingLeaveTypes] = useState<boolean>(false);
+  const [isLeaveTypeMenuVisible, setIsLeaveTypeMenuVisible] = useState<boolean>(false);
   const DaysInAdvance = 14;
+
+  /**
+   * Opens the leave type dropdown menu.
+   */
+  const openLeaveTypeMenu = () => {
+    setIsLeaveTypeMenuVisible(true);
+  };
+
+  /**
+   * Closes the leave type dropdown menu.
+   */
+  const closeLeaveTypeMenu = () => {
+    setIsLeaveTypeMenuVisible(false);
+  };
 
   /**
    * When the modal is opened, the form should reset
@@ -75,7 +91,7 @@ export default function BookLeaveModal({
     setSelectedLeaveTypeId(null);
 
     fetchLeaveTypes();
-  }, [visible, initialDate, leaveTypes]);
+  }, [visible, initialDate]);
 
   /**
    * Loads the available leave types from the backend.
@@ -90,14 +106,29 @@ export default function BookLeaveModal({
 
       if (!response.ok) {
         console.log(`Failed to load leave types. Status: ${response.status}`);
-        setErrorMessage('Request failed');
+        setErrorMessage(`Failed to load leave types. Status: ${response.status}`);
+        setLeaveTypes([]);
+        return;
       }
 
-      const data: LeaveType[] = await response.json();
+      const responseText = await response.text();
+
+      if (!responseText) {
+        console.log('Leave types response was empty.');
+        setErrorMessage('Leave types response was empty.');
+        setLeaveTypes([]);
+        return;
+      }
+
+      const data: LeaveType[] = JSON.parse(responseText);
       setLeaveTypes(data);
 
       if (data.length > 0) {
-        setSelectedLeaveTypeId(data[0].leaveTypeId);
+        const defaultLeaveType =
+          data.find((leaveType) => leaveType.name.toLowerCase() === 'holiday')
+          ?? data[0];
+
+        setSelectedLeaveTypeId(defaultLeaveType.leaveTypeId);
       }
     } catch (error) {
       console.error('Error fetching leave types:', error);
@@ -106,6 +137,13 @@ export default function BookLeaveModal({
       setIsLoadingLeaveTypes(false);
     }
   };
+
+  /**
+   * The currently selected leave type object.
+   */
+  const selectedLeaveType = leaveTypes.find(
+    (leaveType) => leaveType.leaveTypeId === selectedLeaveTypeId
+  );
 
   /**
    * Ensuring the minimum booking date adheres to the number of days in advance
@@ -240,38 +278,40 @@ export default function BookLeaveModal({
           </View>
 
           {/* Section for selecting the leave type */}
+          {/* Leave type dropdown */}
           <View style={styles.fieldWrapper}>
             <Text style={styles.fieldLabel}>Type of Leave</Text>
 
-            <View style={styles.leaveTypeContainer}>
-              {isLoadingLeaveTypes ? (
-                <Text style={styles.secondaryText}>Loading leave types...</Text>
-              ) : (
-                leaveTypes.map((leaveType) => {
-                  const isSelected = leaveType.leaveTypeId === selectedLeaveTypeId;
-
-                  return (
-                    <TouchableOpacity
-                      key={leaveType.leaveTypeId}
-                      style={[
-                        styles.leaveTypeButton,
-                        isSelected && styles.leaveTypeButtonSelected,
-                      ]}
-                      onPress={() => setSelectedLeaveTypeId(leaveType.leaveTypeId)}
-                    >
-                      <Text
-                        style={[
-                          styles.leaveTypeButtonText,
-                          isSelected && styles.leaveTypeButtonTextSelected,
-                        ]}
-                      >
-                        {leaveType.name}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })
-              )}
-            </View>
+            {isLoadingLeaveTypes ? (
+              <Text style={styles.secondaryText}>Loading leave types...</Text>
+            ) : (
+              <Menu
+                visible={isLeaveTypeMenuVisible}
+                onDismiss={closeLeaveTypeMenu}
+                anchor={
+                  <TouchableOpacity
+                    style={styles.dropdownButton}
+                    onPress={openLeaveTypeMenu}
+                  >
+                    <Text style={styles.dropdownButtonText}>
+                      {selectedLeaveType ? selectedLeaveType.name : 'Select leave type'}
+                    </Text>
+                    <Text style={styles.dropdownArrow}>▼</Text>
+                  </TouchableOpacity>
+                }
+              >
+                {leaveTypes.map((leaveType) => (
+                  <Menu.Item
+                    key={leaveType.leaveTypeId}
+                    onPress={() => {
+                      setSelectedLeaveTypeId(leaveType.leaveTypeId);
+                      closeLeaveTypeMenu();
+                    }}
+                    title={leaveType.name}
+                  />
+                ))}
+              </Menu>
+            )}
           </View>
 
           {/* Adding the notes section where users put a description of why they are requesting leave */}
