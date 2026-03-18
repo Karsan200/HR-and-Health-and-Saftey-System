@@ -3,11 +3,14 @@ package uk.co.garagebridgend.backend.logic;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.SettingsResponse;
 import uk.co.garagebridgend.backend.models.entity.SettingsTable;
 import uk.co.garagebridgend.backend.models.entity.ThemesTable;
+import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.repository.SettingsRepository;
 import uk.co.garagebridgend.backend.repository.ThemeRepository;
+import uk.co.garagebridgend.backend.repository.AccountRepository;
 
 /**
  * Service responsible for handling business logic related to user settings
@@ -18,28 +21,35 @@ import uk.co.garagebridgend.backend.repository.ThemeRepository;
 @Transactional
 public class SettingsService {
 
-    /**
-     * Repository used to access settings data from the database.
-     */
     private final SettingsRepository settingsRepository;
-
-    /**
-     * Repository used to access theme data from the database.
-     */
     private final ThemeRepository themeRepository;
+    private final AccountRepository accountRepository;
 
     /**
-     * Retrieves all settings and theme data for a given account.
-     *
-     * @param accountId the ID of the user
-     * @return combined settings + theme response
+     * Helper method to get the currently authenticated account.
      */
-    public SettingsResponse getAllSettings(Long accountId) {
+    private AccountTable getCurrentAccount() {
+        var user = AuthenticationService.getCurrentUser();
 
-        SettingsTable settings = settingsRepository.findByAccountId(accountId)
+        if (user == null) {
+            throw new AuthenticatedAccountNotFoundException();
+        }
+
+        return accountRepository.findById(Long.valueOf(user.getUsername()))
+                .orElseThrow(AuthenticatedAccountNotFoundException::new);
+    }
+
+    /**
+     * Retrieves all settings and theme data for the current user.
+     */
+    public SettingsResponse getAllSettings() {
+
+        AccountTable account = getCurrentAccount();
+
+        SettingsTable settings = settingsRepository.findByAccountId(account.getAccountId())
                 .orElseThrow(() -> new RuntimeException("Settings not found"));
 
-        ThemesTable theme = themeRepository.findByAccountId(accountId)
+        ThemesTable theme = themeRepository.findByAccountId(account.getAccountId())
                 .orElseThrow(() -> new RuntimeException("Theme not found"));
 
         SettingsResponse response = new SettingsResponse();
@@ -65,17 +75,16 @@ public class SettingsService {
     }
 
     /**
-     * Updates all settings and theme data for a given account.
-     *
-     * @param accountId the ID of the user
-     * @param request the updated settings and theme values
+     * Updates all settings and theme data for the current user.
      */
-    public void updateAllSettings(Long accountId, SettingsResponse request) {
+    public void updateAllSettings(SettingsResponse request) {
 
-        SettingsTable settings = settingsRepository.findByAccountId(accountId)
+        AccountTable account = getCurrentAccount();
+
+        SettingsTable settings = settingsRepository.findByAccountId(account.getAccountId())
                 .orElseThrow(() -> new RuntimeException("Settings not found"));
 
-        ThemesTable theme = themeRepository.findByAccountId(accountId)
+        ThemesTable theme = themeRepository.findByAccountId(account.getAccountId())
                 .orElseThrow(() -> new RuntimeException("Theme not found"));
 
         // Update Accessibility Settings
@@ -95,7 +104,6 @@ public class SettingsService {
         theme.setBackgroundColour(request.getBackgroundColour());
         theme.setTextColour(request.getTextColour());
 
-        // Save both
         settingsRepository.save(settings);
         themeRepository.save(theme);
     }

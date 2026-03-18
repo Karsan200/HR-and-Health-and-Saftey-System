@@ -22,13 +22,12 @@ public class SettingsController {
     /**
      * Retrieves all settings and theme data for a given account.
      *
-     * @param accountId the ID of the user
      * @return combined settings + theme response
      */
-    @GetMapping("/{accountId}")
-    public ResponseEntity<SettingsResponse> getSettings(@PathVariable Long accountId) {
+    @GetMapping
+    public ResponseEntity<SettingsResponse> getSettings() {
 
-        SettingsResponse response = settingsService.getAllSettings(accountId);
+        SettingsResponse response = settingsService.getAllSettings();
 
         return ResponseEntity.ok(response);
     }
@@ -36,17 +35,15 @@ public class SettingsController {
     /**
      * Updates all settings and theme data for a given account.
      *
-     * @param accountId the ID of the user
      * @param request the updated settings and theme values
      * @return success response
      */
-    @PutMapping("/{accountId}")
+    @PutMapping
     public ResponseEntity<Void> updateSettings(
-            @PathVariable Long accountId,
             @RequestBody SettingsResponse request
     ) {
 
-        settingsService.updateAllSettings(accountId, request);
+        settingsService.updateAllSettings(request);
 
         return ResponseEntity.noContent().build();
     }
