@@ -295,6 +295,19 @@ public class AuthenticationControllerTest {
 
     @Test
     @Order(2)
+    void testRotateExpiredAccessToken() throws Exception {
+        mockMvc.perform(post("/auth/rotate")
+                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJtb2JpbGVUb2tlbiI6dHJ1ZSwibWZhIjpmYWxzZSwic3ViIjoiMSIsImlhdCI6MTc3Mzc3Mzk5OSwiZXhwIjoxNzczNzc0Mjk5fQ.JfdaJyrvItkM7VSNBgq4ypG2odoSjox4tskey-7rA2E")
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "pinCode": "123456"
+                    }"""))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @Order(2)
     void testRotateInvalidPin() throws Exception {
         String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
 

@@ -72,6 +72,15 @@ public class LeaveControllerTest {
     }
 
     @Test
+    void testGetCalendarLeaveThrowsException() throws Exception {
+
+        when(leaveService.getAllLeaveDates()).thenThrow(new RuntimeException("Database error"));
+
+        mockMvc.perform(get("/api/leave/calendar"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
     void testGetLeaveForDayValid() throws Exception {
 
         List<LeaveDayResponse> mockData = List.of(
@@ -82,7 +91,7 @@ public class LeaveControllerTest {
                 )
         );
 
-        when(leaveService.getLeaveForDate(LocalDate.parse("2026-03-01")))
+        when(leaveService.getLeaveForDate("2026-03-01"))
                 .thenReturn(mockData);
 
         mockMvc.perform(get("/api/leave/day/2026-03-01"))
@@ -91,8 +100,19 @@ public class LeaveControllerTest {
 
     @Test
     void testGetLeaveForDayInvalidDate() throws Exception {
+        when(leaveService.getLeaveForDate("invalid-date"))
+                .thenThrow(new IllegalArgumentException("Invalid date format. Expected format: YYYY-MM-DD"));
 
-        mockMvc.perform(get("/api/leave/day/not-a-date"))
+        mockMvc.perform(get("/api/leave/day/invalid-date"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGetLeaveForDayThrowsException() throws Exception {
+        when(leaveService.getLeaveForDate("2026-03-01"))
+                .thenThrow(new RuntimeException("Database error"));
+
+        mockMvc.perform(get("/api/leave/day/2026-03-01"))
+                .andExpect(status().isInternalServerError());
     }
 }

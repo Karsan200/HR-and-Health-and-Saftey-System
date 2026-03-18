@@ -50,9 +50,17 @@ public class LeaveService {
      *
      * @param date the date to check for leave entries
      * @return a list of {@link LeaveDayResponse} objects representing employees on leave
+     * @throws IllegalArgumentException if the provided date string is not in the expected format
      */
-    public List<LeaveDayResponse> getLeaveForDate(final LocalDate date) {
-        LocalDateTime startOfDay = date.atStartOfDay();
+    public List<LeaveDayResponse> getLeaveForDate(final String date)
+            throws IllegalArgumentException {
+        LocalDate parsedDate;
+        try {
+            parsedDate = LocalDate.parse(date);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid date format. Expected format: YYYY-MM-DD");
+        }
+        LocalDateTime startOfDay = parsedDate.atStartOfDay();
 
         List<LeaveTable> leave = leaveRepository.findLeaveForDate(startOfDay);
 
