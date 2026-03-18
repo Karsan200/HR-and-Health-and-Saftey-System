@@ -67,6 +67,33 @@ export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boole
                 if (response.ok) {
                     // Route the user to the home screen of the app
                     props.isAuth(false);
+
+                    // Get the access token from the response
+                    const data = await response.json();
+                    const accessToken: string = data.accessToken;
+
+                    // Get the refresh token from the cookies
+                    const cookies: string | null = response.headers.get('set-cookie');
+
+                    if (cookies == null) {
+                      throw new HttpException(
+                        500,
+                        'Failed to retrieve refresh token from response cookies.'
+                      );
+                    }
+
+                    // Extract the refresh token from the cookies string
+                    const refreshTokenMatch = cookies.match(/refreshToken=([^;]+)/);
+                    if (!refreshTokenMatch) {
+                      throw new HttpException(
+                        500,
+                        'Failed to parse refresh token from response cookies.'
+                      );
+                    }
+                    const refreshToken: string = refreshTokenMatch[1];
+
+                    // Store the access token and refresh token securely in the keychain
+                    await AuthenticationService.putCredentials(accessToken, refreshToken);
                 }
             } catch (e) {
                 if (e instanceof HttpException && e.statusCode === 401) {
