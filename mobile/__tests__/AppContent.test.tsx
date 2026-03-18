@@ -6,7 +6,6 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import App from '../App.tsx';
 import mockReact from 'react';
-
 // Mocking safe area to prevent errors with missing native modules
 jest.mock('react-native-safe-area-context', () => {
   return {
@@ -33,6 +32,20 @@ jest.mock('../src/screens/HsOverview', () => {
   const { View, Text } = require('react-native');
 
   return () => mockReact.createElement(View, null, mockReact.createElement(Text, null, 'Overview Screen'));
+});
+
+jest.mock('../src/screens/RiskAssessments', () => {
+  const { View, Text } = require('react-native');
+  return () => require('react').createElement(View, null,
+      require('react').createElement(Text, null, 'Risk Assessments Screen')
+  );
+});
+
+jest.mock('../src/screens/HazardForm', () => {
+  const { View, Text } = require('react-native');
+  return () => require('react').createElement(View, null,
+      require('react').createElement(Text, null, 'Hazard Form Screen')
+  );
 });
 
 // Mocking HomeScreen to render the available buttons
