@@ -53,7 +53,6 @@ export function ScreenConfig(body: ScreenConfigProps) {
         <>
           <TopNavBar
             title="Calendar"
-            onProfilePress={() => handleNavigate('profile')}
           />
           <CalendarScreen onDayPress={handleOpenDateDetails} />
         </>
@@ -66,7 +65,6 @@ export function ScreenConfig(body: ScreenConfigProps) {
             title=""
             showBackButton={true}
             onBackPress={() => handleNavigate('calendar')}
-            onProfilePress={() => handleNavigate('profile')}
           />
           <DateDetailsScreen date={body.selectedDate} />
         </>
@@ -77,7 +75,6 @@ export function ScreenConfig(body: ScreenConfigProps) {
         <>
           <TopNavBar
             title="Payslips"
-            onProfilePress={() => handleNavigate('profile')}
           />
           <View style={styles.content} />
         </>
@@ -88,7 +85,6 @@ export function ScreenConfig(body: ScreenConfigProps) {
         <>
           <TopNavBar
             title="Handbook"
-            onProfilePress={() => handleNavigate('profile')}
           />
           <View style={styles.content} />
         </>
@@ -99,7 +95,6 @@ export function ScreenConfig(body: ScreenConfigProps) {
         <>
           <TopNavBar
             title="Clock-In"
-            onProfilePress={() => handleNavigate('profile')}
           />
           <View style={styles.content} />
         </>
@@ -110,7 +105,6 @@ export function ScreenConfig(body: ScreenConfigProps) {
         <>
           <TopNavBar
             title="Overview"
-            onProfilePress={() => handleNavigate('profile')}
           />
           <View style={styles.content}>
             <HsOverview />
@@ -123,7 +117,6 @@ export function ScreenConfig(body: ScreenConfigProps) {
         <>
           <TopNavBar
             title="Documents"
-            onProfilePress={() => handleNavigate('profile')}
           />
           <View style={styles.content} />
         </>
@@ -134,7 +127,6 @@ export function ScreenConfig(body: ScreenConfigProps) {
         <>
           <TopNavBar
             title="Risk"
-            onProfilePress={() => handleNavigate('profile')}
           />
           <View style={styles.content} />
         </>
@@ -145,7 +137,6 @@ export function ScreenConfig(body: ScreenConfigProps) {
         <>
           <TopNavBar
             title="Personal"
-            onProfilePress={() => handleNavigate('profile')}
           />
           <View style={styles.content} />
         </>
@@ -158,7 +149,6 @@ export function ScreenConfig(body: ScreenConfigProps) {
             title="Settings"
             showBackButton={true}
             onBackPress={() => handleNavigate('home')}
-            onProfilePress={() => handleNavigate('profile')}
           />
           <View style={styles.content}>
             <SettingsScreen />
