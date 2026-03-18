@@ -14,6 +14,7 @@ export const homeStyles = (theme: any, accessibility: { largeText: boolean, dysl
   container: {
     paddingHorizontal: Spacing.mediumPadding,
     paddingTop: 64,
+    backgroundColor: theme.white,
   },
 
   /**

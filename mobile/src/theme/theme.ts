@@ -40,11 +40,11 @@ export const Fonts = {
 
   // Accessibility font
   dyslexic: {
-    regular: 'OpenDyslexic-Regular',
-    medium: 'OpenDyslexic-Bold',
-    semiBold: 'OpenDyslexic-Bold',
-    bold: 'OpenDyslexic-Bold',
-    extraBold: 'OpenDyslexic-Bold',
+    regular: 'OpenDyslexic3-Regular',
+    medium: 'OpenDyslexic3-Bold',
+    semiBold: 'OpenDyslexic3-Bold',
+    bold: 'OpenDyslexic3-Bold',
+    extraBold: 'OpenDyslexic3-Bold',
   }
 
 }

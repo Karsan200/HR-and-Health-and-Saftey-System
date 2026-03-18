@@ -300,7 +300,7 @@ export default function SettingsScreen() {
           {/* TO DO: Toggles for settings*/}
 
           <View style={styles.settingRow}>
-            <View style={styles.container}>
+            <View style={styles.smallContainer}>
               <Text style={styles.settingHeader}>
                 Dyslexic Font
               </Text>
@@ -319,7 +319,7 @@ export default function SettingsScreen() {
           </View>
 
           <View style={styles.settingRow}>
-            <View style={styles.container}>
+            <View style={styles.smallContainer}>
               <Text style={styles.settingHeader}>
                 Large Text
               </Text>
@@ -338,7 +338,7 @@ export default function SettingsScreen() {
           </View>
 
           <View style={styles.settingRow}>
-            <View style={styles.container}>
+            <View style={styles.smallContainer}>
               <Text style={styles.settingHeader}>
                 Highlight Text
               </Text>

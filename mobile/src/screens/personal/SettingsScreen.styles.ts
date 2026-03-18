@@ -13,6 +13,11 @@ export const settingsStyles = (theme: any, accessibility: { largeText: boolean, 
    */
   container: {
     paddingHorizontal: Spacing.mediumPadding,
+    backgroundColor: theme.white,
+  },
+
+  smallContainer: {
+    paddingHorizontal: Spacing.smallPadding,
   },
 
   /**
