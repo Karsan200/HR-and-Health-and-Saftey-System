@@ -5,6 +5,7 @@ import DateDetailsScreen from '../screens/DateDetailsScreen.tsx';
 import { View } from 'react-native';
 import HsOverview from '../screens/HsOverview.tsx';
 import SettingsScreen from '../screens/personal/SettingsScreen.tsx';
+import ProfileScreen from '../screens/personal/ProfileScreen.tsx';
 import React from 'react';
 
 import { ScreenConfigStyles as styles } from './ScreenConfig.styles.ts';
@@ -36,7 +37,12 @@ export function ScreenConfig(body: ScreenConfigProps) {
         body.setSection(null);
         body.setCurrentScreen('hazardForm');
         return;
+    } else if (screen === 'profile') {
+      body.setSection(null);
+      body.setCurrentScreen('profile');
+      return;
     }
+
 
     body.setCurrentScreen(screen);
   };
@@ -50,7 +56,9 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'calendar':
       return (
         <>
-          <TopNavBar title="Calendar" />
+          <TopNavBar
+            title="Calendar"
+          />
           <CalendarScreen onDayPress={handleOpenDateDetails} />
         </>
       );
@@ -70,7 +78,9 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'payslips':
       return (
         <>
-          <TopNavBar title="Payslips" />
+          <TopNavBar
+            title="Payslips"
+          />
           <View style={styles.content} />
         </>
       );
@@ -78,7 +88,9 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'handbook':
       return (
         <>
-          <TopNavBar title="Handbook" />
+          <TopNavBar
+            title="Handbook"
+          />
           <View style={styles.content} />
         </>
       );
@@ -86,7 +98,9 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'clockIn':
       return (
         <>
-          <TopNavBar title="Clock-In" />
+          <TopNavBar
+            title="Clock-In"
+          />
           <View style={styles.content} />
         </>
       );
@@ -94,7 +108,9 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'overview':
       return (
         <>
-          <TopNavBar title="Overview" />
+          <TopNavBar
+            title="Overview"
+          />
           <View style={styles.content}>
             <HsOverview />
           </View>
@@ -104,7 +120,9 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'documents':
       return (
         <>
-          <TopNavBar title="Documents" />
+          <TopNavBar
+            title="Documents"
+          />
           <View style={styles.content} />
         </>
       );
@@ -136,7 +154,9 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'personal':
       return (
         <>
-          <TopNavBar title="Personal" />
+          <TopNavBar
+            title="Personal"
+          />
           <View style={styles.content} />
         </>
       );
@@ -151,6 +171,20 @@ export function ScreenConfig(body: ScreenConfigProps) {
           />
           <View style={styles.content}>
             <SettingsScreen />
+          </View>
+        </>
+      );
+
+    case 'profile':
+      return (
+        <>
+          <TopNavBar
+            title="Profile"
+            showBackButton={true}
+            onBackPress={() => handleNavigate('home')}
+          />
+          <View style={styles.content}>
+            <ProfileScreen />
           </View>
         </>
       );
