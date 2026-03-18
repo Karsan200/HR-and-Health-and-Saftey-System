@@ -7,7 +7,7 @@ export const PinCodeAuthScreen = (theme: any) =>
       marginTop: -35,
       alignSelf: 'center',
       color: theme.black,
-      fontSize: FontSize.l24,
+      fontSize: FontSize.m20,
       fontFamily: TextStyles.regular.fontFamily,
       fontWeight: TextStyles.regular.fontWeight
     },
@@ -19,4 +19,24 @@ export const PinCodeAuthScreen = (theme: any) =>
       justifyContent: 'center',
       alignItems: 'center',
     },
+    buttonContainer: {
+      paddingTop: 10,
+      flexDirection: 'row',
+      gap: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    button: {
+      width: 80,
+      height: 80,
+      borderRadius: 100,
+      borderWidth: 2,
+      borderColor: theme.black,
+      backgroundColor: theme.white,
+      fontSize: FontSize.l24,
+      fontFamily: TextStyles.regular.fontFamily,
+      fontWeight: TextStyles.regular.fontWeight,
+      textAlign: 'center',
+      textAlignVertical: 'center',
+    }
 });

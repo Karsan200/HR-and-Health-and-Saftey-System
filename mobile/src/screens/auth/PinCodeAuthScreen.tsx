@@ -34,6 +34,17 @@ export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boole
                     <PinCodeBubble key={index} isEnabled={isEnabled} />
                 ))}
             </View>
+            {[["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"], ["x", "0", ">"]].map((row, index) => (
+                <View key={index} style={styles(theme).buttonContainer}>
+                    {row.map((buttonValue, buttonIndex) => (
+                        <Text
+                            key={buttonIndex}
+                            style={styles(theme).button}
+                            onPress={() => {}}
+                        >{buttonValue}</Text>
+                    ))}
+                </View>
+            ))}
         </ScrollView>
       )
 }
