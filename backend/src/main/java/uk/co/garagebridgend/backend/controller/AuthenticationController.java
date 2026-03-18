@@ -117,7 +117,6 @@ public class AuthenticationController {
                     "Authenticated account not found."
             );
         } catch (Exception e) {
-            System.out.println(e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal sever error"
