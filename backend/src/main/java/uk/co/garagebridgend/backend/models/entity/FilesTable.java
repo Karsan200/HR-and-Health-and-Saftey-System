@@ -42,7 +42,7 @@ public class FilesTable {
      * account table.
      */
     @ManyToOne
-    @JoinColumn(name = "account_id", referencedColumnName = "account_id", nullable = false)
+    @JoinColumn(name = "account_id", referencedColumnName = "account_id")
     private AccountTable account;
 
     /**
