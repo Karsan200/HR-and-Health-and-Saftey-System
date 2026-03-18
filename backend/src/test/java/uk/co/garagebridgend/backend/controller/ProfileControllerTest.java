@@ -27,6 +27,7 @@ import org.springframework.security.core.userdetails.User;
 
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -73,6 +74,7 @@ public class ProfileControllerTest {
                 "Doe",
                 "john.doe@example.com",
                 "1234567890",
+                false,
                 "18 March 2026"
         );
 
@@ -90,6 +92,7 @@ public class ProfileControllerTest {
                     .andExpect(jsonPath("$.lastName", is("Doe")))
                     .andExpect(jsonPath("$.email", is("john.doe@example.com")))
                     .andExpect(jsonPath("$.phoneNumber", is("1234567890")))
+                    .andExpect(jsonPath("$.hasPinCode", is(false)))
                     .andExpect(jsonPath("$.created", is("18 March 2026")));
         }
     }

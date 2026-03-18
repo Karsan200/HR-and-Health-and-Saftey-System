@@ -18,6 +18,7 @@ describe('ProfileScreen', () => {
     lastName: 'Doe',
     email: 'john@example.com',
     phoneNumber: '0123456789',
+    hasPinCode: true,
     created: '2023-01-01',
   };
 

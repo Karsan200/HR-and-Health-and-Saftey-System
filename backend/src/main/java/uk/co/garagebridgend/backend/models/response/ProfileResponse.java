@@ -27,6 +27,11 @@ public class ProfileResponse {
      * Users phone number.
      */
     private String phoneNumber;
+
+    /**
+     * Whether the user has a pin code set up for mobile app authentication.
+     */
+    private boolean hasPinCode;
     /**
      * Date user was added to database.
      */

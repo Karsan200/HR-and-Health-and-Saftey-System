@@ -62,6 +62,7 @@ public class ProfileService {
                 account.getLastName(),
                 account.getEmail(),
                 account.getPhoneNumber(),
+                account.getMobilePin() != null,
                 account.getCreated().format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))
         );
     }

@@ -6,5 +6,6 @@ export interface ProfileModel {
   lastName: string;
   email: string;
   phoneNumber: string;
+  hasPinCode: boolean;
   created: string;
 }
