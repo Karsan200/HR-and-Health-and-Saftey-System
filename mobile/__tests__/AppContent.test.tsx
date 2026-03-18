@@ -21,6 +21,13 @@ jest.mock('../src/logic/AuthenticationService', () => ({
   refresh: jest.fn().mockResolvedValue(true),
 }));
 
+jest.mock('../src/screens/auth/PinCodeAuthScreen', () => {
+  return { PinCodeAuthScreen: ({ isAuth }: any) => {
+      mockReact.useEffect(() => { isAuth(false); }, [isAuth]);
+      return null;
+    }};
+});
+
 jest.mock('../src/screens/HsOverview', () => {
   const { View, Text } = require('react-native');
 
@@ -288,7 +295,7 @@ describe('App navigation flow', () => {
   it('opens the payslips screen from the HR bottom navigation', async () => {
     const { getByText, getAllByText } = render(<App />);
 
-    // Given the user is om the home screen, and they click on the HR section
+    // Given the user is on the home screen, and they click on the HR section
     await waitFor(() => {
       expect(getByText('Welcome Back')).toBeTruthy();
     });
