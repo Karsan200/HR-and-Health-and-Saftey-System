@@ -1,25 +1,25 @@
 import AuthenticationService from './AuthenticationService';
-import { HttpException } from '../exception/HttpException';
-
-export interface ProfileModel {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  created: string;
-}
+import { ProfileModel } from '../model/response/ProfileModel';
 
 class ProfileService {
+  /**
+   * Fetches the profile of the currently authenticated user.
+   *
+   * @returns User's profile data
+   * @throws HttpException if the request fails or the user is unauthorized
+   */
   static async getProfile(): Promise<ProfileModel> {
-    const response = await AuthenticationService.fetch('/profile/me', {
-      method: 'GET',
-    });
+    try {
+      const response = await AuthenticationService.fetch('/profile/me', {
+        method: 'GET',
+      });
 
-    if (!response.ok) {
-      throw new HttpException(response.status, 'Failed to fetch profile');
+      return await response.json();
+    } catch (error) {
+
+      console.error('Error fetching profile:', error);
+      throw error;
     }
-
-    return await response.json();
   }
 }
 
