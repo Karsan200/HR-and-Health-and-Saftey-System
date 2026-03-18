@@ -827,8 +827,8 @@ INSERT INTO themes_table (
     text,
     accent
 ) VALUES
-      (2, 'F6F6F8', 'FFFFFF','000000', 'D20414'),
-      (4, 'F6F6F8', 'FFFFFF', '000000', '0066FF');
+      (2,'Blue', 'F6F6F8','000000', 'D20414'),
+      (4, 'Dark', 'F6F6F8', '000000', '0066FF');
 
 
 INSERT INTO leave_type_table (

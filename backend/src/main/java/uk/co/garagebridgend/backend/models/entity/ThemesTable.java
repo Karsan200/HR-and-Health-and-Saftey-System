@@ -37,13 +37,13 @@ public class ThemesTable {
     @JoinColumn(name = "account_id")
     private AccountTable account;
 
+    /** Preset Theme of the app. */
+    @Column(columnDefinition = "TEXT", name = "theme", nullable = false)
+    private String themePreset;
+
     /** Background colour of the app. */
     @Column(name = "background", length = COLOUR_CODE_LENGTH, nullable = false)
     private String backgroundColour;
-
-    /** Midground colour of the app. */
-    @Column(name = "midground", length = COLOUR_CODE_LENGTH, nullable = false)
-    private String midgroundColour;
 
     /** Text colour of the app. */
     @Column(name = "text", length = COLOUR_CODE_LENGTH, nullable = false)
