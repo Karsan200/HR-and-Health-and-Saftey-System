@@ -38,10 +38,9 @@ public class ProfileService {
      *
      * @return a {@link ProfileResponse} containing the user's profile information
      * @throws AuthenticatedAccountNotFoundException if no authenticated user is found in the security context
-     * @throws NotFoundException if the authenticated user's account cannot be found in the database
      */
     public ProfileResponse getCurrentProfile()
-            throws AuthenticatedAccountNotFoundException, NotFoundException {
+            throws AuthenticatedAccountNotFoundException {
 
         // Get currently authenticated user via authentication service
         User user = AuthenticationService.getCurrentUser();
@@ -55,7 +54,7 @@ public class ProfileService {
 
         // Fetch the account from the database or throw an exception if not found
         AccountTable account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new NotFoundException("Account failed to load"));
+                .orElseThrow(AuthenticatedAccountNotFoundException::new);
 
 
         // Return a ProfileResponse containing the relevant account information for profile page

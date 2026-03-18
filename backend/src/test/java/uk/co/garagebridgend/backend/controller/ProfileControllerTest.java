@@ -93,4 +93,22 @@ public class ProfileControllerTest {
                     .andExpect(jsonPath("$.created", is("18 March 2026")));
         }
     }
+    @Test
+    void testGetCurrentUserUnauthorised() throws Exception {
+        //arrange
+        when(profileService.getCurrentProfile()).thenThrow(new AuthenticatedAccountNotFoundException());
+        // Act & Arrange
+        mockMvc.perform(get("/api/profile/me")).andExpect(status().isUnauthorized()).andExpect(status().reason("Invalid or expired refresh token"));
+    }
+
+    @Test
+    void testGetCurrentUserInternalServerError() throws Exception {
+        // Arrange
+        when(profileService.getCurrentProfile()).thenThrow(new RuntimeException("Something went wrong"));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/profile/me")).andExpect(status().isInternalServerError()).andExpect(status().reason("Internal server error"));
+    }
+
+
 }

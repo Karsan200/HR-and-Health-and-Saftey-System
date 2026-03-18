@@ -41,15 +41,15 @@ export const profileStyles = (theme: any) =>
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: theme.redPrimary,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
+      paddingVertical: 0,
       borderRadius: BorderRadius.largeButtonsAndOutlines,
-      elevation: 3,
     },
 
     editText: {
       color: theme.white,
       fontSize: FontSize.xs14,
+      paddingLeft: -40,
+      paddingRight: 8,
     },
 
     card: {

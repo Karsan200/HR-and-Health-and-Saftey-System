@@ -10,7 +10,7 @@ class ProfileService {
    */
   static async getProfile(): Promise<ProfileModel> {
     try {
-      const response = await AuthenticationService.fetch('/profile/me', {
+      const response = await AuthenticationService.fetch('/api/profile/me', {
         method: 'GET',
       });
 

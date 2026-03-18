@@ -29,7 +29,7 @@ describe('ProfileService', () => {
 
     const profile = await ProfileService.getProfile();
 
-    expect(fetchMock).toHaveBeenCalledWith('/profile/me', { method: 'GET' });
+    expect(fetchMock).toHaveBeenCalledWith('/api/profile/me', { method: 'GET' });
     expect(profile).toEqual(mockProfile);
   });
 
@@ -39,7 +39,7 @@ describe('ProfileService', () => {
     fetchMock.mockRejectedValue(error);
 
     await expect(ProfileService.getProfile()).rejects.toThrow('Network error');
-    expect(fetchMock).toHaveBeenCalledWith('/profile/me', { method: 'GET' });
+    expect(fetchMock).toHaveBeenCalledWith('/api/profile/me', { method: 'GET' });
   });
 
   it('getProfile - should log error when fetch fails', async () => {
