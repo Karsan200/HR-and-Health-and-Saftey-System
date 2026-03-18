@@ -44,6 +44,10 @@ public class SettingsTable {
     @Column(name = "dyslexic_font", nullable = false)
     private boolean dyslexicFont;
 
+    /** Dyslexic font for user defined accessibility settings. */
+    @Column(name = "highlight_text", nullable = false)
+    private boolean highlightText;
+
     /** Text to speech for user defined accessibility settings. */
     @Column(name = "text_to_speech", nullable = false)
     private boolean textToSpeech;
