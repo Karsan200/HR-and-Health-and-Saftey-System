@@ -46,13 +46,6 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
         return d;
     }, []);
 
-    //helps format the date into what the backend is expecting (YYYY-MM-DDTHH:mm:00)
-    const formatDate = (date?: Date) => {
-        if (!date) return '';
-        const pad = (n: number) => n.toString().padStart(2, '0');
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
-    }
-
     //Submit function which builds payload and POSTs to backend. Deals with regular submissions and drafts
     async function handleSubmit(draft?: boolean) {
         // determines if this is a draft or not

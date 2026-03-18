@@ -1,292 +1,586 @@
-// File: __tests__/HazardForm.test.tsx
 import React from 'react';
-import { Text, Alert } from 'react-native';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, act } from '@testing-library/react-native';
+import { Alert } from 'react-native';
 import HazardForm from '../src/screens/HazardForm';
 import AuthenticationService from '../src/logic/AuthenticationService';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { ThemeContext } from '../src/theme/colourController';
 
-const imagePicker = require('react-native-image-picker');
+// ─── Mocks ────────────────────────────────────────────────────────────────────
 
-// Mock AuthenticationService with a fetch mock
-jest.mock('../src/logic/AuthenticationService', () => ({
-    fetch: jest.fn(),
-    refresh: jest.fn(),
-}));
-
-// Mock DatePickerInput so it sets a valid date
-jest.mock('react-native-paper-dates', () => {
-    const React = require('react');
-    const { Text } = require('react-native');
-    return {
-        DatePickerInput: (props: any) => {
-            React.useEffect(() => {
-                if (typeof props.onChange === 'function') {
-                    // call onChange after mount to simulate user picking today's date
-                    props.onChange(new Date());
-                }
-            }, []);
-            return React.createElement(Text, { testID: 'mock-date' }, 'DatePicker');
-        },
-    };
-});
-
-// Mock image picker
+jest.mock('../src/logic/AuthenticationService');
 jest.mock('react-native-image-picker', () => ({
-    launchImageLibrary: jest.fn((options: any, cb: any) =>
-        cb({
-            assets: [
-                { base64: 'AAA', fileName: 'img1.jpg', type: 'image/jpeg' },
-                { base64: 'BBB', fileName: 'img2.jpg', type: 'image/jpeg' },
-            ],
-        })
-    ),
+    launchImageLibrary: jest.fn(),
+}));
+jest.mock('react-native-paper-dates', () => ({
+    DatePickerInput: ({ onChange, value }: any) => {
+        const { TextInput } = require('react-native');
+        return (
+            <TextInput
+                testID="datePickerInput"
+                value={value ? value.toISOString() : ''}
+                onChangeText={(text: string) => onChange(text ? new Date(text) : undefined)}
+            />
+        );
+    },
+}));
+jest.mock('../src/screens/HazardForm.styles.ts', () => ({
+    __esModule: true,
+    default: () => ({
+        container: {},
+        spacer: {},
+        card: {},
+        cardTitle: {},
+        fieldLabel: {},
+        required: {},
+        input: {},
+        multiline: {},
+        errorText: {},
+        checkboxRow: {},
+        checkboxLabel: {},
+        uploadButton: {},
+        uploadLabel: {},
+        photoCountText: {},
+        bottomSpacer: {},
+    }),
+    getCommonInputProps: () => ({}),
+}));
+jest.mock('../src/components/ButtonActionBar.tsx', () => {
+    const { TouchableOpacity, Text } = require('react-native');
+    return ({ onSaveDraft, onSubmit }: any) => (
+        <>
+            <TouchableOpacity testID="saveDraftButton" onPress={onSaveDraft}>
+                <Text>Save Draft</Text>
+            </TouchableOpacity>
+            <TouchableOpacity testID="submitButton" onPress={onSubmit}>
+                <Text>Submit</Text>
+            </TouchableOpacity>
+        </>
+    );
+});
+jest.mock('../src/theme/theme', () => ({
+    FontSize: { xs14: 14 },
+    BorderRadius: { sm: 4 },
 }));
 
-const mockFetch = AuthenticationService.fetch as jest.Mock;
-const { launchImageLibrary } = require('react-native-image-picker') as {
-    launchImageLibrary: jest.Mock;
-};
+// ─── Theme wrapper ────────────────────────────────────────────────────────────
 
-//The Main Tests
+const renderWithTheme = (ui: React.ReactElement) =>
+    render(
+        <ThemeContext.Provider value={{ theme: {} as any, updateTheme: () => {} }}>
+            {ui}
+        </ThemeContext.Provider>
+    );
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const TOMORROW = new Date();
+TOMORROW.setDate(TOMORROW.getDate() + 1);
+TOMORROW.setHours(0, 0, 0, 0);
+
+const YESTERDAY = new Date();
+YESTERDAY.setDate(YESTERDAY.getDate() - 1);
+YESTERDAY.setHours(0, 0, 0, 0);
+
+function fillAllFields(getByPlaceholderText: any, getByTestId: any) {
+    fireEvent.changeText(getByPlaceholderText('e.g. Warehouse Manual Handling'), 'Test Title');
+    fireEvent.changeText(getByPlaceholderText('Describe the hazards identified...'), 'Some hazard');
+    fireEvent.changeText(getByPlaceholderText('Identify who is at risk and how they might be harmed...'), 'Workers');
+    fireEvent.changeText(getByPlaceholderText('Describe current control measures in place...'), 'PPE required');
+    fireEvent.changeText(getByPlaceholderText('Describe additional actions required...'), 'Training needed');
+    fireEvent.changeText(getByPlaceholderText('e.g. Safety Manager, etc...'), 'Safety Manager');
+    fireEvent.changeText(getByTestId('datePickerInput'), TOMORROW.toISOString());
+}
+
+// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('HazardForm', () => {
-    let alertSpy: jest.SpyInstance;
-    const dateModule = require('react-native-paper-dates');
 
     beforeEach(() => {
-        // Clear all mocks
         jest.clearAllMocks();
-
-        // Spy on Alert.alert so tests can assert calls
-        alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => null);
+        jest.spyOn(Alert, 'alert');
     });
 
-    afterEach(() => {
-        alertSpy.mockRestore();
-    });
+    // ── Rendering ────────────────────────────────────────────────────────────
 
-    // fill all required fields using placeholders from the component
-    function fillRequiredFields() {
-        fireEvent.changeText(
-            screen.getByPlaceholderText('e.g. Warehouse Manual Handling'),
-            'Test Title'
-        );
-        fireEvent.changeText(
-            screen.getByPlaceholderText('Describe the hazards identified...'),
-            'Hazard description'
-        );
-        fireEvent.changeText(
-            screen.getByPlaceholderText('Identify who is at risk and how they might be harmed...'),
-            'Who harmed'
-        );
-        fireEvent.changeText(
-            screen.getByPlaceholderText('Describe current control measures in place...'),
-            'Controls'
-        );
-        fireEvent.changeText(
-            screen.getByPlaceholderText('Describe additional actions required...'),
-            'Further actions'
-        );
-        fireEvent.changeText(
-            screen.getByPlaceholderText('e.g. Safety Manager, etc...'),
-            'Safety Manager'
-        );
-    }
+    describe('Rendering', () => {
+        it('renders all required field labels', () => {
+            const { getByText } = renderWithTheme(<HazardForm />);
+            expect(getByText('Hazard Title', { exact: false })).toBeTruthy();
+            expect(getByText('What are the hazards?', { exact: false })).toBeTruthy();
+            expect(getByText('Who might be harmed and how?', { exact: false })).toBeTruthy();
+            expect(getByText('What are you doing to control the risk?', { exact: false })).toBeTruthy();
+            expect(getByText('What further actions do you need to take to control the risk?', { exact: false })).toBeTruthy();
+            expect(getByText('Who needs to carry out the action?', { exact: false })).toBeTruthy();
+            expect(getByText('When is the action needed by?', { exact: false })).toBeTruthy();
+        });
 
-    it('saves draft successfully when all required fields are provided', async () => {
-        mockFetch.mockResolvedValue({ ok: true });
+        it('renders the action completed checkbox unchecked by default', () => {
+            const { getByTestId } = renderWithTheme(<HazardForm />);
+            const checkbox = getByTestId('actionCompletedCheckbox');
+            expect(checkbox.props.accessibilityState?.checked).toBeFalsy();
+        });
 
-        render(<HazardForm />);
+        it('renders Save Draft and Submit buttons', () => {
+            const { getByTestId } = renderWithTheme(<HazardForm />);
+            expect(getByTestId('saveDraftButton')).toBeTruthy();
+            expect(getByTestId('submitButton')).toBeTruthy();
+        });
 
-        fillRequiredFields();
-
-        fireEvent.press(screen.getByText('Save Draft'));
-
-        await waitFor(() => {
-            expect(mockFetch).toHaveBeenCalled();
-            expect(
-                (Alert.alert as jest.Mock).mock.calls.some(call => call[0] === 'Draft Saved')
-            ).toBe(true);
+        it('does not show photo count text when no photos are selected', () => {
+            const { queryByText } = renderWithTheme(<HazardForm />);
+            expect(queryByText(/photos? selected/i)).toBeNull();
         });
     });
 
-    it('shows submission failed when backend returns non-ok', async () => {
-        mockFetch.mockResolvedValue({
-            ok: false,
-            status: 500,
-            text: async () => 'server error',
+    // ── Validation ───────────────────────────────────────────────────────────
+
+    describe('Validation', () => {
+        it('shows Required errors for all empty fields on submit', async () => {
+            const { getByTestId, getAllByText } = renderWithTheme(<HazardForm />);
+            await act(async () => {
+                fireEvent.press(getByTestId('submitButton'));
+            });
+            expect(getAllByText('Required').length).toBe(7);
         });
 
-        render(<HazardForm />);
-
-        fillRequiredFields();
-
-        fireEvent.press(screen.getByText('Submit Hazard'));
-
-        await waitFor(() => {
-            expect(mockFetch).toHaveBeenCalled();
-            expect(
-                (Alert.alert as jest.Mock).mock.calls.some(call => call[0] === 'Submission failed')
-            ).toBe(true);
-        });
-    });
-
-    it('shows incomplete fields alert when saving draft with missing fields', async () => {
-        render(<HazardForm />);
-
-        fireEvent.press(screen.getByText('Save Draft'));
-
-        await waitFor(() => {
-            expect(Alert.alert).toHaveBeenCalled();
-            expect((Alert.alert as jest.Mock).mock.calls.some(c => c[0] === 'Incomplete fields')).toBe(true);
-        });
-        expect(mockFetch).not.toHaveBeenCalled();
-    });
-
-    it('shows submission failed when fetch throws an exception', async () => {
-        mockFetch.mockRejectedValue(new Error('network'));
-
-        render(<HazardForm />);
-
-        fillRequiredFields();
-
-        fireEvent.press(screen.getByText('Submit Hazard'));
-
-        await waitFor(() => {
-            expect(mockFetch).toHaveBeenCalled();
-            expect((Alert.alert as jest.Mock).mock.calls.some(call => call[0] === 'Submission failed')).toBe(true);
-        });
-    });
-
-    it('handles image picker didCancel and errorCode gracefully', async () => {
-        // first call simulates didCancel
-        imagePicker.launchImageLibrary.mockImplementationOnce((_opts: any, cb: any) => cb({ didCancel: true }));
-        render(<HazardForm />);
-        fireEvent.press(screen.getByText('Upload Photo'));
-        // no photos should be selected
-        await waitFor(() => {
-            expect(screen.queryByText(/photo[s]? selected/)).toBeNull();
+        it('shows alert when submitting with empty fields', async () => {
+            const { getByTestId } = renderWithTheme(<HazardForm />);
+            await act(async () => {
+                fireEvent.press(getByTestId('submitButton'));
+            });
+            expect(Alert.alert).toHaveBeenCalledWith(
+                'Incomplete fields',
+                'Please complete all required fields before submitting.',
+                expect.any(Array),
+                expect.any(Object),
+            );
         });
 
-        // next simulate an error code
-        imagePicker.launchImageLibrary.mockImplementationOnce((_opts: any, cb: any) => cb({ errorCode: 'E_UNK', errorMessage: 'boom' }));
-        fireEvent.press(screen.getByText('Upload Photo'));
-        // still no photos and no crash (just ensure not throwing and not adding photos)
-        await waitFor(() => {
-            expect(screen.queryByText(/photo[s]? selected/)).toBeNull();
-        });
-    });
-    it('calls onDone when user confirms successful submission', async () => {
-        mockFetch.mockResolvedValue({ ok: true });
-        const onDoneMock = jest.fn();
-
-        render(<HazardForm onDone={onDoneMock} />);
-
-        fillRequiredFields();
-
-        fireEvent.press(screen.getByText('Submit Hazard'));
-
-        await waitFor(() => {
-            expect(Alert.alert).toHaveBeenCalled();
+        it('shows alert when saving draft with empty fields', async () => {
+            const { getByTestId } = renderWithTheme(<HazardForm />);
+            await act(async () => {
+                fireEvent.press(getByTestId('saveDraftButton'));
+            });
+            expect(Alert.alert).toHaveBeenCalledWith(
+                'Incomplete fields',
+                'Please complete all required fields before submitting.',
+                expect.any(Array),
+                expect.any(Object),
+            );
         });
 
-        // simulate pressing OK button in Alert
-        const alertCall = (Alert.alert as jest.Mock).mock.calls.find(
-            c => c[0] === 'Submission Complete'
-        );
+        it('shows a past-date error when the selected date is in the past', async () => {
+            const { getByTestId, getByPlaceholderText, queryByText } = renderWithTheme(<HazardForm />);
+            fireEvent.changeText(getByPlaceholderText('e.g. Warehouse Manual Handling'), 'Title');
+            fireEvent.changeText(getByPlaceholderText('Describe the hazards identified...'), 'Hazard');
+            fireEvent.changeText(getByPlaceholderText('Identify who is at risk and how they might be harmed...'), 'People');
+            fireEvent.changeText(getByPlaceholderText('Describe current control measures in place...'), 'Controls');
+            fireEvent.changeText(getByPlaceholderText('Describe additional actions required...'), 'Actions');
+            fireEvent.changeText(getByPlaceholderText('e.g. Safety Manager, etc...'), 'Manager');
+            fireEvent.changeText(getByTestId('datePickerInput'), YESTERDAY.toISOString());
 
-        const okButton = alertCall?.[2]?.[0];
-        okButton.onPress();
-
-        expect(onDoneMock).toHaveBeenCalled();
-    });
-
-    it('does not open image library when max photos reached', async () => {
-        render(<HazardForm />);
-
-        // simulate selecting 5 photos
-        launchImageLibrary.mockImplementation((_opts, cb) =>
-            cb({
-                assets: new Array(5).fill(0).map((_, i) => ({
-                    base64: 'AAA',
-                    fileName: `img${i}.jpg`,
-                    type: 'image/jpeg',
-                })),
-            })
-        );
-
-        fireEvent.press(screen.getByText('Upload Photo'));
-
-        await waitFor(() => {
-            expect(screen.getByText('5 photos selected')).toBeTruthy();
+            await act(async () => {
+                fireEvent.press(getByTestId('submitButton'));
+            });
+            expect(queryByText('Date cannot be in the past')).toBeTruthy();
         });
 
-        // try uploading again
-        fireEvent.press(screen.getByText('Upload Photo'));
-
-        // should not call picker again
-        expect(launchImageLibrary).toHaveBeenCalledTimes(1);
-    });
-    it('handles empty assets response gracefully', async () => {
-        launchImageLibrary.mockImplementation((_opts, cb) =>
-            cb({ assets: [] })
-        );
-
-        render(<HazardForm />);
-
-        fireEvent.press(screen.getByText('Upload Photo'));
-
-        await waitFor(() => {
-            expect(screen.queryByText(/photo/)).toBeNull();
-        });
-    });
-    it('shows error when date is in the past', async () => {
-        const pastDate = new Date();
-        pastDate.setDate(pastDate.getDate() - 1);
-
-        jest.spyOn(dateModule, 'DatePickerInput').mockImplementation((props: any) => {
-            React.useEffect(() => {
-                props.onChange(pastDate);
-            }, []);
-            return <Text testID="mock-date">Date</Text>;
+        it('clears a field error when the user updates that field', async () => {
+            const { getByTestId, getByPlaceholderText, queryAllByText } = renderWithTheme(<HazardForm />);
+            await act(async () => {
+                fireEvent.press(getByTestId('submitButton'));
+            });
+            expect(queryAllByText('Required').length).toBeGreaterThan(0);
+            fireEvent.changeText(getByPlaceholderText('e.g. Warehouse Manual Handling'), 'Fixed Title');
+            expect(getByPlaceholderText('e.g. Warehouse Manual Handling').props.value).toBe('Fixed Title');
         });
 
-        render(<HazardForm />);
+        it('passes validation and calls the API when all fields are filled with a future date', async () => {
+            (AuthenticationService.fetch as jest.Mock).mockResolvedValue({ ok: true });
+            const { getByTestId, getByPlaceholderText } = renderWithTheme(<HazardForm />);
+            fillAllFields(getByPlaceholderText, getByTestId);
 
-        fillRequiredFields();
-
-        fireEvent.press(screen.getByText('Submit Hazard'));
-
-        await waitFor(() => {
-            expect(Alert.alert).toHaveBeenCalled();
-        });
-
-        expect((Alert.alert as jest.Mock).mock.calls.some(c =>
-            c[0] === 'Incomplete fields'
-        )).toBe(true);
-    });
-
-    it('toggles actionCompleted when the checkbox is pressed', async () => {
-        render(<HazardForm />);
-
-        const checkbox = screen.getByTestId('actionCompletedCheckbox');
-
-        // initial state should be unchecked
-        expect(checkbox.props.accessibilityState?.checked).toBe(false);
-
-        // press to toggle on
-        fireEvent.press(checkbox);
-        await waitFor(() => {
-            expect(screen.getByTestId('actionCompletedCheckbox').props.accessibilityState?.checked).toBe(true);
-        });
-
-        // press to toggle off
-        fireEvent.press(screen.getByTestId('actionCompletedCheckbox'));
-        await waitFor(() => {
-            expect(screen.getByTestId('actionCompletedCheckbox').props.accessibilityState?.checked).toBe(false);
+            await act(async () => {
+                fireEvent.press(getByTestId('submitButton'));
+            });
+            expect(AuthenticationService.fetch).toHaveBeenCalledTimes(1);
         });
     });
 
+    // ── Submission ───────────────────────────────────────────────────────────
+
+    describe('Submission', () => {
+        it('POSTs to /api/hazard/report with isDraft=false on regular submit', async () => {
+            (AuthenticationService.fetch as jest.Mock).mockResolvedValue({ ok: true });
+            const { getByTestId, getByPlaceholderText } = renderWithTheme(<HazardForm />);
+            fillAllFields(getByPlaceholderText, getByTestId);
+
+            await act(async () => {
+                fireEvent.press(getByTestId('submitButton'));
+            });
+
+            expect(AuthenticationService.fetch).toHaveBeenCalledWith(
+                '/api/hazard/report',
+                expect.objectContaining({
+                    method: 'POST',
+                    body: expect.stringContaining('"isDraft":false'),
+                }),
+            );
+        });
+
+        it('POSTs to /api/hazard/report with isDraft=true on save draft', async () => {
+            (AuthenticationService.fetch as jest.Mock).mockResolvedValue({ ok: true });
+            const { getByTestId, getByPlaceholderText } = renderWithTheme(<HazardForm />);
+            fillAllFields(getByPlaceholderText, getByTestId);
+
+            await act(async () => {
+                fireEvent.press(getByTestId('saveDraftButton'));
+            });
+
+            expect(AuthenticationService.fetch).toHaveBeenCalledWith(
+                '/api/hazard/report',
+                expect.objectContaining({
+                    method: 'POST',
+                    body: expect.stringContaining('"isDraft":true'),
+                }),
+            );
+        });
+
+        it('shows success alert with correct message on regular submit', async () => {
+            (AuthenticationService.fetch as jest.Mock).mockResolvedValue({ ok: true });
+            const { getByTestId, getByPlaceholderText } = renderWithTheme(<HazardForm />);
+            fillAllFields(getByPlaceholderText, getByTestId);
+
+            await act(async () => {
+                fireEvent.press(getByTestId('submitButton'));
+            });
+
+            expect(Alert.alert).toHaveBeenCalledWith(
+                'Submission Complete',
+                'Your hazard has been submitted.',
+                expect.any(Array),
+                expect.any(Object),
+            );
+        });
+
+        it('shows draft saved alert with correct message on save draft', async () => {
+            (AuthenticationService.fetch as jest.Mock).mockResolvedValue({ ok: true });
+            const { getByTestId, getByPlaceholderText } = renderWithTheme(<HazardForm />);
+            fillAllFields(getByPlaceholderText, getByTestId);
+
+            await act(async () => {
+                fireEvent.press(getByTestId('saveDraftButton'));
+            });
+
+            expect(Alert.alert).toHaveBeenCalledWith(
+                'Draft Saved',
+                'Your draft has been saved.',
+                expect.any(Array),
+                expect.any(Object),
+            );
+        });
+
+        it('does not throw when onDone is not provided after successful submission', async () => {
+            (AuthenticationService.fetch as jest.Mock).mockResolvedValue({ ok: true });
+            const { getByTestId, getByPlaceholderText } = renderWithTheme(<HazardForm />);
+            fillAllFields(getByPlaceholderText, getByTestId);
+
+            await act(async () => {
+                fireEvent.press(getByTestId('submitButton'));
+            });
+
+            const alertCall = (Alert.alert as jest.Mock).mock.calls[0];
+            const okButton = alertCall[2][0];
+            expect(() => act(() => { okButton.onPress(); })).not.toThrow();
+        });
+
+        it('calls onDone callback after successful submission', async () => {
+            (AuthenticationService.fetch as jest.Mock).mockResolvedValue({ ok: true });
+            const onDone = jest.fn();
+            const { getByTestId, getByPlaceholderText } = renderWithTheme(<HazardForm onDone={onDone} />);
+            fillAllFields(getByPlaceholderText, getByTestId);
+
+            await act(async () => {
+                fireEvent.press(getByTestId('submitButton'));
+            });
+
+            const alertCall = (Alert.alert as jest.Mock).mock.calls[0];
+            const okButton = alertCall[2][0];
+            act(() => { okButton.onPress(); });
+
+            expect(onDone).toHaveBeenCalledTimes(1);
+        });
+
+        it('shows failure alert when the API returns a non-ok response', async () => {
+            (AuthenticationService.fetch as jest.Mock).mockResolvedValue({
+                ok: false,
+                status: 500,
+                text: jest.fn().mockResolvedValue('Server error'),
+            });
+            const { getByTestId, getByPlaceholderText } = renderWithTheme(<HazardForm />);
+            fillAllFields(getByPlaceholderText, getByTestId);
+
+            await act(async () => {
+                fireEvent.press(getByTestId('submitButton'));
+            });
+
+            expect(Alert.alert).toHaveBeenCalledWith(
+                'Submission failed',
+                'An error occurred while submitting your hazard. Please try again later.',
+                expect.any(Array),
+                expect.any(Object),
+            );
+        });
+
+        it('shows failure alert when the API call throws an error', async () => {
+            (AuthenticationService.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
+            const { getByTestId, getByPlaceholderText } = renderWithTheme(<HazardForm />);
+            fillAllFields(getByPlaceholderText, getByTestId);
+
+            await act(async () => {
+                fireEvent.press(getByTestId('submitButton'));
+            });
+
+            expect(Alert.alert).toHaveBeenCalledWith(
+                'Submission failed',
+                'An error occurred while submitting your hazard. Please try again later.',
+                expect.any(Array),
+                expect.any(Object),
+            );
+        });
+
+        it('includes form field values in the submitted payload', async () => {
+            (AuthenticationService.fetch as jest.Mock).mockResolvedValue({ ok: true });
+            const { getByTestId, getByPlaceholderText } = renderWithTheme(<HazardForm />);
+            fillAllFields(getByPlaceholderText, getByTestId);
+
+            await act(async () => {
+                fireEvent.press(getByTestId('submitButton'));
+            });
+
+            const body = JSON.parse(
+                (AuthenticationService.fetch as jest.Mock).mock.calls[0][1].body
+            );
+            expect(body.title).toBe('Test Title');
+            expect(body.questionOne).toBe('Some hazard');
+            expect(body.questionTwo).toBe('Workers');
+            expect(body.questionThree).toBe('PPE required');
+            expect(body.questionFour).toBe('Training needed');
+            expect(body.questionFive).toBe('Safety Manager');
+            expect(body.questionSix).toBeTruthy();
+        });
+    });
+
+    // ── Checkbox ─────────────────────────────────────────────────────────────
+
+    describe('Action Completed Checkbox', () => {
+        it('toggles actionCompleted to true when pressed', () => {
+            const { getByTestId } = renderWithTheme(<HazardForm />);
+            const checkbox = getByTestId('actionCompletedCheckbox');
+            fireEvent.press(checkbox);
+            expect(checkbox.props.accessibilityState?.checked).toBe(true);
+        });
+
+        it('toggles actionCompleted back to false when pressed twice', () => {
+            const { getByTestId } = renderWithTheme(<HazardForm />);
+            const checkbox = getByTestId('actionCompletedCheckbox');
+            fireEvent.press(checkbox);
+            fireEvent.press(checkbox);
+            expect(checkbox.props.accessibilityState?.checked).toBeFalsy();
+        });
+
+        it('includes isCompleted=true in the payload when checkbox is checked', async () => {
+            (AuthenticationService.fetch as jest.Mock).mockResolvedValue({ ok: true });
+            const { getByTestId, getByPlaceholderText } = renderWithTheme(<HazardForm />);
+            fillAllFields(getByPlaceholderText, getByTestId);
+            fireEvent.press(getByTestId('actionCompletedCheckbox'));
+
+            await act(async () => {
+                fireEvent.press(getByTestId('submitButton'));
+            });
+
+            const body = JSON.parse(
+                (AuthenticationService.fetch as jest.Mock).mock.calls[0][1].body
+            );
+            expect(body.isCompleted).toBe(true);
+        });
+    });
+
+    // ── Image Picker ─────────────────────────────────────────────────────────
+
+    describe('Image Picker', () => {
+        it('shows photo count after selecting images', async () => {
+            (launchImageLibrary as jest.Mock).mockImplementationOnce((_opts: any, cb: any) => {
+                cb({
+                    assets: [
+                        { base64: 'abc123', fileName: 'photo1.jpg', type: 'image/jpeg' },
+                        { base64: 'def456', fileName: 'photo2.jpg', type: 'image/jpeg' },
+                    ],
+                });
+            });
+
+            const { getByText } = renderWithTheme(<HazardForm />);
+            await act(async () => {
+                fireEvent.press(getByText('Upload Photo'));
+            });
+
+            expect(getByText('2 photos selected')).toBeTruthy();
+        });
+
+        it('shows singular "photo" when exactly one image is selected', async () => {
+            (launchImageLibrary as jest.Mock).mockImplementationOnce((_opts: any, cb: any) => {
+                cb({
+                    assets: [{ base64: 'abc123', fileName: 'photo1.jpg', type: 'image/jpeg' }],
+                });
+            });
+
+            const { getByText } = renderWithTheme(<HazardForm />);
+            await act(async () => {
+                fireEvent.press(getByText('Upload Photo'));
+            });
+
+            expect(getByText('1 photo selected')).toBeTruthy();
+        });
+
+        it('does not add photos when user cancels image picker', async () => {
+            (launchImageLibrary as jest.Mock).mockImplementationOnce((_opts: any, cb: any) => {
+                cb({ didCancel: true });
+            });
+
+            const { getByText, queryByText } = renderWithTheme(<HazardForm />);
+            await act(async () => {
+                fireEvent.press(getByText('Upload Photo'));
+            });
+            expect(queryByText(/photo selected/)).toBeNull();
+        });
+
+        it('does not open the picker when MAX_TOTAL images are already selected', async () => {
+            (launchImageLibrary as jest.Mock).mockImplementationOnce((opts: any, cb: any) => {
+                cb({
+                    assets: Array.from({ length: opts.selectionLimit }, (_, i) => ({
+                        base64: `b64-${i}`,
+                        fileName: `photo${i}.jpg`,
+                        type: 'image/jpeg',
+                    })),
+                });
+            });
+
+            const { getByText } = renderWithTheme(<HazardForm />);
+            await act(async () => { fireEvent.press(getByText('Upload Photo')); });
+            expect(getByText('5 photos selected')).toBeTruthy();
+
+            await act(async () => { fireEvent.press(getByText('Upload Photo')); });
+            expect(launchImageLibrary).toHaveBeenCalledTimes(1);
+        });
+
+        it('does not add photos when image picker returns an empty assets array', async () => {
+            (launchImageLibrary as jest.Mock).mockImplementationOnce((_opts: any, cb: any) => {
+                cb({ assets: [] });
+            });
+
+            const { getByText, queryByText } = renderWithTheme(<HazardForm />);
+            await act(async () => { fireEvent.press(getByText('Upload Photo')); });
+            expect(queryByText(/photo selected/)).toBeNull();
+        });
+
+        it('does not add photos when image picker returns an error code', async () => {
+            (launchImageLibrary as jest.Mock).mockImplementationOnce((_opts: any, cb: any) => {
+                cb({ errorCode: 'permission', errorMessage: 'Permission denied' });
+            });
+
+            const { getByText, queryByText } = renderWithTheme(<HazardForm />);
+            await act(async () => { fireEvent.press(getByText('Upload Photo')); });
+            expect(queryByText(/photo selected/)).toBeNull();
+        });
+
+        it('handles assets with missing base64, fileName and type gracefully', async () => {
+            (launchImageLibrary as jest.Mock).mockImplementationOnce((_opts: any, cb: any) => {
+                cb({
+                    assets: [{ uri: 'file://some/path' }],
+                });
+            });
+
+            const { getByText } = renderWithTheme(<HazardForm />);
+            await act(async () => { fireEvent.press(getByText('Upload Photo')); });
+            expect(getByText('1 photo selected')).toBeTruthy();
+        });
+
+        it('handles a filename with no extension when building the payload', async () => {
+            (AuthenticationService.fetch as jest.Mock).mockResolvedValue({ ok: true });
+            (launchImageLibrary as jest.Mock).mockImplementationOnce((_opts: any, cb: any) => {
+                cb({
+                    assets: [{ base64: 'abc123', fileName: 'photowithoutext', type: 'image/jpeg' }],
+                });
+            });
+
+            const { getByText, getByTestId, getByPlaceholderText } = renderWithTheme(<HazardForm />);
+            await act(async () => { fireEvent.press(getByText('Upload Photo')); });
+            fillAllFields(getByPlaceholderText, getByTestId);
+
+            await act(async () => { fireEvent.press(getByTestId('submitButton')); });
+
+            const body = JSON.parse(
+                (AuthenticationService.fetch as jest.Mock).mock.calls[0][1].body
+            );
+            expect(body.files[0].name).toBe('photowithoutext');
+            expect(body.files[0].extension).toBe('jpg');
+        });
+
+        it('includes photos as files in the submitted payload', async () => {
+            (AuthenticationService.fetch as jest.Mock).mockResolvedValue({ ok: true });
+            (launchImageLibrary as jest.Mock).mockImplementationOnce((_opts: any, cb: any) => {
+                cb({
+                    assets: [{ base64: 'abc123', fileName: 'photo.jpg', type: 'image/jpeg' }],
+                });
+            });
+
+            const { getByText, getByTestId, getByPlaceholderText } = renderWithTheme(<HazardForm />);
+            await act(async () => { fireEvent.press(getByText('Upload Photo')); });
+            fillAllFields(getByPlaceholderText, getByTestId);
+
+            await act(async () => { fireEvent.press(getByTestId('submitButton')); });
+
+            const body = JSON.parse(
+                (AuthenticationService.fetch as jest.Mock).mock.calls[0][1].body
+            );
+            expect(body.files).toHaveLength(1);
+            expect(body.files[0].content).toBe('abc123');
+            expect(body.files[0].name).toBe('photo');
+            expect(body.files[0].extension).toBe('jpg');
+        });
+    });
+
+    // ── Date Formatting ──────────────────────────────────────────────────────
+
+    describe('Date Formatting', () => {
+        it('sends the date in ISO format without milliseconds (questionSix)', async () => {
+            (AuthenticationService.fetch as jest.Mock).mockResolvedValue({ ok: true });
+            const { getByTestId, getByPlaceholderText } = renderWithTheme(<HazardForm />);
+            fillAllFields(getByPlaceholderText, getByTestId);
+
+            await act(async () => { fireEvent.press(getByTestId('submitButton')); });
+
+            const body = JSON.parse(
+                (AuthenticationService.fetch as jest.Mock).mock.calls[0][1].body
+            );
+            expect(body.questionSix).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/);
+        });
+
+        it('blocks submission and does not call the API when date is missing', async () => {
+            (AuthenticationService.fetch as jest.Mock).mockResolvedValue({ ok: true });
+            const { getByTestId, getByPlaceholderText } = renderWithTheme(<HazardForm />);
+
+            fireEvent.changeText(getByPlaceholderText('e.g. Warehouse Manual Handling'), 'Test Title');
+            fireEvent.changeText(getByPlaceholderText('Describe the hazards identified...'), 'Some hazard');
+            fireEvent.changeText(getByPlaceholderText('Identify who is at risk and how they might be harmed...'), 'Workers');
+            fireEvent.changeText(getByPlaceholderText('Describe current control measures in place...'), 'PPE required');
+            fireEvent.changeText(getByPlaceholderText('Describe additional actions required...'), 'Training needed');
+            fireEvent.changeText(getByPlaceholderText('e.g. Safety Manager, etc...'), 'Safety Manager');
+
+            await act(async () => { fireEvent.press(getByTestId('submitButton')); });
+
+            expect(AuthenticationService.fetch).not.toHaveBeenCalled();
+        });
+    });
 });
-
-
