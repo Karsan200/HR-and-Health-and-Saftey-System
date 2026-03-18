@@ -1,6 +1,6 @@
 import {Image, ScrollView, Text, View} from 'react-native';
 import {Avatar, Button, Dialog, Portal} from 'react-native-paper';
-import React, {Dispatch, SetStateAction, useContext, useState} from 'react';
+import React, { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react';
 import { ThemeContext } from '../../theme/colourController.tsx';
 
 import { passwordAuthScreenStyles } from './PasswordAuthScreen.styles.ts';
@@ -13,6 +13,7 @@ import {HttpException} from "../../exception/HttpException.ts";
 export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boolean>> }) {
     const [pinCode, setPinCode] = useState('');
     const [pinBubbles, setPinBubbles] = useState([false, false, false, false, false, false]);
+    const [greeting, setGreeting] = useState('');
 
     const [visible, setVisible] = useState(false);
     const [error, setError] = useState('');
@@ -108,6 +109,36 @@ export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boole
         }
     }
 
+    useEffect(() => {
+        const loadUser = async () => {
+            try {
+                const response = await AuthenticationService.fetch("/api/profile/me");
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.hasPinCode) {
+                      setGreeting(`Welcome back, ${data.firstName}!`);
+                    }
+                    else {
+                      setGreeting("Create your pin code!");
+                    }
+                }
+            } catch (e) {
+                if (e instanceof HttpException && e.statusCode === 401) {
+                    setError("Your session has expired. Please restart the app and log in again.");
+                    setVisible(true);
+                }
+                else {
+                    setError("An unknown error occurred. Please try again later.");
+                    setVisible(true);
+                }
+            }
+        };
+
+        loadUser();
+    }, []);
+
     return (
         <ScrollView contentContainerStyle={styles(theme).container}>
             <ScrollView contentContainerStyle={passwordAuthScreenStyles(theme).imageContainer}>
@@ -122,7 +153,7 @@ export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boole
                 style={homeStyles(theme).profileIcon}
                 color={theme.redPrimary}
             />
-            <Text style={styles(theme).welcomeBackText}>Welcome back, Maggie</Text>
+            <Text style={styles(theme).welcomeBackText}>{greeting}</Text>
             <View style={styles(theme).bubbleContainer}>
                 {pinBubbles.map((isEnabled, index) => (
                     <PinCodeBubble key={index} isEnabled={isEnabled} />
