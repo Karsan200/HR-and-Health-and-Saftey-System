@@ -13,21 +13,21 @@ const ProfileScreen = () => {
   const [profile, setProfile] = useState<ProfileModel | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Fetch profile data when page loads
   useEffect(() => {
-    loadProfile();
+    (async () => {
+      try {
+        const data = await ProfileService.getProfile();
+        setProfile(data);
+      } catch (error) {
+        console.error('Failed to load profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
-  const loadProfile = async () => {
-    try {
-      const data = await ProfileService.getProfile();
-      setProfile(data);
-    } catch (error) {
-      console.error('Failed to load profile:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Show loading indicator when profile is loading
   if (loading) {
     return (
       <View style={styles(theme).loadingContainer}>
@@ -36,6 +36,7 @@ const ProfileScreen = () => {
     );
   }
 
+  // Display error if profile is not loaded
   if (!profile) {
     return <Text>Error loading profile</Text>;
   }
