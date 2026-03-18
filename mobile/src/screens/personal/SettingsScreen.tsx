@@ -297,7 +297,6 @@ export default function SettingsScreen() {
         {/* Accessibility Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Accessibility Settings</Text>
-          {/* TO DO: Toggles for settings*/}
 
           <View style={styles.settingRow}>
             <View style={styles.smallContainer}>

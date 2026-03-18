@@ -1,12 +1,12 @@
 import { StyleSheet } from 'react-native';
-import { Spacing, FontSize, TextStyles, BorderRadius } from '../theme/theme';
+import { Spacing, FontSize, TextStyles, BorderRadius, Fonts } from '../theme/theme';
 
 /**
  * Styles used by the HsOverview screen components.
  */
 export const styles= (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
   const fontScale = accessibility.largeText ? 1.3 : 1;
-  const fontFamily = accessibility.dyslexicFont ? 'OpenDyslexic' : TextStyles.regular.fontFamily;
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
 
   return StyleSheet.create({
     /**
@@ -55,7 +55,7 @@ export const styles= (theme: any, accessibility: { largeText: boolean, dyslexicF
      */
     headerTitle: {
         marginLeft: 8,
-        fontFamily,
+        fontFamily: fontFamilies.regular,
         fontWeight: TextStyles.medium.fontWeight,
         fontSize: FontSize.l24 * fontScale,
         color: theme.black,
@@ -81,7 +81,7 @@ export const styles= (theme: any, accessibility: { largeText: boolean, dyslexicF
      */
     headerBadgeText: {
         color: theme.white,
-        fontFamily,
+        fontFamily: fontFamilies.regular,
         fontWeight: TextStyles.semiBold.fontWeight,
         fontSize: FontSize.s16 * fontScale,
         lineHeight: 28,
@@ -101,7 +101,7 @@ export const styles= (theme: any, accessibility: { largeText: boolean, dyslexicF
      * Matches the header title typography.
      */
     sectionHeading: {
-        fontFamily,
+        fontFamily: fontFamilies.regular,
         fontWeight: TextStyles.medium.fontWeight,
         fontSize: FontSize.l24 * fontScale,
         color: theme.black,
@@ -111,7 +111,7 @@ export const styles= (theme: any, accessibility: { largeText: boolean, dyslexicF
      * Generic title style used elsewhere on the screen.
      */
     title: {
-        fontFamily,
+        fontFamily: fontFamilies.regular,
         fontSize: FontSize.m20 * fontScale,
         color: theme.blueDark,
         marginBottom: 12,
@@ -150,7 +150,7 @@ export const styles= (theme: any, accessibility: { largeText: boolean, dyslexicF
  */
 export const localStyles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
   const fontScale = accessibility.largeText ? 1.3 : 1;
-  const fontFamily = accessibility.dyslexicFont ? 'OpenDyslexic' : TextStyles.regular.fontFamily;
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
 
   return StyleSheet.create({
     /**
@@ -184,7 +184,7 @@ export const localStyles = (theme: any, accessibility: { largeText: boolean, dys
      * Uses medium font family and medium-large font size.
      */
     count: {
-        fontFamily,
+        fontFamily: fontFamilies.regular,
         fontWeight: TextStyles.medium.fontWeight,
         fontSize: FontSize.m20 * fontScale,
         color: theme.black,
@@ -195,7 +195,7 @@ export const localStyles = (theme: any, accessibility: { largeText: boolean, dys
      * Uses smaller font size and grey tone for secondary emphasis.
      */
     label: {
-        fontFamily,
+        fontFamily: fontFamilies.regular,
         fontWeight: TextStyles.medium.fontWeight,
         fontSize: FontSize.xs14 * fontScale,
         color: theme.greyPrimaryMainText,
@@ -239,7 +239,7 @@ export const localStyles = (theme: any, accessibility: { largeText: boolean, dys
      * Uses medium weight and small font size for compact appearance.
      */
     riskLabel: {
-        fontFamily,
+        fontFamily: fontFamilies.regular,
         fontWeight: TextStyles.medium.fontWeight,
         fontSize: FontSize.s16 * fontScale,
         color: theme.black,

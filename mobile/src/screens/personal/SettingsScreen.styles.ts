@@ -236,7 +236,7 @@ export const settingsStyles = (theme: any, accessibility: { largeText: boolean, 
   },
 
   previewText: {
-    fontSize: FontSize.s16 * fontScale,
+    fontSize: FontSize.xs14 * fontScale,
     fontFamily: fontFamilies.regular,
     fontWeight: TextStyles.regular.fontWeight,
     color: theme.black,
