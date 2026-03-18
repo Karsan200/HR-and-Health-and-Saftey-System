@@ -23,7 +23,8 @@ module.exports = {
       preset: 'react-native',
       testMatch: ['**/__tests__/**/*.test.{js,jsx,ts,tsx}'],
       transformIgnorePatterns: [
-        'node_modules/(?!(react-native|@react-native|react-native-paper|react-native-vector-icons|@react-navigation)/)',
+        'node_modules/(?!(react-native|@react-native|react-native-paper|react-native-paper-dates|react-native-image-picker|react-native-vector-icons|@react-navigation|color|color-string|color-name|color-convert|simple-swizzle|is-arrayish)/)',
+        'node_modules/react-native-paper-dates/node_modules/(?!(color|color-string|color-name|color-convert|simple-swizzle|is-arrayish)/)',
       ],
     },
   ],

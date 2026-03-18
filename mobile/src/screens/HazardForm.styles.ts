@@ -16,6 +16,9 @@ export const getCommonInputProps = (theme: any) => ({
 //main styling fo the hazard form
 export default function hazardStyles(theme: any) {
     return StyleSheet.create({
+        flexContainer: {
+            flex: 1,
+        },
         //main background
         container: {
             backgroundColor: theme.greyBackground,
@@ -114,6 +117,7 @@ export default function hazardStyles(theme: any) {
             ...TextStyles.medium,
             color: theme.white,
         },
+
         //the text shat shows how many photos you have uploaded
         photoCountText: {
             marginTop: 6,

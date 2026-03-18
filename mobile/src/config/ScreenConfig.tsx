@@ -37,8 +37,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
         body.setSection(null);
         body.setCurrentScreen('hazardForm');
         return;
-    }
-    else if (screen === 'profile') {
+    } else if (screen === 'profile') {
       body.setSection(null);
       body.setCurrentScreen('profile');
       return;
