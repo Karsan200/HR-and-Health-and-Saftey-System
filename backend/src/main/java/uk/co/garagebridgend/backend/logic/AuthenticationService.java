@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.springframework.transaction.annotation.Transactional;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.SessionTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
@@ -119,6 +120,7 @@ public class AuthenticationService {
      * @return a RotateRefreshTokenInternal object containing the new refresh token and access token
      * @throws AuthenticatedAccountNotFoundException if no authenticated user is found in the security context
      */
+    @Transactional
     public RotateRefreshTokenInternal rotateRefreshToken(final AuthRotateRequest body)
             throws AuthenticatedAccountNotFoundException, InvalidPasswordException {
         // Get the current user
@@ -132,8 +134,12 @@ public class AuthenticationService {
         AccountTable account = accountRepository.findById(Long.valueOf(user.getUsername()))
                 .orElseThrow(AuthenticatedAccountNotFoundException::new);
 
-        // Validate the provided pin code
-        if (!BCrypt.checkpw(body.getPinCode(), account.getMobilePin())) {
+        /* If the user does not have a pin code set, set it to the provided pin code,
+         * otherwise validate the provided pin code against the stored hash. */
+        if (account.getMobilePin() == null) {
+            account.setMobilePin(BCrypt.hashpw(body.getPinCode(), BCrypt.gensalt()));
+            accountRepository.save(account);
+        } else if (!BCrypt.checkpw(body.getPinCode(), account.getMobilePin())) {
             throw new InvalidPasswordException("Invalid pin code");
         }
 
