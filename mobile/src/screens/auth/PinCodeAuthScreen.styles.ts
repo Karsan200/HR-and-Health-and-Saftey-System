@@ -1,8 +1,13 @@
 import { StyleSheet } from 'react-native';
-import { FontSize, TextStyles } from '../../theme/theme.ts';
+import { FontSize, Spacing, TextStyles } from '../../theme/theme.ts';
 
 export const PinCodeAuthScreen = (theme: any) =>
   StyleSheet.create({
+    container: {
+      paddingHorizontal: Spacing.largePadding,
+      paddingTop: 40,
+    },
+
     welcomeBackText: {
       marginTop: -35,
       alignSelf: 'center',
@@ -11,6 +16,7 @@ export const PinCodeAuthScreen = (theme: any) =>
       fontFamily: TextStyles.regular.fontFamily,
       fontWeight: TextStyles.regular.fontWeight
     },
+
     bubbleContainer: {
       paddingTop: 16,
       paddingBottom: 16,
@@ -19,6 +25,7 @@ export const PinCodeAuthScreen = (theme: any) =>
       justifyContent: 'center',
       alignItems: 'center',
     },
+
     buttonContainer: {
       paddingTop: 10,
       flexDirection: 'row',
@@ -26,6 +33,7 @@ export const PinCodeAuthScreen = (theme: any) =>
       justifyContent: 'center',
       alignItems: 'center',
     },
+
     button: {
       width: 80,
       height: 80,
