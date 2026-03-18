@@ -3,7 +3,7 @@ import {ScrollView, View, Text, Alert,} from 'react-native';
 
 import {TextInput, Checkbox, Button} from 'react-native-paper';
 import { ThemeContext } from '../theme/colourController.tsx';
-import { FontSize, BorderRadius } from '../theme/theme';
+import { FontSize } from '../theme/theme';
 import { JSX } from 'react/jsx-runtime';
 import { DatePickerInput} from "react-native-paper-dates";
 import ButtonActionBar from '../components/ButtonActionBar.tsx';
@@ -22,6 +22,10 @@ type Photo = {
     type?: string;
     base64: string; // used to upload photo as base64 string to backend
 }
+
+const UploadIcon = ({ color }: { color: string }) => (
+    <Icon source="upload" size={20} color={color} />
+);
 
 export default function HazardForm({ onDone }: Props): JSX.Element {
 
@@ -241,7 +245,7 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
 
     //Rendering the forms UI
     return (
-        <View style={{ flex: 1 }}>
+        <View style={styles.flexContainer}>
             <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
                 <View style={styles.spacer} />
 
@@ -376,7 +380,7 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
                     {/*upload a photo*/}
                     <Button
                         mode="outlined"
-                        icon={() => <Icon source="upload" size={20} color={theme.white} />}
+                        icon={() => <UploadIcon color={theme.white} />}
                         onPress={openImageLibrary}
                         buttonColor={theme.redPrimary}
                         textColor={theme.white}
