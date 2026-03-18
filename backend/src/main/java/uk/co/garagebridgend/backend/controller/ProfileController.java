@@ -20,11 +20,11 @@ public class ProfileController {
     /**
      * Allows for dependency injection of the ProfileService.
      *
-     * @param profileService the ProfileService implementation to use
+     * @param service the ProfileService implementation to use
      */
     @Autowired
-    public ProfileController(ProfileService profileService) {
-        this.profileService = profileService;
+    public ProfileController(final ProfileService service) {
+        this.profileService = service;
     }
 
 

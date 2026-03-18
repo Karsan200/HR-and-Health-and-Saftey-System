@@ -6,14 +6,29 @@ import lombok.Data;
 
 /**
  * Response payload sent when user is loading their account page
- * with a valid authenticated account
+ * with a valid authenticated account.
  */
 @Data
 @AllArgsConstructor
 public class ProfileResponse {
+    /**
+     * First name of user.
+     */
     private String firstName;
+    /**
+     * Last name of user.
+     */
     private String lastName;
+    /**
+     * Users email address.
+     */
     private String email;
+    /**
+     * Users phone number.
+     */
     private String phoneNumber;
+    /**
+     * Date user was added to database.
+     */
     private String created;
 }

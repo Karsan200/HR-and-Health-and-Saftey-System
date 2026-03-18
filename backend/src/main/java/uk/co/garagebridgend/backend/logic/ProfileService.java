@@ -14,7 +14,7 @@ import uk.co.garagebridgend.backend.repository.AccountRepository;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Service responsible for retrieving the profile information for the currently authenticated user
+ * Service responsible for retrieving the profile information for the currently authenticated user.
  */
 @Service
 public class ProfileService {
@@ -25,11 +25,11 @@ public class ProfileService {
     /**
      * Constructor for dependency injection of required repositories.
      *
-     * @param accountRepository the AccountRepository implementation to use
+     * @param repository the AccountRepository implementation to use
      */
     @Autowired
-    public ProfileService(AccountRepository accountRepository) {
-        this.accountRepository = accountRepository;
+    public ProfileService(final AccountRepository repository) {
+        this.accountRepository = repository;
     }
 
     /**
