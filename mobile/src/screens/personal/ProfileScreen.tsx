@@ -5,7 +5,8 @@ import { Avatar, IconButton } from 'react-native-paper';
 import { ThemeContext } from '../../theme/colourController';
 import { profileStyles as styles } from './ProfileScreen.styles';
 
-import ProfileService, { ProfileModel } from '../../logic/ProfileService.ts';
+import ProfileService from '../../logic/ProfileService';
+import { ProfileModel } from '../../model/response/ProfileModel';
 
 const ProfileScreen = () => {
   const { theme } = useContext(ThemeContext);
