@@ -10,8 +10,8 @@ export function PinCodeBubble(props: { isEnabled: boolean }) {
 
   return (
     props.isEnabled ?
-      <View style={styles(theme).enabledBubble} />
+      <View testID="bubble-enabled" style={styles(theme).enabledBubble} />
       :
-      <View style={styles(theme).disabledBubble} />
+      <View testID="bubble-disabled" style={styles(theme).disabledBubble} />
   );
 }
