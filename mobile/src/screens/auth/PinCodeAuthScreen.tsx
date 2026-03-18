@@ -7,6 +7,8 @@ import { passwordAuthScreenStyles } from './PasswordAuthScreen.styles.ts';
 import { homeStyles } from '../HomeScreen.styles.ts';
 import { PinCodeAuthScreen as styles } from './PinCodeAuthScreen.styles.ts';
 import {PinCodeBubble} from "../../components/auth/PinCodeBubble.tsx";
+import AuthenticationService from "../../logic/AuthenticationService.ts";
+import {HttpException} from "../../exception/HttpException.ts";
 
 export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boolean>> }) {
     const [pinCode, setPinCode] = useState('');
@@ -17,10 +19,11 @@ export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boole
 
     const { theme } = useContext(ThemeContext)
 
-    function onButtonPress(buttonValue: string) {
+    async function onButtonPress(buttonValue: string) {
         switch(buttonValue) {
             case "x":
-                setPinCode(pinCode.slice(0, -1));
+                buttonValue = pinCode.slice(0, -1);
+                setPinCode(buttonValue);
                 setPinBubbles(pinBubbles.map((_, index) => index < pinCode.length - 1));
                 break;
             case ">":
@@ -30,11 +33,51 @@ export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boole
                     setError("Please enter a 6-digit pin code");
                     setVisible(true);
                 }
+                buttonValue = pinCode;
                 break;
             default:
-                setPinCode(pinCode + buttonValue);
+                buttonValue = pinCode + buttonValue
+                setPinCode(buttonValue);
                 setPinBubbles(pinBubbles.map((_, index) => index < pinCode.length + 1));
                 break;
+        }
+
+        // If the pin code is 6 digits long, authenticate the user and route them to the home screen of the app
+        if (buttonValue.length === 6) {
+            try {
+                // Get the refresh the token
+                const credentials = await AuthenticationService.getCredentials();
+
+                // if the credentials are null, then the user is not authenticated and should be routed to the login screen
+                if (!credentials) {
+                    setError("Your session has expired. Please restart the app and log in again.");
+                    setVisible(true);
+                    return;
+                }
+
+                const response = await AuthenticationService.fetch("/auth/rotate", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        'Cookie': `refreshToken=${credentials.refreshToken}`,
+                    },
+                    body: JSON.stringify({"pinCode": buttonValue}),
+                })
+
+                if (response.ok) {
+                    // Route the user to the home screen of the app
+                    props.isAuth(false);
+                }
+            } catch (e) {
+                if (e instanceof HttpException && e.statusCode === 401) {
+                    setError("Invalid pin code entered");
+                    setVisible(true);
+                }
+                else {
+                    setError("An unknown error occurred during authentication. Please try again later.");
+                    setVisible(true);
+                }
+            }
         }
     }
 
