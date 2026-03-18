@@ -84,7 +84,7 @@ public class ProfileControllerTest {
                     .thenReturn(new User("123", "password", Collections.emptyList()));
 
             // Act & Assert
-            mockMvc.perform(get("/profile/me"))
+            mockMvc.perform(get("/api/profile/me"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.firstName", is("John")))
                     .andExpect(jsonPath("$.lastName", is("Doe")))
