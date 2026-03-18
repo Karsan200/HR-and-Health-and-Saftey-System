@@ -6,6 +6,8 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
+import uk.co.garagebridgend.backend.models.exception.NotFoundException;
 import uk.co.garagebridgend.backend.models.response.ProfileResponse;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
 
@@ -21,17 +23,20 @@ public class ProfileService {
         this.accountRepository = accountRepository;
     }
 
-    public ProfileResponse getCurrentProfile() {
+    public ProfileResponse getCurrentProfile()
+            throws AuthenticatedAccountNotFoundException, NotFoundException {
+
         User user = AuthenticationService.getCurrentUser();
 
         if (user == null) {
-            throw new RuntimeException("User not authenticated");
+            throw new AuthenticatedAccountNotFoundException();
         }
 
-        Long accountUser = Long.valueOf(user.getUsername());
+        Long accountId = Long.valueOf(user.getUsername());
 
-        AccountTable account = accountRepository.findById(accountUser)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+        AccountTable account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new NotFoundException("Account failed to load"));
+
 
         return new ProfileResponse(
                 account.getFirstName(),
