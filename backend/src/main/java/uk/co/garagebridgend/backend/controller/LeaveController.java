@@ -13,7 +13,6 @@ import uk.co.garagebridgend.backend.logic.LeaveService;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 
-import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -34,7 +33,14 @@ public class LeaveController {
      */
     @GetMapping("/calendar")
     public List<LeaveCalendarResponse> getCalendarLeave() {
-        return leaveService.getAllLeaveDates();
+        try {
+            return leaveService.getAllLeaveDates();
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal sever error"
+            );
+        }
     }
 
     /**
@@ -46,12 +52,16 @@ public class LeaveController {
     @GetMapping("/day/{date}")
     public List<LeaveDayResponse> getLeaveForDay(final @PathVariable String date) {
         try {
-            LocalDate parsedDate = LocalDate.parse(date);
-            return leaveService.getLeaveForDate(parsedDate);
-        } catch (Exception e) {
+            return leaveService.getLeaveForDate(date);
+        } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Invalid date format"
+                    e.getMessage()
+            );
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal sever error"
             );
         }
     }
