@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
-import uk.co.garagebridgend.backend.models.exception.NotFoundException;
 import uk.co.garagebridgend.backend.models.response.ProfileResponse;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
 

@@ -74,10 +74,12 @@ public class ProfileServiceTest {
             authServiceMock.when(AuthenticationService::getCurrentUser).thenReturn(mockUser);
 
             // Act & Assert
-            NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-                profileService.getCurrentProfile();
-            });
-            assertEquals("Account failed to load", exception.getMessage());
+            AuthenticatedAccountNotFoundException exception =
+                    assertThrows(AuthenticatedAccountNotFoundException.class, () -> {
+                        profileService.getCurrentProfile();
+                    });
+
+            assertEquals("Account not found.", exception.getMessage());
         }
     }
 
