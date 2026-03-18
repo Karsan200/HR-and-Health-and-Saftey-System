@@ -1,0 +1,171 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+stages:
+  - test
+  - build
+  - deploy
+
+backend:test:
+  image: eclipse-temurin:21-jdk
+  stage: test
+  cache:
+    key: gradle-cache-key
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+    policy: pull-push
+  script:
+    - cd backend
+    - chmod +x gradlew
+    - ./gradlew check
+  artifacts:
+    name: "$CI_JOB_NAME"
+    paths:
+      - backend/build/reports/tests/
+      - backend/build/reports/checkstyle/
+      - backend/build/jacocoHtml/
+      - backend/build/jacoco/test.exec
+      - backend/build/reports/jacoco/test/jacocoTestReport.xml
+    reports:
+      coverage_report:
+        coverage_format: jacoco
+        path: backend/build/reports/jacoco/test/jacocoTestReport.xml
+      junit: backend/build/test-results/test/TEST-*.xml
+    expire_in: 4 week
+
+backend:build:
+  image: eclipse-temurin:21-jdk
+  stage: build
+  cache:
+    key: gradle-cache-key
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+    policy: pull-push
+  needs:
+    - backend:test
+  script:
+    - cd backend
+    - chmod +x gradlew
+    - ./gradlew build
+  artifacts:
+    paths:
+      - backend/build/libs/*.jar
+
+frontend:mobile:test:
+  image: node:20-bullseye
+  stage: test
+  cache:
+    key:
+      files:
+        - mobile/package-lock.json
+    paths:
+      - mobile/node_modules/
+    policy: pull-push
+  script:
+    - cd mobile
+    - npm ci
+    - npm run lint
+    - npm test -- --coverage --ci --maxWorkers=2
+  artifacts:
+    when: always
+    paths:
+      - mobile/coverage/
+      - mobile/coverage/cobertura-coverage.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: mobile/coverage/cobertura-coverage.xml
+    expire_in: 4 week
+
+frontend:mobile:android:build:
+  image: reactnativecommunity/react-native-android:latest
+  stage: build
+  needs:
+    - frontend:mobile:test
+  cache:
+    key: android-gradle
+    paths:
+      - mobile/android/.gradle/
+      - mobile/node_modules/
+  script:
+    - cd mobile
+    - npm ci
+    - cd android
+    - chmod +x gradlew
+    - ./gradlew assembleDebug --no-daemon
+  artifacts:
+    when: always
+    paths:
+      - mobile/android/app/build/outputs/apk/debug/
+    expire_in: 4 week
+
+
+frontend:web:test:
+  image: node:20-bullseye
+  stage: test
+  cache:
+    key:
+      files:
+        - web/package-lock.json
+    paths:
+      - web/node_modules/
+    policy: pull-push
+  script:
+    - cd web
+    - npm ci
+    - npm run lint
+    - npm test -- --coverage --ci --maxWorkers=2
+  artifacts:
+    when: always
+    paths:
+      - web/coverage/
+      - web/coverage/cobertura-coverage.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: web/coverage/cobertura-coverage.xml
+    expire_in: 4 week
+
+frontend:web:build:
+  image: node:20-bullseye
+  stage: build
+  needs:
+    - frontend:web:test
+  cache:
+    key:
+      files:
+        - web/package-lock.json
+    paths:
+      - web/node_modules/
+    policy: pull-push
+  script:
+    - cd web
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - web/dist/
+    expire_in: 4 week
+
+frontend:web:deploy:
+  image: node:20-bullseye
+  stage: deploy
+  needs:
+    - frontend:web:build
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  cache:
+    key:
+      files:
+        - web/package-lock.json
+    paths:
+      - web/node_modules/
+    policy: pull-push
+  script:
+    - cd web
+    - npm install wrangler --location=global
+    - wrangler pages publish ./src --project-name "large-team-project" --branch "main"

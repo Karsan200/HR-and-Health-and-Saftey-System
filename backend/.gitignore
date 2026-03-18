@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Spring App Properties ###
+src/main/resources/application.properties

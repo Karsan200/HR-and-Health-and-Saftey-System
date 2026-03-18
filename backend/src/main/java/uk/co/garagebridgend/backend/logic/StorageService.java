@@ -1,0 +1,70 @@
+package uk.co.garagebridgend.backend.logic;
+
+import io.minio.BucketExistsArgs;
+import io.minio.MakeBucketArgs;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.io.InputStream;
+
+/** Service class responsible for handling file storage operations using MinIO. */
+@Service
+public class StorageService {
+    /** The name of the MinIO bucket to use for storing files, configured via application properties. */
+    @Value("${minio.bucket.name}")
+    private String bucketName;
+
+    /** The maximum file size allowed for uploads, configured via application properties.*/
+    @Getter
+    @Value("${minio.file.maxsize}")
+    private int maxFileSize;
+
+    /** MinIO client for interacting with the MinIO storage service. */
+    @Autowired
+    private MinioClient minioClient;
+
+    /** Uploads a file to the MinIO storage.
+     * @param objectName the name of the object to be stored in MinIO
+     * @param inputStream the InputStream of the file to be uploaded
+     * @param extension the file extension to determine the content type
+     * @throws RuntimeException if any error occurs during the upload process
+     */
+    public void uploadFile(final String objectName, final InputStream inputStream, final String extension)
+            throws RuntimeException {
+        // Determine the content type based on the file extension
+        String contentType = switch (extension.toLowerCase()) {
+            case "jpg", "jpeg" -> "image/jpeg";
+            case "png" -> "image/png";
+            case "gif" -> "image/gif";
+            case "pdf" -> "application/pdf";
+            case "doc", "docx" -> "application/msword";
+            default -> "application/octet-stream"; // Default binary type for unknown extensions
+        };
+
+        try {
+            boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
+            if (!found) {
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
+            }
+            minioClient.putObject(
+                    PutObjectArgs.builder().bucket(bucketName).object(objectName).stream(
+                                    inputStream, inputStream.available(), -1)
+                            .contentType(contentType)
+                            .build());
+        } catch (Exception e) {
+            throw new RuntimeException("Error occurred: " + e.getMessage());
+        }
+    }
+
+    /** Base64 decoding utility method.
+     * @param base64Data the Base64-encoded string to decode
+     * @return a byte array containing the decoded data
+     */
+    public byte[] decodeBase64(final String base64Data) {
+        return java.util.Base64.getDecoder().decode(base64Data);
+    }
+}
