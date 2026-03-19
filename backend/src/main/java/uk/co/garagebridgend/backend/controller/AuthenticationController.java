@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,6 +42,9 @@ public class AuthenticationController {
     /** Max age for web refresh token cookies in seconds. */
     @Value("${jwt.refresh_token_expiration}")
     private Long webRefreshTokenCookieExpiration;
+
+    /** Logger for logging authentication-related events and errors. */
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
     /** Authentication service for handling authentication operations. */
     private final AuthenticationService authenticationService;
@@ -79,6 +84,7 @@ public class AuthenticationController {
                     "Account not found."
             );
         } catch (Exception e) {
+            log.error("Error during authentication", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal sever error"
@@ -117,6 +123,7 @@ public class AuthenticationController {
                     "Authenticated account not found."
             );
         } catch (Exception e) {
+            log.error("Error rotating refresh token", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal sever error"
@@ -158,6 +165,7 @@ public class AuthenticationController {
                 "Invalid or expired refresh token"
             );
         } catch (Exception e) {
+            log.error("Error refreshing access token", e);
             throw new ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Internal sever error"
