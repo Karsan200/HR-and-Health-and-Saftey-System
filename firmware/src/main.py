@@ -1,18 +1,19 @@
 import os
 import time
+import ujson
 import _thread
 
 from upload import upload
 from scan import scan
 
 # Check if the /cache directory exists, if not create it
-if not ("cache" in os.listdir):
+if "cache" not in os.listdir():
     os.mkdir("cache")
     
 # Check if the config file exists, if not create it
-if not ("config.json" in os.listdir):
-    f = open("config.json", "w")
-    f.write("""
+if "config.json" not in os.listdir():
+    with open("config.json", "w") as f:
+        f.write("""
 {
     "ssid": "",
     "password": "",
@@ -24,10 +25,10 @@ if not ("config.json" in os.listdir):
     "rssi_threshold": -75,
     "max_cache_entries": 100
 }
-""")
+        """)
     
-# Load the settings
-with open("settings.json") as f:
+# Load the config
+with open("config.json") as f:
     settings = ujson.load(f)
     
 # Start the uploading process
