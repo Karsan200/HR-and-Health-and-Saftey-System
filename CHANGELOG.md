@@ -1,4 +1,8 @@
-## [0.1.1] - 2026-03-19
+## [V0.1.2] - 2026-03-19
+### Fixed
+- Removed -SNAPSHOT suffix from version number for production release, and changed port so that the Jenkins pipeline can locate the built jar file.
+
+## [V0.1.1] - 2026-03-19
 
 ### Added
 - Flyway database migration support for production schema management
