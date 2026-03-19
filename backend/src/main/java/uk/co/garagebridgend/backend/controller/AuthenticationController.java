@@ -35,6 +35,9 @@ import java.util.Arrays;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
+    /** Logger for logging authentication-related events and errors. */
+    private static final Logger LOG = LoggerFactory.getLogger(AuthenticationController.class);
+
     /** Max age for mobile refresh token cookies in seconds. */
     @Value("${jwt.refresh_token_expiration_mobile}")
     private Long mobileRefreshTokenCookieExpiration;
@@ -42,9 +45,6 @@ public class AuthenticationController {
     /** Max age for web refresh token cookies in seconds. */
     @Value("${jwt.refresh_token_expiration}")
     private Long webRefreshTokenCookieExpiration;
-
-    /** Logger for logging authentication-related events and errors. */
-    private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
     /** Authentication service for handling authentication operations. */
     private final AuthenticationService authenticationService;
@@ -84,7 +84,7 @@ public class AuthenticationController {
                     "Account not found."
             );
         } catch (Exception e) {
-            log.error("Error during authentication", e);
+            LOG.error("Error during authentication", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal sever error"
@@ -123,7 +123,7 @@ public class AuthenticationController {
                     "Authenticated account not found."
             );
         } catch (Exception e) {
-            log.error("Error rotating refresh token", e);
+            LOG.error("Error rotating refresh token", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal sever error"
@@ -165,7 +165,7 @@ public class AuthenticationController {
                 "Invalid or expired refresh token"
             );
         } catch (Exception e) {
-            log.error("Error refreshing access token", e);
+            LOG.error("Error refreshing access token", e);
             throw new ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Internal sever error"
