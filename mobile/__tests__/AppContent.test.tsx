@@ -6,7 +6,6 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import App from '../App.tsx';
 import mockReact from 'react';
-
 // Mocking safe area to prevent errors with missing native modules
 jest.mock('react-native-safe-area-context', () => {
   return {
@@ -22,10 +21,31 @@ jest.mock('../src/logic/AuthenticationService', () => ({
   refresh: jest.fn().mockResolvedValue(true),
 }));
 
+jest.mock('../src/screens/auth/PinCodeAuthScreen', () => {
+  return { PinCodeAuthScreen: ({ isAuth }: any) => {
+      mockReact.useEffect(() => { isAuth(false); }, [isAuth]);
+      return null;
+    }};
+});
+
 jest.mock('../src/screens/HsOverview', () => {
   const { View, Text } = require('react-native');
 
   return () => mockReact.createElement(View, null, mockReact.createElement(Text, null, 'Overview Screen'));
+});
+
+jest.mock('../src/screens/RiskAssessments', () => {
+  const { View, Text } = require('react-native');
+  return () => require('react').createElement(View, null,
+      require('react').createElement(Text, null, 'Risk Assessments Screen')
+  );
+});
+
+jest.mock('../src/screens/HazardForm', () => {
+  const { View, Text } = require('react-native');
+  return () => require('react').createElement(View, null,
+      require('react').createElement(Text, null, 'Hazard Form Screen')
+  );
 });
 
 // Mocking HomeScreen to render the available buttons
@@ -275,7 +295,7 @@ describe('App navigation flow', () => {
   it('opens the payslips screen from the HR bottom navigation', async () => {
     const { getByText, getAllByText } = render(<App />);
 
-    // Given the user is om the home screen, and they click on the HR section
+    // Given the user is on the home screen, and they click on the HR section
     await waitFor(() => {
       expect(getByText('Welcome Back')).toBeTruthy();
     });

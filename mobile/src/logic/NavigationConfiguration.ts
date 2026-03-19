@@ -14,7 +14,8 @@ export type ScreenKey =
     | 'logout'
     | 'profile'
     | 'notifications'
-    | 'dateDetails';
+    | 'dateDetails'
+    | 'hazardForm';
 
 export type BottomNavItem = {
     key: ScreenKey;

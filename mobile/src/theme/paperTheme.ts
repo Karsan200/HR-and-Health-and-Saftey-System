@@ -23,6 +23,7 @@ export const paperTheme = (themeContext: ThemeContextType): ThemeProp => {
       primary: theme.redPrimary,
       onSurfaceVariant: theme.greyPrimaryMainText,
       outline: theme.greyIconLight,
+      surfaceVariant: theme.white,
       elevation: {
         level3: theme.greyBackground
       }
