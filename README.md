@@ -32,7 +32,7 @@ jwt.refresh_token_expiration_mobile=2592000
 ```sql
 CREATE DATABASE rent_a_tech;
 ```
-* For the MinIO configuration, you can set up a local MinIO server or use a cloud-based MinIO service or AWS S3 Object Storage. Make sure to replace the placeholders with your actual credentials and the URL of your MinIO server. If you are using a local MinIO server, the URL would typically be `http://localhost:9000/`.
+* For the MinIO configuration, you can set up a local MinIO server or use a cloud-based S3 compatible object storage solution such as AWS S3 or Cloudflare R2. Make sure to replace the placeholders with your actual credentials and the URL of your MinIO server. If you are using a local MinIO server, the URL would typically be `http://localhost:9000/`.
 * For the JWT configuration, generate a secure secret token and set appropriate expiration times for access and refresh tokens. Please note the expiration times are a Long integer so do not set values higher than `Long.MAX_VALUE` (9223372036854775807).
 
 4. Build the project using Gradle: `./gradlew build`
