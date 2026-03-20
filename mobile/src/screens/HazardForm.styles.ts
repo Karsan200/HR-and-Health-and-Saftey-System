@@ -1,21 +1,24 @@
 import { StyleSheet } from 'react-native';
-import {FontSize, BorderRadius, TextStyles} from '../theme/theme';
+import { FontSize, BorderRadius, TextStyles, Fonts } from '../theme/theme';
 
 // styling for common fields like the text boxes
-export const getCommonInputProps = (theme: any) => ({
+export const getCommonInputProps = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => ({
     mode: 'outlined' as const,
     dense: true,
     underlineColor: 'transparent',
     placeholderTextColor: theme.greyIconLight,
-    contentStyle: { fontSize: FontSize.xs14, padding: 5 },
+    contentStyle: { fontSize: FontSize.xs14 * (accessibility.largeText ? 1.3 : 1), padding: 5 },
     textColor: theme.black,
     outlineStyle: { borderRadius: BorderRadius.smallTextField },
     style: { backgroundColor: theme.white },
 } as any);
 
 //main styling fo the hazard form
-export default function hazardStyles(theme: any) {
-    return StyleSheet.create({
+export const styles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
+
+  return StyleSheet.create({
         flexContainer: {
             flex: 1,
         },
@@ -44,8 +47,9 @@ export default function hazardStyles(theme: any) {
         },
         //the styling for the titles of the two cards
         cardTitle: {
-            fontSize: FontSize.m20,
-            ...TextStyles.medium,
+            fontSize: FontSize.m20 * fontScale,
+            fontFamily: fontFamilies.regular,
+            fontWeight: TextStyles.medium.fontWeight,
             color: theme.black,
             marginBottom: 8,
         },
@@ -59,8 +63,9 @@ export default function hazardStyles(theme: any) {
         fieldLabel: {
             color: theme.greyPrimaryMainText,
             marginBottom: 6,
-            fontSize: FontSize.xs14,
-            ...TextStyles.medium,
+            fontSize: FontSize.xs14 * fontScale,
+            fontFamily: fontFamilies.regular,
+            fontWeight: TextStyles.medium.fontWeight,
         },
         //asterisk styling
         required: {
@@ -72,7 +77,9 @@ export default function hazardStyles(theme: any) {
         input: {
             backgroundColor: theme.white,
             marginBottom: 10,
-            ...TextStyles.medium,
+            fontSize: FontSize.m20 * fontScale,
+            fontFamily: fontFamilies.regular,
+            fontWeight: TextStyles.medium.fontWeight,
         },
         //extra styling for multiline
         multiline: {
@@ -91,8 +98,9 @@ export default function hazardStyles(theme: any) {
         checkboxLabel: {
             color: theme.greyPrimaryMainText,
             marginLeft: 8,
-            fontSize: FontSize.xs14,
-            ...TextStyles.medium,
+            fontSize: FontSize.xs14 * fontScale,
+            fontFamily: fontFamilies.regular,
+            fontWeight: TextStyles.medium.fontWeight,
         },
         //the submit button styling
         submitButton: {
@@ -113,8 +121,9 @@ export default function hazardStyles(theme: any) {
         },
         //the label inside the upload button styling
         uploadLabel: {
-            fontSize: FontSize.xxs12,
-            ...TextStyles.medium,
+            fontSize: FontSize.xxs12 * fontScale,
+            fontFamily: fontFamilies.regular,
+            fontWeight: TextStyles.medium.fontWeight,
             color: theme.white,
         },
 
@@ -122,17 +131,19 @@ export default function hazardStyles(theme: any) {
         photoCountText: {
             marginTop: 6,
             color: theme.greyPrimaryMainText,
-            fontSize: FontSize.xs14,
-            ...TextStyles.medium,
+            fontSize: FontSize.xs14 * fontScale,
+            fontFamily: fontFamilies.regular,
+            fontWeight: TextStyles.medium.fontWeight,
 
         },
         //the error text telling you fields are required
         errorText: {
             color: theme.redTrafficPrimary,
             marginTop: 6,
-            fontSize: FontSize.xs14,
-            ...TextStyles.medium,
+            fontSize: FontSize.xs14 * fontScale,
+            fontFamily: fontFamilies.regular,
+            fontWeight: TextStyles.medium.fontWeight,
 
         },
-    });
-}
+      });
+    };

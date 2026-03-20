@@ -4,7 +4,7 @@ import { Spacing, FontSize, TextStyles, BorderRadius, Fonts } from '../theme/the
 /**
  * Styles used by the HsOverview screen components.
  */
-export const styles= (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
+export const styles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
   const fontScale = accessibility.largeText ? 1.3 : 1;
   const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
 
