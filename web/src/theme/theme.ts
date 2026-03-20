@@ -1,11 +1,3 @@
-// Main padding and margin values for consistency
-export const Spacing = {
-    margin: 24,
-    smallPadding: 10,
-    mediumPadding: 16,
-    largePadding: 24,
-};
-
 // All the font sizes that are used in the app
 export const FontSize = {
     xxs12: 12,
@@ -15,7 +7,6 @@ export const FontSize = {
     l24: 24,
     xl32: 32,
     xxl36: 36,
-
 };
 
 //Border radius values for different sized components in the app

@@ -1,13 +1,29 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "@mui/material";
 
 import { muiTheme } from "./theme/muiTheme.ts";
+import IncompatibleScreen from "./components/IncompatibleScreen.tsx";
 
 function App() {
+    const [screenSize, setScreenSize] = useState(window.innerWidth);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setScreenSize(window.innerWidth);
+        };
+
+        window.addEventListener("resize", handleResize);
+        handleResize();
+
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, []);
 
   return (
       <ThemeProvider theme={muiTheme}>
-        <AppContent />
+          {screenSize < 768 ? <IncompatibleScreen /> : <AppContent />}
       </ThemeProvider>
   )
 }
