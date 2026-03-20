@@ -1,6 +1,6 @@
 {
   "name": "Rent-A-Tech",
-  "version": "0.0.1",
+  "version": "0.1.2",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -21,9 +21,10 @@
     "react-native": "0.83.1",
     "react-native-blob-util": "^0.24.7",
     "react-native-calendars": "^1.1314.0",
+    "react-native-image-picker": "^8.2.1",
     "react-native-keychain": "^10.0.0",
     "react-native-paper": "^5.14.5",
-    "react-native-passkey": "^3.3.2",
+    "react-native-paper-dates": "^0.23.4",
     "react-native-pdf": "^7.0.3",
     "react-native-safe-area-context": "^5.6.2",
     "react-native-screens": "^4.23.0",

@@ -60,6 +60,7 @@ public class ProfileServiceTest {
             assertEquals("Doe", response.getLastName());
             assertEquals("john.doe@example.com", response.getEmail());
             assertEquals("1234567890", response.getPhoneNumber());
+            assertFalse(response.isHasPinCode());
             assertEquals("18 March 2026", response.getCreated());
         }
     }

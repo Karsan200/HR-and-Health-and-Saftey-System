@@ -90,7 +90,10 @@ frontend:mobile:android:build:
     key: android-gradle
     paths:
       - mobile/android/.gradle/
+      - mobile/android/app/.cqche/
       - mobile/node_modules/
+      - ~/.gradle/caches/
+      - ~/.gradle/wrapper/
   script:
     - cd mobile
     - npm ci
@@ -167,5 +170,7 @@ frontend:web:deploy:
     policy: pull-push
   script:
     - cd web
+    - npm ci
+    - npm run build
     - npm install wrangler --location=global
-    - wrangler pages publish ./src --project-name "large-team-project" --branch "main"
+    - wrangler pages deploy ./dist --project-name "large-team-project" --branch "main"

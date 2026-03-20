@@ -11,6 +11,8 @@ import React from 'react';
 import { ScreenConfigStyles as styles } from './ScreenConfig.styles.ts';
 import { ScreenKey } from '../logic/NavigationConfiguration.ts';
 import { ScreenConfigProps } from '../model/props/ScreenConfigProps.ts';
+import HazardForm from "../screens/HazardForm.tsx";
+import RiskAssessments from "../screens/RiskAssessments.tsx";
 
 export function ScreenConfig(body: ScreenConfigProps) {
   // Defaulting to the calendar screen when the HR section is selected.
@@ -31,8 +33,11 @@ export function ScreenConfig(body: ScreenConfigProps) {
       body.setSection(null);
       body.setCurrentScreen('home');
       return;
-    }
-    else if (screen === 'profile') {
+    } else if (screen === 'hazardForm') {
+        body.setSection(null);
+        body.setCurrentScreen('hazardForm');
+        return;
+    } else if (screen === 'profile') {
       body.setSection(null);
       body.setCurrentScreen('profile');
       return;
@@ -125,12 +130,26 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'risk':
       return (
         <>
-          <TopNavBar
-            title="Risk"
-          />
-          <View style={styles.content} />
+          <TopNavBar title="Risk" />
+          <View style={styles.content}>
+            <RiskAssessments onStartAssessment={() => handleNavigate('hazardForm')} />
+        </View>
         </>
       );
+
+      case 'hazardForm':
+          return (
+              <>
+                  <TopNavBar
+                      title="Hazard Form"
+                      showBackButton={true}
+                      onBackPress={() => handleNavigate('risk')}
+                  />
+                  <View style={styles.content}>
+                      <HazardForm onDone={() => handleNavigate('risk')} />
+                  </View>
+              </>
+          );
 
     case 'personal':
       return (

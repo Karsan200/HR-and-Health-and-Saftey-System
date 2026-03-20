@@ -10,6 +10,7 @@ describe('ProfileService', () => {
     lastName: 'Doe',
     email: 'john.doe@example.com',
     phoneNumber: '1234567890',
+    hasPinCode: true,
     created: '2026-03-18T12:00:00Z',
   };
 
