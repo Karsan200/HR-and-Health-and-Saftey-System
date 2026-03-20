@@ -1,8 +1,11 @@
 import {StyleSheet} from "react-native";
-import {FontSize, TextStyles} from "../theme/theme.ts";
+import { Fonts, FontSize, TextStyles } from '../theme/theme.ts';
 
-export default function buttonActionBarStyles(theme: any) {
-    return StyleSheet.create({
+export const ButtonActionBarStyles= (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
+
+  return StyleSheet.create({
 
         //root container that holds the entire action bar, positioned at the bottom of the screen
         container: {
@@ -37,9 +40,10 @@ export default function buttonActionBarStyles(theme: any) {
         },
         //base styling of text inside buttons
         label: {
-            fontSize: FontSize.s16,
+            fontSize: FontSize.s16 * fontScale,
             textAlignVertical: 'center',
-            ...TextStyles.medium,
+            fontFamily: fontFamilies.medium,
+            fontWeight: TextStyles.medium.fontWeight,
 
         },
         //submit button label
