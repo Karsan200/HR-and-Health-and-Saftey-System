@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {Pressable, ScrollView, Text, View} from 'react-native';
 import ColorPicker from 'react-native-wheel-color-picker';
 import { useTheme } from "../../theme/colourController";
 import { settingsStyles } from './SettingsScreen.styles';
 import { DefaultColours } from "../../theme/colours";
 import SwitchToggle from "../../components/SwitchToggle.tsx";
+import { getSettings, updateSettings } from '../../logic/SettingsService.ts';
 
 type HSL = {
   h: number;
@@ -120,8 +121,6 @@ export default function SettingsScreen() {
   const [pickerVisible, setPickerVisible] = useState(false);
   const [editingColor, setEditingColor] = useState<string | null>(null);
 
-  const styles = settingsStyles(theme, accessibility);
-
   const [highlightSmallText, setHighlightSmallText] = React.useState(false);
 
   const [pickColors, setPickColors] = useState({
@@ -136,6 +135,76 @@ export default function SettingsScreen() {
     light: ""
   });
 
+  const styles = settingsStyles(theme, accessibility);
+
+  // Load the settings they have saved.
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await getSettings();
+
+        updateAccessibility({
+          largeText: data.largeText,
+          dyslexicFont: data.dyslexicFont,
+          highlightText: data.highlightText,
+        });
+
+        setHighlightSmallText(data.highlightText);
+
+        updateTheme({
+          redPrimary: data.accentColour,
+          greyBackground: data.backgroundColour,
+          black: data.textColour,
+        });
+
+        setPickColors({
+          background: data.backgroundColour,
+          text: data.textColour,
+          accent: data.accentColour
+        });
+
+      } catch (err) {
+        console.error("Failed to load settings", err);
+      }
+    }
+
+    load();
+  }, [updateTheme, updateAccessibility]);
+
+  async function save(update: any) {
+    try {
+      await updateSettings(update);
+    } catch (err) {
+      console.error("Save failed", err);
+    }
+  }
+
+  function toggleAccessibility(key: "largeText" | "dyslexicFont") {
+    const newVal = !accessibility[key];
+    updateAccessibility({ [key]: newVal });
+    save({ [key]: newVal });
+  }
+
+  function handleHighlightToggle() {
+    const newVal = !highlightSmallText;
+    setHighlightSmallText(newVal);
+
+    updateAccessibility({ highlightText: newVal });
+    save({ highlightText: newVal });
+
+    if (newVal) {
+      updateTheme({
+        greyPrimaryMainText: '#FFEE00',
+        black: '#FFEE00',
+      })
+    } else {
+      updateTheme({
+        greyPrimaryMainText: '#767676',
+        black: '#000000',
+      })
+    }
+  }
+
   function applyDefaultTheme() {
     updateTheme(DefaultColours);
 
@@ -147,6 +216,7 @@ export default function SettingsScreen() {
 
     setPickerVisible(false);
     setEditingColor(null);
+    save({ themePreset: "DEFAULT", accentColour: DefaultColours.redPrimary });
   }
 
   function applyBlueTheme() {
@@ -164,6 +234,7 @@ export default function SettingsScreen() {
     });
     setPickerVisible(false);
     setEditingColor(null);
+    save({ themePreset: "BLUE", accentColour: DefaultColours.redPrimary });
   }
 
   function applyGreenTheme() {
@@ -181,6 +252,7 @@ export default function SettingsScreen() {
     });
     setPickerVisible(false);
     setEditingColor(null);
+    save({ themePreset: "GREEN", accentColour: DefaultColours.redPrimary });
   }
 
   function applyDarkTheme() {
@@ -218,23 +290,7 @@ export default function SettingsScreen() {
     });
     setPickerVisible(false);
     setEditingColor(null);
-  }
-
-  function handleHighlightToggle() {
-    const newValue = !highlightSmallText;
-    setHighlightSmallText(newValue);
-
-    if (newValue) {
-      updateTheme({
-        greyPrimaryMainText: '#FFEE00',
-        black: '#FFEE00',
-      })
-    } else {
-      updateTheme({
-        greyPrimaryMainText: '#767676',
-        black: '#000000',
-      })
-    }
+    save({ themePreset: "DARK", accentColour: DefaultColours.redPrimary });
   }
 
   function openPicker(type: "background" | "text" | "accent") {
@@ -262,12 +318,15 @@ export default function SettingsScreen() {
     const newColors = generateColorSet(hex);
     setColors(newColors);
 
+    let payload: any = {};
+
     if (editingColor === "accent") {
       updateTheme({
         redPrimary: newColors.primary,
         redTextDark: newColors.dark,
         redBackgroundLight: newColors.light
       });
+      payload.accentColour = newColors.primary;
     }
 
     if (editingColor === "text") {
@@ -276,6 +335,7 @@ export default function SettingsScreen() {
         greyPrimaryMainText: newColors.primary,
         greyIconLight: newColors.light
       });
+      payload.textColour = newColors.primary;
     }
 
     if (editingColor === "background") {
@@ -283,6 +343,7 @@ export default function SettingsScreen() {
         greyBackground: newColors.primary,
         white: newColors.light
       });
+      payload.backgroundColour = newColors.primary;
     }
   }
 
@@ -309,11 +370,7 @@ export default function SettingsScreen() {
             </View>
             <SwitchToggle
               value={accessibility.dyslexicFont}
-              onToggle={() =>
-                updateAccessibility({
-                  dyslexicFont: !accessibility.dyslexicFont
-                })
-              }
+              onToggle={() => toggleAccessibility("dyslexicFont")}
             />
           </View>
 
@@ -328,11 +385,7 @@ export default function SettingsScreen() {
             </View>
             <SwitchToggle
               value={accessibility.largeText}
-              onToggle={() =>
-                updateAccessibility({
-                  largeText: !accessibility.largeText
-                })
-              }
+              onToggle={() => toggleAccessibility("largeText")}
             />
           </View>
 
