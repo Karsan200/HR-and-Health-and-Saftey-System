@@ -29,6 +29,10 @@ export const styles = (theme: any) =>
       elevation: 4,
     },
 
+    modalWrapper: {
+        gap: Spacing.mediumPadding,
+    },
+
     /**
      * Top row of modal.
      */

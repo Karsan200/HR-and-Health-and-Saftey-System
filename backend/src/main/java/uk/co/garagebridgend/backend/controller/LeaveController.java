@@ -13,6 +13,9 @@ import uk.co.garagebridgend.backend.logic.LeaveService;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveTypeResponse;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import uk.co.garagebridgend.backend.models.request.LeaveRequest;
 
 import java.util.List;
 
@@ -75,6 +78,28 @@ public class LeaveController {
     public List<LeaveTypeResponse> getLeaveTypes() {
         try {
             return leaveService.getLeaveTypes();
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal server error"
+            );
+        }
+    }
+
+    /**
+     * Creates a new leave request for the authenticated user.
+     *
+     * @param request request body containing leave details
+     */
+    @PostMapping
+    public void createLeave(@RequestBody final LeaveRequest request) {
+        try {
+            leaveService.createLeave(request);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    e.getMessage()
+            );
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,

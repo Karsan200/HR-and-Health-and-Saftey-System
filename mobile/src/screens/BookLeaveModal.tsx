@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Modal,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Menu } from 'react-native-paper';
+import { Menu, Portal, Modal as PaperModal } from 'react-native-paper';
 import dayjs from 'dayjs';
 
 import AuthenticationService from '../logic/AuthenticationService';
@@ -104,23 +103,26 @@ export default function BookLeaveModal({
         method: 'GET',
       });
 
+      console.log('Leave types status:', response.status);
+
+      const text = await response.text();
+      console.log('Leave types raw response:', text);
+
       if (!response.ok) {
-        console.log(`Failed to load leave types. Status: ${response.status}`);
         setErrorMessage(`Failed to load leave types. Status: ${response.status}`);
         setLeaveTypes([]);
         return;
       }
 
-      const responseText = await response.text();
-
-      if (!responseText) {
-        console.log('Leave types response was empty.');
+      if (!text) {
         setErrorMessage('Leave types response was empty.');
         setLeaveTypes([]);
         return;
       }
 
-      const data: LeaveType[] = JSON.parse(responseText);
+      const data: LeaveType[] = JSON.parse(text);
+      console.log('Parsed leave types:', data);
+
       setLeaveTypes(data);
 
       if (data.length > 0) {
@@ -128,8 +130,11 @@ export default function BookLeaveModal({
           data.find((leaveType) => leaveType.name.toLowerCase() === 'holiday')
           ?? data[0];
 
+        console.log('Default leave type:', defaultLeaveType);
+
         setSelectedLeaveTypeId(defaultLeaveType.leaveTypeId);
       }
+
     } catch (error) {
       console.error('Error fetching leave types:', error);
       setErrorMessage('Unable to load leave types.');
@@ -204,7 +209,13 @@ export default function BookLeaveModal({
     setErrorMessage('');
     setIsSubmitting(true);
 
-    // Attempting to submit the leave request to the backend
+    console.log('Submitting leave request:', {
+      startDate,
+      endDate,
+      leaveTypeId: selectedLeaveTypeId,
+      notes: notes.trim(),
+    });
+
     try {
       const response = await AuthenticationService.fetch('/api/leave', {
         method: 'POST',
@@ -219,12 +230,20 @@ export default function BookLeaveModal({
         }),
       });
 
-      // If the is not successful, return the error message for debugging
+      console.log('Submit response status:', response.status);
+
+      const responseText = await response.text();
+      console.log('Submit response body:', responseText);
+
       if (!response.ok) {
-        const errorText = await response.text();
-        setErrorMessage(errorText || 'Unable to submit leave request.');
+        console.log(`Status: ${response.status}, Response: ${responseText}`);
+        setErrorMessage(
+          responseText || `Unable to submit leave request. Status: ${response.status}`
+        );
         return;
       }
+
+      console.log('Leave submitted successfully');
 
       onClose();
       await onSuccess();
@@ -237,13 +256,12 @@ export default function BookLeaveModal({
     }
   };
   return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <View style={styles.overlay}>
+    <Portal>
+      <PaperModal
+        visible={visible}
+        onDismiss={onClose}
+        contentContainerStyle={styles.modalWrapper}
+      >
         <View style={styles.modalContainer}>
           <View style={styles.headerRow}>
             <Text style={styles.title}>Book Time Off</Text>
@@ -253,7 +271,6 @@ export default function BookLeaveModal({
             </TouchableOpacity>
           </View>
 
-          {/* Start date, keeping this as a text for now, but it will change*/}
           <View style={styles.fieldWrapper}>
             <Text style={styles.fieldLabel}>Selected Start Date</Text>
             <TextInput
@@ -265,7 +282,6 @@ export default function BookLeaveModal({
             />
           </View>
 
-          {/* End date */}
           <View style={styles.fieldWrapper}>
             <Text style={styles.fieldLabel}>Selected End Date</Text>
             <TextInput
@@ -277,8 +293,6 @@ export default function BookLeaveModal({
             />
           </View>
 
-          {/* Section for selecting the leave type */}
-          {/* Leave type dropdown */}
           <View style={styles.fieldWrapper}>
             <Text style={styles.fieldLabel}>Type of Leave</Text>
 
@@ -291,7 +305,10 @@ export default function BookLeaveModal({
                 anchor={
                   <TouchableOpacity
                     style={styles.dropdownButton}
-                    onPress={openLeaveTypeMenu}
+                    onPress={() => {
+                      console.log('Opening leave type menu');
+                      openLeaveTypeMenu();
+                    }}
                   >
                     <Text style={styles.dropdownButtonText}>
                       {selectedLeaveType ? selectedLeaveType.name : 'Select leave type'}
@@ -304,6 +321,7 @@ export default function BookLeaveModal({
                   <Menu.Item
                     key={leaveType.leaveTypeId}
                     onPress={() => {
+                      console.log('Selected leave type:', leaveType);
                       setSelectedLeaveTypeId(leaveType.leaveTypeId);
                       closeLeaveTypeMenu();
                     }}
@@ -314,7 +332,6 @@ export default function BookLeaveModal({
             )}
           </View>
 
-          {/* Adding the notes section where users put a description of why they are requesting leave */}
           <View style={styles.fieldWrapper}>
             <Text style={styles.fieldLabel}>Add any additional details...</Text>
             <TextInput
@@ -328,12 +345,10 @@ export default function BookLeaveModal({
             />
           </View>
 
-          {/* returning the error to help debugging*/}
           {errorMessage ? (
             <Text style={styles.errorText}>{errorMessage}</Text>
           ) : null}
 
-          {/* Allowing the user to submit the form/*/}
           <TouchableOpacity
             style={styles.submitButton}
             onPress={handleSubmit}
@@ -344,7 +359,7 @@ export default function BookLeaveModal({
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
-    </Modal>
+      </PaperModal>
+    </Portal>
   );
 }

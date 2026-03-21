@@ -6,8 +6,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import uk.co.garagebridgend.backend.repository.AccountRepository;
+import uk.co.garagebridgend.backend.models.entity.AccountTable;
+import uk.co.garagebridgend.backend.models.request.LeaveRequest;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 import uk.co.garagebridgend.backend.models.entity.LeaveTable;
@@ -32,6 +37,8 @@ public class LeaveService {
      * Repository used to access leave type data from the database.
      */
     private final LeaveTypeRepository leaveTypeRepository;
+
+    private final AccountRepository accountRepository;
 
     /**
      * Retrieves all approved leave entries for calendar display.
@@ -99,5 +106,53 @@ public class LeaveService {
                         leaveType.getIconType()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Creates a new leave request based on the provided data.
+     *
+     * @param request the leave request data containing start date, end date, leave type, and notes
+     * @throws IllegalArgumentException if any required fields are missing or if the date range is invalid
+     */
+    public void createLeave(final LeaveRequest request)
+            throws IllegalArgumentException {
+
+        if (request.getStartDate() == null || request.getEndDate() == null) {
+            throw new IllegalArgumentException("Start date and end date are required.");
+        }
+
+        if (request.getLeaveTypeId() == null) {
+            throw new IllegalArgumentException("Leave type is required.");
+        }
+
+        if (request.getStartDate().isAfter(request.getEndDate())) {
+            throw new IllegalArgumentException("The start date cannot be after the end date.");
+        }
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || authentication.getName() == null) {
+            throw new IllegalArgumentException("Authenticated user not found.");
+        }
+
+        String username = authentication.getName();
+
+        AccountTable account = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Authenticated account not found."));
+
+        LeaveTypeTable leaveType = leaveTypeRepository.findById(request.getLeaveTypeId())
+                .orElseThrow(() -> new IllegalArgumentException("Selected leave type was not found."));
+
+        LeaveTable leave = new LeaveTable();
+        leave.setAccount(account);
+        leave.setLeaveType(leaveType);
+        leave.setStartDate(request.getStartDate().atStartOfDay());
+        leave.setEndDate(request.getEndDate().atTime(23, 59, 59));
+        leave.setApproved(false);
+        leave.setNotes(request.getNotes());
+        leave.setResponse(null);
+        leave.setCreated(LocalDateTime.now());
+
+        leaveRepository.save(leave);
     }
 }
