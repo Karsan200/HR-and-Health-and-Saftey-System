@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import uk.co.garagebridgend.backend.RentATechApplication;
 import uk.co.garagebridgend.backend.logic.LeaveService;
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveSummaryResponse;
@@ -142,5 +143,14 @@ public class LeaveControllerTest {
 
         mockMvc.perform(get("/api/leave/summary"))
                 .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testGetSummaryUnauthorized() throws Exception {
+        when(leaveService.getLeaveSummaryForCurrentUser())
+                .thenThrow(new AuthenticatedAccountNotFoundException());
+
+        mockMvc.perform(get("/api/leave/summary"))
+                .andExpect(status().isUnauthorized());
     }
 }

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 import uk.co.garagebridgend.backend.models.entity.LeaveTable;
@@ -105,7 +106,7 @@ public class LeaveService {
     public LeaveSummaryResponse getLeaveSummaryForCurrentUser() {
         User user = AuthenticationService.getCurrentUser();
         if (user == null) {
-            throw new RuntimeException("User not authenticated");
+            throw new AuthenticatedAccountNotFoundException();
         }
 
         Long accountId = Long.valueOf(user.getUsername());

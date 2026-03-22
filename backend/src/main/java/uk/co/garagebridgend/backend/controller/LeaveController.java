@@ -13,6 +13,7 @@ import uk.co.garagebridgend.backend.logic.LeaveService;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveSummaryResponse;
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 
 import java.util.List;
 
@@ -78,6 +79,11 @@ public class LeaveController {
     public LeaveSummaryResponse getSummary() {
         try {
             return leaveService.getLeaveSummaryForCurrentUser();
+        } catch (AuthenticatedAccountNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "User not authenticated"
+            );
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,

@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.test.context.ActiveProfiles;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.LeaveTable;
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.LeaveSummaryResponse;
 import uk.co.garagebridgend.backend.repository.LeaveRepository;
 
@@ -163,7 +164,9 @@ public class LeaveServiceTest {
         try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
             authMock.when(AuthenticationService::getCurrentUser).thenReturn(null);
 
-            assertThrows(RuntimeException.class, () -> leaveService.getLeaveSummaryForCurrentUser());
+            assertThrows(AuthenticatedAccountNotFoundException.class, () ->
+                    leaveService.getLeaveSummaryForCurrentUser()
+            );
         }
     }
 }
