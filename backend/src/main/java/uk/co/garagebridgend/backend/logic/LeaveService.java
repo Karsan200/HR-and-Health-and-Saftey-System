@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.request.LeaveRequest;
@@ -20,6 +21,7 @@ import uk.co.garagebridgend.backend.repository.LeaveRepository;
 import uk.co.garagebridgend.backend.models.entity.LeaveTypeTable;
 import uk.co.garagebridgend.backend.models.response.LeaveTypeResponse;
 import uk.co.garagebridgend.backend.repository.LeaveTypeRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service responsible for handling business logic related to employee leave.
@@ -38,6 +40,9 @@ public class LeaveService {
      */
     private final LeaveTypeRepository leaveTypeRepository;
 
+    /**
+     * Repository used to access account data from the database.
+     */
     private final AccountRepository accountRepository;
 
     /**
@@ -114,44 +119,39 @@ public class LeaveService {
      * @param request the leave request data containing start date, end date, leave type, and notes
      * @throws IllegalArgumentException if any required fields are missing or if the date range is invalid
      */
+    @Transactional
     public void createLeave(final LeaveRequest request)
             throws IllegalArgumentException {
 
         if (request.getStartDate() == null || request.getEndDate() == null) {
             throw new IllegalArgumentException("Start date and end date are required.");
         }
-
+        if (request.getEndDate().isBefore(request.getStartDate())) {
+            throw new IllegalArgumentException("End date cannot be before start date.");
+        }
         if (request.getLeaveTypeId() == null) {
             throw new IllegalArgumentException("Leave type is required.");
         }
 
-        if (request.getStartDate().isAfter(request.getEndDate())) {
-            throw new IllegalArgumentException("The start date cannot be after the end date.");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            throw new AuthenticatedAccountNotFoundException();
         }
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || authentication.getName() == null) {
-            throw new IllegalArgumentException("Authenticated user not found.");
-        }
-
-        String username = authentication.getName();
-
+        String username = auth.getName();
         AccountTable account = accountRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("Authenticated account not found."));
+                .orElseThrow(AuthenticatedAccountNotFoundException::new);
 
         LeaveTypeTable leaveType = leaveTypeRepository.findById(request.getLeaveTypeId())
-                .orElseThrow(() -> new IllegalArgumentException("Selected leave type was not found."));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid leave type id."));
 
         LeaveTable leave = new LeaveTable();
         leave.setAccount(account);
         leave.setLeaveType(leaveType);
         leave.setStartDate(request.getStartDate().atStartOfDay());
-        leave.setEndDate(request.getEndDate().atTime(23, 59, 59));
+        leave.setEndDate(request.getEndDate().atTime(23,59,59));
         leave.setApproved(false);
         leave.setNotes(request.getNotes());
-        leave.setResponse(null);
-        leave.setCreated(LocalDateTime.now());
 
         leaveRepository.save(leave);
     }
