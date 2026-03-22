@@ -159,16 +159,14 @@ const [refreshing, setRefreshing] = useState(false);
   return (
     <SafeAreaView style={styles(theme).container}>
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={theme.redPrimary} // spinner color
+            tintColor={theme.redPrimary}
           />
         }
       >
-        {/* Existing content: summary cards, calendar, key */}
         <View style={styles(theme).summaryWrapper}>
           <SummaryRow>
             <SummaryCard
