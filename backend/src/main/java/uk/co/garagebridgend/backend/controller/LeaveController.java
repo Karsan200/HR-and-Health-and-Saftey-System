@@ -12,6 +12,8 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.LeaveService;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
+import uk.co.garagebridgend.backend.models.response.LeaveSummaryResponse;
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 
 import java.util.List;
 
@@ -65,4 +67,29 @@ public class LeaveController {
             );
         }
     }
+
+    /**
+     * Retrieves a summary of leave for the currently authenticated user.
+     *
+     * @return a {@link LeaveSummaryResponse} object containing leave summary details
+     * @throws ResponseStatusException with {@link org.springframework.http.HttpStatus#INTERNAL_SERVER_ERROR}
+     * if the user is not authenticated or an unexpected error occurs
+     */
+    @GetMapping("/summary")
+    public LeaveSummaryResponse getSummary() {
+        try {
+            return leaveService.getLeaveSummaryForCurrentUser();
+        } catch (AuthenticatedAccountNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "User not authenticated"
+            );
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal server error"
+            );
+        }
+    }
+
 }

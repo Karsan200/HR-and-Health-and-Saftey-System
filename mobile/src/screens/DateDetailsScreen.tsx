@@ -1,15 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import dayjs from 'dayjs';
 
 import { dateDetailsStyles as styles } from './DateDetailsScreen.styles';
-import AuthenticationService from "../logic/AuthenticationService";
+import AuthenticationService from '../logic/AuthenticationService';
 import { ThemeContext } from '../theme/colourController';
 
 type Props = {
@@ -20,10 +15,13 @@ type Activity = {
   name: string;
   role: string;
   until: string;
+  from?: string;
+  to?: string;
+  isPartial: boolean;
 };
 
 const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
-  const { theme } = useContext(ThemeContext); // Get current theme
+  const { theme } = useContext(ThemeContext);
 
   const initialDate = initialDateStr || dayjs().format('YYYY-MM-DD');
 
@@ -41,7 +39,7 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
   const fetchLeaveForDate = async (date: string) => {
     try {
       const response = await AuthenticationService.fetch(
-        `/api/leave/day/${date}`
+        `/api/leave/day/${date}`,
       );
 
       if (!response.ok) {
@@ -63,6 +61,9 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
         name: leave.name,
         role: leave.role,
         until: dayjs(leave.endDate).format('DD/MM/YYYY'),
+        from: dayjs(leave.startDate).format('HH:mm'),
+        to: dayjs(leave.endDate).format('HH:mm'),
+        isPartial: leave.partialDay,
       }));
 
       setActivities(mapped);
@@ -103,11 +104,17 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
             return (
               <TouchableOpacity
                 key={day.format('YYYY-MM-DD')}
-                style={[styles(theme).dayCard, selected && styles(theme).dayCardSelected]}
+                style={[
+                  styles(theme).dayCard,
+                  selected && styles(theme).dayCardSelected,
+                ]}
                 onPress={() => setSelectedDate(day)}
               >
                 <Text
-                  style={[styles(theme).dayLabel, selected && styles(theme).dayLabelSelected]}
+                  style={[
+                    styles(theme).dayLabel,
+                    selected && styles(theme).dayLabelSelected,
+                  ]}
                 >
                   {day.format('ddd').toUpperCase()}
                 </Text>
@@ -134,13 +141,20 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
             <Text style={styles(theme).weekButtonText}>‹</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles(theme).weekButton} onPress={goToNextWeek}>
+          <TouchableOpacity
+            style={styles(theme).weekButton}
+            onPress={goToNextWeek}
+          >
             <Text style={styles(theme).weekButtonText}>›</Text>
           </TouchableOpacity>
         </View>
 
         {/* Activity Cards */}
-        {activities.length === 0 && <Text style={{ color: theme.greyPrimaryMainText }}>No leave for this date</Text>}
+        {activities.length === 0 && (
+          <Text style={{ color: theme.greyPrimaryMainText }}>
+            No leave for this date
+          </Text>
+        )}
 
         {activities.map((activity, index) => (
           <View key={index} style={styles(theme).activityCard}>
@@ -156,7 +170,9 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
               </View>
 
               <Text style={styles(theme).activitySubtext}>
-                On leave til {activity.until}
+                {activity.isPartial
+                  ? `On leave ${activity.from} - ${activity.to}`
+                  : `On leave til ${activity.until}`}
               </Text>
             </View>
           </View>
