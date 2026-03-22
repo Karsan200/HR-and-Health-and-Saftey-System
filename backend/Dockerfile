@@ -1,7 +1,7 @@
 FROM eclipse-temurin:21-jdk
 
 WORKDIR /backend
-COPY build/libs/*-SNAPSHOT.jar app.jar
+COPY build/libs/*.jar app.jar
 
-EXPOSE 8081
+EXPOSE 5000
 ENTRYPOINT ["java", "-jar", "/backend/app.jar"]
