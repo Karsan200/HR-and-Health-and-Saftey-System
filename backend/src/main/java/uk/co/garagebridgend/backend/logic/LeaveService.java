@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 import uk.co.garagebridgend.backend.models.entity.LeaveTable;
+import uk.co.garagebridgend.backend.models.response.LeaveSummaryResponse;
 import uk.co.garagebridgend.backend.repository.LeaveRepository;
 
 /**
@@ -73,4 +75,58 @@ public class LeaveService {
                 ))
                 .collect(Collectors.toList());
     }
+    public LeaveSummaryResponse getLeaveSummaryForCurrentUser() {
+        User user = AuthenticationService.getCurrentUser();
+
+        if (user == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        Long accountId = Long.valueOf(user.getUsername());
+
+        List<LeaveTable> leaves = leaveRepository.findAll()
+                .stream()
+                .filter(l -> l.getAccount().getAccountId().equals(accountId))
+                .toList();
+
+        int approved = 0;
+        int pending = 0;
+
+        int totalAllowanceHours = 160;
+
+        int usedHours = 0;
+
+        for (LeaveTable leave : leaves) {
+
+            // Calculate hours per leave
+            long days = java.time.Duration.between(
+                    leave.getStartDate().toLocalDate().atStartOfDay(),
+                    leave.getEndDate().toLocalDate().atStartOfDay()
+            ).toDays() + 1;
+
+            // convert days to hours
+            long hours = days * 8;
+
+            // Minimum 8 hours for same-day leave
+            if (hours == 0) {
+                hours = 8;
+            }
+
+            if (leave.isApproved()) {
+                approved++;
+                usedHours += hours;
+            } else {
+                pending++;
+            }
+        }
+
+        int remainingHours = totalAllowanceHours - usedHours;
+
+        return new LeaveSummaryResponse(
+                remainingHours,
+                pending,
+                approved
+        );
+    }
+
 }

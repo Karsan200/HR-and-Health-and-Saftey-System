@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.LeaveService;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
+import uk.co.garagebridgend.backend.models.response.LeaveSummaryResponse;
 
 import java.util.List;
 
@@ -65,4 +66,17 @@ public class LeaveController {
             );
         }
     }
+
+    @GetMapping("/summary")
+    public LeaveSummaryResponse getSummary() {
+        try {
+            return leaveService.getLeaveSummaryForCurrentUser();
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal server error"
+            );
+        }
+    }
+
 }

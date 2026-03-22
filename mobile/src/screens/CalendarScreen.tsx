@@ -22,8 +22,15 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
 
   const [bookedDays, setBookedDays] = useState<string[]>([]);
 
+  const [summary, setSummary] = useState({
+    totalDays: 0,
+    pendingCount: 0,
+    approvedCount: 0,
+  });
+
   useEffect(() => {
     fetchLeave();
+    fetchSummary();
   }, []);
 
   const fetchLeave = async () => {
@@ -46,6 +53,19 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
       setBookedDays(dates);
     } catch (error) {
       console.error('Error fetching leave', error);
+    }
+  };
+
+  const fetchSummary = async () => {
+    try {
+      const response = await AuthenticationService.fetch(
+        '/api/leave/summary',
+        {},
+      );
+      const data = await response.json();
+      setSummary(data);
+    } catch (error) {
+      console.error('Error fetching summary', error);
     }
   };
 
@@ -132,21 +152,21 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
         <SummaryRow>
           <SummaryCard
             label="Hours"
-            value={82}
+            value={summary.totalDays}
             icon="clock-outline"
             colour="red"
           />
 
           <SummaryCard
             label="Pending"
-            value={4}
+            value={summary.pendingCount}
             icon="alert-circle-outline"
             colour="amber"
           />
 
           <SummaryCard
             label="Approved"
-            value={2}
+            value={summary.approvedCount}
             icon="check-circle-outline"
             colour="green"
           />
