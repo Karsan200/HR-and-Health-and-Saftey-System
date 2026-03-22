@@ -17,8 +17,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import uk.co.garagebridgend.backend.RentATechApplication;
 import uk.co.garagebridgend.backend.logic.LeaveService;
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
+import uk.co.garagebridgend.backend.models.response.LeaveSummaryResponse;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -83,11 +85,16 @@ public class LeaveControllerTest {
     @Test
     void testGetLeaveForDayValid() throws Exception {
 
+        LocalDateTime start = LocalDateTime.now();
+        LocalDateTime end = start.plusHours(2);
+
         List<LeaveDayResponse> mockData = List.of(
                 new LeaveDayResponse(
                         "John Doe",
                         "Technician",
-                        LocalDateTime.now().plusDays(2)
+                        start,
+                        end,
+                        true // partialDay = true
                 )
         );
 
@@ -114,5 +121,36 @@ public class LeaveControllerTest {
 
         mockMvc.perform(get("/api/leave/day/2026-03-01"))
                 .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testGetSummarySuccess() throws Exception {
+        LeaveSummaryResponse mockSummary = new LeaveSummaryResponse(
+                120, // remainingHours
+                2,   // pendingCount
+                5    // approvedCount
+        );
+
+        when(leaveService.getLeaveSummaryForCurrentUser()).thenReturn(mockSummary);
+
+        mockMvc.perform(get("/api/leave/summary"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetSummaryThrowsException() throws Exception {
+        when(leaveService.getLeaveSummaryForCurrentUser()).thenThrow(new RuntimeException("Auth error"));
+
+        mockMvc.perform(get("/api/leave/summary"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testGetSummaryUnauthorized() throws Exception {
+        when(leaveService.getLeaveSummaryForCurrentUser())
+                .thenThrow(new AuthenticatedAccountNotFoundException());
+
+        mockMvc.perform(get("/api/leave/summary"))
+                .andExpect(status().isUnauthorized());
     }
 }
