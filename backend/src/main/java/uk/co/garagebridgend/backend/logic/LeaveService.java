@@ -2,6 +2,7 @@ package uk.co.garagebridgend.backend.logic;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,13 @@ import uk.co.garagebridgend.backend.repository.LeaveRepository;
 @Service
 @RequiredArgsConstructor
 public class LeaveService {
+
+
+    /** Standard work hours per full day of leave. */
+    private static final int HOURS_PER_FULL_DAY = 8;
+
+    /** Total holiday allowance in hours for a user. */
+    private static final int TOTAL_ALLOWANCE_HOURS = 160;
 
     /**
      * Repository used to access leave data from the database.
@@ -65,14 +73,15 @@ public class LeaveService {
         }
 
         LocalDateTime startOfDay = parsedDate.atStartOfDay();
-        LocalDateTime endOfDay = parsedDate.atTime(23, 59, 59);
+        LocalDateTime endOfDay = parsedDate.atTime(LocalTime.MAX);
 
         List<LeaveTable> leave = leaveRepository.findLeaveForDate(startOfDay, endOfDay);
 
         return leave.stream()
                 .map(l -> {
                     boolean isFullDay =
-                            l.getStartDate().toLocalTime().equals(java.time.LocalTime.MIDNIGHT) &&
+                            l.getStartDate().toLocalTime().equals(java.time.LocalTime.MIDNIGHT)
+                                    &&
                                     l.getEndDate().toLocalTime().equals(java.time.LocalTime.MIDNIGHT);
 
                     return new LeaveDayResponse(
@@ -85,9 +94,16 @@ public class LeaveService {
                 })
                 .collect(Collectors.toList());
     }
+
+    /**
+     * Retrieves a summary of leave for the currently authenticated user.
+     *
+     * @return a {@link LeaveSummaryResponse} containing the remaining hours,
+     * count of pending leaves, and count of approved leaves for the current user
+     * @throws RuntimeException if no user is currently authenticated
+     */
     public LeaveSummaryResponse getLeaveSummaryForCurrentUser() {
         User user = AuthenticationService.getCurrentUser();
-
         if (user == null) {
             throw new RuntimeException("User not authenticated");
         }
@@ -101,10 +117,6 @@ public class LeaveService {
 
         int approved = 0;
         int pending = 0;
-
-        // Total allowance of hours for all users to use for holiday's
-        int totalAllowanceHours = 160;
-
         int usedHours = 0;
 
         for (LeaveTable leave : leaves) {
@@ -112,8 +124,8 @@ public class LeaveService {
             long hours;
 
             boolean isFullDay =
-                    leave.getStartDate().toLocalTime().equals(java.time.LocalTime.MIDNIGHT) &&
-                            leave.getEndDate().toLocalTime().equals(java.time.LocalTime.MIDNIGHT);
+                    leave.getStartDate().toLocalTime().equals(java.time.LocalTime.MIDNIGHT)
+                            && leave.getEndDate().toLocalTime().equals(java.time.LocalTime.MIDNIGHT);
 
             if (isFullDay) {
                 long days = java.time.Duration.between(
@@ -121,7 +133,7 @@ public class LeaveService {
                         leave.getEndDate().toLocalDate().atStartOfDay()
                 ).toDays() + 1;
 
-                hours = days * 8;
+                hours = days * HOURS_PER_FULL_DAY;
             } else {
                 hours = java.time.Duration.between(
                         leave.getStartDate(),
@@ -137,7 +149,7 @@ public class LeaveService {
             }
         }
 
-        int remainingHours = totalAllowanceHours - usedHours;
+        int remainingHours = TOTAL_ALLOWANCE_HOURS - usedHours;
 
         return new LeaveSummaryResponse(
                 remainingHours,

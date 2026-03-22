@@ -16,11 +16,12 @@ import java.util.List;
 public interface LeaveRepository extends JpaRepository<LeaveTable, Long> {
 
     /**
-     * Retrieves all approved leave entries that include the specified date.
+     * Retrieves all approved leave entries that overlap with a given day.
      *
-     * @param date the date to check against leave records
-     * @return a list of {@link LeaveTable} entries where the date falls
-     *         within the leave period and the leave is approved
+     * @param startOfDay the start of the day (e.g. 00:00 of the selected date)
+     * @param endOfDay the end of the day (e.g. 23:59:59 of the selected date)
+     * @return a list of {@link LeaveTable} entries where the leave period overlaps
+     *         with the specified day and the leave is approved
      */
     @Query("""
     SELECT l FROM LeaveTable l

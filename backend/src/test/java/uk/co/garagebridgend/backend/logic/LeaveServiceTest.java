@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Tests for {@link LeaveService}.
@@ -73,11 +73,15 @@ public class LeaveServiceTest {
 
         LeaveTable leave = new LeaveTable();
         leave.setAccount(account);
-        leave.setStartDate(LocalDateTime.now());
-        leave.setEndDate(LocalDateTime.now().plusDays(1));
+        leave.setStartDate(LocalDateTime.of(2026, 3, 1, 10, 0));
+        leave.setEndDate(LocalDateTime.of(2026, 3, 1, 14, 0));
         leave.setApproved(true);
 
-        when(leaveRepository.findLeaveForDate(LocalDate.parse("2026-03-01").atStartOfDay()))
+        LocalDate date = LocalDate.parse("2026-03-01");
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(23, 59, 59);
+
+        when(leaveRepository.findLeaveForDate(startOfDay, endOfDay))
                 .thenReturn(List.of(leave));
 
         var result = leaveService.getLeaveForDate("2026-03-01");
@@ -85,12 +89,20 @@ public class LeaveServiceTest {
         assertEquals(1, result.size());
         assertEquals("John Doe", result.getFirst().getName());
         assertEquals("Technician", result.getFirst().getRole());
+
+        assertTrue(result.getFirst().isPartialDay());
+        assertNotNull(result.getFirst().getStartDate());
+        assertNotNull(result.getFirst().getEndDate());
     }
 
     @Test
     void testGetLeaveForDateEmpty() {
 
-        when(leaveRepository.findLeaveForDate(LocalDate.parse("2026-03-01").atStartOfDay()))
+        LocalDate date = LocalDate.parse("2026-03-01");
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(23, 59, 59);
+
+        when(leaveRepository.findLeaveForDate(startOfDay, endOfDay))
                 .thenReturn(List.of());
 
         var result = leaveService.getLeaveForDate("2026-03-01");

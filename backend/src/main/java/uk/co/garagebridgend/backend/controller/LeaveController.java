@@ -67,6 +67,13 @@ public class LeaveController {
         }
     }
 
+    /**
+     * Retrieves a summary of leave for the currently authenticated user.
+     *
+     * @return a {@link LeaveSummaryResponse} object containing leave summary details
+     * @throws ResponseStatusException with {@link org.springframework.http.HttpStatus#INTERNAL_SERVER_ERROR}
+     * if the user is not authenticated or an unexpected error occurs
+     */
     @GetMapping("/summary")
     public LeaveSummaryResponse getSummary() {
         try {
