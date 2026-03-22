@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, ScrollView, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar, DateData } from 'react-native-calendars';
 import dayjs from 'dayjs';
@@ -27,6 +27,16 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
     pendingCount: 0,
     approvedCount: 0,
   });
+
+const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true); // start refreshing
+
+    await Promise.all([fetchLeave(), fetchSummary()]); // fetch both leave data and summary
+
+    setRefreshing(false); // stop refreshing
+  };
 
   useEffect(() => {
     fetchLeave();
@@ -148,61 +158,71 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
 
   return (
     <SafeAreaView style={styles(theme).container}>
-      <View style={styles(theme).summaryWrapper}>
-        <SummaryRow>
-          <SummaryCard
-            label="Hours"
-            value={summary.totalDays}
-            icon="clock-outline"
-            colour="red"
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.redPrimary} // spinner color
+          />
+        }
+      >
+        {/* Existing content: summary cards, calendar, key */}
+        <View style={styles(theme).summaryWrapper}>
+          <SummaryRow>
+            <SummaryCard
+              label="Hours"
+              value={summary.totalDays}
+              icon="clock-outline"
+              colour="red"
+            />
+            <SummaryCard
+              label="Pending"
+              value={summary.pendingCount}
+              icon="alert-circle-outline"
+              colour="amber"
+            />
+            <SummaryCard
+              label="Approved"
+              value={summary.approvedCount}
+              icon="check-circle-outline"
+              colour="green"
+            />
+          </SummaryRow>
+        </View>
+
+        <View style={styles(theme).calendarContainer}>
+          <Calendar
+            onDayPress={handleDayPress}
+            markedDates={markedDates}
+            theme={{
+              calendarBackground: theme.white,
+              textSectionTitleColor: theme.greyPrimaryMainText,
+              selectedDayBackgroundColor: theme.redPrimary,
+              selectedDayTextColor: theme.white,
+              todayTextColor: theme.redPrimary,
+              arrowColor: theme.redPrimary,
+              monthTextColor: theme.black,
+            }}
           />
 
-          <SummaryCard
-            label="Pending"
-            value={summary.pendingCount}
-            icon="alert-circle-outline"
-            colour="amber"
-          />
+          <View style={styles(theme).redStripe} />
 
-          <SummaryCard
-            label="Approved"
-            value={summary.approvedCount}
-            icon="check-circle-outline"
-            colour="green"
-          />
-        </SummaryRow>
-      </View>
+          {/* Key */}
+          <View style={styles(theme).keyContainer}>
+            <View style={styles(theme).keyItem}>
+              <View style={styles(theme).fullyBookedCircle} />
+              <Text style={styles(theme).keyText}>Fully Booked Days</Text>
+            </View>
 
-      <View style={styles(theme).calendarContainer}>
-        <Calendar
-          onDayPress={handleDayPress}
-          markedDates={markedDates}
-          theme={{
-            calendarBackground: theme.white,
-            textSectionTitleColor: theme.greyPrimaryMainText,
-            selectedDayBackgroundColor: theme.redPrimary,
-            selectedDayTextColor: theme.white,
-            todayTextColor: theme.redPrimary,
-            arrowColor: theme.redPrimary,
-            monthTextColor: theme.black,
-          }}
-        />
-
-        <View style={styles(theme).redStripe} />
-
-        {/* Key */}
-        <View style={styles(theme).keyContainer}>
-          <View style={styles(theme).keyItem}>
-            <View style={styles(theme).fullyBookedCircle} />
-            <Text style={styles(theme).keyText}>Fully Booked Days</Text>
-          </View>
-
-          <View style={styles(theme).keyItem}>
-            <View style={styles(theme).partialBookedCircle} />
-            <Text style={styles(theme).keyText}>Partial Booked Days</Text>
+            <View style={styles(theme).keyItem}>
+              <View style={styles(theme).partialBookedCircle} />
+              <Text style={styles(theme).keyText}>Partial Booked Days</Text>
+            </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
