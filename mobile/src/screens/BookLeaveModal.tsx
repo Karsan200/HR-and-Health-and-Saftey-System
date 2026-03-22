@@ -8,22 +8,10 @@ import {
 import { Menu, Portal, Modal as PaperModal } from 'react-native-paper';
 import dayjs from 'dayjs';
 
-import AuthenticationService from '../logic/AuthenticationService';
 import { useTheme } from '../theme/colourController';
 import { styles as baseStyles } from './BookLeaveModal.styles';
-
-/**
- * Format of the leave type returned from the backend.
- * This is used to display the leave types in the modal
- * and send the selected type back to the backend.
- */
-type LeaveType = {
-  leaveTypeId: number;
-  name: string;
-  colourIcon: string;
-  colourBg: string;
-  iconType: string;
-};
+import { HttpException } from '../exception/HttpException.ts';
+import LeaveService, { LeaveType } from '../logic/LeaveService';
 
 /**
  * Props for the BookLeaveModal component.
@@ -93,51 +81,17 @@ export default function BookLeaveModal({
   }, [visible, initialDate]);
 
   /**
-   * Loads the available leave types from the backend.
+   * Using the LeaveService to load the available leave types from the backend.
    */
   const fetchLeaveTypes = async () => {
     setIsLoadingLeaveTypes(true);
 
     try {
-      const response = await AuthenticationService.fetch('/api/leave/types', {
-        method: 'GET',
-      });
-
-      console.log('Leave types status:', response.status);
-
-      const text = await response.text();
-      console.log('Leave types raw response:', text);
-
-      if (!response.ok) {
-        setErrorMessage(`Failed to load leave types. Status: ${response.status}`);
-        setLeaveTypes([]);
-        return;
-      }
-
-      if (!text) {
-        setErrorMessage('Leave types response was empty.');
-        setLeaveTypes([]);
-        return;
-      }
-
-      const data: LeaveType[] = JSON.parse(text);
-      console.log('Parsed leave types:', data);
-
+      const data = await LeaveService.getLeaveTypes();
       setLeaveTypes(data);
-
-      if (data.length > 0) {
-        const defaultLeaveType =
-          data.find((leaveType) => leaveType.name.toLowerCase() === 'holiday')
-          ?? data[0];
-
-        console.log('Default leave type:', defaultLeaveType);
-
-        setSelectedLeaveTypeId(defaultLeaveType.leaveTypeId);
-      }
-
-    } catch (error) {
-      console.error('Error fetching leave types:', error);
+    } catch {
       setErrorMessage('Unable to load leave types.');
+      setLeaveTypes([]);
     } finally {
       setIsLoadingLeaveTypes(false);
     }
@@ -209,47 +163,30 @@ export default function BookLeaveModal({
     setErrorMessage('');
     setIsSubmitting(true);
 
-    console.log('Submitting leave request:', {
-      startDate,
-      endDate,
-      leaveTypeId: selectedLeaveTypeId,
-      notes: notes.trim(),
-    });
 
     try {
-      const response = await AuthenticationService.fetch('/api/leave', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+        await LeaveService.createLeave({
           startDate,
           endDate,
-          leaveTypeId: selectedLeaveTypeId,
+          leaveTypeId: selectedLeaveTypeId as number,
           notes: notes.trim(),
-        }),
-      });
-
-      console.log('Submit response status:', response.status);
-
-      const responseText = await response.text();
-      console.log('Submit response body:', responseText);
-
-      if (!response.ok) {
-        console.log(`Status: ${response.status}, Response: ${responseText}`);
-        setErrorMessage(
-          responseText || `Unable to submit leave request. Status: ${response.status}`
-        );
-        return;
-      }
-
-      console.log('Leave submitted successfully');
+        });
 
       onClose();
       await onSuccess();
 
     } catch (error) {
-      console.error('Error submitting leave request:', error);
+
+      if (error instanceof HttpException) {
+        if (error.statusCode === 401) {
+          setErrorMessage('Session expired. Please sign in again.');
+          return;
+        }
+
+        setErrorMessage(error.message || 'Unable to submit leave request.');
+        return;
+      }
+
       setErrorMessage('Something went wrong while submitting the request.');
     } finally {
       setIsSubmitting(false);
@@ -306,7 +243,6 @@ export default function BookLeaveModal({
                   <TouchableOpacity
                     style={styles.dropdownButton}
                     onPress={() => {
-                      console.log('Opening leave type menu');
                       openLeaveTypeMenu();
                     }}
                   >
@@ -321,7 +257,6 @@ export default function BookLeaveModal({
                   <Menu.Item
                     key={leaveType.leaveTypeId}
                     onPress={() => {
-                      console.log('Selected leave type:', leaveType);
                       setSelectedLeaveTypeId(leaveType.leaveTypeId);
                       closeLeaveTypeMenu();
                     }}
@@ -354,9 +289,7 @@ export default function BookLeaveModal({
             onPress={handleSubmit}
             disabled={isSubmitting}
           >
-            <Text style={styles.submitButtonText}>
-              {isSubmitting ? 'Submitting...' : 'Submit'}
-            </Text>
+            <Text style={styles.submitButtonText}>Submit</Text>
           </TouchableOpacity>
         </View>
       </PaperModal>

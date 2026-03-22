@@ -92,7 +92,7 @@ public class LeaveController {
      *
      * @param request request body containing leave details
      */
-    @PostMapping
+    @PostMapping("/create")
     public void createLeave(@RequestBody final LeaveRequest request) {
         try {
             leaveService.createLeave(request);

@@ -6,17 +6,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+
+import org.jetbrains.annotations.NotNull;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
-import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
-import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.request.LeaveRequest;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 import uk.co.garagebridgend.backend.models.entity.LeaveTable;
+import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.LeaveRepository;
 import uk.co.garagebridgend.backend.models.entity.LeaveTypeTable;
 import uk.co.garagebridgend.backend.models.response.LeaveTypeResponse;
@@ -44,6 +45,11 @@ public class LeaveService {
      * Repository used to access account data from the database.
      */
     private final AccountRepository accountRepository;
+
+    /**
+     * Service used to access authentication information about the currently logged-in user.
+     **/
+    private final AuthenticationService authenticationService;
 
     /**
      * Retrieves all approved leave entries for calendar display.
@@ -123,25 +129,10 @@ public class LeaveService {
     public void createLeave(final LeaveRequest request)
             throws IllegalArgumentException {
 
-        if (request.getStartDate() == null || request.getEndDate() == null) {
-            throw new IllegalArgumentException("Start date and end date are required.");
-        }
-        if (request.getEndDate().isBefore(request.getStartDate())) {
-            throw new IllegalArgumentException("End date cannot be before start date.");
-        }
-        if (request.getLeaveTypeId() == null) {
-            throw new IllegalArgumentException("Leave type is required.");
-        }
+        String username = leaveRequestChecks(request);
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-            throw new AuthenticatedAccountNotFoundException();
-        }
-
-        String username = auth.getName();
         AccountTable account = accountRepository.findByUsername(username)
                 .orElseThrow(AuthenticatedAccountNotFoundException::new);
-
         LeaveTypeTable leaveType = leaveTypeRepository.findById(request.getLeaveTypeId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid leave type id."));
 
@@ -154,5 +145,33 @@ public class LeaveService {
         leave.setNotes(request.getNotes());
 
         leaveRepository.save(leave);
+    }
+
+    /**
+     * Validates the leave request data and retrieves the username of the currently authenticated user.
+     *
+     * @param request the leave request to validate
+     * @return the username of the authenticated user
+     * @throws IllegalArgumentException if any required fields are missing or if the date range is invalid
+     * @throws AuthenticatedAccountNotFoundException if no authenticated user is found
+     */
+    @NotNull
+    private static String leaveRequestChecks(final LeaveRequest request) {
+        if (request.getStartDate() == null || request.getEndDate() == null) {
+            throw new IllegalArgumentException("Start date and end date are required.");
+        }
+        if (request.getEndDate().isBefore(request.getStartDate())) {
+            throw new IllegalArgumentException("End date cannot be before start date.");
+        }
+        if (request.getLeaveTypeId() == null) {
+            throw new IllegalArgumentException("Leave type is required.");
+        }
+
+        User user = AuthenticationService.getCurrentUser();
+        if (user == null) {
+            throw new AuthenticatedAccountNotFoundException();
+        }
+
+        return user.getUsername();
     }
 }
