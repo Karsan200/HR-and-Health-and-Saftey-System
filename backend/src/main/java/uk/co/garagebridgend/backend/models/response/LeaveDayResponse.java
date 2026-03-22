@@ -15,19 +15,18 @@ import lombok.Data;
 @AllArgsConstructor
 public class LeaveDayResponse {
 
-    /**
-     * The name of the employee on leave.
-     */
+    /** The name of the employee on leave. */
     private String name;
 
-    /**
-     * The role of the employee on leave.
-     */
+    /** The role of the employee on leave. */
     private String role;
 
-    /**
-     * The date and time when the leave period ends.
-     */
+    /** The date and time when the leave starts. */
+    private LocalDateTime startDate;
+
+    /** The date and time when the leave period ends. */
     private LocalDateTime endDate;
 
+    /** True if this is a partial-day leave (has specific times). */
+    private boolean partialDay;
 }

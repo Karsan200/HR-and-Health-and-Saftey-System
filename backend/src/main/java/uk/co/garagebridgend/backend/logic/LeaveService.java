@@ -56,23 +56,33 @@ public class LeaveService {
      */
     public List<LeaveDayResponse> getLeaveForDate(final String date)
             throws IllegalArgumentException {
+
         LocalDate parsedDate;
         try {
             parsedDate = LocalDate.parse(date);
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid date format. Expected format: YYYY-MM-DD");
         }
-        LocalDateTime startOfDay = parsedDate.atStartOfDay();
 
-        List<LeaveTable> leave = leaveRepository.findLeaveForDate(startOfDay);
+        LocalDateTime startOfDay = parsedDate.atStartOfDay();
+        LocalDateTime endOfDay = parsedDate.atTime(23, 59, 59);
+
+        List<LeaveTable> leave = leaveRepository.findLeaveForDate(startOfDay, endOfDay);
 
         return leave.stream()
-                .map(l -> new LeaveDayResponse(
-                        l.getAccount().getFirstName() + " "
-                                + l.getAccount().getLastName(),
-                        "Technician", // Replace with real role if available in future
-                        l.getEndDate()
-                ))
+                .map(l -> {
+                    boolean isFullDay =
+                            l.getStartDate().toLocalTime().equals(java.time.LocalTime.MIDNIGHT) &&
+                                    l.getEndDate().toLocalTime().equals(java.time.LocalTime.MIDNIGHT);
+
+                    return new LeaveDayResponse(
+                            l.getAccount().getFirstName() + " " + l.getAccount().getLastName(),
+                            "Technician",
+                            l.getStartDate(),
+                            l.getEndDate(),
+                            !isFullDay // partialDay = true if NOT full day
+                    );
+                })
                 .collect(Collectors.toList());
     }
     public LeaveSummaryResponse getLeaveSummaryForCurrentUser() {
@@ -92,29 +102,36 @@ public class LeaveService {
         int approved = 0;
         int pending = 0;
 
+        // Total allowance of hours for all users to use for holiday's
         int totalAllowanceHours = 160;
 
         int usedHours = 0;
 
         for (LeaveTable leave : leaves) {
 
-            // Calculate hours per leave
-            long days = java.time.Duration.between(
-                    leave.getStartDate().toLocalDate().atStartOfDay(),
-                    leave.getEndDate().toLocalDate().atStartOfDay()
-            ).toDays() + 1;
+            long hours;
 
-            // convert days to hours
-            long hours = days * 8;
+            boolean isFullDay =
+                    leave.getStartDate().toLocalTime().equals(java.time.LocalTime.MIDNIGHT) &&
+                            leave.getEndDate().toLocalTime().equals(java.time.LocalTime.MIDNIGHT);
 
-            // Minimum 8 hours for same-day leave
-            if (hours == 0) {
-                hours = 8;
+            if (isFullDay) {
+                long days = java.time.Duration.between(
+                        leave.getStartDate().toLocalDate().atStartOfDay(),
+                        leave.getEndDate().toLocalDate().atStartOfDay()
+                ).toDays() + 1;
+
+                hours = days * 8;
+            } else {
+                hours = java.time.Duration.between(
+                        leave.getStartDate(),
+                        leave.getEndDate()
+                ).toHours();
             }
 
             if (leave.isApproved()) {
                 approved++;
-                usedHours += hours;
+                usedHours += (int) hours;
             } else {
                 pending++;
             }

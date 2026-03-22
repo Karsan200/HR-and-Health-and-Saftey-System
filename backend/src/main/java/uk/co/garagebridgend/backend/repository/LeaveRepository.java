@@ -23,9 +23,10 @@ public interface LeaveRepository extends JpaRepository<LeaveTable, Long> {
      *         within the leave period and the leave is approved
      */
     @Query("""
-        SELECT l FROM LeaveTable l
-        WHERE :date >= l.startDate AND :date <= l.endDate
-        AND l.isApproved = true
+    SELECT l FROM LeaveTable l
+    WHERE l.startDate < :endOfDay
+    AND l.endDate > :startOfDay
+    AND l.isApproved = true
     """)
-    List<LeaveTable> findLeaveForDate(LocalDateTime date);
+    List<LeaveTable> findLeaveForDate(LocalDateTime startOfDay, LocalDateTime endOfDay);
 }
