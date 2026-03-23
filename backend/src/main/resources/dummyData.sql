@@ -152,7 +152,7 @@ INSERT INTO files_table (
     extension,
     created
 ) VALUES
-      (UUID(), 1, 1,
+      ('d1b2c3d4-e5f6-7890-dcba-ef1234567890', 1, 1,
        'safety_policy', 'pdf', '2025-02-14 10:00:00'),
 
       (UUID(), 1, 1,

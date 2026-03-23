@@ -14,6 +14,9 @@ import { ScreenConfigProps } from '../model/props/ScreenConfigProps.ts';
 import HazardForm from "../screens/HazardForm.tsx";
 import RiskAssessments from "../screens/RiskAssessments.tsx";
 import PayslipScreen from '../screens/PayslipScreen.tsx';
+import DocumentsScreen from '../screens/DocumentsScreen.tsx';
+import ViewDocumentScreen from '../screens/DocumentsViewScreen.tsx';
+import DocumentsViewScreen from "../screens/DocumentsViewScreen.tsx";
 
 export function ScreenConfig(body: ScreenConfigProps) {
   // Defaulting to the calendar screen when the HR section is selected.
@@ -126,10 +129,27 @@ export function ScreenConfig(body: ScreenConfigProps) {
             title="Documents"
           />
           <View style={styles.content} />
+            <DocumentsScreen onOpenDocument={() => handleNavigate('viewDocuments')} />
         </>
       );
 
-    case 'risk':
+      case 'viewDocuments':
+          return (
+              <>
+                  <TopNavBar
+                      title="View Document"
+                      showBackButton={true}
+                      onBackPress={() => handleNavigate('documents')}
+                  />
+                  <View style={styles.content}>
+                      <DocumentsViewScreen />
+                  </View>
+              </>
+          );
+
+
+
+      case 'risk':
       return (
         <>
           <TopNavBar title="Risk" />

@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 import uk.co.garagebridgend.backend.models.entity.DocumentTable;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 
+import java.util.List;
+
 /**
  * Repository interface for DocumentTable entity.
  */
@@ -17,4 +19,6 @@ public interface DocumentRepository extends JpaRepository<DocumentTable, Long> {
      * @return the number of documents for the account
      */
     int countByFileAccount(AccountTable account);
+
+    List<DocumentTable> findByFileAccountOrderByCreatedDesc(AccountTable account);
 }
