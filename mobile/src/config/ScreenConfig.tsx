@@ -13,6 +13,7 @@ import { ScreenKey } from '../logic/NavigationConfiguration.ts';
 import { ScreenConfigProps } from '../model/props/ScreenConfigProps.ts';
 import HazardForm from "../screens/HazardForm.tsx";
 import RiskAssessments from "../screens/RiskAssessments.tsx";
+import PayslipScreen from '../screens/PayslipScreen.tsx';
 
 export function ScreenConfig(body: ScreenConfigProps) {
   // Defaulting to the calendar screen when the HR section is selected.
@@ -82,6 +83,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
             title="Payslips"
           />
           <View style={styles.content} />
+            <PayslipScreen />
         </>
       );
 

@@ -203,7 +203,7 @@ INSERT INTO files_table (
       (UUID(), 3, 3,
        'missing_fire_extinguisher_photo', 'jpg', CURRENT_TIMESTAMP),
 
-      (UUID(), 1, 2,
+      ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 1, 2,
        'payslip_jan_2026_mmay', 'pdf', '2026-01-31 17:00:00'),
 
       (UUID(), 1, 2,
