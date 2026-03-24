@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "@mui/material";
 
 import { muiTheme } from "./theme/muiTheme.ts";
-import IncompatibleScreen from "./components/IncompatibleScreen.tsx";
+import { IncompatibleScreen } from "./components/IncompatibleScreen.tsx";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);

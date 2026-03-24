@@ -5,7 +5,7 @@ import NoCellIcon from '@mui/icons-material/NoCell';
 
 import { IncompatibleScreenStyles as styles } from "./IncompatibleScreen.styles.ts";
 
-export default function IncompatibleScreen() {
+export function IncompatibleScreen() {
     return (
         <Box sx={styles.container}>
             <Alert icon={false} severity="error" sx={styles.alert}>
