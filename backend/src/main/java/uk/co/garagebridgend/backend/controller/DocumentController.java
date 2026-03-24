@@ -54,4 +54,27 @@ public class DocumentController {
         }
     }
 
+    @PostMapping("/{id}/sign")
+    public void signDocument(@PathVariable Long id) {
+
+        try {
+
+            documentsService.signDocument(id);
+
+        } catch (AuthenticatedAccountNotFoundException e) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Authenticated account not found."
+            );
+
+        } catch (Exception e) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal server error"
+            );
+        }
+    }
+
 }

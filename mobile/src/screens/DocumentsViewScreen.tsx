@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Alert, Switch, ActivityIndicator } from 'react-native';
+import { View, Text, Alert, ActivityIndicator } from 'react-native';
 import Pdf from 'react-native-pdf';
+import { Checkbox } from 'react-native-paper';
 import AuthenticationService from '../logic/AuthenticationService';
 
 type Document = {
     documentId: number;
     title: string;
     url: string;
+    signed: boolean;
 };
 
 export default function DocumentsViewScreen() {
@@ -27,13 +29,45 @@ export default function DocumentsViewScreen() {
                 Alert.alert('Error', 'Failed to load document.');
                 return;
             }
-
-            const data = await response.json();
+            const data: Document = await response.json();
             setDocument(data);
+            setChecked(data.signed);
         } catch {
             Alert.alert('Error', 'Unexpected error.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const signDocument = async () => {
+
+        if (!document) return;
+
+        try {
+
+            const response = await AuthenticationService.fetch(
+                `/api/documents/${document.documentId}/sign`,
+                { method: 'POST' }
+            );
+
+            if (!response.ok) {
+                Alert.alert('Error', 'Failed to sign document.');
+                return;
+            }
+
+        } catch {
+            Alert.alert('Error', 'Unexpected error.');
+        }
+    };
+
+    const handleCheckboxPress = async () => {
+
+        const newValue = !checked;
+
+        setChecked(newValue);
+
+        if (newValue) {
+            await signDocument();
         }
     };
 
@@ -53,11 +87,12 @@ export default function DocumentsViewScreen() {
             />
 
             <View>
-                <Text>Acknowledge</Text>
-                <Switch
-                    value={checked}
-                    onValueChange={setChecked}
+                <Checkbox
+                    testID={"documentAcknowledgedCheckbox"}
+                    status={checked ? 'checked' : 'unchecked'}
+                    onPress={handleCheckboxPress}
                 />
+                <Text>I acknowledge this document</Text>
             </View>
 
         </View>

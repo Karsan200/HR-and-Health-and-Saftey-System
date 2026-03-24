@@ -582,12 +582,6 @@ INSERT INTO signature_table (
     risk_assessment_id,
     created
 ) VALUES
-      (UUID(),1,
-       (SELECT document_id FROM document_table WHERE title = 'Company Safety Policy'),
-       NULL,
-       NULL,
-       '2025-02-14 10:30:00'),
-
       (UUID(), 1,
        (SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'),
        NULL,

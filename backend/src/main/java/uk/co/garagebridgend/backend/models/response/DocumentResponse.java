@@ -15,4 +15,6 @@ public class DocumentResponse {
 
     private String url;
 
+    private boolean signed;
+
 }
