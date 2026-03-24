@@ -87,22 +87,50 @@ public class SettingsService {
         ThemesTable theme = themeRepository.findByAccountId(account.getAccountId())
                 .orElseThrow(() -> new RuntimeException("Theme not found"));
 
-        // Update Accessibility Settings
-        settings.setLargeText(request.isLargeText());
-        settings.setDyslexicFont(request.isDyslexicFont());
-        settings.setHighlightText(request.isHighlightText());
-        settings.setTextToSpeech(request.isTextToSpeech());
-        settings.setDictation(request.isDictation());
+        if (request.getLargeText() != null) {
+            settings.setLargeText(request.getLargeText());
+        }
 
-        // Update Silent Mode
-        settings.setSilentStart(request.getSilentStart());
-        settings.setSilentEnd(request.getSilentEnd());
+        if (request.getDyslexicFont() != null) {
+            settings.setDyslexicFont(request.getDyslexicFont());
+        }
 
-        // Update Theme
-        theme.setThemePreset(request.getThemePreset());
-        theme.setAccentColour(request.getAccentColour());
-        theme.setBackgroundColour(request.getBackgroundColour());
-        theme.setTextColour(request.getTextColour());
+        if (request.getHighlightText() != null) {
+            settings.setHighlightText(request.getHighlightText());
+        }
+
+        if (request.getTextToSpeech() != null) {
+            settings.setTextToSpeech(request.getTextToSpeech());
+        }
+
+        if (request.getDictation() != null) {
+            settings.setDictation(request.getDictation());
+        }
+
+        if (request.getSilentStart() != null) {
+            settings.setSilentStart(request.getSilentStart());
+        }
+
+        if (request.getSilentEnd() != null) {
+            settings.setSilentEnd(request.getSilentEnd());
+        }
+
+        if (request.getThemePreset() != null) {
+            theme.setThemePreset(request.getThemePreset());
+        }
+
+        if (request.getAccentColour() != null) {
+            theme.setAccentColour(request.getAccentColour());
+        }
+
+        if (request.getBackgroundColour() != null) {
+            theme.setBackgroundColour(request.getBackgroundColour());
+        }
+
+        if (request.getTextColour() != null) {
+            theme.setTextColour(request.getTextColour());
+        }
+
 
         settingsRepository.save(settings);
         themeRepository.save(theme);

@@ -16,11 +16,11 @@ public class SettingsResponse {
     /**
      * Accessibility Settings Booleans
      */
-    private boolean largeText;
-    private boolean dyslexicFont;
-    private boolean textToSpeech;
-    private boolean dictation;
-    private boolean highlightText;
+    private Boolean largeText;
+    private Boolean dyslexicFont;
+    private Boolean textToSpeech;
+    private Boolean dictation;
+    private Boolean highlightText;
 
     /**
      * Silent Mode time - For Admin use only

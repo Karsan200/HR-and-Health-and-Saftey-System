@@ -1,7 +1,7 @@
 import AuthenticationService from "./AuthenticationService";
 
 export async function getSettings() {
-    const response = await AuthenticationService.fetch("/settings", {
+    const response = await AuthenticationService.fetch("/api/settings", {
         method: "GET",
     });
 
@@ -13,7 +13,7 @@ export async function getSettings() {
 }
 
 export async function updateSettings(settings: any) {
-    const response = await AuthenticationService.fetch("/settings", {
+    const response = await AuthenticationService.fetch("/api/settings", {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
