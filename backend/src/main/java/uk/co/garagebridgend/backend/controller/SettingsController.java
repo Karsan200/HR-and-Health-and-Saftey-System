@@ -19,6 +19,11 @@ public class SettingsController {
      */
     private final SettingsService settingsService;
 
+//    @GetMapping
+//    public String test() {
+//        return "Settings endpoint is working!";
+//    }
+
     /**
      * Retrieves all settings and theme data for a given account.
      *

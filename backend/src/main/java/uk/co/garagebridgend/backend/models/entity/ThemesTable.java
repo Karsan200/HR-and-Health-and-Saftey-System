@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ThemesTable {
     /** Length of the refresh token pin code. */
-    private static final int COLOUR_CODE_LENGTH = 6;
+    private static final int COLOUR_CODE_LENGTH = 7;
 
     /**
      * Account that owns these permissions (primary key).

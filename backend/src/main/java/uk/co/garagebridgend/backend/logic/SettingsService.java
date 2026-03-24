@@ -1,5 +1,6 @@
 package uk.co.garagebridgend.backend.logic;
 
+import jdk.swing.interop.SwingInterOpUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,14 +45,47 @@ public class SettingsService {
      */
     public SettingsResponse getAllSettings() {
 
+        System.out.println("Step 1: Entered getAllSettings()");
+
         AccountTable account = getCurrentAccount();
+        System.out.println("Step 2: Retrieved current account with ID: " + account.getAccountId());
 
-        SettingsTable settings = settingsRepository.findByAccountId(account.getAccountId())
-                .orElseThrow(() -> new RuntimeException("Settings not found"));
+        // Get or create settings
+        SettingsTable settings = settingsRepository
+                .findByAccountId(account.getAccountId())
+                .orElseGet(() -> {
+                    System.out.println("Step 3: No settings found for account, creating default settings");
+                    SettingsTable s = new SettingsTable();
+                    s.setAccount(account);
 
-        ThemesTable theme = themeRepository.findByAccountId(account.getAccountId())
-                .orElseThrow(() -> new RuntimeException("Theme not found"));
+                    // Optional defaults
+                    s.setLargeText(false);
+                    s.setDyslexicFont(false);
+                    s.setHighlightText(false);
+                    s.setTextToSpeech(false);
+                    s.setDictation(false);
 
+                    return settingsRepository.save(s);
+                });
+
+        // Get or create theme
+        ThemesTable theme = themeRepository
+                .findByAccountId(account.getAccountId())
+                .orElseGet(() -> {
+                    System.out.println("Step 4: No theme found for account, creating default theme");
+                    ThemesTable t = new ThemesTable();
+                    t.setAccount(account);
+
+                    // Optional defaults
+                    t.setThemePreset("default");
+                    t.setAccentColour("#0066FF");
+                    t.setBackgroundColour("#FFFFFF");
+                    t.setTextColour("#000000");
+
+                    return themeRepository.save(t);
+                });
+
+        System.out.println("Step 5: Retrieved settings and theme, preparing response");
         SettingsResponse response = new SettingsResponse();
 
         // Accessibility Settings
@@ -71,6 +105,8 @@ public class SettingsService {
         response.setBackgroundColour(theme.getBackgroundColour());
         response.setTextColour(theme.getTextColour());
 
+        System.out.println("Step 6: Prepared response: " + response);
+
         return response;
     }
 
@@ -81,11 +117,21 @@ public class SettingsService {
 
         AccountTable account = getCurrentAccount();
 
-        SettingsTable settings = settingsRepository.findByAccountId(account.getAccountId())
-                .orElseThrow(() -> new RuntimeException("Settings not found"));
+        SettingsTable settings = settingsRepository
+                .findByAccountId(account.getAccountId())
+                .orElseGet(() -> {
+                    SettingsTable s = new SettingsTable();
+                    s.setAccount(account);
+                    return settingsRepository.save(s);
+                });
 
-        ThemesTable theme = themeRepository.findByAccountId(account.getAccountId())
-                .orElseThrow(() -> new RuntimeException("Theme not found"));
+        ThemesTable theme = themeRepository
+                .findByAccountId(account.getAccountId())
+                .orElseGet(() -> {
+                    ThemesTable t = new ThemesTable();
+                    t.setAccount(account);
+                    return themeRepository.save(t);
+                });
 
         if (request.getLargeText() != null) {
             settings.setLargeText(request.getLargeText());
