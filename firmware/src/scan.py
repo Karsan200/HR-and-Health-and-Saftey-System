@@ -4,6 +4,10 @@ import time
 import ujson
 
 
+# Company ID, 16 bit little endian 
+COMPANY_ID = 0xFFFF
+
+
 def _get_timestamp():
     """Return a formatted timestamp string for use as a filename."""
     t = time.localtime()
@@ -12,29 +16,69 @@ def _get_timestamp():
     )
 
 
-def _mac_to_str(addr_bytes):
-    """Convert 6-byte MAC address bytes to a colon-separated hex string."""
-    return ":".join("{:02X}".format(b) for b in addr_bytes)
-
-
 def _load_settings():
-    """Load settings from config.json."""
+    # Load settings from config.json.
     try:
         with open("config.json") as f:
             return ujson.load(f)
     except Exception:
-        """Fallback for if config fails."""
+        # Fallback for if config fails.
         return {"rssi_threshold": -75, "max_cache_entries": 100}
+
+
+def _parse_adv_data(adv_data):
+    """
+    Walk the BLE advertisement data structures looking for a
+    Manufacturer Specific Data record (AD type 0xFF) that matches
+    COMPANY_ID. If found, the remaining bytes are decoded as a
+    UTF-8 employee ID string and returned. Returns None if no
+    matching record is found.
+
+    Advertisement data is a sequence of Length-Type-Value triplets:
+        [length (1 byte)] [AD type (1 byte)] [payload (length-1 bytes)]
+    """
+    i = 0
+    while i < len(adv_data):
+        length = adv_data[i]
+        if length == 0:
+            break
+
+        # Guard against malformed packets running past the buffer end
+        if i + length >= len(adv_data):
+            break
+
+        ad_type = adv_data[i + 1]
+        payload = adv_data[i + 2 : i + 1 + length]
+
+        # 0xFF = Manufacturer Specific Data
+        # Minimum meaningful payload: 2 bytes company ID + 1 byte of data
+        if ad_type == 0xFF and len(payload) >= 3:
+            company_id = payload[0] | (payload[1] << 8)
+            if company_id == COMPANY_ID:
+                try:
+                    employee_id = bytes(payload[2:]).decode("utf-8").strip("\x00").strip()
+                    if employee_id:
+                        return employee_id
+                except Exception:
+                    pass
+
+        i += 1 + length
+
+    return None
 
 
 def scan():
     """
-    Perform a BLE scan, collect unique MAC addresses, and write results
-    to /cache/<timestamp>.csv with a 'pending' status for each entry.
+    Perform a BLE scan and collect employee IDs from devices running
+    the HR app. Only devices broadcasting a manufacturer-specific
+    advertisement with COMPANY_ID are recorded.
+
+    Results are written to /cache/<timestamp>.csv with a 'pending'
+    status for each entry.
 
     CSV format:
-        mac_address,rssi,status
-        AA:BB:CC:DD:EE:FF,-65,pending
+        employee_id,rssi,status
+        EMP-00142,-65,pending
     """
     settings = _load_settings()
     rssi_threshold = settings.get("rssi_threshold", -75)
@@ -45,7 +89,8 @@ def scan():
     SCAN_INTERVAL_US = 30000
     SCAN_WINDOW_US   = 30000
 
-    seen = {}  # mac_str -> best rssi seen during this scan
+    # employee_id, store best rssi seen during this scan
+    seen = {}
 
     ble = bluetooth.BLE()
     ble.active(True)
@@ -57,17 +102,20 @@ def scan():
 
         # _IRQ_SCAN_RESULT = 5
         if event == 5:
-            # data: (addr_type, addr, adv_type, rssi, adv_data)
             addr_type, addr, adv_type, rssi, adv_data = data
-            mac = _mac_to_str(bytes(addr))
 
-            # Apply RSSI threshold filter
+            # Apply RSSI threshold and ignore distant devices
             if rssi < rssi_threshold:
                 return
 
-            # Keep only the strongest RSSI seen for each device
-            if mac not in seen or rssi > seen[mac]:
-                seen[mac] = rssi
+            employee_id = _parse_adv_data(bytes(adv_data))
+            if employee_id is None:
+                # Device is not running the HR app; skip it
+                return
+
+            # Keep only the strongest RSSI seen for each employee
+            if employee_id not in seen or rssi > seen[employee_id]:
+                seen[employee_id] = rssi
 
         # _IRQ_SCAN_DONE = 6
         elif event == 6:
@@ -91,10 +139,10 @@ def scan():
         ble.active(False)
 
     if not seen:
-        print("scan: no devices found above RSSI threshold")
+        print("scan: no HR app devices found above RSSI threshold")
         return
 
-    # Respect max_cache_entries while keeping the strongest signals if over limit
+    # Sort by strongest signal, cap at max_entries
     sorted_devices = sorted(seen.items(), key=lambda x: x[1], reverse=True)
     sorted_devices = sorted_devices[:max_entries]
 
@@ -104,11 +152,11 @@ def scan():
 
     try:
         with open(filepath, "w") as f:
-            f.write("mac_address,rssi,status\n")
-            for mac, rssi in sorted_devices:
-                f.write("{},{},pending\n".format(mac, rssi))
+            f.write("employee_id,rssi,status\n")
+            for employee_id, rssi in sorted_devices:
+                f.write("{},{},pending\n".format(employee_id, rssi))
 
-        print("scan: wrote {} device(s) to {}".format(len(sorted_devices), filepath))
+        print("scan: wrote {} employee(s) to {}".format(len(sorted_devices), filepath))
 
     except Exception as e:
         print("scan: failed to write CSV:", e)
