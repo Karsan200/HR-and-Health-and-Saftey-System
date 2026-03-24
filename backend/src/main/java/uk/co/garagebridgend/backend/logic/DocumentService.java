@@ -17,9 +17,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DocumentService {
 
+    /** Repository for accessing document data. */
     private final DocumentRepository documentRepository;
+
+    /** Repository for accessing account data. */
     private final AccountRepository accountRepository;
+
+    /** Repository for accessing signature data. */
     private final SignatureRepository signatureRepository;
+
+    /** Service for generating pre-signed URLs for files in storage. */
     private final StorageService storageService;
 
 
@@ -33,7 +40,9 @@ public class DocumentService {
     public List<DocumentResponse> getAllDocuments() throws AuthenticatedAccountNotFoundException {
 
         var user = AuthenticationService.getCurrentUser();
-        if (user == null) throw new AuthenticatedAccountNotFoundException();
+        if (user == null) {
+            throw new AuthenticatedAccountNotFoundException();
+        }
 
         AccountTable account = accountRepository.findById(Long.valueOf(user.getUsername()))
                 .orElseThrow(AuthenticatedAccountNotFoundException::new);
@@ -51,10 +60,13 @@ public class DocumentService {
 
     /**
      * Sign a document as the currently authenticated user.
+     * @param documentId the ID of the document to sign
      */
     public void signDocument(final Long documentId) throws AuthenticatedAccountNotFoundException {
         var user = AuthenticationService.getCurrentUser();
-        if (user == null) throw new AuthenticatedAccountNotFoundException();
+        if (user == null) {
+            throw new AuthenticatedAccountNotFoundException();
+        }
 
         AccountTable account = accountRepository.findById(Long.valueOf(user.getUsername()))
                 .orElseThrow(AuthenticatedAccountNotFoundException::new);
@@ -63,7 +75,9 @@ public class DocumentService {
                 .orElseThrow();
 
         // Don't create duplicate signatures
-        if (signatureRepository.existsByAccountAndDocument(account, document)) return;
+        if (signatureRepository.existsByAccountAndDocument(account, document)) {
+            return;
+        }
 
         SignatureTable signature = new SignatureTable();
         signature.setAccount(account);
