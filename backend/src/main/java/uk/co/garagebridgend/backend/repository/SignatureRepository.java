@@ -20,5 +20,12 @@ public interface SignatureRepository extends JpaRepository<SignatureTable, Long>
      */
     int countByAccount(AccountTable account);
 
+    /**
+     * Checks if a signature exists for the given account and document.
+     *
+     * @param account  the account to check for
+     * @param document the document to check for
+     * @return true if a signature exists for the account and document, false otherwise
+     */
     boolean existsByAccountAndDocument(AccountTable account, DocumentTable document);
 }

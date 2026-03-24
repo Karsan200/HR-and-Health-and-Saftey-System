@@ -36,7 +36,7 @@ public class PayslipService {
     public List<PayslipResponse> getPayslipsForCurrentUser()
             throws AuthenticatedAccountNotFoundException {
 
-        // Get the currently authenticated user - same pattern as HazardService
+        // Get the currently authenticated user
         var user = AuthenticationService.getCurrentUser();
 
         AccountTable account;

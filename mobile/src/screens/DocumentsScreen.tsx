@@ -55,7 +55,7 @@ export default function DocumentsScreen({ onOpenDocument }: Props) {
                 <View>
                     <Text>{item.title}</Text>
 
-                    <TouchableOpacity onPress={() => openDocument}>
+                    <TouchableOpacity onPress={openDocument}>
                         <Text>View</Text>
                     </TouchableOpacity>
                 </View>

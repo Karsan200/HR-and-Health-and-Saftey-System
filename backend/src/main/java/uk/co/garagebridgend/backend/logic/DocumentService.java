@@ -13,18 +13,37 @@ import uk.co.garagebridgend.backend.repository.SignatureRepository;
 
 import java.util.List;
 
+/**
+ * Service class for handling document-related operations, such as retrieving documents for the authenticated user
+ * and signing documents.
+ */
 @Service
 @RequiredArgsConstructor
 public class DocumentService {
 
+    /** Repository for accessing document data. */
     private final DocumentRepository documentRepository;
+
+    /** Repository for accessing account data. */
     private final AccountRepository accountRepository;
+
+    /** Service for generating pre-signed URLs for files in storage. */
     private final StorageService storageService;
+
+    /** Repository for accessing signature data. */
     private final SignatureRepository signatureRepository;
 
+    /**
+     * Retrieves all documents for the currently authenticated user,
+     * each including a pre-signed URL to access the file.
+     *
+     * @return list of document responses for the authenticated user
+     * @throws AuthenticatedAccountNotFoundException if the authenticated user cannot be found
+     */
     public List<DocumentResponse> getDocumentsForCurrentUser()
             throws AuthenticatedAccountNotFoundException {
 
+        // Get the currently authenticated user
         var user = AuthenticationService.getCurrentUser();
 
         AccountTable account;
@@ -37,6 +56,7 @@ public class DocumentService {
             throw new AuthenticatedAccountNotFoundException();
         }
 
+        // Fetch all documents for this account and map to response objects
         return documentRepository
                 .findByFileAccountOrderByCreatedDesc(account)
                 .stream()
@@ -57,7 +77,15 @@ public class DocumentService {
                 .toList();
     }
 
-    public DocumentResponse getDocumentForCurrentUser(Long documentId)
+    /**
+     * Retrieves a specific document by its ID for the currently authenticated user,
+     * including a pre-signed URL to access the file.
+     *
+     * @param documentId the ID of the document to retrieve
+     * @return a document response containing the document's details and pre-signed URL
+     * @throws AuthenticatedAccountNotFoundException if the authenticated user cannot be found
+     */
+    public DocumentResponse getDocumentForCurrentUser(final Long documentId)
             throws AuthenticatedAccountNotFoundException {
 
         var user = AuthenticationService.getCurrentUser();
@@ -91,7 +119,13 @@ public class DocumentService {
         );
     }
 
-    public void signDocument(Long documentId)
+    /**
+     * Signs a specific document by its ID for the currently authenticated user.
+     *
+     * @param documentId the ID of the document to sign
+     * @throws AuthenticatedAccountNotFoundException if the authenticated user cannot be found
+     */
+    public void signDocument(final Long documentId)
             throws AuthenticatedAccountNotFoundException {
 
         var user = AuthenticationService.getCurrentUser();
