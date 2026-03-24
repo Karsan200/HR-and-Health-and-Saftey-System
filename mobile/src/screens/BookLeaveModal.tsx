@@ -4,8 +4,9 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ScrollView,
 } from 'react-native';
-import { Menu, Portal, Modal as PaperModal } from 'react-native-paper';
+import { Portal, Modal as PaperModal } from 'react-native-paper';
 import dayjs from 'dayjs';
 
 import { useTheme } from '../theme/colourController';
@@ -45,21 +46,16 @@ export default function BookLeaveModal({
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoadingLeaveTypes, setIsLoadingLeaveTypes] = useState<boolean>(false);
-  const [isLeaveTypeMenuVisible, setIsLeaveTypeMenuVisible] = useState<boolean>(false);
+  const [isLeaveTypePickerVisible, setIsLeaveTypePickerVisible] = useState<boolean>(false);
+
   const DaysInAdvance = 14;
 
-  /**
-   * Opens the leave type dropdown menu.
-   */
-  const openLeaveTypeMenu = () => {
-    setIsLeaveTypeMenuVisible(true);
+  const openLeaveTypePicker = () => {
+    setIsLeaveTypePickerVisible(true);
   };
 
-  /**
-   * Closes the leave type dropdown menu.
-   */
-  const closeLeaveTypeMenu = () => {
-    setIsLeaveTypeMenuVisible(false);
+  const closeLeaveTypePicker = () => {
+    setIsLeaveTypePickerVisible(false);
   };
 
   /**
@@ -76,6 +72,7 @@ export default function BookLeaveModal({
     setNotes('');
     setErrorMessage('');
     setSelectedLeaveTypeId(null);
+    setIsLeaveTypePickerVisible(false);
 
     fetchLeaveTypes();
   }, [visible, initialDate]);
@@ -101,7 +98,7 @@ export default function BookLeaveModal({
    * The currently selected leave type object.
    */
   const selectedLeaveType = leaveTypes.find(
-    (leaveType) => leaveType.leaveTypeId === selectedLeaveTypeId
+      (leaveType) => leaveType.leaveTypeId === selectedLeaveTypeId
   );
 
   /**
@@ -113,38 +110,33 @@ export default function BookLeaveModal({
   }, []);
 
   /**
-   * Validation the form values.
+   * Validating the form values.
    * Returns an empty string when valid, otherwise returns the validation message.
    */
   const validateForm = (): string => {
-    // Checking if the start and end date are provided
     if (!startDate.trim() || !endDate.trim()) {
       return 'Please enter both the start and end date.';
     }
 
-    // Checking the leave type is selected
     if (selectedLeaveTypeId === null) {
       return 'Please select a leave type.';
     }
 
-    // Parsing the dates using dayjs to get them in the correct format
     const parsedStartDate = dayjs(startDate);
     const parsedEndDate = dayjs(endDate);
 
-    // Checking if the dates are valid
     if (!parsedStartDate.isValid() || !parsedEndDate.isValid()) {
       return 'Please enter valid dates in YYYY-MM-DD format.';
     }
 
-    // Checking if the start date is after the end date
     if (parsedStartDate.isAfter(parsedEndDate, 'day')) {
       return 'The start date cannot be after the end date.';
     }
 
-    // Ensuring the start date is at least 14 days past the current date
     if (parsedStartDate.isBefore(minimumBookableDate, 'day')) {
       return 'Leave requests must be made at least 14 days in advance.';
     }
+
     return '';
   };
 
@@ -163,20 +155,17 @@ export default function BookLeaveModal({
     setErrorMessage('');
     setIsSubmitting(true);
 
-
     try {
-        await LeaveService.createLeave({
-          startDate,
-          endDate,
-          leaveTypeId: selectedLeaveTypeId as number,
-          notes: notes.trim(),
-        });
+      await LeaveService.createLeave({
+        startDate,
+        endDate,
+        leaveTypeId: selectedLeaveTypeId as number,
+        notes: notes.trim(),
+      });
 
       onClose();
       await onSuccess();
-
     } catch (error) {
-
       if (error instanceof HttpException) {
         if (error.statusCode === 401) {
           setErrorMessage('Session expired. Please sign in again.');
@@ -192,107 +181,142 @@ export default function BookLeaveModal({
       setIsSubmitting(false);
     }
   };
+
   return (
-    <Portal>
-      <PaperModal
-        visible={visible}
-        onDismiss={onClose}
-        contentContainerStyle={styles.modalWrapper}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.headerRow}>
-            <Text style={styles.title}>Book Time Off</Text>
+      <Portal>
+        <PaperModal
+            visible={visible}
+            onDismiss={onClose}
+            contentContainerStyle={styles.modalWrapper}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.headerRow}>
+              <Text style={styles.title}>Book Time Off</Text>
 
-            <TouchableOpacity onPress={onClose} style={styles.closeButtonWrapper}>
-              <Text style={styles.closeButtonText}>×</Text>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity onPress={onClose} style={styles.closeButtonWrapper}>
+                <Text style={styles.closeButtonText}>×</Text>
+              </TouchableOpacity>
+            </View>
 
-          <View style={styles.fieldWrapper}>
-            <Text style={styles.fieldLabel}>Selected Start Date</Text>
-            <TextInput
-              value={startDate}
-              onChangeText={setStartDate}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor={theme.greyPrimaryMainText}
-              style={styles.input}
-            />
-          </View>
+            <View style={styles.fieldWrapper}>
+              <Text style={styles.fieldLabel}>Selected Start Date</Text>
+              <TextInput
+                  value={startDate}
+                  onChangeText={setStartDate}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor={theme.greyPrimaryMainText}
+                  style={styles.input}
+              />
+            </View>
 
-          <View style={styles.fieldWrapper}>
-            <Text style={styles.fieldLabel}>Selected End Date</Text>
-            <TextInput
-              value={endDate}
-              onChangeText={setEndDate}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor={theme.greyPrimaryMainText}
-              style={styles.input}
-            />
-          </View>
+            <View style={styles.fieldWrapper}>
+              <Text style={styles.fieldLabel}>Selected End Date</Text>
+              <TextInput
+                  value={endDate}
+                  onChangeText={setEndDate}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor={theme.greyPrimaryMainText}
+                  style={styles.input}
+              />
+            </View>
 
-          <View style={styles.fieldWrapper}>
-            <Text style={styles.fieldLabel}>Type of Leave</Text>
+            <View style={styles.fieldWrapper}>
+              <Text style={styles.fieldLabel}>Type of Leave</Text>
 
-            {isLoadingLeaveTypes ? (
-              <Text style={styles.secondaryText}>Loading leave types...</Text>
-            ) : (
-              <Menu
-                visible={isLeaveTypeMenuVisible}
-                onDismiss={closeLeaveTypeMenu}
-                anchor={
+              {isLoadingLeaveTypes ? (
+                  <Text style={styles.secondaryText}>Loading leave types...</Text>
+              ) : (
                   <TouchableOpacity
-                    style={styles.dropdownButton}
-                    onPress={() => {
-                      openLeaveTypeMenu();
-                    }}
+                      style={styles.dropdownButton}
+                      onPress={openLeaveTypePicker}
+                      activeOpacity={0.8}
                   >
                     <Text style={styles.dropdownButtonText}>
                       {selectedLeaveType ? selectedLeaveType.name : 'Select leave type'}
                     </Text>
                     <Text style={styles.dropdownArrow}>▼</Text>
                   </TouchableOpacity>
-                }
+              )}
+            </View>
+
+            <View style={styles.fieldWrapper}>
+              <Text style={styles.fieldLabel}>Add any additional details...</Text>
+              <TextInput
+                  value={notes}
+                  onChangeText={setNotes}
+                  placeholder="Optional notes"
+                  placeholderTextColor={theme.greyPrimaryMainText}
+                  multiline={true}
+                  textAlignVertical="top"
+                  style={styles.notesInput}
+              />
+            </View>
+
+            {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+
+            <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleSubmit}
+                disabled={isSubmitting}
+            >
+              <Text style={styles.submitButtonText}>Submit</Text>
+            </TouchableOpacity>
+          </View>
+        </PaperModal>
+
+        <PaperModal
+            visible={isLeaveTypePickerVisible}
+            onDismiss={closeLeaveTypePicker}
+            contentContainerStyle={styles.leaveTypeModalWrapper}
+        >
+          <View style={styles.leaveTypeModalContainer}>
+            <View style={styles.leaveTypeHeaderRow}>
+              <Text style={styles.leaveTypeModalTitle}>Select Leave Type</Text>
+
+              <TouchableOpacity
+                  onPress={closeLeaveTypePicker}
+                  style={styles.closeButtonWrapper}
               >
-                {leaveTypes.map((leaveType) => (
-                  <Menu.Item
-                    key={leaveType.leaveTypeId}
-                    onPress={() => {
-                      setSelectedLeaveTypeId(leaveType.leaveTypeId);
-                      closeLeaveTypeMenu();
-                    }}
-                    title={leaveType.name}
-                  />
-                ))}
-              </Menu>
-            )}
+                <Text style={styles.closeButtonText}>×</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView
+                style={styles.leaveTypeList}
+                contentContainerStyle={styles.leaveTypeListContent}
+                showsVerticalScrollIndicator={false}
+            >
+              {leaveTypes.map((leaveType) => {
+                const isSelected = leaveType.leaveTypeId === selectedLeaveTypeId;
+
+                return (
+                    <TouchableOpacity
+                        key={leaveType.leaveTypeId}
+                        style={[
+                          styles.leaveTypeOption,
+                          isSelected && styles.leaveTypeOptionSelected,
+                        ]}
+                        onPress={() => {
+                          setSelectedLeaveTypeId(leaveType.leaveTypeId);
+                          closeLeaveTypePicker();
+                        }}
+                        activeOpacity={0.8}
+                    >
+                      <Text
+                          style={[
+                            styles.leaveTypeOptionText,
+                            isSelected && styles.leaveTypeOptionTextSelected,
+                          ]}
+                          numberOfLines={1}
+                      >
+                        {leaveType.name}
+                      </Text>
+                    </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
           </View>
-
-          <View style={styles.fieldWrapper}>
-            <Text style={styles.fieldLabel}>Add any additional details...</Text>
-            <TextInput
-              value={notes}
-              onChangeText={setNotes}
-              placeholder="Optional notes"
-              placeholderTextColor={theme.greyPrimaryMainText}
-              multiline={true}
-              textAlignVertical="top"
-              style={styles.notesInput}
-            />
-          </View>
-
-          {errorMessage ? (
-            <Text style={styles.errorText}>{errorMessage}</Text>
-          ) : null}
-
-          <TouchableOpacity
-            style={styles.submitButton}
-            onPress={handleSubmit}
-            disabled={isSubmitting}
-          >
-            <Text style={styles.submitButtonText}>Submit</Text>
-          </TouchableOpacity>
-        </View>
-      </PaperModal>
-    </Portal>
+        </PaperModal>
+      </Portal>
   );
 }

@@ -16,6 +16,14 @@ export const styles = (theme: any) =>
     },
 
     /**
+     * Main modal wrapper.
+     */
+    modalWrapper: {
+        justifyContent: 'center',
+        paddingHorizontal: Spacing.largePadding,
+    },
+
+    /**
      * Modal card container.
      */
     modalContainer: {
@@ -27,10 +35,6 @@ export const styles = (theme: any) =>
       shadowOpacity: 1,
       shadowRadius: 4,
       elevation: 4,
-    },
-
-    modalWrapper: {
-        gap: Spacing.mediumPadding,
     },
 
     /**
@@ -49,6 +53,7 @@ export const styles = (theme: any) =>
       fontSize: FontSize.l24,
       color: theme.black,
     },
+
     closeButtonWrapper: {
       paddingHorizontal: 4,
       paddingVertical: 2,
@@ -75,6 +80,7 @@ export const styles = (theme: any) =>
       fontSize: FontSize.xs14,
       color: theme.greyPrimaryMainText,
     },
+
     input: {
       borderWidth: 1,
       borderColor: theme.greyIconLight,
@@ -89,7 +95,7 @@ export const styles = (theme: any) =>
     },
 
     /**
-     * Input field for reason.
+     * Input field for notes.
      */
     notesInput: {
       minHeight: 100,
@@ -103,39 +109,6 @@ export const styles = (theme: any) =>
       fontFamily: TextStyles.regular.fontFamily,
       fontWeight: TextStyles.regular.fontWeight,
       fontSize: FontSize.s16,
-    },
-
-    /**
-     * Leave type
-     */
-    leaveTypeContainer: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 8,
-    },
-
-    leaveTypeButton: {
-      borderWidth: 1,
-      borderColor: theme.greyIconLight,
-      borderRadius: BorderRadius.mediumNotification,
-      backgroundColor: theme.white,
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-    },
-
-    leaveTypeButtonSelected: {
-      borderColor: theme.redPrimary,
-      backgroundColor: theme.redBackgroundLight,
-    },
-    leaveTypeButtonText: {
-      fontFamily: TextStyles.medium.fontFamily,
-      fontWeight: TextStyles.medium.fontWeight,
-      fontSize: FontSize.s16,
-      color: theme.black,
-    },
-
-    leaveTypeButtonTextSelected: {
-      color: theme.redTextDark,
     },
 
     secondaryText: {
@@ -179,7 +152,7 @@ export const styles = (theme: any) =>
     },
 
     /**
-     * Menu for selecting the leave type.
+     * Trigger button for leave type selection.
      */
     dropdownButton: {
       borderWidth: 1,
@@ -194,10 +167,12 @@ export const styles = (theme: any) =>
     },
 
     dropdownButtonText: {
+      flex: 1,
       fontFamily: TextStyles.regular.fontFamily,
       fontWeight: TextStyles.regular.fontWeight,
       fontSize: FontSize.s16,
       color: theme.black,
+      marginRight: 12,
     },
 
     dropdownArrow: {
@@ -206,4 +181,71 @@ export const styles = (theme: any) =>
       fontSize: FontSize.s16,
       color: theme.greyPrimaryMainText,
     },
-  });
+
+    /**
+     * Leave type picker modal.
+     */
+    leaveTypeModalWrapper: {
+      justifyContent: 'center',
+      paddingHorizontal: Spacing.largePadding,
+    },
+
+    leaveTypeModalContainer: {
+      backgroundColor: theme.white,
+      borderRadius: BorderRadius.largeButtonsAndOutlines,
+      padding: Spacing.mediumPadding,
+      shadowColor: theme.greyIconLight,
+      shadowOpacity: 1,
+      shadowRadius: 4,
+      elevation: 5,
+      maxHeight: 420,
+    },
+
+    leaveTypeHeaderRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: Spacing.smallPadding,
+    },
+
+    leaveTypeModalTitle: {
+      fontFamily: TextStyles.medium.fontFamily,
+      fontWeight: TextStyles.medium.fontWeight,
+      fontSize: FontSize.m20,
+      color: theme.black,
+    },
+
+    leaveTypeList: {
+      maxHeight: 340,
+    },
+
+    leaveTypeListContent: {
+      paddingBottom: 4,
+    },
+
+    leaveTypeOption: {
+      paddingHorizontal: 12,
+      paddingVertical: 14,
+      borderRadius: BorderRadius.mediumNotification,
+      backgroundColor: theme.white,
+      marginBottom: 8,
+      borderWidth: 1,
+      borderColor: theme.greyIconLight,
+    },
+
+    leaveTypeOptionSelected: {
+      borderColor: theme.redPrimary,
+      backgroundColor: theme.redBackgroundLight,
+    },
+
+    leaveTypeOptionText: {
+      fontFamily: TextStyles.regular.fontFamily,
+      fontWeight: TextStyles.regular.fontWeight,
+      fontSize: FontSize.s16,
+      color: theme.black,
+    },
+
+    leaveTypeOptionTextSelected: {
+        color: theme.redTextDark,
+    },
+});
