@@ -248,4 +248,17 @@ export const styles = (theme: any) =>
     leaveTypeOptionTextSelected: {
         color: theme.redTextDark,
     },
+
+    datePickerInput: {
+      backgroundColor: theme.white,
+    },
+
+    datePickerOutline: {
+      borderRadius: BorderRadius.mediumNotification,
+    },
+
+    datePickerContent: {
+      fontSize: FontSize.s16,
+      color: theme.black,
+    },
 });

@@ -13,6 +13,7 @@ import { useTheme } from '../theme/colourController';
 import { styles as baseStyles } from './BookLeaveModal.styles';
 import { HttpException } from '../exception/HttpException.ts';
 import LeaveService, { LeaveType } from '../logic/LeaveService';
+import { DatePickerInput } from 'react-native-paper-dates';
 
 /**
  * Props for the BookLeaveModal component.
@@ -38,8 +39,8 @@ export default function BookLeaveModal({
   const { theme } = useTheme();
   const styles = baseStyles(theme);
 
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [notes, setNotes] = useState<string>('');
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [selectedLeaveTypeId, setSelectedLeaveTypeId] = useState<number | null>(null);
@@ -67,8 +68,8 @@ export default function BookLeaveModal({
       return;
     }
 
-    setStartDate(initialDate ?? '');
-    setEndDate(initialDate ?? '');
+    setStartDate(initialDate ? dayjs(initialDate).toDate() : undefined);
+    setEndDate(initialDate ? dayjs(initialDate).toDate() : undefined);
     setNotes('');
     setErrorMessage('');
     setSelectedLeaveTypeId(null);
@@ -106,15 +107,28 @@ export default function BookLeaveModal({
    * that the leave request must be made in.
    */
   const minimumBookableDate = useMemo(() => {
-    return dayjs().add(DaysInAdvance, 'day').startOf('day');
+    return dayjs().add(DaysInAdvance, 'day').startOf('day').toDate();
   }, []);
+
+
+  const commonDatePickerProps = {
+    mode: 'outlined' as const,
+    locale: 'en-GB',
+    validRange: { startDate: minimumBookableDate },
+    inputMode: 'start' as const,
+    underlineColor: 'transparent',
+    placeholder: 'DD/MM/YYYY',
+    outlineStyle: styles.datePickerOutline,
+    style: styles.datePickerInput,
+  } as const;
+
 
   /**
    * Validating the form values.
    * Returns an empty string when valid, otherwise returns the validation message.
    */
   const validateForm = (): string => {
-    if (!startDate.trim() || !endDate.trim()) {
+    if (!startDate || !endDate) {
       return 'Please enter both the start and end date.';
     }
 
@@ -124,16 +138,21 @@ export default function BookLeaveModal({
 
     const parsedStartDate = dayjs(startDate);
     const parsedEndDate = dayjs(endDate);
+    const minimumDate = dayjs(minimumBookableDate);
 
     if (!parsedStartDate.isValid() || !parsedEndDate.isValid()) {
-      return 'Please enter valid dates in YYYY-MM-DD format.';
+      return 'Please select valid dates.';
     }
 
     if (parsedStartDate.isAfter(parsedEndDate, 'day')) {
       return 'The start date cannot be after the end date.';
     }
 
-    if (parsedStartDate.isBefore(minimumBookableDate, 'day')) {
+    if (parsedStartDate.isBefore(minimumDate, 'day')) {
+      return 'Leave requests must be made at least 14 days in advance.';
+    }
+
+    if (parsedEndDate.isBefore(minimumDate, 'day')) {
       return 'Leave requests must be made at least 14 days in advance.';
     }
 
@@ -157,8 +176,8 @@ export default function BookLeaveModal({
 
     try {
       await LeaveService.createLeave({
-        startDate,
-        endDate,
+        startDate: dayjs(startDate).format('YYYY-MM-DD'),
+        endDate: dayjs(endDate).format('YYYY-MM-DD'),
         leaveTypeId: selectedLeaveTypeId as number,
         notes: notes.trim(),
       });
@@ -200,23 +219,36 @@ export default function BookLeaveModal({
 
             <View style={styles.fieldWrapper}>
               <Text style={styles.fieldLabel}>Selected Start Date</Text>
-              <TextInput
-                  value={startDate}
-                  onChangeText={setStartDate}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor={theme.greyPrimaryMainText}
-                  style={styles.input}
+              <DatePickerInput
+                value={startDate}
+                onChange={(date) => {
+                  setStartDate(date ?? undefined);
+
+                  if (date && endDate && dayjs(endDate).isBefore(dayjs(date), 'day')) {
+                    setEndDate(date);
+                  }
+                }}
+                {...commonDatePickerProps}
               />
             </View>
 
             <View style={styles.fieldWrapper}>
               <Text style={styles.fieldLabel}>Selected End Date</Text>
-              <TextInput
-                  value={endDate}
-                  onChangeText={setEndDate}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor={theme.greyPrimaryMainText}
-                  style={styles.input}
+              <DatePickerInput
+                value={endDate}
+                onChange={(date) => {
+                  setEndDate(date ?? undefined);
+                }}
+                validRange={{
+                  startDate: startDate ?? minimumBookableDate,
+                }}
+                locale="en-GB"
+                mode="outlined"
+                inputMode="start"
+                underlineColor="transparent"
+                placeholder="DD/MM/YYYY"
+                outlineStyle={styles.datePickerOutline}
+                style={styles.datePickerInput}
               />
             </View>
 
