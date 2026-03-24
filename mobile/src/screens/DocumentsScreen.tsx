@@ -17,6 +17,8 @@ export default function DocumentsScreen() {
     const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
     const [checked, setChecked] = useState(false);
 
+    const [filter, setFilter] = useState<'policies' | 'sop'>('policies');
+
     useEffect(() => {
         fetchDocuments();
     }, []);
@@ -63,7 +65,6 @@ export default function DocumentsScreen() {
         if (newValue) {
             await signDocument(selectedDocument);
 
-            // update document in the list so it stays signed
             setDocuments(prev =>
                 prev.map(doc =>
                     doc.documentId === selectedDocument.documentId
@@ -72,7 +73,6 @@ export default function DocumentsScreen() {
                 )
             );
 
-            // also update selected document
             setSelectedDocument(prev =>
                 prev ? { ...prev, signed: true } : prev
             );
@@ -81,6 +81,7 @@ export default function DocumentsScreen() {
 
     if (loading) return <ActivityIndicator />;
 
+    // When viewing a document
     if (selectedDocument) {
         return (
             <View style={{ flex: 1 }}>
@@ -94,14 +95,11 @@ export default function DocumentsScreen() {
                     source={{ uri: selectedDocument.url, cache: false }}
                     trustAllCerts={false}
                     style={{ flex: 1, width: Dimensions.get('window').width }}
-                    onError={(error) => {
-                        console.error('PDF error:', error);
-                        Alert.alert('Error', 'Failed to load PDF.');
-                    }}
                 />
 
                 <View>
                     <Checkbox
+                        testID={"documentAcknowledgedCheckbox"}
                         status={checked ? 'checked' : 'unchecked'}
                         onPress={handleCheckboxPress}
                     />
@@ -111,19 +109,43 @@ export default function DocumentsScreen() {
         );
     }
 
+    // Filtering logic
+    const filteredDocuments = documents.filter(doc => {
+        const title = doc.title.toLowerCase();
+
+        if (filter === 'sop') {
+            return title.includes('sop');
+        }
+
+        return !title.includes('sop') && !title.includes('handbook');
+    });
+
     return (
-        <FlatList
-            data={documents}
-            keyExtractor={(item) => item.documentId.toString()}
-            renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => {
-                    setSelectedDocument(item);
-                    setChecked(item.signed);
-                }}>
-                    <Text>{item.title}</Text>
-                    <Text>View</Text>
-                </TouchableOpacity>
-            )}
-        />
+        <View>
+
+            {/* Filter Buttons */}
+            <TouchableOpacity onPress={() => setFilter('policies')}>
+                <Text>Health and Safety Policies</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => setFilter('sop')}>
+                <Text>SOPs and Instructions</Text>
+            </TouchableOpacity>
+
+            {/* Document List */}
+            <FlatList
+                data={filteredDocuments}
+                keyExtractor={(item) => item.documentId.toString()}
+                renderItem={({ item }) => (
+                    <TouchableOpacity onPress={() => {
+                        setSelectedDocument(item);
+                        setChecked(item.signed);
+                    }}>
+                        <Text>{item.title}</Text>
+                        <Text>View</Text>
+                    </TouchableOpacity>
+                )}
+            />
+        </View>
     );
 }
