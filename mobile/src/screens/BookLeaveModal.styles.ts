@@ -261,4 +261,75 @@ export const styles = (theme: any) =>
       fontSize: FontSize.s16,
       color: theme.black,
     },
+
+    partialDayToggleRow: {
+      borderWidth: 1,
+      borderColor: theme.greyIconLight,
+      borderRadius: BorderRadius.mediumNotification,
+      backgroundColor: theme.white,
+      paddingHorizontal: 12,
+      paddingVertical: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+
+    partialDayToggleTextWrapper: {
+      flex: 1,
+      marginRight: 12,
+    },
+
+    partialDayToggleIndicator: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.greyIconLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.white,
+    },
+
+    partialDayToggleIndicatorSelected: {
+      borderColor: theme.redPrimary,
+      backgroundColor: theme.redBackgroundLight,
+    },
+
+    partialDayToggleIndicatorText: {
+      color: theme.redTextDark,
+      fontFamily: TextStyles.medium.fontFamily,
+      fontWeight: TextStyles.medium.fontWeight,
+      fontSize: FontSize.xs14,
+    },
+
+    timeRow: {
+      flexDirection: 'row',
+      gap: 12,
+      marginBottom: 8,
+    },
+
+    timeButton: {
+      flex: 1,
+      borderWidth: 1,
+      borderColor: theme.greyIconLight,
+      borderRadius: BorderRadius.mediumNotification,
+      backgroundColor: theme.white,
+      paddingHorizontal: 12,
+      paddingVertical: 12,
+    },
+
+    timeButtonLabel: {
+      fontFamily: TextStyles.regular.fontFamily,
+      fontWeight: TextStyles.regular.fontWeight,
+      fontSize: FontSize.xs14,
+      color: theme.greyPrimaryMainText,
+      marginBottom: 4,
+    },
+
+    timeButtonValue: {
+      fontFamily: TextStyles.regular.fontFamily,
+      fontWeight: TextStyles.regular.fontWeight,
+      fontSize: FontSize.s16,
+      color: theme.black,
+    },
 });

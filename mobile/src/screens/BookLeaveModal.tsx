@@ -4,7 +4,6 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  ScrollView,
 } from 'react-native';
 import { Portal, Modal as PaperModal } from 'react-native-paper';
 import dayjs from 'dayjs';
@@ -13,7 +12,21 @@ import { useTheme } from '../theme/colourController';
 import { styles as baseStyles } from './BookLeaveModal.styles';
 import { HttpException } from '../exception/HttpException.ts';
 import LeaveService, { LeaveType } from '../logic/LeaveService';
-import { DatePickerInput } from 'react-native-paper-dates';
+import { DatePickerInput, TimePickerModal } from 'react-native-paper-dates';
+import LeaveTypePickerModal from './LeaveTypePickerModal';
+import PartialDayTimeSection from './PartialDayTimeSection';
+import {
+  daysInAdvance,
+  monThurStartHour,
+  monThurStartMin,
+  monThurEndHour,
+  monThurEndMin,
+  getWorkingDayBounds,
+  formatTime,
+  validatePartialDayTimes,
+  buildSubmissionDates,
+  getWorkingHoursText,
+} from '../logic/LeaveBookingLogic';
 
 /**
  * Props for the BookLeaveModal component.
@@ -49,7 +62,13 @@ export default function BookLeaveModal({
   const [isLoadingLeaveTypes, setIsLoadingLeaveTypes] = useState<boolean>(false);
   const [isLeaveTypePickerVisible, setIsLeaveTypePickerVisible] = useState<boolean>(false);
 
-  const DaysInAdvance = 14;
+  const [isPartialDay, setIsPartialDay] = useState<boolean>(false);
+  const [startHours, setStartHours] = useState<number>(monThurStartHour);
+  const [startMinutes, setStartMinutes] = useState<number>(monThurStartMin);
+  const [endHours, setEndHours] = useState<number>(monThurEndHour);
+  const [endMinutes, setEndMinutes] = useState<number>(monThurEndMin);
+  const [isStartTimePickerVisible, setIsStartTimePickerVisible] = useState<boolean>(false);
+  const [isEndTimePickerVisible, setIsEndTimePickerVisible] = useState<boolean>(false);
 
   const openLeaveTypePicker = () => {
     setIsLeaveTypePickerVisible(true);
@@ -68,12 +87,24 @@ export default function BookLeaveModal({
       return;
     }
 
-    setStartDate(initialDate ? dayjs(initialDate).toDate() : undefined);
-    setEndDate(initialDate ? dayjs(initialDate).toDate() : undefined);
+    const initialSelectedDate = initialDate ? dayjs(initialDate).toDate() : undefined;
+    const initialBounds = initialSelectedDate
+      ? getWorkingDayBounds(initialSelectedDate)
+      : getWorkingDayBounds(new Date());
+
+    setStartDate(initialSelectedDate);
+    setEndDate(initialSelectedDate);
     setNotes('');
     setErrorMessage('');
     setSelectedLeaveTypeId(null);
     setIsLeaveTypePickerVisible(false);
+    setIsPartialDay(false);
+    setIsStartTimePickerVisible(false);
+    setIsEndTimePickerVisible(false);
+    setStartHours(initialBounds.start.hours);
+    setStartMinutes(initialBounds.start.minutes);
+    setEndHours(initialBounds.end.hours);
+    setEndMinutes(initialBounds.end.minutes);
 
     fetchLeaveTypes();
   }, [visible, initialDate]);
@@ -99,7 +130,7 @@ export default function BookLeaveModal({
    * The currently selected leave type object.
    */
   const selectedLeaveType = leaveTypes.find(
-      (leaveType) => leaveType.leaveTypeId === selectedLeaveTypeId
+    (leaveType) => leaveType.leaveTypeId === selectedLeaveTypeId
   );
 
   /**
@@ -107,9 +138,33 @@ export default function BookLeaveModal({
    * that the leave request must be made in.
    */
   const minimumBookableDate = useMemo(() => {
-    return dayjs().add(DaysInAdvance, 'day').startOf('day').toDate();
+    return dayjs().add(daysInAdvance, 'day').startOf('day').toDate();
   }, []);
 
+  const isSingleDayBooking = useMemo(() => {
+    if (!startDate || !endDate) {
+      return false;
+    }
+
+    return dayjs(startDate).isSame(dayjs(endDate), 'day');
+  }, [startDate, endDate]);
+
+  useEffect(() => {
+    if (!isSingleDayBooking) {
+      setIsPartialDay(false);
+      return;
+    }
+
+    if (!startDate) {
+      return;
+    }
+
+    const bounds = getWorkingDayBounds(startDate);
+    setStartHours(bounds.start.hours);
+    setStartMinutes(bounds.start.minutes);
+    setEndHours(bounds.end.hours);
+    setEndMinutes(bounds.end.minutes);
+  }, [isSingleDayBooking, startDate]);
 
   const commonDatePickerProps = {
     mode: 'outlined' as const,
@@ -121,7 +176,6 @@ export default function BookLeaveModal({
     outlineStyle: styles.datePickerOutline,
     style: styles.datePickerInput,
   } as const;
-
 
   /**
    * Validating the form values.
@@ -149,11 +203,22 @@ export default function BookLeaveModal({
     }
 
     if (parsedStartDate.isBefore(minimumDate, 'day')) {
-      return 'Leave requests must be made at least 14 days in advance.';
+      return `Leave requests must be made at least ${daysInAdvance} days in advance.`;
     }
 
     if (parsedEndDate.isBefore(minimumDate, 'day')) {
-      return 'Leave requests must be made at least 14 days in advance.';
+      return `Leave requests must be made at least ${daysInAdvance} days in advance.`;
+    }
+
+    if (isPartialDay) {
+      return validatePartialDayTimes(
+        startDate,
+        endDate,
+        startHours,
+        startMinutes,
+        endHours,
+        endMinutes,
+      );
     }
 
     return '';
@@ -171,13 +236,28 @@ export default function BookLeaveModal({
       return;
     }
 
+    const submissionDates = buildSubmissionDates(
+      startDate,
+      endDate,
+      isPartialDay,
+      startHours,
+      startMinutes,
+      endHours,
+      endMinutes,
+    );
+
+    if (!submissionDates) {
+      setErrorMessage('Please select valid dates.');
+      return;
+    }
+
     setErrorMessage('');
     setIsSubmitting(true);
 
     try {
       await LeaveService.createLeave({
-        startDate: dayjs(startDate).format('YYYY-MM-DD'),
-        endDate: dayjs(endDate).format('YYYY-MM-DD'),
+        startDate: submissionDates.startDate,
+        endDate: submissionDates.endDate,
         leaveTypeId: selectedLeaveTypeId as number,
         notes: notes.trim(),
       });
@@ -200,6 +280,8 @@ export default function BookLeaveModal({
       setIsSubmitting(false);
     }
   };
+
+  const workingHoursText = getWorkingHoursText(startDate);
 
   return (
       <Portal>
@@ -252,6 +334,21 @@ export default function BookLeaveModal({
               />
             </View>
 
+          <PartialDayTimeSection
+            isSingleDayBooking={isSingleDayBooking}
+            isPartialDay={isPartialDay}
+            setIsPartialDay={setIsPartialDay}
+            setIsStartTimePickerVisible={setIsStartTimePickerVisible}
+            setIsEndTimePickerVisible={setIsEndTimePickerVisible}
+            startHours={startHours}
+            startMinutes={startMinutes}
+            endHours={endHours}
+            endMinutes={endMinutes}
+            formatTime={formatTime}
+            workingHoursText={workingHoursText}
+            styles={styles}
+          />
+
             <View style={styles.fieldWrapper}>
               <Text style={styles.fieldLabel}>Type of Leave</Text>
 
@@ -296,59 +393,46 @@ export default function BookLeaveModal({
           </View>
         </PaperModal>
 
-        <PaperModal
+        <LeaveTypePickerModal
             visible={isLeaveTypePickerVisible}
             onDismiss={closeLeaveTypePicker}
-            contentContainerStyle={styles.leaveTypeModalWrapper}
-        >
-          <View style={styles.leaveTypeModalContainer}>
-            <View style={styles.leaveTypeHeaderRow}>
-              <Text style={styles.leaveTypeModalTitle}>Select Leave Type</Text>
+            leaveTypes={leaveTypes}
+            selectedLeaveTypeId={selectedLeaveTypeId}
+            setSelectedLeaveTypeId={setSelectedLeaveTypeId}
+            styles={styles}
+        />
 
-              <TouchableOpacity
-                  onPress={closeLeaveTypePicker}
-                  style={styles.closeButtonWrapper}
-              >
-                <Text style={styles.closeButtonText}>×</Text>
-              </TouchableOpacity>
-            </View>
+        <TimePickerModal
+          visible={isStartTimePickerVisible}
+          onDismiss={() => setIsStartTimePickerVisible(false)}
+          onConfirm={({ hours, minutes }) => {
+            setIsStartTimePickerVisible(false);
+            setStartHours(hours);
+            setStartMinutes(minutes);
+          }}
+          hours={startHours}
+          minutes={startMinutes}
+          use24HourClock
+          label="Select start time"
+          cancelLabel="Cancel"
+          confirmLabel="Ok"
+        />
 
-            <ScrollView
-                style={styles.leaveTypeList}
-                contentContainerStyle={styles.leaveTypeListContent}
-                showsVerticalScrollIndicator={false}
-            >
-              {leaveTypes.map((leaveType) => {
-                const isSelected = leaveType.leaveTypeId === selectedLeaveTypeId;
-
-                return (
-                    <TouchableOpacity
-                        key={leaveType.leaveTypeId}
-                        style={[
-                          styles.leaveTypeOption,
-                          isSelected && styles.leaveTypeOptionSelected,
-                        ]}
-                        onPress={() => {
-                          setSelectedLeaveTypeId(leaveType.leaveTypeId);
-                          closeLeaveTypePicker();
-                        }}
-                        activeOpacity={0.8}
-                    >
-                      <Text
-                          style={[
-                            styles.leaveTypeOptionText,
-                            isSelected && styles.leaveTypeOptionTextSelected,
-                          ]}
-                          numberOfLines={1}
-                      >
-                        {leaveType.name}
-                      </Text>
-                    </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-          </View>
-        </PaperModal>
+        <TimePickerModal
+          visible={isEndTimePickerVisible}
+          onDismiss={() => setIsEndTimePickerVisible(false)}
+          onConfirm={({ hours, minutes }) => {
+            setIsEndTimePickerVisible(false);
+            setEndHours(hours);
+            setEndMinutes(minutes);
+        }}
+          hours={endHours}
+          minutes={endMinutes}
+          use24HourClock
+          label="Select end time"
+          cancelLabel="Cancel"
+          confirmLabel="Ok"
+        />
       </Portal>
   );
 }
