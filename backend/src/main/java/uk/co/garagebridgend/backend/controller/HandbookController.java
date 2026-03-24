@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class HandbookController {
 
+    /** Service responsible for handling document-related operations. */
     private final DocumentService documentService;
 
     /**
@@ -34,7 +35,7 @@ public class HandbookController {
         try {
             List<DocumentResponse> allDocuments = documentService.getDocumentsForCurrentUser();
 
-            // Filter documents where title contains "handbook" 
+            // Filter documents where title contains "handbook"
             return allDocuments.stream()
                     .filter(doc -> doc.getTitle().toLowerCase().contains("handbook"))
                     .collect(Collectors.toList());
