@@ -16,6 +16,7 @@ import RiskAssessments from "../screens/RiskAssessments.tsx";
 import PayslipScreen from '../screens/PayslipScreen.tsx';
 import DocumentsScreen from '../screens/DocumentsScreen.tsx';
 import DocumentsViewScreen from "../screens/DocumentsViewScreen.tsx";
+import HandbookScreen from "../screens/HandbookScreen.tsx";
 
 export function ScreenConfig(body: ScreenConfigProps) {
   // Defaulting to the calendar screen when the HR section is selected.
@@ -96,6 +97,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
             title="Handbook"
           />
           <View style={styles.content} />
+            <HandbookScreen />
         </>
       );
 
