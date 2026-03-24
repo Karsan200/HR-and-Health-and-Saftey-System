@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {Pressable, ScrollView, Text, View} from 'react-native';
 import ColorPicker from 'react-native-wheel-color-picker';
 import { useTheme } from "../../theme/colourController";
@@ -137,75 +137,7 @@ export default function SettingsScreen() {
 
   const styles = settingsStyles(theme, accessibility);
 
-  // Load the settings they have saved.
-  useEffect(() => {
-    async function load() {
-      try {
-        const data = await getSettings();
-
-        updateAccessibility({
-          largeText: data.largeText,
-          dyslexicFont: data.dyslexicFont,
-          highlightText: data.highlightText,
-        });
-
-        setHighlightSmallText(data.highlightText);
-
-        updateTheme({
-          redPrimary: data.accentColour,
-          greyBackground: data.backgroundColour,
-          black: data.textColour,
-        });
-
-        setPickColors({
-          background: data.backgroundColour,
-          text: data.textColour,
-          accent: data.accentColour
-        });
-
-      } catch (err) {
-        console.error("Failed to load settings", err);
-      }
-    }
-
-    load();
-  }, [updateTheme, updateAccessibility]);
-
-  async function save(update: any) {
-    try {
-      await updateSettings(update);
-    } catch (err) {
-      console.error("Save failed", err);
-    }
-  }
-
-  function toggleAccessibility(key: "largeText" | "dyslexicFont") {
-    const newVal = !accessibility[key];
-    updateAccessibility({ [key]: newVal });
-    save({ [key]: newVal });
-  }
-
-  function handleHighlightToggle() {
-    const newVal = !highlightSmallText;
-    setHighlightSmallText(newVal);
-
-    updateAccessibility({ highlightText: newVal });
-    save({ highlightText: newVal });
-
-    if (newVal) {
-      updateTheme({
-        greyPrimaryMainText: '#FFEE00',
-        black: '#FFEE00',
-      })
-    } else {
-      updateTheme({
-        greyPrimaryMainText: '#767676',
-        black: '#000000',
-      })
-    }
-  }
-
-  function applyDefaultTheme() {
+  const applyDefaultTheme = useCallback((skipSave = false) => {
     updateTheme(DefaultColours);
 
     setPickColors({
@@ -216,10 +148,10 @@ export default function SettingsScreen() {
 
     setPickerVisible(false);
     setEditingColor(null);
-    save({ themePreset: "DEFAULT", accentColour: DefaultColours.redPrimary });
-  }
+    if (!skipSave) save({ themePreset: "DEFAULT", accentColour: DefaultColours.redPrimary });
+  }, [updateTheme]);
 
-  function applyBlueTheme() {
+  const applyBlueTheme = useCallback((skipSave = false) => {
     updateTheme({
       ...DefaultColours,
       redPrimary: "#0066FF",
@@ -234,10 +166,11 @@ export default function SettingsScreen() {
     });
     setPickerVisible(false);
     setEditingColor(null);
-    save({ themePreset: "BLUE", accentColour: DefaultColours.redPrimary });
-  }
+    if (!skipSave) save({ themePreset: "BLUE", accentColour: "#0066FF" });
+  }, [updateTheme]);
 
-  function applyGreenTheme() {
+
+  const applyGreenTheme = useCallback((skipSave = false) => {
     updateTheme({
       ...DefaultColours,
       redPrimary: "#2E7D32",
@@ -252,10 +185,10 @@ export default function SettingsScreen() {
     });
     setPickerVisible(false);
     setEditingColor(null);
-    save({ themePreset: "GREEN", accentColour: DefaultColours.redPrimary });
-  }
+    if (!skipSave) save({ themePreset: "GREEN", accentColour: "#2E7D32" });
+  }, [updateTheme]);
 
-  function applyDarkTheme() {
+  const applyDarkTheme = useCallback((skipSave = false) => {
     updateTheme({
       // Basic colours
       black: '#FFFFFF',
@@ -290,7 +223,100 @@ export default function SettingsScreen() {
     });
     setPickerVisible(false);
     setEditingColor(null);
-    save({ themePreset: "DARK", accentColour: DefaultColours.redPrimary });
+    if (!skipSave) save({ themePreset: "DARK", accentColour: "#D20413" });
+  }, [updateTheme]);
+
+  // Load the settings they have saved.
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await getSettings();
+
+        updateAccessibility({
+          largeText: data.largeText,
+          dyslexicFont: data.dyslexicFont,
+          highlightText: data.highlightText,
+        });
+
+        setHighlightSmallText(data.highlightText);
+
+        if (data.themePreset) {
+          switch (data.themePreset) {
+            case "DEFAULT": applyDefaultTheme(true); break;
+            case "BLUE": applyBlueTheme(true); break;
+            case "GREEN": applyGreenTheme(true); break;
+            case "DARK": applyDarkTheme(true); break;
+            default: console.warn("Unknown preset", data.themePreset);
+          }
+        } else {
+
+          const accentSet = generateColorSet(data.accentColour);
+          const textSet = generateColorSet(data.textColour);
+          const backgroundSet = generateColorSet(data.backgroundColour);
+
+          updateTheme({
+            // Accent
+            redPrimary: accentSet.primary,
+            redTextDark: accentSet.dark,
+            redBackgroundLight: accentSet.light,
+
+            // Text
+            black: textSet.dark,
+            greyPrimaryMainText: textSet.primary,
+            greyIconLight: textSet.light,
+
+            // Background
+            greyBackground: backgroundSet.primary,
+            white: backgroundSet.light,
+          });
+
+          setPickColors({
+            background: data.backgroundColour,
+            text: data.textColour,
+            accent: data.accentColour,
+          });
+        }
+
+      } catch (err) {
+        console.error("Failed to load settings", err);
+      }
+    }
+
+    load();
+  }, [updateTheme, updateAccessibility, applyDefaultTheme, applyBlueTheme, applyGreenTheme, applyDarkTheme]);
+
+  async function save(update: any) {
+    try {
+      await updateSettings(update);
+    } catch (err) {
+      console.error("Save failed", err);
+    }
+  }
+
+  function toggleAccessibility(key: "largeText" | "dyslexicFont") {
+    const newVal = !accessibility[key];
+    updateAccessibility({ [key]: newVal });
+    save({ [key]: newVal });
+  }
+
+  function handleHighlightToggle() {
+    const newVal = !highlightSmallText;
+    setHighlightSmallText(newVal);
+
+    updateAccessibility({ highlightText: newVal });
+    save({ highlightText: newVal });
+
+    if (newVal) {
+      updateTheme({
+        greyPrimaryMainText: '#FFEE00',
+        black: '#FFEE00',
+      })
+    } else {
+      updateTheme({
+        greyPrimaryMainText: '#767676',
+        black: '#000000',
+      })
+    }
   }
 
   function openPicker(type: "background" | "text" | "accent") {
@@ -410,22 +436,22 @@ export default function SettingsScreen() {
           <Text style={styles.quickAccessTitle}>Colour Themes</Text>
 
           <View style={styles.schemeGrid}>
-            <Pressable testID="theme-default-button" style={[styles.schemeButton, PRESET_COLOURS[0] === theme.redPrimary  && styles.activeScheme]} onPress={applyDefaultTheme}>
+            <Pressable testID="theme-default-button" style={[styles.schemeButton, PRESET_COLOURS[0] === theme.redPrimary  && styles.activeScheme]} onPress={() => applyDefaultTheme()}>
               <View style={[styles.schemeSwatch]} />
               <Text style={styles.smallLabel}>Default</Text>
             </Pressable>
 
-            <Pressable testID="theme-blue-button" style={[styles.schemeButton, PRESET_COLOURS[1] === theme.redPrimary && styles.activeScheme]} onPress={applyBlueTheme}>
+            <Pressable testID="theme-blue-button" style={[styles.schemeButton, PRESET_COLOURS[1] === theme.redPrimary && styles.activeScheme]} onPress={() => applyBlueTheme()}>
               <View style={[styles.schemeSwatchBlue]} />
               <Text style={styles.smallLabel}>Blue</Text>
             </Pressable>
 
-            <Pressable testID="theme-green-button"  style={[styles.schemeButton, PRESET_COLOURS[2] === theme.redPrimary && styles.activeScheme]} onPress={applyGreenTheme}>
+            <Pressable testID="theme-green-button"  style={[styles.schemeButton, PRESET_COLOURS[2] === theme.redPrimary && styles.activeScheme]} onPress={() => applyGreenTheme()}>
               <View style={[styles.schemeSwatchGreen]} />
               <Text style={styles.smallLabel}>Green</Text>
             </Pressable>
 
-            <Pressable testID="theme-dark-button"  style={[styles.schemeButton, PRESET_COLOURS[3] === theme.redPrimary && styles.activeScheme]} onPress={applyDarkTheme}>
+            <Pressable testID="theme-dark-button"  style={[styles.schemeButton, PRESET_COLOURS[3] === theme.redPrimary && styles.activeScheme]} onPress={() => applyDarkTheme()}>
               <View style={[styles.schemeSwatchDark]} />
               <Text style={styles.smallLabel}>Dark</Text>
             </Pressable>
