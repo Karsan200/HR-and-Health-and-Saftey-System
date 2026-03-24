@@ -4,9 +4,11 @@ import { ThemeProvider } from "@mui/material";
 
 import { muiTheme } from "./theme/muiTheme.ts";
 import { IncompatibleScreen } from "./components/IncompatibleScreen.tsx";
+import {AuthProvider} from "./AuthContext.tsx";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
     useEffect(() => {
         const handleResize = () => {
@@ -23,7 +25,11 @@ function App() {
 
   return (
       <ThemeProvider theme={muiTheme}>
-          {screenSize < 768 ? <IncompatibleScreen /> : <AppContent />}
+          {screenSize < 768 ? <IncompatibleScreen /> :
+              <AuthProvider isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated}>
+                  <AppContent />
+              </AuthProvider>
+          }
       </ThemeProvider>
   )
 }
