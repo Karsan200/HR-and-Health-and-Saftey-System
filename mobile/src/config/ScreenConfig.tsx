@@ -15,7 +15,6 @@ import HazardForm from "../screens/HazardForm.tsx";
 import RiskAssessments from "../screens/RiskAssessments.tsx";
 import PayslipScreen from '../screens/PayslipScreen.tsx';
 import DocumentsScreen from '../screens/DocumentsScreen.tsx';
-import ViewDocumentScreen from '../screens/DocumentsViewScreen.tsx';
 import DocumentsViewScreen from "../screens/DocumentsViewScreen.tsx";
 
 export function ScreenConfig(body: ScreenConfigProps) {

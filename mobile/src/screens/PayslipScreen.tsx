@@ -31,7 +31,7 @@ export default function PayslipScreen() {
 
             const data: Payslip[] = await response.json();
             setPayslips(data);
-        } catch (error) {
+        } catch {
             Alert.alert('Error', 'An unexpected error occurred.');
         } finally {
             setLoading(false);

@@ -16,7 +16,6 @@ export default function DocumentsScreen({ onOpenDocument }: Props) {
 
     const [documents, setDocuments] = useState<Document[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [selectedId, setSelectedId] = useState<number | null>(null);
 
     useEffect(() => {
         fetchDocuments();
@@ -33,15 +32,14 @@ export default function DocumentsScreen({ onOpenDocument }: Props) {
 
             const data: Document[] = await response.json();
             setDocuments(data);
-        } catch (error) {
+        } catch {
             Alert.alert('Error', 'An unexpected error occurred.');
         } finally {
             setLoading(false);
         }
     };
 
-    const openDocument = (id: number) => {
-        setSelectedId(id);
+    const openDocument = () => {
         onOpenDocument();
     };
 
@@ -57,7 +55,7 @@ export default function DocumentsScreen({ onOpenDocument }: Props) {
                 <View>
                     <Text>{item.title}</Text>
 
-                    <TouchableOpacity onPress={() => openDocument(item.documentId)}>
+                    <TouchableOpacity onPress={() => openDocument}>
                         <Text>View</Text>
                     </TouchableOpacity>
                 </View>
