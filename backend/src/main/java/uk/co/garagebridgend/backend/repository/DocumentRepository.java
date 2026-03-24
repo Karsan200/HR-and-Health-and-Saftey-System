@@ -21,10 +21,9 @@ public interface DocumentRepository extends JpaRepository<DocumentTable, Long> {
     int countByFileAccount(AccountTable account);
 
     /**
-     * Retrieves a list of documents associated with the given account, ordered by creation date in descending order.
+     * Finds all documents ordered by creation date in descending order.
      *
-     * @param account the account to retrieve documents for
-     * @return a list of documents for the account, ordered by creation date descending
+     * @return list of documents ordered by creation date descending
      */
-    List<DocumentTable> findByFileAccountOrderByCreatedDesc(AccountTable account);
+    List<DocumentTable> findAllByOrderByCreatedDesc();
 }

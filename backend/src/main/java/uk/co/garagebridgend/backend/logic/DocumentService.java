@@ -13,146 +13,61 @@ import uk.co.garagebridgend.backend.repository.SignatureRepository;
 
 import java.util.List;
 
-/**
- * Service class for handling document-related operations, such as retrieving documents for the authenticated user
- * and signing documents.
- */
 @Service
 @RequiredArgsConstructor
 public class DocumentService {
 
-    /** Repository for accessing document data. */
     private final DocumentRepository documentRepository;
-
-    /** Repository for accessing account data. */
     private final AccountRepository accountRepository;
-
-    /** Service for generating pre-signed URLs for files in storage. */
+    private final SignatureRepository signatureRepository;
     private final StorageService storageService;
 
-    /** Repository for accessing signature data. */
-    private final SignatureRepository signatureRepository;
 
     /**
-     * Retrieves all documents for the currently authenticated user,
-     * each including a pre-signed URL to access the file.
+     * Retrieves all documents for the currently authenticated user, including a pre-signed URL for each document's file
+     * and whether the user has signed each document.
      *
-     * @return list of document responses for the authenticated user
+     * @return list of DocumentResponse objects representing the documents for the authenticated user
      * @throws AuthenticatedAccountNotFoundException if the authenticated user cannot be found
      */
-    public List<DocumentResponse> getDocumentsForCurrentUser()
-            throws AuthenticatedAccountNotFoundException {
+    public List<DocumentResponse> getAllDocuments() throws AuthenticatedAccountNotFoundException {
 
-        // Get the currently authenticated user
         var user = AuthenticationService.getCurrentUser();
+        if (user == null) throw new AuthenticatedAccountNotFoundException();
 
-        AccountTable account;
+        AccountTable account = accountRepository.findById(Long.valueOf(user.getUsername()))
+                .orElseThrow(AuthenticatedAccountNotFoundException::new);
 
-        if (user != null) {
-            account = accountRepository
-                    .findById(Long.valueOf(user.getUsername()))
-                    .orElseThrow(AuthenticatedAccountNotFoundException::new);
-        } else {
-            throw new AuthenticatedAccountNotFoundException();
-        }
-
-        // Fetch all documents for this account and map to response objects
-        return documentRepository
-                .findByFileAccountOrderByCreatedDesc(account)
+        return documentRepository.findAllByOrderByCreatedDesc()
                 .stream()
-                .map(document -> {
-
-                    boolean signed = signatureRepository
-                            .existsByAccountAndDocument(account, document);
-
-                    return new DocumentResponse(
-                            document.getDocumentId(),
-                            document.getTitle(),
-                            storageService.getPresignedUrl(
-                                    document.getFile().getFileId().toString()
-                            ),
-                            signed
-                    );
-                })
+                .map(document -> new DocumentResponse(
+                        document.getDocumentId(),
+                        document.getTitle(),
+                        storageService.getPresignedUrl(document.getFile().getFileId().toString()),
+                        signatureRepository.existsByAccountAndDocument(account, document)
+                ))
                 .toList();
     }
 
     /**
-     * Retrieves a specific document by its ID for the currently authenticated user,
-     * including a pre-signed URL to access the file.
-     *
-     * @param documentId the ID of the document to retrieve
-     * @return a document response containing the document's details and pre-signed URL
-     * @throws AuthenticatedAccountNotFoundException if the authenticated user cannot be found
+     * Sign a document as the currently authenticated user.
      */
-    public DocumentResponse getDocumentForCurrentUser(final Long documentId)
-            throws AuthenticatedAccountNotFoundException {
-
+    public void signDocument(final Long documentId) throws AuthenticatedAccountNotFoundException {
         var user = AuthenticationService.getCurrentUser();
+        if (user == null) throw new AuthenticatedAccountNotFoundException();
 
-        AccountTable account;
-        if (user != null) {
-            account = accountRepository
-                    .findById(Long.valueOf(user.getUsername()))
-                    .orElseThrow(AuthenticatedAccountNotFoundException::new);
-        } else {
-            throw new AuthenticatedAccountNotFoundException();
-        }
+        AccountTable account = accountRepository.findById(Long.valueOf(user.getUsername()))
+                .orElseThrow(AuthenticatedAccountNotFoundException::new);
 
-        var document = documentRepository.findById(documentId)
+        DocumentTable document = documentRepository.findById(documentId)
                 .orElseThrow();
 
-        if (!document.getFile().getAccount().equals(account)) {
-            throw new RuntimeException("Unauthorized");
-        }
-
-        boolean signed = signatureRepository
-                .existsByAccountAndDocument(account, document);
-
-        return new DocumentResponse(
-                document.getDocumentId(),
-                document.getTitle(),
-                storageService.getPresignedUrl(
-                        document.getFile().getFileId().toString()
-                ),
-                signed
-        );
-    }
-
-    /**
-     * Signs a specific document by its ID for the currently authenticated user.
-     *
-     * @param documentId the ID of the document to sign
-     * @throws AuthenticatedAccountNotFoundException if the authenticated user cannot be found
-     */
-    public void signDocument(final Long documentId)
-            throws AuthenticatedAccountNotFoundException {
-
-        var user = AuthenticationService.getCurrentUser();
-
-        AccountTable account;
-
-        if (user != null) {
-            account = accountRepository
-                    .findById(Long.valueOf(user.getUsername()))
-                    .orElseThrow(AuthenticatedAccountNotFoundException::new);
-        } else {
-            throw new AuthenticatedAccountNotFoundException();
-        }
-
-        DocumentTable document = documentRepository
-                .findById(documentId)
-                .orElseThrow();
-
-        if (signatureRepository.existsByAccountAndDocument(account, document)) {
-            return;
-        }
+        // Don't create duplicate signatures
+        if (signatureRepository.existsByAccountAndDocument(account, document)) return;
 
         SignatureTable signature = new SignatureTable();
-
         signature.setAccount(account);
         signature.setDocument(document);
-
         signatureRepository.save(signature);
     }
 }

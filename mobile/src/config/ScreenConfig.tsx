@@ -15,7 +15,6 @@ import HazardForm from "../screens/HazardForm.tsx";
 import RiskAssessments from "../screens/RiskAssessments.tsx";
 import PayslipScreen from '../screens/PayslipScreen.tsx';
 import DocumentsScreen from '../screens/DocumentsScreen.tsx';
-import DocumentsViewScreen from "../screens/DocumentsViewScreen.tsx";
 import HandbookScreen from "../screens/HandbookScreen.tsx";
 
 export function ScreenConfig(body: ScreenConfigProps) {
@@ -130,25 +129,9 @@ export function ScreenConfig(body: ScreenConfigProps) {
             title="Documents"
           />
           <View style={styles.content} />
-            <DocumentsScreen onOpenDocument={() => handleNavigate('viewDocuments')} />
+            <DocumentsScreen />
         </>
       );
-
-      case 'viewDocuments':
-          return (
-              <>
-                  <TopNavBar
-                      title="View Document"
-                      showBackButton={true}
-                      onBackPress={() => handleNavigate('documents')}
-                  />
-                  <View style={styles.content}>
-                      <DocumentsViewScreen />
-                  </View>
-              </>
-          );
-
-
 
       case 'risk':
       return (
