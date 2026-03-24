@@ -1,6 +1,6 @@
-import {createContext, type ReactNode, useContext, useState} from "react";
+import {createContext, type ReactNode, useContext, useEffect, useState} from "react";
 import * as React from "react";
-import {ActivityLoader} from "./components/ActivityLoader.tsx";
+import { ActivityLoader } from "./components/ActivityLoader.tsx";
 
 export type AuthContextType = {
     accessToken: string | null;
@@ -8,6 +8,8 @@ export type AuthContextType = {
 
     isAuthenticated: boolean | null;
     setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean | null>>;
+    isMfaAuthenticated: boolean | null;
+    setIsMfaAuthenticated: React.Dispatch<React.SetStateAction<boolean | null>>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,13 +18,22 @@ interface AuthProviderProps {
     children: ReactNode;
     isAuthenticated: boolean | null;
     setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean | null>>;
+    isMfaAuthenticated: boolean | null;
+    setIsMfaAuthenticated: React.Dispatch<React.SetStateAction<boolean | null>>;
 }
 
-export function AuthProvider({ children, isAuthenticated, setIsAuthenticated }: AuthProviderProps) {
+export function AuthProvider(
+    { children, isAuthenticated, setIsAuthenticated, isMfaAuthenticated, setIsMfaAuthenticated }: AuthProviderProps) {
     const [accessToken, setAccessToken] = useState<string | null>(null);
 
+    useEffect(() => {
+
+    }, []);
+
     return (
-        <AuthContext.Provider value={{ accessToken, setAccessToken, isAuthenticated, setIsAuthenticated }}>
+        <AuthContext.Provider value={
+        { accessToken, setAccessToken, isAuthenticated, setIsAuthenticated, isMfaAuthenticated, setIsMfaAuthenticated }
+        }>
             {isAuthenticated === null ? <ActivityLoader /> : children}
         </AuthContext.Provider>
     );

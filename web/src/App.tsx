@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { ThemeProvider } from "@mui/material";
+import { useEffect, useState, type SetStateAction} from "react";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
+import {ThemeProvider} from "@mui/material";
 
-import { muiTheme } from "./theme/muiTheme.ts";
-import { IncompatibleScreen } from "./components/IncompatibleScreen.tsx";
+import {muiTheme} from "./theme/muiTheme.ts";
+import {IncompatibleScreen} from "./components/IncompatibleScreen.tsx";
 import {AuthProvider} from "./AuthContext.tsx";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
+
+    // Authentication states
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const [isMfaAuthenticated, setIsMfaAuthenticated] = useState<boolean | null>(null);
 
     useEffect(() => {
         const handleResize = () => {
@@ -23,10 +26,12 @@ function App() {
         };
     }, []);
 
-  return (
-      <ThemeProvider theme={muiTheme}>
-          {screenSize < 768 ? <IncompatibleScreen /> :
-              <AuthProvider isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated}>
+    return (
+        <ThemeProvider theme={muiTheme}>
+            {screenSize < 768 ? <IncompatibleScreen/> :
+                <AuthProvider isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated}
+                    isMfaAuthenticated={isMfaAuthenticated} setIsMfaAuthenticated={setIsMfaAuthenticated}
+                >
                   <AppContent />
               </AuthProvider>
           }
