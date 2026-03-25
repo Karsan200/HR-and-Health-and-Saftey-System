@@ -1016,6 +1016,11 @@ INSERT INTO qualifications_table (
     details,
     created
 ) VALUES
+        (1,
+        (SELECT file_id FROM files_table WHERE name = 'safety_policy'),
+         'Workshop Safety Training',
+         'Internal safety training covering workshop hazards and procedures.',
+         '2024-06-12 10:05:00'),
 
       (5,
       (SELECT file_id FROM files_table WHERE name = 'nvq_level3_motor_vehicle_droberts'),
