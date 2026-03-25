@@ -35,9 +35,6 @@ public class LeaveService {
     /** Standard work hours per full Monday to Thursday leave day. */
     private static final int MONDAY_TO_THURSDAY_HOURS = 9;
 
-    /** Standard work hours per full day of leave. */
-    private static final int HOURS_PER_FULL_DAY = 8;
-
     /** Standard work hours per full Friday leave day. */
     private static final int FRIDAY_HOURS = 4;
 
@@ -160,10 +157,7 @@ public class LeaveService {
 
         return leave.stream()
                 .map(l -> {
-                    boolean isFullDay =
-                            l.getStartDate().toLocalTime().equals(java.time.LocalTime.MIDNIGHT)
-                                    &&
-                                    l.getEndDate().toLocalTime().equals(java.time.LocalTime.MIDNIGHT);
+                    boolean isFullDay = isFullDayLeave(l);
 
                     return new LeaveDayResponse(
                             l.getAccount().getFirstName() + " " + l.getAccount().getLastName(),
@@ -201,30 +195,15 @@ public class LeaveService {
         int usedHours = 0;
 
         for (LeaveTable leave : leaves) {
-
-            long hours;
-
-            boolean isFullDay =
-                    leave.getStartDate().toLocalTime().equals(java.time.LocalTime.MIDNIGHT)
-                            && leave.getEndDate().toLocalTime().equals(java.time.LocalTime.MIDNIGHT);
-
-            if (isFullDay) {
-                long days = java.time.Duration.between(
-                        leave.getStartDate().toLocalDate().atStartOfDay(),
-                        leave.getEndDate().toLocalDate().atStartOfDay()
-                ).toDays() + 1;
-
-                hours = days * HOURS_PER_FULL_DAY;
-            } else {
-                hours = java.time.Duration.between(
-                        leave.getStartDate(),
-                        leave.getEndDate()
-                ).toHours();
-            }
+            long leaveMinutes = calculateWorkingMinutesBetween(
+                leave.getStartDate(),
+                leave.getEndDate()
+            );
+            int leaveHours = (int) Math.ceil((double) leaveMinutes / MINUTES_PER_HOUR);
 
             if (leave.isApproved()) {
                 approved++;
-                usedHours += (int) hours;
+                usedHours += leaveHours;
             } else {
                 pending++;
             }
@@ -339,60 +318,50 @@ public class LeaveService {
     }
 
     /**
-     * Calculates the total leave duration in minutes.
+     * Calculates the total number of working minutes between two date-times.
+     * Only working hours are counted and weekends are ignored.
      *
-     * @param leave the leave entry to calculate
-     * @return the total number of leave minutes
+     * @param startDateTime the leave start date and time
+     * @param endDateTime the leave end date and time
+     * @return the total working minutes across the date range
      */
-    private long calculateLeaveMinutes(final LeaveTable leave) {
-        if (isFullDayLeave(leave)) {
-            return calculateFullDayLeaveMinutes(
-                    leave.getStartDate().toLocalDate(),
-                    leave.getEndDate().toLocalDate()
-            );
+    private long calculateWorkingMinutesBetween(
+            final LocalDateTime startDateTime,
+            final LocalDateTime endDateTime) {
+
+        if (endDateTime.isBefore(startDateTime)) {
+            return 0;
         }
 
-        return Duration.between(
-                leave.getStartDate(),
-                leave.getEndDate()
-        ).toMinutes();
-    }
-
-    /**
-     * Calculates the total working minutes across a full-day leave date range.
-     *
-     * @param startDate the leave start date
-     * @param endDate the leave end date
-     * @return the total working minutes across the full-day leave range
-     */
-    private long calculateFullDayLeaveMinutes(final LocalDate startDate, final LocalDate endDate) {
         long totalMinutes = 0;
-        LocalDate currentDate = startDate;
+        LocalDate currentDate = startDateTime.toLocalDate();
+        LocalDate endDate = endDateTime.toLocalDate();
 
         while (!currentDate.isAfter(endDate)) {
-            totalMinutes += getFullDayMinutes(currentDate);
+            if (!isWeekend(currentDate)) {
+                LocalDateTime workDayStart = currentDate.atTime(getWorkDayStartTime(currentDate));
+                LocalDateTime workDayEnd = currentDate.atTime(getWorkDayEndTime(currentDate));
+
+                LocalDateTime effectiveStart = workDayStart;
+                LocalDateTime effectiveEnd = workDayEnd;
+
+                if (currentDate.equals(startDateTime.toLocalDate()) && startDateTime.isAfter(workDayStart)) {
+                    effectiveStart = startDateTime;
+                }
+
+                if (currentDate.equals(endDateTime.toLocalDate()) && endDateTime.isBefore(workDayEnd)) {
+                    effectiveEnd = endDateTime;
+                }
+
+                if (effectiveEnd.isAfter(effectiveStart)) {
+                    totalMinutes += Duration.between(effectiveStart, effectiveEnd).toMinutes();
+                }
+            }
+
             currentDate = currentDate.plusDays(1);
         }
 
         return totalMinutes;
-    }
-
-    /**
-     * Returns the number of working minutes for a full leave day.
-     *
-     * @param date the date being checked
-     * @return the number of working minutes for that day
-     */
-    private long getFullDayMinutes(final LocalDate date) {
-        if (isWeekend(date)) {
-            return 0;
-        }
-
-        if (isFriday(date)) {
-            return FRIDAY_HOURS * MINUTES_PER_HOUR;
-        }
-
-        return MONDAY_TO_THURSDAY_HOURS * MINUTES_PER_HOUR;
     }
 
     /**
