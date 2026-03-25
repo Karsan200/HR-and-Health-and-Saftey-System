@@ -2,7 +2,7 @@ package uk.co.garagebridgend.backend.models.request;
 
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Request body used to create a new leave request.
@@ -13,12 +13,12 @@ public class LeaveRequest {
     /**
      * Start date of the leave request.
      */
-    private LocalDate startDate;
+    private LocalDateTime startDate;
 
     /**
      * End date of the leave request.
      */
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
     /**
      * Selected leave type identifier.

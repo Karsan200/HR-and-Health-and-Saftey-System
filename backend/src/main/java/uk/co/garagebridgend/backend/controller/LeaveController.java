@@ -122,6 +122,7 @@ public class LeaveController {
     @PostMapping("/create")
     public void createLeave(@RequestBody final LeaveRequest request) {
         try {
+            System.out.println("Received leave request: " + request);
             leaveService.createLeave(request);
         } catch (AuthenticatedAccountNotFoundException e) {
             throw new ResponseStatusException(

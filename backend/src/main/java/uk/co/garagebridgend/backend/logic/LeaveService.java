@@ -1,5 +1,6 @@
 package uk.co.garagebridgend.backend.logic;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -7,7 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
@@ -32,12 +32,69 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class LeaveService {
 
+    /** Standard work hours per full Monday to Thursday leave day. */
+    private static final int MONDAY_TO_THURSDAY_HOURS = 9;
 
     /** Standard work hours per full day of leave. */
     private static final int HOURS_PER_FULL_DAY = 8;
 
+    /** Standard work hours per full Friday leave day. */
+    private static final int FRIDAY_HOURS = 4;
+
     /** Total holiday allowance in hours for a user. */
     private static final int TOTAL_ALLOWANCE_HOURS = 160;
+
+    /** Number of minutes in one hour. */
+    private static final int MINUTES_PER_HOUR = 60;
+
+    /** Friday day-of-week value used by java.time.DayOfWeek. */
+    private static final int FRIDAY_DAY_VALUE = 5;
+
+    /** Saturday day-of-week value used by java.time.DayOfWeek. */
+    private static final int SATURDAY_DAY_VALUE = 6;
+
+    /** Sunday day-of-week value used by java.time.DayOfWeek. */
+    private static final int SUNDAY_DAY_VALUE = 7;
+
+    /** Monday to Thursday work day start hour. */
+    private static final int MONDAY_TO_THURSDAY_START_HOUR = 8;
+
+    /** Monday to Thursday work day start minute. */
+    private static final int MONDAY_TO_THURSDAY_START_MINUTE = 0;
+
+    /** Monday to Thursday work day end hour. */
+    private static final int MONDAY_TO_THURSDAY_END_HOUR = 17;
+
+    /** Monday to Thursday work day end minute. */
+    private static final int MONDAY_TO_THURSDAY_END_MINUTE = 0;
+
+    /** Friday work day start hour. */
+    private static final int FRIDAY_START_HOUR = 8;
+
+    /** Friday work day start minute. */
+    private static final int FRIDAY_START_MINUTE = 0;
+
+    /** Friday work day end hour. */
+    private static final int FRIDAY_END_HOUR = 12;
+
+    /** Friday work day end minute. */
+    private static final int FRIDAY_END_MINUTE = 0;
+
+    /** Monday to Thursday work day start time. */
+    private static final LocalTime MONDAY_TO_THURSDAY_START_TIME =
+            LocalTime.of(MONDAY_TO_THURSDAY_START_HOUR, MONDAY_TO_THURSDAY_START_MINUTE);
+
+    /** Monday to Thursday work day end time. */
+    private static final LocalTime MONDAY_TO_THURSDAY_END_TIME =
+            LocalTime.of(MONDAY_TO_THURSDAY_END_HOUR, MONDAY_TO_THURSDAY_END_MINUTE);
+
+    /** Friday work day start time. */
+    private static final LocalTime FRIDAY_START_TIME =
+            LocalTime.of(FRIDAY_START_HOUR, FRIDAY_START_MINUTE);
+
+    /** Friday work day end time. */
+    private static final LocalTime FRIDAY_END_TIME =
+            LocalTime.of(FRIDAY_END_HOUR, FRIDAY_END_MINUTE);
 
     /**
      * Repository used to access leave data from the database.
@@ -211,18 +268,17 @@ public class LeaveService {
     public void createLeave(final LeaveRequest request)
             throws IllegalArgumentException {
 
-        String username = leaveRequestChecks(request);
+        validateLeaveRequest(request);
 
-        AccountTable account = accountRepository.findByUsername(username)
-                .orElseThrow(AuthenticatedAccountNotFoundException::new);
+        AccountTable account = getAuthenticatedAccount();
         LeaveTypeTable leaveType = leaveTypeRepository.findById(request.getLeaveTypeId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid leave type id."));
 
         LeaveTable leave = new LeaveTable();
         leave.setAccount(account);
         leave.setLeaveType(leaveType);
-        leave.setStartDate(request.getStartDate().atStartOfDay());
-        leave.setEndDate(request.getEndDate().atTime(23,59,59));
+        leave.setStartDate(request.getStartDate());
+        leave.setEndDate(request.getEndDate());
         leave.setApproved(false);
         leave.setNotes(request.getNotes());
 
@@ -230,15 +286,16 @@ public class LeaveService {
     }
 
     /**
-     * Validates the leave request data and retrieves the username of the currently authenticated user.
+     * Validates the leave request data.
      *
      * @param request the leave request to validate
-     * @return the username of the authenticated user
      * @throws IllegalArgumentException if any required fields are missing or if the date range is invalid
-     * @throws AuthenticatedAccountNotFoundException if no authenticated user is found
      */
-    @NotNull
-    private static String leaveRequestChecks(final LeaveRequest request) {
+    private void validateLeaveRequest(final LeaveRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Leave request is required.");
+        }
+
         if (request.getStartDate() == null || request.getEndDate() == null) {
             throw new IllegalArgumentException("Start date and end date are required.");
         }
@@ -248,13 +305,142 @@ public class LeaveService {
         if (request.getLeaveTypeId() == null) {
             throw new IllegalArgumentException("Leave type is required.");
         }
-
-        User user = AuthenticationService.getCurrentUser();
-        if (user == null) {
-            throw new AuthenticatedAccountNotFoundException();
-        }
-
-        return user.getUsername();
     }
 
+    /**
+     * Retrieves the currently authenticated account.
+     *
+     * @return the authenticated account
+     * @throws AuthenticatedAccountNotFoundException if no authenticated user or account is found
+     */
+    private AccountTable getAuthenticatedAccount() {
+        var user = AuthenticationService.getCurrentUser();
+
+        if (user != null) {
+            return accountRepository.findById(Long.valueOf(user.getUsername()))
+                    .orElseThrow(AuthenticatedAccountNotFoundException::new);
+        } else {
+            throw new AuthenticatedAccountNotFoundException();
+        }
+    }
+
+    /**
+     * Checks whether the leave entry matches the working hours for full-day leave.
+     *
+     * @param leave the leave entry to check
+     * @return true when the leave covers full working days, otherwise false
+     */
+    private boolean isFullDayLeave(final LeaveTable leave) {
+        LocalTime expectedStartTime = getWorkDayStartTime(leave.getStartDate().toLocalDate());
+        LocalTime expectedEndTime = getWorkDayEndTime(leave.getEndDate().toLocalDate());
+
+        return leave.getStartDate().toLocalTime().equals(expectedStartTime)
+                && leave.getEndDate().toLocalTime().equals(expectedEndTime);
+    }
+
+    /**
+     * Calculates the total leave duration in minutes.
+     *
+     * @param leave the leave entry to calculate
+     * @return the total number of leave minutes
+     */
+    private long calculateLeaveMinutes(final LeaveTable leave) {
+        if (isFullDayLeave(leave)) {
+            return calculateFullDayLeaveMinutes(
+                    leave.getStartDate().toLocalDate(),
+                    leave.getEndDate().toLocalDate()
+            );
+        }
+
+        return Duration.between(
+                leave.getStartDate(),
+                leave.getEndDate()
+        ).toMinutes();
+    }
+
+    /**
+     * Calculates the total working minutes across a full-day leave date range.
+     *
+     * @param startDate the leave start date
+     * @param endDate the leave end date
+     * @return the total working minutes across the full-day leave range
+     */
+    private long calculateFullDayLeaveMinutes(final LocalDate startDate, final LocalDate endDate) {
+        long totalMinutes = 0;
+        LocalDate currentDate = startDate;
+
+        while (!currentDate.isAfter(endDate)) {
+            totalMinutes += getFullDayMinutes(currentDate);
+            currentDate = currentDate.plusDays(1);
+        }
+
+        return totalMinutes;
+    }
+
+    /**
+     * Returns the number of working minutes for a full leave day.
+     *
+     * @param date the date being checked
+     * @return the number of working minutes for that day
+     */
+    private long getFullDayMinutes(final LocalDate date) {
+        if (isWeekend(date)) {
+            return 0;
+        }
+
+        if (isFriday(date)) {
+            return FRIDAY_HOURS * MINUTES_PER_HOUR;
+        }
+
+        return MONDAY_TO_THURSDAY_HOURS * MINUTES_PER_HOUR;
+    }
+
+    /**
+     * Returns the working-day start time for the supplied date.
+     *
+     * @param date the date being checked
+     * @return the expected working-day start time
+     */
+    private LocalTime getWorkDayStartTime(final LocalDate date) {
+        if (isFriday(date)) {
+            return FRIDAY_START_TIME;
+        }
+
+        return MONDAY_TO_THURSDAY_START_TIME;
+    }
+
+    /**
+     * Returns the working-day end time for the supplied date.
+     *
+     * @param date the date being checked
+     * @return the expected working-day end time
+     */
+    private LocalTime getWorkDayEndTime(final LocalDate date) {
+        if (isFriday(date)) {
+            return FRIDAY_END_TIME;
+        }
+
+        return MONDAY_TO_THURSDAY_END_TIME;
+    }
+
+    /**
+     * Checks whether the supplied date falls on a Friday.
+     *
+     * @param date the date being checked
+     * @return true if the date is Friday, otherwise false
+     */
+    private boolean isFriday(final LocalDate date) {
+        return date.getDayOfWeek().getValue() == FRIDAY_DAY_VALUE;
+    }
+
+    /**
+     * Checks whether the supplied date falls on a weekend.
+     *
+     * @param date the date being checked
+     * @return true if the date is Saturday or Sunday, otherwise false
+     */
+    private boolean isWeekend(final LocalDate date) {
+        int dayOfWeek = date.getDayOfWeek().getValue();
+        return dayOfWeek == SATURDAY_DAY_VALUE || dayOfWeek == SUNDAY_DAY_VALUE;
+    }
 }

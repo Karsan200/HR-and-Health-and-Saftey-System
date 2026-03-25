@@ -129,9 +129,22 @@ export const buildSubmissionDates = (
     }
 
     if (!isPartialDay) {
+        const startBounds = getWorkingDayBounds(startDate);
+        const endBounds = getWorkingDayBounds(endDate);
+
+        const fullStart = dayjs(startDate)
+          .hour(startBounds.start.hours)
+          .minute(startBounds.start.minutes)
+          .second(0);
+
+        const fullEnd = dayjs(endDate)
+          .hour(endBounds.end.hours)
+          .minute(endBounds.end.minutes)
+          .second(0);
+
         return {
-            startDate: dayjs(startDate).format('YYYY-MM-DD'),
-            endDate: dayjs(endDate).format('YYYY-MM-DD'),
+          startDate: fullStart.format('YYYY-MM-DDTHH:mm:ss'),
+          endDate: fullEnd.format('YYYY-MM-DDTHH:mm:ss'),
         };
     }
 

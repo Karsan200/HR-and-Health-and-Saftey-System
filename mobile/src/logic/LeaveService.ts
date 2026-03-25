@@ -14,6 +14,9 @@ export type LeaveType = {
   iconType: string;
 };
 
+/**
+ * Payload used to create a leave request.
+ */
 type CreateLeaveRequest = {
   startDate: string;
   endDate: string;
@@ -48,7 +51,7 @@ export default class LeaveService {
    * On success, the screen is refreshed and the modal is closed.
    */
   static async createLeave(request: CreateLeaveRequest): Promise<void> {
-    const response = await AuthenticationService.fetch('/api/leave', {
+    const response = await AuthenticationService.fetch('/api/leave/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
