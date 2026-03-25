@@ -71,6 +71,9 @@ public class LeaveService {
     /** Friday work day end minute. */
     private static final int FRIDAY_END_MINUTE = 0;
 
+    /** Minimum number of days in advance that a leave request must be made. */
+    private static final int MINIMUM_ADVANCE_BOOKING_DAYS = 14;
+
     /** Monday to Thursday work day start time. */
     private static final LocalTime MONDAY_TO_THURSDAY_START_TIME =
             LocalTime.of(MONDAY_TO_THURSDAY_START_HOUR, MONDAY_TO_THURSDAY_START_MINUTE);
@@ -236,7 +239,10 @@ public class LeaveService {
     public void createLeave(final LeaveRequest request)
             throws IllegalArgumentException {
 
-        validateLeaveRequest(request);
+        validateFieldsFilled(request);
+        validateLeaveRequestIsInAdvance(request);
+        validateLeaveRequestWithinWorkingHours(request);
+        validateLeaveRequestDayCapacity(request);
 
         AccountTable account = getAuthenticatedAccount();
         LeaveTypeTable leaveType = leaveTypeRepository.findById(request.getLeaveTypeId())
@@ -259,7 +265,7 @@ public class LeaveService {
      * @param request the leave request to validate
      * @throws IllegalArgumentException if any required fields are missing or if the date range is invalid
      */
-    private void validateLeaveRequest(final LeaveRequest request) {
+    private void validateFieldsFilled(final LeaveRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Leave request is required.");
         }
@@ -275,8 +281,79 @@ public class LeaveService {
         }
     }
 
+    /* Validates that the leave request is made at least a certain number of days in advance.
+     *
+     * @param request the leave request to validate
+     * @throws IllegalArgumentException if the leave request is not made in advance
+     */
+    private void validateLeaveRequestIsInAdvance(final LeaveRequest request) {
+        LocalDate minimumBookableDate = LocalDate.now().plusDays(MINIMUM_ADVANCE_BOOKING_DAYS);
+
+        if (request.getStartDate().toLocalDate().isBefore(minimumBookableDate)) {
+            throw new IllegalArgumentException("Leave requests must be made at least 14 days in advance.");
+        }
+
+        if (request.getEndDate().toLocalDate().isBefore(minimumBookableDate)) {
+            throw new IllegalArgumentException("Leave requests must be made at least 14 days in advance.");
+        }
+    }
+
+    /* Validates that the leave request does not exceed the maximum number of approved leaves allowed per day.
+     *
+     * @param request the leave request to validate
+     * @throws IllegalArgumentException if any date within the leave request is fully booked
+     */
+    private void validateLeaveRequestDayCapacity(final LeaveRequest request) {
+        LocalDate currentDate = request.getStartDate().toLocalDate();
+        LocalDate endDate = request.getEndDate().toLocalDate();
+
+        while (!currentDate.isAfter(endDate)) {
+            if (!isWeekend(currentDate)) {
+                LocalDateTime startOfDay = currentDate.atStartOfDay();
+                LocalDateTime endOfDay = currentDate.atTime(LocalTime.MAX);
+
+                long approvedLeaveCount = leaveRepository.findLeaveForDate(startOfDay, endOfDay)
+                        .stream()
+                        .filter(LeaveTable::isApproved)
+                        .count();
+
+                if (approvedLeaveCount >= 2) {
+                    throw new IllegalArgumentException("One or more selected dates are fully booked.");
+                }
+            }
+
+            currentDate = currentDate.plusDays(1);
+        }
+    }
+
+    /* Validates that the leave request start and end times fall within the defined working hours.
+     *
+     * @param request the leave request to validate
+     * @throws IllegalArgumentException if the start or end time is outside of working hours
+     */
+    private void validateLeaveRequestWithinWorkingHours(final LeaveRequest request) {
+        LocalDateTime startDateTime = request.getStartDate();
+        LocalDateTime endDateTime = request.getEndDate();
+
+        LocalTime allowedStartTimeForStartDate = getWorkDayStartTime(startDateTime.toLocalDate());
+        LocalTime allowedEndTimeForStartDate = getWorkDayEndTime(startDateTime.toLocalDate());
+
+        LocalTime allowedStartTimeForEndDate = getWorkDayStartTime(endDateTime.toLocalDate());
+        LocalTime allowedEndTimeForEndDate = getWorkDayEndTime(endDateTime.toLocalDate());
+
+        if (startDateTime.toLocalTime().isBefore(allowedStartTimeForStartDate)
+                || startDateTime.toLocalTime().isAfter(allowedEndTimeForStartDate)) {
+            throw new IllegalArgumentException("Start time must be within working hours.");
+        }
+
+        if (endDateTime.toLocalTime().isBefore(allowedStartTimeForEndDate)
+                || endDateTime.toLocalTime().isAfter(allowedEndTimeForEndDate)) {
+            throw new IllegalArgumentException("End time must be within working hours.");
+        }
+    }
+
     /**
-     * Retrieves the currently authenticated account.
+     * * Retrieves the currently authenticated account.
      *
      * @return the authenticated account
      * @throws AuthenticatedAccountNotFoundException if no authenticated user or account is found

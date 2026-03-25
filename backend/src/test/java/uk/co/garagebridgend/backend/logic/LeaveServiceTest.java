@@ -134,14 +134,14 @@ public class LeaveServiceTest {
         LeaveTable approvedLeave = new LeaveTable();
         approvedLeave.setAccount(account);
         approvedLeave.setApproved(true);
-        approvedLeave.setStartDate(LocalDateTime.of(2026, 3, 1, 0, 0));
-        approvedLeave.setEndDate(LocalDateTime.of(2026, 3, 2, 0, 0)); // 2 full days
+        approvedLeave.setStartDate(LocalDateTime.of(2026, 3, 2, 8, 0));   // Monday 08:00
+        approvedLeave.setEndDate(LocalDateTime.of(2026, 3, 3, 17, 0));    // Tuesday 17:00
 
         LeaveTable pendingLeave = new LeaveTable();
         pendingLeave.setAccount(account);
         pendingLeave.setApproved(false);
-        pendingLeave.setStartDate(LocalDateTime.of(2026, 3, 3, 0, 0));
-        pendingLeave.setEndDate(LocalDateTime.of(2026, 3, 3, 0, 0)); // 1 full day
+        pendingLeave.setStartDate(LocalDateTime.of(2026, 3, 4, 8, 0)); // Wednesday 08:00
+        pendingLeave.setEndDate(LocalDateTime.of(2026, 3, 4, 17, 0)); // Wednesday 17:00
 
         when(leaveRepository.findAll()).thenReturn(List.of(approvedLeave, pendingLeave));
 
@@ -154,8 +154,8 @@ public class LeaveServiceTest {
             assertEquals(1, summary.getApprovedCount());
             assertEquals(1, summary.getPendingCount());
 
-            // 2 full days = 16 hours, allowance = 160 - 16 = 144
-            assertEquals(144, summary.getTotalDays());
+            // Monday 9 hours + Tuesday 9 hours = 18 hours, allowance = 160 - 18 = 142
+            assertEquals(142, summary.getTotalDays());
         }
     }
 

@@ -62,10 +62,25 @@ export default class LeaveService {
     const responseText = await response.text();
 
     if (!response.ok) {
-      throw new HttpException(
-        response.status,
-        responseText || `Unable to submit leave request. Status: ${response.status}`
-      );
+      let errorMessage = `Unable to submit leave request. Status: ${response.status}`;
+
+      if (responseText) {
+        try {
+          const parsedError = JSON.parse(responseText);
+
+          if (parsedError?.message && typeof parsedError.message === 'string') {
+            errorMessage = parsedError.message;
+          } else if (parsedError?.error && typeof parsedError.error === 'string') {
+            errorMessage = parsedError.error;
+          } else {
+            errorMessage = responseText;
+          }
+        } catch {
+          errorMessage = responseText;
+        }
+      }
+
+      throw new HttpException(response.status, errorMessage);
     }
   }
 }
