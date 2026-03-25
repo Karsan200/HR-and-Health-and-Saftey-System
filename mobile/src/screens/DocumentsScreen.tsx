@@ -79,7 +79,7 @@ export default function DocumentsScreen() {
         }
     };
 
-    if (loading) return <ActivityIndicator />;
+    if (loading) return <ActivityIndicator testID="loading-indicator" />;
 
     // When viewing a document
     if (selectedDocument) {
