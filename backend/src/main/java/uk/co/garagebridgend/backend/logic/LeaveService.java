@@ -32,12 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class LeaveService {
 
-    /** Standard work hours per full Monday to Thursday leave day. */
-    private static final int MONDAY_TO_THURSDAY_HOURS = 9;
-
-    /** Standard work hours per full Friday leave day. */
-    private static final int FRIDAY_HOURS = 4;
-
     /** Total holiday allowance in hours for a user. */
     private static final int TOTAL_ALLOWANCE_HOURS = 160;
 
@@ -107,11 +101,6 @@ public class LeaveService {
      * Repository used to access account data from the database.
      */
     private final AccountRepository accountRepository;
-
-    /**
-     * Service used to access authentication information about the currently logged-in user.
-     **/
-    private final AuthenticationService authenticationService;
 
     /**
      * Retrieves all approved leave entries for calendar display.
