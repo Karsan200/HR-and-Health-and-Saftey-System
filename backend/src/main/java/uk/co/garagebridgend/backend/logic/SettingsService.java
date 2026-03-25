@@ -77,7 +77,7 @@ public class SettingsService {
                     t.setAccount(account);
 
                     // Optional defaults
-                    t.setThemePreset("default");
+                    t.setThemePreset("DEFAULT");
                     t.setAccentColour("#0066FF");
                     t.setBackgroundColour("#FFFFFF");
                     t.setTextColour("#000000");

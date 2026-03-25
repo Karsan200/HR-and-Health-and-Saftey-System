@@ -148,8 +148,10 @@ export default function SettingsScreen() {
 
     setPickerVisible(false);
     setEditingColor(null);
-    if (!skipSave) save({ themePreset: "DEFAULT", accentColour: DefaultColours.redPrimary });
-  }, [updateTheme]);
+    if (!skipSave) {
+      save({ themePreset: "DEFAULT", accentColour: DefaultColours.redPrimary });
+    }
+  }, [save, updateTheme]);
 
   const applyBlueTheme = useCallback((skipSave = false) => {
     updateTheme({
@@ -166,8 +168,10 @@ export default function SettingsScreen() {
     });
     setPickerVisible(false);
     setEditingColor(null);
-    if (!skipSave) save({ themePreset: "BLUE", accentColour: "#0066FF" });
-  }, [updateTheme]);
+    if (!skipSave) {
+      save({ themePreset: "BLUE", accentColour: "#0066FF" });
+    }
+  }, [save, updateTheme]);
 
 
   const applyGreenTheme = useCallback((skipSave = false) => {
@@ -185,8 +189,10 @@ export default function SettingsScreen() {
     });
     setPickerVisible(false);
     setEditingColor(null);
-    if (!skipSave) save({ themePreset: "GREEN", accentColour: "#2E7D32" });
-  }, [updateTheme]);
+    if (!skipSave) {
+      save({ themePreset: "GREEN", accentColour: "#2E7D32" });
+    }
+  }, [save, updateTheme]);
 
   const applyDarkTheme = useCallback((skipSave = false) => {
     updateTheme({
@@ -223,8 +229,10 @@ export default function SettingsScreen() {
     });
     setPickerVisible(false);
     setEditingColor(null);
-    if (!skipSave) save({ themePreset: "DARK", accentColour: "#D20413" });
-  }, [updateTheme]);
+    if (!skipSave) {
+      save({ themePreset: "DARK", accentColour: "#D20413" });
+    }
+  }, [save, updateTheme]);
 
   const [hasLoaded, setHasLoaded] = useState(false);
 
@@ -289,14 +297,15 @@ export default function SettingsScreen() {
     load();
   }, [hasLoaded, updateTheme, updateAccessibility, applyDefaultTheme, applyBlueTheme, applyGreenTheme, applyDarkTheme]);
 
-  async function save(update: any) {
-    if (!hasLoaded) return; //Dont save until we have loaded the users settings, otherwise we might overwrite their settings with defaults
+  const save = useCallback(async (update: any): Promise<void> => {
+    if (!hasLoaded) return; // Prevent saving before initial load (which would overwrite their settings with defaults)
+
     try {
       await updateSettings(update);
     } catch (err) {
       console.error("Save failed", err);
     }
-  }
+  }, [hasLoaded]);
 
   function toggleAccessibility(key: "largeText" | "dyslexicFont") {
     const newVal = !accessibility[key];

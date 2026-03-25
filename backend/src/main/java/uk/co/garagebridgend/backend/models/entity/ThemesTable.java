@@ -38,7 +38,7 @@ public class ThemesTable {
     private AccountTable account;
 
     /** Preset Theme of the app. */
-    @Column(columnDefinition = "TEXT", name = "theme", nullable = false)
+    @Column(columnDefinition = "TEXT", name = "theme")
     private String themePreset;
 
     /** Background colour of the app. */
