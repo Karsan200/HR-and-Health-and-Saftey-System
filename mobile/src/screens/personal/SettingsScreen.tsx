@@ -206,15 +206,10 @@ export default function SettingsScreen() {
       redBackgroundLight: '#AE010B',
 
       // Traffic Light Colours
-      redTrafficPrimary: '#D20414',
       redTrafficTextDark: '#F6CDD0',
       redTrafficBackgroundLight: '#AE010B',
-
-      amberPrimary: '#E8960A',
       amberTextDark: '#FFECCD',
       amberBackgroundLight: '#9B6302',
-
-      greenPrimary: '#14A45A',
       greenTextDark: '#D0EDDE',
       greenBackgroundLight: '#0D7B42',
 
@@ -223,7 +218,6 @@ export default function SettingsScreen() {
       greyBackground: '#101010', // Background of App
 
       // Miscellaneous colours
-      bluePrimary: '#588FFF',
       blueDark: '#E6ECF9',
       blueLight: '#002A80',
     });
