@@ -78,8 +78,8 @@ public class SettingsService {
 
                     // Optional defaults
                     t.setThemePreset("DEFAULT");
-                    t.setAccentColour("#0066FF");
-                    t.setBackgroundColour("#FFFFFF");
+                    t.setAccentColour("#D20414");
+                    t.setBackgroundColour("#F6F6F8");
                     t.setTextColour("#000000");
 
                     return themeRepository.save(t);

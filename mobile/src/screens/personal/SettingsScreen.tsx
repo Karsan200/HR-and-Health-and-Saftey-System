@@ -346,7 +346,7 @@ export default function SettingsScreen() {
   }
 
 
-  function updateColor(hex: string) {
+  async function updateColor(hex: string) {
 
     if (!editingColor) return;
 
@@ -388,7 +388,7 @@ export default function SettingsScreen() {
       payload.backgroundColour = newColors.primary;
     }
 
-    save(payload);
+    await save(payload);
   }
 
   const PRESET_COLOURS = ["#D20414", "#0066FF", "#2E7D32", "#D20413"];

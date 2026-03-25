@@ -1,7 +1,6 @@
 package uk.co.garagebridgend.backend.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uk.co.garagebridgend.backend.logic.SettingsService;
 import uk.co.garagebridgend.backend.models.response.SettingsResponse;
@@ -18,23 +17,15 @@ public class SettingsController {
      * Service layer for handling settings logic.
      */
     private final SettingsService settingsService;
-
-//    @GetMapping
-//    public String test() {
-//        return "Settings endpoint is working!";
-//    }
-
     /**
      * Retrieves all settings and theme data for a given account.
      *
      * @return combined settings + theme response
      */
     @GetMapping
-    public ResponseEntity<SettingsResponse> getSettings() {
+    public SettingsResponse getSettings() {
 
-        SettingsResponse response = settingsService.getAllSettings();
-
-        return ResponseEntity.ok(response);
+        return settingsService.getAllSettings();
     }
 
     /**
@@ -44,12 +35,9 @@ public class SettingsController {
      * @return success response
      */
     @PutMapping
-    public ResponseEntity<Void> updateSettings(
+    public void updateSettings(
             @RequestBody SettingsResponse request
     ) {
-
         settingsService.updateAllSettings(request);
-
-        return ResponseEntity.noContent().build();
     }
 }
