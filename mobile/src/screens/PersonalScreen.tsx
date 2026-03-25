@@ -50,13 +50,17 @@ export default function PersonalScreen() {
                     source={{ uri: selectedUrl, cache: false }}
                     trustAllCerts={false}
                     style={{ flex: 1 }}
+                    onError={(error) => {
+                        console.error('PDF error:', error);
+                        Alert.alert('Error', 'Failed to load PDF.');
+                    }}
                 />
             </View>
         );
     }
 
     if (loading) {
-        return <ActivityIndicator />;
+        return <ActivityIndicator testID="loading-indicator" />;
     }
 
     return (
