@@ -58,7 +58,7 @@ export default function PayslipScreen() {
     }
 
     if (loading) {
-        return <ActivityIndicator />;
+        return <ActivityIndicator testID="loading-indicator" />;
     }
 
     return (
