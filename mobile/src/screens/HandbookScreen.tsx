@@ -56,7 +56,7 @@ export default function HandbookScreen() {
     }
 
     if (loading) {
-        return <ActivityIndicator />;
+        return <ActivityIndicator testID="loading-indicator" />;
     }
 
     return (
