@@ -31,20 +31,28 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
 
   const startOfWeek = selectedDate.startOf('week');
 
+
   const weekDays = Array.from({ length: 7 }).map((_, i) =>
     startOfWeek.add(i, 'day'),
   );
 
   const isToday = selectedDate.isSame(dayjs(), 'day');
   const [isBookLeaveModalVisible, setIsBookLeaveModalVisible] = useState(false);
+
   const refreshSelectedDateData = async () => {
     await fetchLeaveForDate(selectedDate.format('YYYY-MM-DD'));
   };
 
-  const DaysInAdvance = 14;
+  const daysInAdvance = 14;
+  const maxBookedDays = 2;
+
   const minimumBookableDate = dayjs()
-    .add(DaysInAdvance, 'day').startOf('day');
+    .add(daysInAdvance, 'day')
+    .startOf('day');
+
   const canBookLeave = !selectedDate.isBefore(minimumBookableDate, 'day');
+  const isFullyBooked = activities.length >= maxBookedDays;
+  const canOpenBookingModal = canBookLeave && !isFullyBooked;
 
   const fetchLeaveForDate = async (date: string) => {
     try {
@@ -159,6 +167,19 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
           </TouchableOpacity>
         </View>
 
+        {/* Booking Status Message */}
+        {!canBookLeave && (
+          <Text style={{ color: theme.greyPrimaryMainText }}>
+            Leave must be booked at least {daysInAdvance} days in advance
+          </Text>
+        )}
+
+        {canBookLeave && isFullyBooked && (
+          <Text style={{ color: theme.greyPrimaryMainText }}>
+            This day is fully booked
+          </Text>
+        )}
+
         {/* Activity Cards */}
         {activities.length === 0 && (
           <Text style={{ color: theme.greyPrimaryMainText }}>
@@ -193,16 +214,25 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
       <TouchableOpacity
         style={[
           styles(theme).addButton,
-          !canBookLeave && styles(theme).addButtonDisabled,
+          !canOpenBookingModal && styles(theme).addButtonDisabled,
         ]}
         onPress={() => {
-          if (canBookLeave) {
+          if (canOpenBookingModal) {
             setIsBookLeaveModalVisible(true);
           }
         }}
+        disabled={!canOpenBookingModal}
       >
-        <Text style={styles(theme).addIcon}>+</Text>
+        <Text
+          style={[
+            styles(theme).addIcon,
+            !canOpenBookingModal && styles(theme).addButtonDisabled,
+          ]}
+        >
+          +
+        </Text>
       </TouchableOpacity>
+
       <BookLeaveModal
         visible={isBookLeaveModalVisible}
         initialDate={selectedDate.format('YYYY-MM-DD')}
