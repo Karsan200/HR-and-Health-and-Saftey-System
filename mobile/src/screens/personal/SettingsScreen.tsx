@@ -226,9 +226,12 @@ export default function SettingsScreen() {
     if (!skipSave) save({ themePreset: "DARK", accentColour: "#D20413" });
   }, [updateTheme]);
 
+  const [hasLoaded, setHasLoaded] = useState(false);
+
   // Load the settings they have saved.
   useEffect(() => {
     async function load() {
+      if (hasLoaded) return;
       try {
         const data = await getSettings();
 
@@ -276,6 +279,7 @@ export default function SettingsScreen() {
             accent: data.accentColour,
           });
         }
+        setHasLoaded(true);
 
       } catch (err) {
         console.error("Failed to load settings", err);
@@ -283,9 +287,10 @@ export default function SettingsScreen() {
     }
 
     load();
-  }, [updateTheme, updateAccessibility, applyDefaultTheme, applyBlueTheme, applyGreenTheme, applyDarkTheme]);
+  }, [hasLoaded, updateTheme, updateAccessibility, applyDefaultTheme, applyBlueTheme, applyGreenTheme, applyDarkTheme]);
 
   async function save(update: any) {
+    if (!hasLoaded) return; //Dont save until we have loaded the users settings, otherwise we might overwrite their settings with defaults
     try {
       await updateSettings(update);
     } catch (err) {
@@ -344,7 +349,9 @@ export default function SettingsScreen() {
     const newColors = generateColorSet(hex);
     setColors(newColors);
 
-    let payload: any = {};
+    let payload: any = {
+      themePreset: null // Force Custom mode
+    };
 
     if (editingColor === "accent") {
       updateTheme({
@@ -371,6 +378,8 @@ export default function SettingsScreen() {
       });
       payload.backgroundColour = newColors.primary;
     }
+
+    save(payload);
   }
 
   const PRESET_COLOURS = ["#D20414", "#0066FF", "#2E7D32", "#D20413"];

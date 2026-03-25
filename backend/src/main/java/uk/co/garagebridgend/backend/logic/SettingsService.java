@@ -163,6 +163,8 @@ public class SettingsService {
 
         if (request.getThemePreset() != null) {
             theme.setThemePreset(request.getThemePreset());
+        } else {
+            theme.setThemePreset(null);
         }
 
         if (request.getAccentColour() != null) {
