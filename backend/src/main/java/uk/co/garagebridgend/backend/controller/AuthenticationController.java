@@ -24,6 +24,7 @@ import uk.co.garagebridgend.backend.models.exception.NotFoundException;
 import uk.co.garagebridgend.backend.models.internal.RotateRefreshTokenInternal;
 import uk.co.garagebridgend.backend.models.request.AuthRequest;
 import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
+import uk.co.garagebridgend.backend.models.response.MfaCheckResponse;
 import uk.co.garagebridgend.backend.models.response.RefreshTokenResponse;
 
 import java.util.Arrays;
@@ -85,6 +86,24 @@ public class AuthenticationController {
             );
         } catch (Exception e) {
             LOG.error("Error during authentication", e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal sever error"
+            );
+        }
+    }
+
+    @GetMapping("/mfa/check")
+    public MfaCheckResponse checkMfa(final HttpServletResponse response) {
+        try {
+            // TODO: Implement service method to check if user has MFA setup and return secret if not
+        } catch (AuthenticatedAccountNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Authenticated account not found."
+            );
+        } catch (Exception e) {
+            LOG.error("Error checking MFA status", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal sever error"
