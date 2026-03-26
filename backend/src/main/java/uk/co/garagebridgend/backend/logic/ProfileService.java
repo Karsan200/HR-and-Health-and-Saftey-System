@@ -18,17 +18,18 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class ProfileService {
 
-    /** Repository for fetching account data. */
-    private final AccountRepository accountRepository;
+    /** Service for handling authentication and retrieving the current user. */
+    private final AuthenticationService authenticationService;
 
     /**
      * Constructor for dependency injection of required repositories.
      *
-     * @param repository the AccountRepository implementation to use
+     * @param authenticationServiceImpl the AuthenticationService implementation to use
      */
     @Autowired
-    public ProfileService(final AccountRepository repository) {
-        this.accountRepository = repository;
+    public ProfileService(
+            final AuthenticationService authenticationServiceImpl) {
+        this.authenticationService = authenticationServiceImpl;
     }
 
     /**
@@ -42,19 +43,7 @@ public class ProfileService {
             throws AuthenticatedAccountNotFoundException {
 
         // Get currently authenticated user via authentication service
-        User user = AuthenticationService.getCurrentUser();
-
-        // throws exception if no user is authenticated
-        if (user == null) {
-            throw new AuthenticatedAccountNotFoundException();
-        }
-
-        Long accountId = Long.valueOf(user.getUsername());
-
-        // Fetch the account from the database or throw an exception if not found
-        AccountTable account = accountRepository.findById(accountId)
-                .orElseThrow(AuthenticatedAccountNotFoundException::new);
-
+        var account = authenticationService.getCurrentUser();
 
         // Return a ProfileResponse containing the relevant account information for profile page
         return new ProfileResponse(

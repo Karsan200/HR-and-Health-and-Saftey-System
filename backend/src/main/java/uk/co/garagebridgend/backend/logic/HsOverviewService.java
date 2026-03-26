@@ -19,6 +19,9 @@ import uk.co.garagebridgend.backend.repository.SignatureRepository;
  */
 @Service
 public class HsOverviewService {
+    /** Service for handling authentication and retrieving the current user. */
+    private final AuthenticationService authenticationService;
+
     /** Repository to access account data. */
     private final AccountRepository accountRepository;
 
@@ -34,6 +37,7 @@ public class HsOverviewService {
     /**
      * Constructs the HsOverviewService with the required repositories.
      *
+     * @param authenticationServiceImpl service for handling authentication and retrieving the current user
      * @param accountRepositoryImpl   repository for AccountTable
      * @param documentRepositoryImpl  repository for DocumentTable
      * @param signatureRepositoryImpl repository for SignatureTable
@@ -41,10 +45,12 @@ public class HsOverviewService {
      */
     @Autowired
     public HsOverviewService(
+            final AuthenticationService authenticationServiceImpl,
             final AccountRepository accountRepositoryImpl,
             final DocumentRepository documentRepositoryImpl,
             final SignatureRepository signatureRepositoryImpl,
             final HazardRepository hazardRepositoryImpl) {
+        this.authenticationService = authenticationServiceImpl;
         this.accountRepository = accountRepositoryImpl;
         this.documentRepository = documentRepositoryImpl;
         this.signatureRepository = signatureRepositoryImpl;
@@ -58,15 +64,7 @@ public class HsOverviewService {
      */
     public HsOverviewResponseModel getOverview() {
         // Get the current authenticated user
-        var user = AuthenticationService.getCurrentUser();
-
-        AccountTable account;
-        if (user != null) {
-            account = accountRepository.findById(Long.valueOf(user.getUsername()))
-                    .orElseThrow(AuthenticatedAccountNotFoundException::new);
-        } else {
-            throw new AuthenticatedAccountNotFoundException();
-        }
+        var account = authenticationService.getCurrentUser();
 
         int pendingDocs = documentRepository.countByFileAccount(account);
         int signed = signatureRepository.countByAccount(account);

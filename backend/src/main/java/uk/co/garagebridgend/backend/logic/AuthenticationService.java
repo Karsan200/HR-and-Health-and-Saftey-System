@@ -124,15 +124,7 @@ public class AuthenticationService {
     public RotateRefreshTokenInternal rotateRefreshToken(final AuthRotateRequest body)
             throws AuthenticatedAccountNotFoundException, InvalidPasswordException {
         // Get the current user
-        User user = AuthenticationService.getCurrentUser();
-
-        if (user == null) {
-            throw new AuthenticatedAccountNotFoundException();
-        }
-
-        // Get the account from the database
-        AccountTable account = accountRepository.findById(Long.valueOf(user.getUsername()))
-                .orElseThrow(AuthenticatedAccountNotFoundException::new);
+        AccountTable account = this.getCurrentUser();
 
         /* If the user does not have a pin code set, set it to the provided pin code,
          * otherwise validate the provided pin code against the stored hash. */
@@ -147,14 +139,14 @@ public class AuthenticationService {
         sessionRepository.deleteMobileSessionsByAccountId(account.getAccountId());
 
         // Create a new mobile refresh token
-        String newRefreshToken = createRefreshToken(Long.valueOf(user.getUsername()), true);
+        String newRefreshToken = createRefreshToken(account.getAccountId(), true);
 
         // Create a new access token
         Map<String, Object> claims = new HashMap<>();
         claims.put("mfa", false);
         claims.put("mobileToken", true);
 
-        String newAccessToken = createToken(claims, Long.valueOf(user.getUsername()));
+        String newAccessToken = createToken(claims, account.getAccountId());
 
         return new RotateRefreshTokenInternal(newRefreshToken, newAccessToken);
     }
@@ -187,16 +179,20 @@ public class AuthenticationService {
 
     /**
      * Retrieves the currently authenticated user from the Spring Security context. If the authentication
-     * is present and the principal is an instance of User, it returns the User object; otherwise, it returns null.
+     * is present and the principal is an instance of User, it returns the AccountTable object.
      * @return the currently authenticated User, or null if no authentication is present or the principal is not a User
+     * @throws AuthenticatedAccountNotFoundException if no authenticated user is found in the security context
      */
-    public static User getCurrentUser() {
+    public AccountTable getCurrentUser()
+        throws AuthenticatedAccountNotFoundException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication != null && authentication.getPrincipal() instanceof User) {
-            return (User) authentication.getPrincipal();
+        if (authentication != null && authentication.getPrincipal() instanceof User user) {
+            return accountRepository.findById(Long.valueOf(user.getUsername()))
+                    .orElseThrow(AuthenticatedAccountNotFoundException::new);
         }
-        return null;
+
+        throw new AuthenticatedAccountNotFoundException();
     }
 
     /**

@@ -27,8 +27,8 @@ public class HazardService {
     /** Service for handling object storage interactions. */
     private final StorageService storageService;
 
-    /** Repository for managing account data. */
-    private final AccountRepository accountRepository;
+    /** Service for handling authentication and retrieving the current user. */
+    private final AuthenticationService authenticationService;
 
     /** Repository for managing hazard data. */
     private final HazardRepository hazardRepository;
@@ -43,19 +43,20 @@ public class HazardService {
      * Constructs the HazardService with the required dependencies.
      *
      * @param storageServiceImpl       service for handling object storage interactions
-     * @param accountRepositoryImpl    repository for managing account data
+     * @param authenticationServiceImpl service for handling authentication and retrieving the current user
      * @param hazardRepositoryImpl     repository for managing hazard data
      * @param hazardFilesRepositoryImpl repository for managing hazard file data
      * @param filesRepositoryImpl      repository for managing file data
      */
     public HazardService(
             final StorageService storageServiceImpl,
+            final AuthenticationService authenticationServiceImpl,
             final AccountRepository accountRepositoryImpl,
             final HazardRepository hazardRepositoryImpl,
             final HazardFilesRepository hazardFilesRepositoryImpl,
             final FilesRepository filesRepositoryImpl) {
         this.storageService = storageServiceImpl;
-        this.accountRepository = accountRepositoryImpl;
+        this.authenticationService = authenticationServiceImpl;
         this.hazardRepository = hazardRepositoryImpl;
         this.hazardFilesRepository = hazardFilesRepositoryImpl;
         this.filesRepository = filesRepositoryImpl;
@@ -71,15 +72,7 @@ public class HazardService {
     public void report(final HazardReportRequest body)
             throws AuthenticatedAccountNotFoundException, IllegalArgumentException {
         // Get the current authenticated user
-        var user = AuthenticationService.getCurrentUser();
-
-        AccountTable account;
-        if (user != null) {
-            account = accountRepository.findById(Long.valueOf(user.getUsername()))
-                    .orElseThrow(AuthenticatedAccountNotFoundException::new);
-        } else {
-            throw new AuthenticatedAccountNotFoundException();
-        }
+        var account = authenticationService.getCurrentUser();
 
         // Check the size of the uploaded files
         if (!body.getFiles().isEmpty()) {
