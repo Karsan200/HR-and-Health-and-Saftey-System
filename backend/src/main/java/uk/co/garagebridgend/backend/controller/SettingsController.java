@@ -1,8 +1,11 @@
 package uk.co.garagebridgend.backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.SettingsService;
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.SettingsResponse;
 
 /**
@@ -24,8 +27,13 @@ public class SettingsController {
      */
     @GetMapping
     public SettingsResponse getSettings() {
-
-        return settingsService.getAllSettings();
+        try {
+            return settingsService.getAllSettings();
+        } catch (AuthenticatedAccountNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired refresh token");
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+        }
     }
 
     /**
@@ -35,9 +43,13 @@ public class SettingsController {
      * @return success response
      */
     @PutMapping
-    public void updateSettings(
-            @RequestBody SettingsResponse request
-    ) {
-        settingsService.updateAllSettings(request);
+    public void updateSettings(@RequestBody SettingsResponse request) {
+        try {
+            settingsService.updateAllSettings(request);
+        } catch (AuthenticatedAccountNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired refresh token");
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+        }
     }
 }
