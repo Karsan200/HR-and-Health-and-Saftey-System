@@ -51,16 +51,16 @@ public class SettingsService {
      */
     public SettingsResponse getAllSettings() {
 
-        System.out.println("Step 1: Entered getAllSettings()");
+        // System.out.println("Step 1: Entered getAllSettings()");
 
         AccountTable account = getCurrentAccount();
-        System.out.println("Step 2: Retrieved current account with ID: " + account.getAccountId());
+        // System.out.println("Step 2: Retrieved current account with ID: " + account.getAccountId());
 
         // Get or create settings
         SettingsTable settings = settingsRepository
                 .findByAccountId(account.getAccountId())
                 .orElseGet(() -> {
-                    System.out.println("Step 3: No settings found for account, creating default settings");
+                    // System.out.println("Step 3: No settings found for account, creating default settings");
                     SettingsTable s = new SettingsTable();
                     s.setAccount(account);
 
@@ -78,7 +78,7 @@ public class SettingsService {
         ThemesTable theme = themeRepository
                 .findByAccountId(account.getAccountId())
                 .orElseGet(() -> {
-                    System.out.println("Step 4: No theme found for account, creating default theme");
+                    // System.out.println("Step 4: No theme found for account, creating default theme");
                     ThemesTable t = new ThemesTable();
                     t.setAccount(account);
 
@@ -91,7 +91,7 @@ public class SettingsService {
                     return themeRepository.save(t);
                 });
 
-        System.out.println("Step 5: Retrieved settings and theme, preparing response");
+        // System.out.println("Step 5: Retrieved settings and theme, preparing response");
         SettingsResponse response = new SettingsResponse();
 
         // Accessibility Settings
@@ -111,7 +111,7 @@ public class SettingsService {
         response.setBackgroundColour(theme.getBackgroundColour());
         response.setTextColour(theme.getTextColour());
 
-        System.out.println("Step 6: Prepared response: " + response);
+        // System.out.println("Step 6: Prepared response: " + response);
 
         return response;
     }
