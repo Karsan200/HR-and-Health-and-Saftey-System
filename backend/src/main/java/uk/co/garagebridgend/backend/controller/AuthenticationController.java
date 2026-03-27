@@ -96,7 +96,7 @@ public class AuthenticationController {
     @GetMapping("/mfa/check")
     public MfaCheckResponse checkMfa(final HttpServletResponse response) {
         try {
-            // TODO: Implement service method to check if user has MFA setup and return secret if not
+            return authenticationService.checkMfa();
         } catch (AuthenticatedAccountNotFoundException e) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,

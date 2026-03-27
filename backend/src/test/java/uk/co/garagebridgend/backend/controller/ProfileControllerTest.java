@@ -8,7 +8,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.MockedStatic;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -19,15 +18,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import uk.co.garagebridgend.backend.RentATechApplication;
 import uk.co.garagebridgend.backend.logic.ProfileService;
 import uk.co.garagebridgend.backend.logic.AuthenticationService;
+import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
-import uk.co.garagebridgend.backend.models.exception.NotFoundException;
 import uk.co.garagebridgend.backend.models.response.ProfileResponse;
 
-import org.springframework.security.core.userdetails.User;
-
-import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -53,6 +47,9 @@ public class ProfileControllerTest {
 
     @Mock
     private ProfileService profileService;
+
+    @Mock
+    private AuthenticationService authenticationService;
 
     @InjectMocks
     private ProfileController profileController;
@@ -80,21 +77,19 @@ public class ProfileControllerTest {
 
         when(profileService.getCurrentProfile()).thenReturn(mockProfile);
 
-        // Mock AuthenticationService.getCurrentUser() to return a valid user
-        try (MockedStatic<AuthenticationService> authMock = org.mockito.Mockito.mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(new User("123", "password", Collections.emptyList()));
+        // Mock AuthenticationService.getCurrentUser() (now an instance method) to return a valid user
+        when(authenticationService.getCurrentUser())
+                .thenReturn(new AccountTable());
 
-            // Act & Assert
-            mockMvc.perform(get("/api/profile/me"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.firstName", is("John")))
-                    .andExpect(jsonPath("$.lastName", is("Doe")))
-                    .andExpect(jsonPath("$.email", is("john.doe@example.com")))
-                    .andExpect(jsonPath("$.phoneNumber", is("1234567890")))
-                    .andExpect(jsonPath("$.hasPinCode", is(false)))
-                    .andExpect(jsonPath("$.created", is("18 March 2026")));
-        }
+        // Act & Assert
+        mockMvc.perform(get("/api/profile/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName", is("John")))
+                .andExpect(jsonPath("$.lastName", is("Doe")))
+                .andExpect(jsonPath("$.email", is("john.doe@example.com")))
+                .andExpect(jsonPath("$.phoneNumber", is("1234567890")))
+                .andExpect(jsonPath("$.hasPinCode", is(false)))
+                .andExpect(jsonPath("$.created", is("18 March 2026")));
     }
     @Test
     void testGetCurrentUserUnauthorised() throws Exception {

@@ -4,9 +4,12 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.apache.commons.codec.binary.Base32;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,11 +20,9 @@ import javax.crypto.SecretKey;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.transaction.annotation.Transactional;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
@@ -33,6 +34,7 @@ import uk.co.garagebridgend.backend.models.exception.NotFoundException;
 import uk.co.garagebridgend.backend.models.internal.RotateRefreshTokenInternal;
 import uk.co.garagebridgend.backend.models.request.AuthRequest;
 import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
+import uk.co.garagebridgend.backend.models.response.MfaCheckResponse;
 import uk.co.garagebridgend.backend.models.response.RefreshTokenResponse;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.SessionRepository;
@@ -114,6 +116,37 @@ public class AuthenticationService {
     }
 
     /**
+     * Checks if multifactor authentication (MFA) is required for the currently authenticated user.
+     * If the user does not have a 2FA secret set up, generates a new secret and saves it to the user's account.
+     * @return a MfaCheckResponse containing the MFA secret (if generated) and whether MFA is required for the user
+     * @throws AuthenticatedAccountNotFoundException if no authenticated user is found in the security context
+     */
+    public MfaCheckResponse checkMfa() throws AuthenticatedAccountNotFoundException {
+        AccountTable account = this.getCurrentUser();
+
+        // Get the current claims (authorities) of the authenticated user to determine if mfa is required
+        var authorities = this.getCurrentClaims();
+        boolean mfaRequired = authorities.contains("mfa");
+
+        // Check the user's 2FA secret to determine if 2FA has been set up
+        String mfaSecret = null;
+        if (account.getTwoFactorSecret() == null) {
+            // Create a random 20 byte array
+            byte[] secret = new byte[20];
+            new SecureRandom().nextBytes(secret);
+
+            // Encode the secret as a base32 string
+            mfaSecret = new Base32().encodeToString(secret);
+
+            // Save the secret to the user's account in the database
+            account.setTwoFactorSecret(mfaSecret);
+            accountRepository.save(account);
+        }
+
+        return new MfaCheckResponse(mfaSecret, mfaRequired);
+    }
+
+    /**
      * Rotates the refresh token for the currently authenticated user. Revokes all existing mobile refresh tokens,
      * creates a new mobile refresh token, and generates a new access token with appropriate claims.
      * @param body the request body containing the user's pin code
@@ -192,6 +225,25 @@ public class AuthenticationService {
                     .orElseThrow(AuthenticatedAccountNotFoundException::new);
         }
 
+        throw new AuthenticatedAccountNotFoundException();
+    }
+
+    /**
+     * Retrieves the current claims (authorities) of the authenticated user from the Spring Security context.
+     * @return a list of claim strings representing the authorities of the authenticated user
+     * @throws AuthenticatedAccountNotFoundException if no authenticated user is found in the security context
+     */
+    public List<String> getCurrentClaims()
+        throws AuthenticatedAccountNotFoundException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null) {
+            var authorities = authentication.getAuthorities();
+
+            return authorities.stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+        }
         throw new AuthenticatedAccountNotFoundException();
     }
 

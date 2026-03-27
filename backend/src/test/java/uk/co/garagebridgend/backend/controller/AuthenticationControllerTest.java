@@ -5,14 +5,13 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -322,6 +321,7 @@ public class AuthenticationControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "0")
     @Order(2)
     void testRotateAccountNotFound() throws Exception {
         String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902fghfghf");
@@ -331,19 +331,14 @@ public class AuthenticationControllerTest {
 
         assertTrue(session.isPresent(), "Session should exist before deletion");
 
-        // Mock getCurrentUser to return null
-        try (MockedStatic<AuthenticationService> mocked = Mockito.mockStatic(AuthenticationService.class)) {
-            mocked.when(AuthenticationService::getCurrentUser).thenReturn(null);
-
-            mockMvc.perform(post("/auth/rotate")
-                            .header("Authorization", "Bearer " + accessToken)
-                            .contentType(String.valueOf(MediaType.APPLICATION_JSON))
-                            .content("""
-                    {
-                        "pinCode": "123456"
-                    }"""))
-                    .andExpect(status().isUnauthorized());
-        }
+        mockMvc.perform(post("/auth/rotate")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                {
+                    "pinCode": "123456"
+                }"""))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
