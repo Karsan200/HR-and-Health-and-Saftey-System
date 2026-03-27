@@ -3,6 +3,10 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import RiskAssessments from '../src/screens/RiskAssessments';
 
+jest.mock('react-native-wheel-color-picker', () => {
+  return () => null;
+});
+
 // Mock the ThemeContext
 jest.mock('../src/theme/colourController.tsx', () => {
     const React = require('react');
