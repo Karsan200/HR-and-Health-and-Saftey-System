@@ -6,7 +6,6 @@ describe('settingsStyles', () => {
   const baseAccessibility = {
     largeText: false,
     dyslexicFont: false,
-    highlightText: false,
   };
 
   it('applies normal font scale when largeText is false', () => {
