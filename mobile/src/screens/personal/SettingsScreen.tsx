@@ -302,29 +302,39 @@ export default function SettingsScreen() {
   }, [hasLoaded]);
 
   function toggleAccessibility(key: "largeText" | "dyslexicFont") {
-    const newVal = !accessibility[key];
-    updateAccessibility({ [key]: newVal });
-    save({ [key]: newVal });
+    updateAccessibility((prev: any) => {
+      const newVal = !prev[key];
+
+      save({ [key]: newVal });
+
+      return {
+        ...prev,
+        [key]: newVal,
+      };
+    });
   }
 
   function handleHighlightToggle() {
-    const newVal = !highlightSmallText;
-    setHighlightSmallText(newVal);
+    setHighlightSmallText(prev => {
+      const newVal = !prev;
 
-    updateAccessibility({ highlightText: newVal });
-    save({ highlightText: newVal });
+      updateAccessibility({ highlightText: newVal });
+      save({ highlightText: newVal });
 
-    if (newVal) {
-      updateTheme({
-        greyPrimaryMainText: '#FFEE00',
-        black: '#FFEE00',
-      })
-    } else {
-      updateTheme({
-        greyPrimaryMainText: '#767676',
-        black: '#000000',
-      })
-    }
+      if (newVal) {
+        updateTheme({
+          greyPrimaryMainText: '#FFEE00',
+          black: '#FFEE00',
+        });
+      } else {
+        updateTheme({
+          greyPrimaryMainText: '#767676',
+          black: '#000000',
+        });
+      }
+
+      return newVal;
+    });
   }
 
   function openPicker(type: "background" | "text" | "accent") {
