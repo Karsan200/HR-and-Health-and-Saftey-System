@@ -3,6 +3,10 @@ import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { PinCodeAuthScreen } from '../src/screens/auth/PinCodeAuthScreen';
 import AuthenticationService from '../src/logic/AuthenticationService';
 
+jest.mock('react-native-wheel-color-picker', () => {
+  return () => null;
+});
+
 jest.mock('../src/logic/AuthenticationService', () => ({
   __esModule: true,
   default: {
@@ -12,10 +16,22 @@ jest.mock('../src/logic/AuthenticationService', () => ({
   },
 }));
 
+// Mock Theme values
+jest.mock('../src/theme/theme', () => {
+  const actual = jest.requireActual('../src/theme/theme');
+
+  return {
+    ...actual,
+    TextStyles: {
+      ...actual.TextStyles,
+    },
+  };
+});
+
 jest.mock('../src/theme/colourController', () => {
   const mockReact = require('react');
   return {
-    ThemeContext: mockReact.createContext({ theme: {} }),
+    ThemeContext: mockReact.createContext({ theme: {}, accessibility: {} }),
   };
 });
 
