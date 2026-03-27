@@ -22,7 +22,11 @@ import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -53,6 +57,15 @@ public class AuthenticationService {
     /** Alphanumeric characters used for generating random strings. */
     private static final String ALPHANUMERIC =
             "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+    /** Length of the MFA secret in bytes. */
+    private static final int MFA_SECRET_LENGTH = 20;
+
+    /** Length of the TOTP code to be generated and validated. */
+    private static final int TOTP_CODE_LENGTH = 6;
+
+    /** Time period in seconds for which a TOTP code is valid. */
+    private static final int TOTP_PERIOD_SECONDS = 30;
 
     /** Secret key for signing JWTs, injected from application properties. */
     @Value("${jwt.secret}")
@@ -120,7 +133,7 @@ public class AuthenticationService {
 
     /**
      * Authenticates a user for multifactor authentication (MFA) using a provided TOTP code and refresh token.
-     * Validates the TOTP code against the user's 2FA secret, updates the session to indicate 2FA has been authenticated,
+     * Validates the TOTP code against the user's 2FA secret, updates the session it's MFA authorised.
      * and returns a new access token with updated claims.
      * @param body the request body containing the TOTP code for MFA authentication
      * @param refreshToken the refresh token associated with the current session to update
@@ -143,10 +156,10 @@ public class AuthenticationService {
         // Create a TOTP generator
         TOTPGenerator totp = new TOTPGenerator.Builder(secret)
                 .withHOTPGenerator(builder -> {
-                    builder.withPasswordLength(6);
+                    builder.withPasswordLength(TOTP_CODE_LENGTH);
                     builder.withAlgorithm(HMACAlgorithm.SHA1);
                 })
-                .withPeriod(Duration.ofSeconds(30))
+                .withPeriod(Duration.ofSeconds(TOTP_PERIOD_SECONDS))
                 .build();
 
         // Validate the provided TOTP code
@@ -180,13 +193,14 @@ public class AuthenticationService {
 
         // Get the current claims (authorities) of the authenticated user to determine if mfa is required
         var authorities = this.getCurrentClaims();
-        boolean mfaRequired = authorities.contains("mfa");
+
+        boolean mfaRequired = authorities.contains("2FA_OK");
 
         // Check the user's 2FA secret to determine if 2FA has been set up
         String mfaSecret = null;
         if (account.getTwoFactorSecret() == null) {
             // Create a random 20 byte array
-            byte[] secret = new byte[20];
+            byte[] secret = new byte[MFA_SECRET_LENGTH];
             new SecureRandom().nextBytes(secret);
 
             // Encode the secret as a base32 string

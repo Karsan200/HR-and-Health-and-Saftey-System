@@ -1,13 +1,11 @@
 package uk.co.garagebridgend.backend.logic;
 
 import org.springframework.stereotype.Service;
-import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.FilesTable;
 import uk.co.garagebridgend.backend.models.entity.HazardFilesTable;
 import uk.co.garagebridgend.backend.models.entity.HazardTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.request.HazardReportRequest;
-import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.FilesRepository;
 import uk.co.garagebridgend.backend.repository.HazardFilesRepository;
 import uk.co.garagebridgend.backend.repository.HazardRepository;
@@ -51,7 +49,6 @@ public class HazardService {
     public HazardService(
             final StorageService storageServiceImpl,
             final AuthenticationService authenticationServiceImpl,
-            final AccountRepository accountRepositoryImpl,
             final HazardRepository hazardRepositoryImpl,
             final HazardFilesRepository hazardFilesRepositoryImpl,
             final FilesRepository filesRepositoryImpl) {

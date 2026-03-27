@@ -2,10 +2,7 @@ package uk.co.garagebridgend.backend.logic;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.co.garagebridgend.backend.models.entity.AccountTable;
-import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.HsOverviewResponseModel;
-import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.DocumentRepository;
 import uk.co.garagebridgend.backend.repository.HazardRepository;
 import uk.co.garagebridgend.backend.repository.SignatureRepository;
@@ -22,9 +19,6 @@ public class HsOverviewService {
     /** Service for handling authentication and retrieving the current user. */
     private final AuthenticationService authenticationService;
 
-    /** Repository to access account data. */
-    private final AccountRepository accountRepository;
-
     /** Repository to access document data. */
     private final DocumentRepository documentRepository;
 
@@ -38,7 +32,6 @@ public class HsOverviewService {
      * Constructs the HsOverviewService with the required repositories.
      *
      * @param authenticationServiceImpl service for handling authentication and retrieving the current user
-     * @param accountRepositoryImpl   repository for AccountTable
      * @param documentRepositoryImpl  repository for DocumentTable
      * @param signatureRepositoryImpl repository for SignatureTable
      * @param hazardRepositoryImpl    repository for HazardTable
@@ -46,12 +39,10 @@ public class HsOverviewService {
     @Autowired
     public HsOverviewService(
             final AuthenticationService authenticationServiceImpl,
-            final AccountRepository accountRepositoryImpl,
             final DocumentRepository documentRepositoryImpl,
             final SignatureRepository signatureRepositoryImpl,
             final HazardRepository hazardRepositoryImpl) {
         this.authenticationService = authenticationServiceImpl;
-        this.accountRepository = accountRepositoryImpl;
         this.documentRepository = documentRepositoryImpl;
         this.signatureRepository = signatureRepositoryImpl;
         this.hazardRepository = hazardRepositoryImpl;

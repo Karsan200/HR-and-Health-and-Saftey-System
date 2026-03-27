@@ -2,13 +2,10 @@ package uk.co.garagebridgend.backend.logic;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
-import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.ProfileResponse;
-import uk.co.garagebridgend.backend.repository.AccountRepository;
 
 import java.time.format.DateTimeFormatter;
 

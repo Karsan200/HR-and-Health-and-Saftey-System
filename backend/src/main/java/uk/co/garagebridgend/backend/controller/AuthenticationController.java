@@ -12,8 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import uk.co.garagebridgend.backend.logic.AuthenticationService;
@@ -56,7 +56,7 @@ public class AuthenticationController {
      * @param request The HTTP request containing the cookies from which to extract the refresh token.
      * @return the refresh token if found in the cookies, or null if not found.
      */
-    private String extractRefreshToken(HttpServletRequest request) {
+    private String extractRefreshToken(final HttpServletRequest request) {
         // Get refresh token from cookie
         String refreshToken = null;
 
@@ -116,6 +116,7 @@ public class AuthenticationController {
 
     /** Authorises a user for MFA by validating the provided TOTP code.
      * @param body The request body containing the TOTP code for MFA authorisation.
+     * @param request The HTTP request containing the refresh token cookie for validating the session.
      * @return RefreshTokenResponse containing a new access token if MFA authorisation is successful.
      * */
     @PostMapping("/mfa/authorise")
@@ -124,7 +125,6 @@ public class AuthenticationController {
             final HttpServletRequest request) {
         // Get refresh token from cookie
         String refreshToken = extractRefreshToken(request);
-
         if (refreshToken == null) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,
@@ -144,6 +144,11 @@ public class AuthenticationController {
                     HttpStatus.UNAUTHORIZED,
                     "Authenticated account not found."
             );
+        } catch (InvalidRefreshTokenException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Invalid or expired refresh token"
+            );
         } catch (Exception e) {
             LOG.error("Error authorising MFA", e);
             throw new ResponseStatusException(
@@ -154,11 +159,10 @@ public class AuthenticationController {
     }
 
     /** Checks if the currently authenticated user has completed MFA authorisation.
-     * @param response The HTTP response to set the appropriate status code on.
      * @return MfaCheckResponse indicating whether MFA is authorised or not.
      * */
     @GetMapping("/mfa/check")
-    public MfaCheckResponse checkMfa(final HttpServletResponse response) {
+    public MfaCheckResponse checkMfa() {
         try {
             return authenticationService.checkMfa();
         } catch (AuthenticatedAccountNotFoundException e) {

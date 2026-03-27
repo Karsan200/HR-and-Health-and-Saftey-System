@@ -77,6 +77,7 @@ public class AuthenticationControllerTest {
         account.setEmail("johnd@test.com");
         account.setPassword(BCrypt.hashpw("hashedPassword", BCrypt.gensalt()));
         account.setMobilePin(BCrypt.hashpw("123456", BCrypt.gensalt()));
+        account.setTwoFactorSecret("NGXEIJWEXZ7NLRKF3P7VMRQMQ4GAT65Y");
         account.setAddressOne("123 Main St");
         account.setPostalCode("12345");
         accountRepository.save(account);
@@ -105,7 +106,7 @@ public class AuthenticationControllerTest {
         valid.setRefreshToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
         valid.setExpires(LocalDateTime.now(Clock.systemUTC()).plusHours(2));
         valid.setMobile(false);
-        valid.setTwoFactor(false);
+        valid.setTwoFactor(true);
         sessionRepository.save(valid);
 
         // Create a new account (for mobile)
@@ -276,6 +277,87 @@ public class AuthenticationControllerTest {
                         "password": "hashedPassword",
                         "isMobile": false
                     }"""))
+                .andExpect(status().isInternalServerError()) // matches ResponseStatusException
+                .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
+                .andExpect(result -> {
+                    ResponseStatusException ex = (ResponseStatusException) result.getResolvedException();
+                    assertNotNull(ex);
+                    assertEquals("Internal sever error", ex.getReason()); // match your controller message
+                });
+    }
+
+    @Test
+    @Order(2)
+    void testCheckMfaSuccess() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902fghfghf");
+        mockMvc.perform(get("/auth/mfa/check").header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(result -> {;
+                    String responseBody = result.getResponse().getContentAsString();
+                    assertFalse(responseBody.isBlank(), "Response body should not be empty");
+
+                    boolean requiresMfa = new ObjectMapper()
+                            .readTree(responseBody)
+                            .path("mfaAuthorised")
+                            .asBoolean();
+
+                    assertFalse(requiresMfa, "Expected mfaAuthorised to be false");
+
+                    String mfaSecret = new ObjectMapper()
+                            .readTree(responseBody)
+                            .path("secret")
+                            .asText();
+                    assertFalse(mfaSecret.isBlank(), "MFA secret should not be empty");
+                });
+    }
+
+    @Test
+    @Order(2)
+    void testCheckMfaSuccessNullSecret() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
+        mockMvc.perform(get("/auth/mfa/check").header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(result -> {;
+                    String responseBody = result.getResponse().getContentAsString();
+                    assertFalse(responseBody.isBlank(), "Response body should not be empty");
+
+                    boolean requiresMfa = new ObjectMapper()
+                            .readTree(responseBody)
+                            .path("mfaAuthorised")
+                            .asBoolean();
+
+                    assertTrue(requiresMfa, "Expected mfaAuthorised to be true");
+
+                    String mfaSecret = new ObjectMapper()
+                            .readTree(responseBody)
+                            .path("secret")
+                            .asText();
+                    assertTrue(mfaSecret.isBlank(), "MFA secret should be null");
+                });
+    }
+
+    @Test
+    @Order(2)
+    @WithMockUser(username = "0")
+    void testCheckMfaNotAuthenticated() throws Exception {
+        mockMvc.perform(get("/auth/mfa/check"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @Order(2)
+    void testCheckMfaThrowsException() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902fghfghf");
+
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(authenticationController).build();
+
+        // simulate your AuthenticationService throwing an exception
+        when(authenticationService.checkMfa())
+                .thenThrow(new RuntimeException("Service failed"));
+
+        // perform a GET to /auth/mfa/check with an Authorization header
+        mockMvc.perform(get("/auth/mfa/check").header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isInternalServerError()) // matches ResponseStatusException
                 .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
                 .andExpect(result -> {

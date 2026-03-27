@@ -12,9 +12,9 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class MfaCheckResponse {
-    /** The secret key used to setup MFA for the user. Null if MFA is already setup. */
+    /** The secret key used to set up MFA for the user. Null if MFA is already setup. */
     private String secret;
 
-    /** Whether the user is mfa authorised or not */
+    /** Whether the user is mfa authorised or not. */
     private boolean isMfaAuthorised;
 }

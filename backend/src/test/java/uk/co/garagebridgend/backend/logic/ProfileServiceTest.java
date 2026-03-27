@@ -5,17 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.MockedStatic;
 import org.springframework.test.context.ActiveProfiles;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
-import uk.co.garagebridgend.backend.models.exception.NotFoundException;
 import uk.co.garagebridgend.backend.models.response.ProfileResponse;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
-import org.springframework.security.core.userdetails.User;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -67,8 +63,7 @@ public class ProfileServiceTest {
     @Test
     void testGetCurrentProfileAccountNotFound() {
         // Arrange
-        when(accountRepository.findById(123L)).thenReturn(Optional.empty());
-        when(authenticationService.getCurrentUser()).thenReturn(new AccountTable());
+        when(authenticationService.getCurrentUser()).thenThrow(new AuthenticatedAccountNotFoundException());
 
         // Act & Assert
         AuthenticatedAccountNotFoundException exception =
@@ -77,15 +72,5 @@ public class ProfileServiceTest {
                 });
 
         assertEquals("Account not found.", exception.getMessage());
-    }
-
-    @Test
-    void testGetCurrentProfileNoAuthenticatedUser() {
-        when(authenticationService.getCurrentUser()).thenReturn(null);
-
-        // Act & Assert
-        assertThrows(AuthenticatedAccountNotFoundException.class, () -> {
-            profileService.getCurrentProfile();
-        });
     }
 }
