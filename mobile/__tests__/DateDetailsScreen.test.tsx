@@ -7,6 +7,10 @@ import DateDetailsScreen from '../src/screens/DateDetailsScreen';
 import dayjs from 'dayjs';
 import AuthenticationService from "../src/logic/AuthenticationService.ts";
 
+jest.mock('react-native-wheel-color-picker', () => {
+  return () => null;
+});
+
 // Mock SafeAreaView to render children directly
 jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
@@ -26,12 +30,16 @@ jest.mock('../src/theme/colours', () => ({
 }));
 
 // Mock Theme values
-jest.mock('../src/theme/theme', () => ({
-  Spacing: { largePadding: 10 },
-  BorderRadius: { largeButtonsAndOutlines: 8 },
-  FontSize: { xs14: 12 },
-  TextStyles: { regular: {} },
-}));
+jest.mock('../src/theme/theme', () => {
+  const actual = jest.requireActual('../src/theme/theme');
+
+  return {
+    ...actual,
+    TextStyles: {
+      ...actual.TextStyles,
+    },
+  };
+});
 
 jest.mock('../src/logic/AuthenticationService.ts', () => ({
   fetch: jest.fn(),

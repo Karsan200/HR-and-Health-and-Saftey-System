@@ -31,6 +31,8 @@ export const dateDetailsStyles = (theme: any, accessibility: { largeText: boolea
     },
 
     todayText: {
+        fontFamily: fontFamilies.regular,
+        fontWeight: TextStyles.regular.fontWeight,
         color: theme.redPrimary,
     },
 
@@ -59,6 +61,8 @@ export const dateDetailsStyles = (theme: any, accessibility: { largeText: boolea
 
     weekButtonText: {
         fontSize: FontSize.m20 * fontScale,
+        fontFamily: fontFamilies.regular,
+        fontWeight: TextStyles.regular.fontWeight,
         color: theme.black,
     },
 
@@ -80,7 +84,9 @@ export const dateDetailsStyles = (theme: any, accessibility: { largeText: boolea
     },
 
     dayLabel: {
-        fontSize: FontSize.xs14,
+        fontSize: FontSize.xs14 * fontScale,
+        fontFamily: fontFamilies.regular,
+        fontWeight: TextStyles.regular.fontWeight,
         color: theme.greyPrimaryMainText,
     },
 
@@ -89,7 +95,9 @@ export const dateDetailsStyles = (theme: any, accessibility: { largeText: boolea
     },
 
     dayNumber: {
-        fontSize: 24,
+        fontSize: FontSize.l24 * fontScale,
+        fontFamily: fontFamilies.regular,
+        fontWeight: TextStyles.regular.fontWeight,
         color: theme.black,
     },
 
@@ -136,7 +144,9 @@ export const dateDetailsStyles = (theme: any, accessibility: { largeText: boolea
     },
 
     activitySubtext: {
-        fontSize: FontSize.xs14,
+        fontSize: FontSize.xs14 * fontScale,
+        fontFamily: fontFamilies.regular,
+        fontWeight: TextStyles.regular.fontWeight,
         color: theme.black,
         paddingLeft: 20,
     },
@@ -156,7 +166,9 @@ export const dateDetailsStyles = (theme: any, accessibility: { largeText: boolea
     },
 
     addIcon: {
-        fontSize: 36,
+        fontSize: FontSize.xxl36 * fontScale,
+        fontFamily: fontFamilies.regular,
+        fontWeight: TextStyles.regular.fontWeight,
         color: theme.redPrimary,
         marginTop: -2,
     },
