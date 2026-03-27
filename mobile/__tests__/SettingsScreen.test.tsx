@@ -398,21 +398,32 @@ describe('SettingsScreen', () => {
   });
 
   it('calls updateSettings when a theme preset is applied', async () => {
-    const { getByText } = render(<SettingsScreen />);
+    (getSettings as jest.Mock).mockResolvedValue({
+      ...defaultSettings,
+      themePreset: 'GREEN',
+    });
 
-    // Wait for initial load to complete so hasLoaded becomes true
-    await waitFor(() => expect(getSettings).toHaveBeenCalled());
-    await waitFor(() => expect(mockUpdateTheme).toHaveBeenCalled());
+    const { getByTestId } = render(<SettingsScreen />);
+
+    // Wait for green theme to be applied — this confirms hasLoaded is true
+    await waitFor(() => {
+      expect(mockUpdateTheme).toHaveBeenCalledWith(
+        expect.objectContaining({ redPrimary: '#2E7D32' })
+      );
+    }, { timeout: 3000 });
+
+    (updateSettings as jest.Mock).mockClear();
+    mockUpdateTheme.mockClear();
 
     await act(async () => {
-      fireEvent.press(getByText('Blue'));
+      fireEvent.press(getByTestId('theme-blue-button'));
     });
 
     await waitFor(() => {
       expect(updateSettings).toHaveBeenCalledWith(
         expect.objectContaining({ themePreset: 'BLUE' })
       );
-    });
+    }, { timeout: 3000 });
   });
 
   it('does not crash when getSettings fails on mount', async () => {

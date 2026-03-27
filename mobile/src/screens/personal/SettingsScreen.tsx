@@ -123,6 +123,18 @@ export default function SettingsScreen() {
 
   const [highlightSmallText, setHighlightSmallText] = React.useState(false);
 
+  const [hasLoaded, setHasLoaded] = useState(false);
+
+  const save = useCallback(async (update: any): Promise<void> => {
+    if (!hasLoaded) return; // Prevent saving before initial load (which would overwrite their settings with defaults)
+
+    try {
+      await updateSettings(update);
+    } catch (err) {
+      console.error("Save failed", err);
+    }
+  }, [hasLoaded]);
+
   const [pickColors, setPickColors] = useState({
     background: "#F6F6F8",
     text: "#000000",
@@ -228,7 +240,7 @@ export default function SettingsScreen() {
     }
   }, [save, updateTheme]);
 
-  const [hasLoaded, setHasLoaded] = useState(false);
+
 
   // Load the settings they have saved.
   useEffect(() => {
@@ -290,16 +302,6 @@ export default function SettingsScreen() {
 
     load();
   }, [hasLoaded, updateTheme, updateAccessibility, applyDefaultTheme, applyBlueTheme, applyGreenTheme, applyDarkTheme]);
-
-  const save = useCallback(async (update: any): Promise<void> => {
-    if (!hasLoaded) return; // Prevent saving before initial load (which would overwrite their settings with defaults)
-
-    try {
-      await updateSettings(update);
-    } catch (err) {
-      console.error("Save failed", err);
-    }
-  }, [hasLoaded]);
 
   function toggleAccessibility(key: "largeText" | "dyslexicFont") {
     updateAccessibility((prev: any) => {
