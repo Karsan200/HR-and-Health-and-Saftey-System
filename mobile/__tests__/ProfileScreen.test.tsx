@@ -9,6 +9,10 @@ import ProfileService from '../src/logic/ProfileService';
 import { ThemeContext } from '../src/theme/colourController';
 import { DefaultColours } from '../src/theme/colours';
 
+jest.mock('react-native-wheel-color-picker', () => {
+  return () => null;
+});
+
 // Mock ProfileService
 jest.mock('../src/logic/ProfileService');
 
@@ -29,7 +33,7 @@ describe('ProfileScreen', () => {
   const renderScreen = () =>
     render(
       <ThemeContext.Provider
-        value={{ theme: mockTheme, updateTheme: mockUpdateTheme }}
+        value={{ theme: mockTheme, updateTheme: mockUpdateTheme, accessibility: {} as any, updateAccessibility: () => {} }}
       >
         <ProfileScreen />
       </ThemeContext.Provider>,
