@@ -297,26 +297,16 @@ describe('SettingsScreen', () => {
     await waitFor(() => expect(getSettings).toHaveBeenCalled());
 
     mockUpdateAccessibility.mockClear();
+    mockUpdateTheme.mockClear();
 
     await act(async () => {
       fireEvent(getByTestId('toggle-highlight'), 'onToggle');
     });
 
-    expect(mockUpdateAccessibility).toHaveBeenCalled();
-
-    const updateFn = mockUpdateAccessibility.mock.calls[0][0];
-
-    const result = updateFn({
-      dyslexicFont: false,
-      highlightText: false,
-      largeText: false,
-    });
-
-    expect(result).toEqual({
-      dyslexicFont: false,
+    expect(mockUpdateAccessibility).toHaveBeenCalledWith({
       highlightText: true,
-      largeText: false,
     });
+
     expect(mockUpdateTheme).toHaveBeenCalledWith(
       expect.objectContaining({
         greyPrimaryMainText: '#FFEE00',

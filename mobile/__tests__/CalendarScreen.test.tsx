@@ -16,6 +16,10 @@ jest.mock('react-native-calendars', () => {
   const mockReact = require('react');
   const { Text, TouchableOpacity } = require('react-native');
 
+jest.mock('react-native-wheel-color-picker', () => {
+  return () => null;
+});
+
   return {
     Calendar: ({ onDayPress }: any) =>
       mockReact.createElement(
