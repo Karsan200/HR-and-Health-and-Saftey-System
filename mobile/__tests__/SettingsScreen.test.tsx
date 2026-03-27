@@ -239,47 +239,83 @@ describe('SettingsScreen', () => {
   // Accessibility toggles
 
   it('toggles dyslexic font when pressed', async () => {
-    const { getByText } = render(<SettingsScreen />);
+    const { getByTestId } = render(<SettingsScreen />);
     await waitFor(() => expect(getSettings).toHaveBeenCalled());
 
+    mockUpdateAccessibility.mockClear();
+
     await act(async () => {
-      fireEvent.press(getByText('Dyslexic Font'));
+      fireEvent(getByTestId('toggle-dyslexic'), 'onToggle');
     });
 
-    expect(mockUpdateAccessibility).toHaveBeenCalledWith({
-      "dyslexicFont": true,
-      "highlightText": false,
-      "largeText": false,
-  });
+    expect(mockUpdateAccessibility).toHaveBeenCalled();
+
+    const updateFn = mockUpdateAccessibility.mock.calls[0][0];
+
+    const result = updateFn({
+      dyslexicFont: false,
+      highlightText: false,
+      largeText: false,
+    });
+
+    expect(result).toEqual({
+      dyslexicFont: true,
+      highlightText: false,
+      largeText: false,
+    });
   });
 
   it('toggles large text when pressed', async () => {
-    const { getByText } = render(<SettingsScreen />);
+    const { getByTestId } = render(<SettingsScreen />);
     await waitFor(() => expect(getSettings).toHaveBeenCalled());
 
+    mockUpdateAccessibility.mockClear();
+
     await act(async () => {
-      fireEvent.press(getByText('Large Text'));
+      fireEvent(getByTestId('toggle-large'), 'onToggle');
     });
 
-    expect(mockUpdateAccessibility).toHaveBeenCalledWith({
-      "dyslexicFont": false,
-      "highlightText": false,
-      "largeText": true,
+    expect(mockUpdateAccessibility).toHaveBeenCalled();
+
+    const updateFn = mockUpdateAccessibility.mock.calls[0][0];
+
+    const result = updateFn({
+      dyslexicFont: false,
+      highlightText: false,
+      largeText: false,
+    });
+
+    expect(result).toEqual({
+      dyslexicFont: false,
+      highlightText: false,
+      largeText: true,
     });
   });
 
   it('toggles highlight text and updates theme when pressed', async () => {
-    const { getByText } = render(<SettingsScreen />);
+    const { getByTestId } = render(<SettingsScreen />);
     await waitFor(() => expect(getSettings).toHaveBeenCalled());
 
+    mockUpdateAccessibility.mockClear();
+
     await act(async () => {
-      fireEvent.press(getByText('Highlight Text'));
+      fireEvent(getByTestId('toggle-highlight'), 'onToggle');
     });
 
-    expect(mockUpdateAccessibility).toHaveBeenCalledWith({
-      "dyslexicFont": false,
-      "highlightText": true,
-      "largeText": false,
+    expect(mockUpdateAccessibility).toHaveBeenCalled();
+
+    const updateFn = mockUpdateAccessibility.mock.calls[0][0];
+
+    const result = updateFn({
+      dyslexicFont: false,
+      highlightText: false,
+      largeText: false,
+    });
+
+    expect(result).toEqual({
+      dyslexicFont: false,
+      highlightText: true,
+      largeText: false,
     });
     expect(mockUpdateTheme).toHaveBeenCalledWith(
       expect.objectContaining({

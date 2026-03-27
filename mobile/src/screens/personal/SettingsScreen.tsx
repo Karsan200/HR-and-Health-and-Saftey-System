@@ -417,6 +417,7 @@ export default function SettingsScreen() {
               </Text>
             </View>
             <SwitchToggle
+              testID={"toggle-dyslexic"}
               value={accessibility.dyslexicFont}
               onToggle={() => toggleAccessibility("dyslexicFont")}
             />
@@ -432,6 +433,7 @@ export default function SettingsScreen() {
               </Text>
             </View>
             <SwitchToggle
+              testID="toggle-large"
               value={accessibility.largeText}
               onToggle={() => toggleAccessibility("largeText")}
             />
@@ -447,6 +449,7 @@ export default function SettingsScreen() {
               </Text>
             </View>
             <SwitchToggle
+                testID={"toggle-highlight"}
                 value={highlightSmallText}
                 onToggle={handleHighlightToggle}
             />
