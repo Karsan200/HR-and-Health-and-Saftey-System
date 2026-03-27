@@ -1,10 +1,10 @@
-import { useEffect, useState, type SetStateAction} from "react";
+import { useEffect, useState } from "react";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import {ThemeProvider} from "@mui/material";
+import { ThemeProvider } from "@mui/material";
 
-import {muiTheme} from "./theme/muiTheme.ts";
-import {IncompatibleScreen} from "./components/IncompatibleScreen.tsx";
-import {AuthProvider} from "./AuthContext.tsx";
+import { muiTheme } from "./theme/muiTheme.ts";
+import { IncompatibleScreen } from "./components/IncompatibleScreen.tsx";
+import { AuthProvider } from "./AuthContext.tsx";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);

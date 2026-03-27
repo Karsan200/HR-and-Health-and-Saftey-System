@@ -163,7 +163,7 @@ public class AuthenticationService {
                 .build();
 
         // Validate the provided TOTP code
-        if (!totp.verify(body.getCode())) {
+        if (!totp.verify(body.getCode(), 2)) {
             throw new InvalidPasswordException("Invalid TOTP code");
         }
 
