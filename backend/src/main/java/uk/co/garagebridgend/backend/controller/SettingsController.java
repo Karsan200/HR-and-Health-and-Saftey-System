@@ -40,10 +40,9 @@ public class SettingsController {
      * Updates all settings and theme data for a given account.
      *
      * @param request the updated settings and theme values
-     * @return success response
      */
     @PutMapping
-    public void updateSettings(@RequestBody SettingsResponse request) {
+    public void updateSettings(final @RequestBody SettingsResponse request) {
         try {
             settingsService.updateAllSettings(request);
         } catch (AuthenticatedAccountNotFoundException e) {

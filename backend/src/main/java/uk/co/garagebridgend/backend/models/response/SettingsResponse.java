@@ -14,25 +14,49 @@ import java.sql.Time;
 @NoArgsConstructor
 public class SettingsResponse {
     /**
-     * Accessibility Settings Booleans
+     * Accessibility Settings Large Text.
      */
     private Boolean largeText;
+    /**
+     * Accessibility Settings Dyslexic Font.
+     */
     private Boolean dyslexicFont;
+    /**
+     * Accessibility Settings Text To Speech.
+     */
     private Boolean textToSpeech;
+    /**
+     * Accessibility Settings Dictation.
+     */
     private Boolean dictation;
+    /**
+     * Accessibility Settings Highlight Text.
+     */
     private Boolean highlightText;
 
     /**
-     * Silent Mode time - For Admin use only
+     * Silent Mode time - For Admin use only. Start Time.
      */
     private Time silentStart;
+    /**
+     * Silent Mode time - For Admin use only. End Time.
+     */
     private Time silentEnd;
 
     /**
-     * Colour Settings Hex Codes and Title
+     * Colour Settings Theme Title.
      */
     private String themePreset;
+    /**
+     * Colour Settings Hex Codes of accent colour.
+     */
     private String accentColour;
+    /**
+     * Colour Settings Hex Codes of background colour.
+     */
     private String backgroundColour;
+    /**
+     * Colour Settings Hex Codes of text colour.
+     */
     private String textColour;
 }

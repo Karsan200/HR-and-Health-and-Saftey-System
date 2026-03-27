@@ -21,12 +21,18 @@ import uk.co.garagebridgend.backend.repository.AccountRepository;
 @Transactional
 public class SettingsService {
 
+    /** Repository for fetching account settings. */
     private final SettingsRepository settingsRepository;
+
+    /** Repository for fetching account theme visuals. */
     private final ThemeRepository themeRepository;
+
+    /** Repository for fetching account data related to session creation and validation. */
     private final AccountRepository accountRepository;
 
     /**
      * Helper method to get the currently authenticated account.
+     * @return account found by ID.
      */
     private AccountTable getCurrentAccount() {
         var user = AuthenticationService.getCurrentUser();
@@ -41,6 +47,7 @@ public class SettingsService {
 
     /**
      * Retrieves all settings and theme data for the current user.
+     * @return all settings for user as an object.
      */
     public SettingsResponse getAllSettings() {
 
@@ -111,8 +118,9 @@ public class SettingsService {
 
     /**
      * Updates all settings and theme data for the current user.
+     * @param request the settings response.
      */
-    public void updateAllSettings(SettingsResponse request) {
+    public void updateAllSettings(final SettingsResponse request) {
 
         AccountTable account = getCurrentAccount();
 
