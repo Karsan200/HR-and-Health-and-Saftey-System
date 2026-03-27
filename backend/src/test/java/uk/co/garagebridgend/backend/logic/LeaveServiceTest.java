@@ -10,6 +10,7 @@ import org.mockito.MockitoAnnotations;
 
 import org.springframework.security.core.userdetails.User;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.LeaveTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
@@ -53,6 +54,14 @@ public class LeaveServiceTest {
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
+
+        ReflectionTestUtils.setField(leaveService, "totalAllowanceHours", 160);
+        ReflectionTestUtils.setField(leaveService, "minimumAdvanceBookingDays", 14);
+        ReflectionTestUtils.setField(leaveService, "maxApprovedPerDay", 2);
+        ReflectionTestUtils.setField(leaveService, "mondayToThursdayStartTime", LocalTime.of(8, 0));
+        ReflectionTestUtils.setField(leaveService, "mondayToThursdayEndTime", LocalTime.of(17, 0));
+        ReflectionTestUtils.setField(leaveService, "fridayStartTime", LocalTime.of(8, 0));
+        ReflectionTestUtils.setField(leaveService, "fridayEndTime", LocalTime.of(12, 0));
     }
 
     private LocalDate getNextMondayToThursdayAtLeast14DaysAhead() {

@@ -1,5 +1,6 @@
 package uk.co.garagebridgend.backend.logic;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
@@ -32,63 +34,36 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class LeaveService {
 
-    /** Total holiday allowance in hours for a user. */
-    private static final int TOTAL_ALLOWANCE_HOURS = 160;
-
     /** Number of minutes in one hour. */
     private static final int MINUTES_PER_HOUR = 60;
 
-    /** Friday day-of-week value used by java.time.DayOfWeek. */
-    private static final int FRIDAY_DAY_VALUE = 5;
-
-    /** Saturday day-of-week value used by java.time.DayOfWeek. */
-    private static final int SATURDAY_DAY_VALUE = 6;
-
-    /** Sunday day-of-week value used by java.time.DayOfWeek. */
-    private static final int SUNDAY_DAY_VALUE = 7;
-
-    /** Monday to Thursday work day start hour. */
-    private static final int MONDAY_TO_THURSDAY_START_HOUR = 8;
-
-    /** Monday to Thursday work day start minute. */
-    private static final int MONDAY_TO_THURSDAY_START_MINUTE = 0;
-
-    /** Monday to Thursday work day end hour. */
-    private static final int MONDAY_TO_THURSDAY_END_HOUR = 17;
-
-    /** Monday to Thursday work day end minute. */
-    private static final int MONDAY_TO_THURSDAY_END_MINUTE = 0;
-
-    /** Friday work day start hour. */
-    private static final int FRIDAY_START_HOUR = 8;
-
-    /** Friday work day start minute. */
-    private static final int FRIDAY_START_MINUTE = 0;
-
-    /** Friday work day end hour. */
-    private static final int FRIDAY_END_HOUR = 12;
-
-    /** Friday work day end minute. */
-    private static final int FRIDAY_END_MINUTE = 0;
+    /** Total holiday allowance in hours for a user. */
+    @Value("${leave.total-allowance-hours}")
+    private int totalAllowanceHours;
 
     /** Minimum number of days in advance that a leave request must be made. */
-    private static final int MINIMUM_ADVANCE_BOOKING_DAYS = 14;
+    @Value("${leave.minimum-advance-booking-days}")
+    private int minimumAdvanceBookingDays;
+
+    /** Maximum number of approved leaves allowed per day. */
+    @Value("${leave.max-approved-per-day}")
+    private int maxApprovedPerDay;
 
     /** Monday to Thursday work day start time. */
-    private static final LocalTime MONDAY_TO_THURSDAY_START_TIME =
-            LocalTime.of(MONDAY_TO_THURSDAY_START_HOUR, MONDAY_TO_THURSDAY_START_MINUTE);
+    @Value("${leave.working-hours.monday-thursday.start}")
+    private LocalTime mondayToThursdayStartTime;
 
     /** Monday to Thursday work day end time. */
-    private static final LocalTime MONDAY_TO_THURSDAY_END_TIME =
-            LocalTime.of(MONDAY_TO_THURSDAY_END_HOUR, MONDAY_TO_THURSDAY_END_MINUTE);
+    @Value("${leave.working-hours.monday-thursday.end}")
+    private LocalTime mondayToThursdayEndTime;
 
     /** Friday work day start time. */
-    private static final LocalTime FRIDAY_START_TIME =
-            LocalTime.of(FRIDAY_START_HOUR, FRIDAY_START_MINUTE);
+    @Value("${leave.working-hours.friday.start}")
+    private LocalTime fridayStartTime;
 
     /** Friday work day end time. */
-    private static final LocalTime FRIDAY_END_TIME =
-            LocalTime.of(FRIDAY_END_HOUR, FRIDAY_END_MINUTE);
+    @Value("${leave.working-hours.friday.end}")
+    private LocalTime fridayEndTime;
 
     /**
      * Repository used to access leave data from the database.
@@ -111,7 +86,6 @@ public class LeaveService {
      * @return a list of {@link LeaveCalendarResponse} objects containing leave dates
      */
     public List<LeaveCalendarResponse> getAllLeaveDates() {
-        // Only fetch approved leaves
         List<LeaveTable> leaveList = leaveRepository.findAll()
                 .stream()
                 .filter(LeaveTable::isApproved)
@@ -156,7 +130,7 @@ public class LeaveService {
                             "Technician",
                             l.getStartDate(),
                             l.getEndDate(),
-                            !isFullDay // partialDay = true if NOT full day
+                            !isFullDay
                     );
                 })
                 .collect(Collectors.toList());
@@ -188,8 +162,8 @@ public class LeaveService {
 
         for (LeaveTable leave : leaves) {
             long leaveMinutes = calculateWorkingMinutesBetween(
-                leave.getStartDate(),
-                leave.getEndDate()
+                    leave.getStartDate(),
+                    leave.getEndDate()
             );
             int leaveHours = (int) Math.ceil((double) leaveMinutes / MINUTES_PER_HOUR);
 
@@ -201,7 +175,7 @@ public class LeaveService {
             }
         }
 
-        int remainingHours = TOTAL_ALLOWANCE_HOURS - usedHours;
+        int remainingHours = totalAllowanceHours - usedHours;
 
         return new LeaveSummaryResponse(
                 remainingHours,
@@ -281,24 +255,34 @@ public class LeaveService {
         }
     }
 
-    /* Validates that the leave request is made at least a certain number of days in advance.
+    /**
+     * Validates that the leave request is made at least a certain number of days in advance.
      *
      * @param request the leave request to validate
      * @throws IllegalArgumentException if the leave request is not made in advance
      */
     private void validateLeaveRequestIsInAdvance(final LeaveRequest request) {
-        LocalDate minimumBookableDate = LocalDate.now().plusDays(MINIMUM_ADVANCE_BOOKING_DAYS);
+        LocalDate minimumBookableDate = LocalDate.now().plusDays(minimumAdvanceBookingDays);
 
         if (request.getStartDate().toLocalDate().isBefore(minimumBookableDate)) {
-            throw new IllegalArgumentException("Leave requests must be made at least 14 days in advance.");
+            throw new IllegalArgumentException(
+                    "Leave requests must be made at least "
+                            + minimumAdvanceBookingDays
+                            + " days in advance."
+            );
         }
 
         if (request.getEndDate().toLocalDate().isBefore(minimumBookableDate)) {
-            throw new IllegalArgumentException("Leave requests must be made at least 14 days in advance.");
+            throw new IllegalArgumentException(
+                    "Leave requests must be made at least "
+                            + minimumAdvanceBookingDays
+                            + " days in advance."
+            );
         }
     }
 
-    /* Validates that the leave request does not exceed the maximum number of approved leaves allowed per day.
+    /**
+     * Validates that the leave request does not exceed the maximum number of approved leaves allowed per day.
      *
      * @param request the leave request to validate
      * @throws IllegalArgumentException if any date within the leave request is fully booked
@@ -317,7 +301,7 @@ public class LeaveService {
                         .filter(LeaveTable::isApproved)
                         .count();
 
-                if (approvedLeaveCount >= 2) {
+                if (approvedLeaveCount >= maxApprovedPerDay) {
                     throw new IllegalArgumentException("One or more selected dates are fully booked.");
                 }
             }
@@ -326,7 +310,8 @@ public class LeaveService {
         }
     }
 
-    /* Validates that the leave request start and end times fall within the defined working hours.
+    /**
+     * Validates that the leave request start and end times fall within the defined working hours.
      *
      * @param request the leave request to validate
      * @throws IllegalArgumentException if the start or end time is outside of working hours
@@ -353,7 +338,7 @@ public class LeaveService {
     }
 
     /**
-     * * Retrieves the currently authenticated account.
+     * Retrieves the currently authenticated account.
      *
      * @return the authenticated account
      * @throws AuthenticatedAccountNotFoundException if no authenticated user or account is found
@@ -438,10 +423,10 @@ public class LeaveService {
      */
     private LocalTime getWorkDayStartTime(final LocalDate date) {
         if (isFriday(date)) {
-            return FRIDAY_START_TIME;
+            return fridayStartTime;
         }
 
-        return MONDAY_TO_THURSDAY_START_TIME;
+        return mondayToThursdayStartTime;
     }
 
     /**
@@ -452,10 +437,10 @@ public class LeaveService {
      */
     private LocalTime getWorkDayEndTime(final LocalDate date) {
         if (isFriday(date)) {
-            return FRIDAY_END_TIME;
+            return fridayEndTime;
         }
 
-        return MONDAY_TO_THURSDAY_END_TIME;
+        return mondayToThursdayEndTime;
     }
 
     /**
@@ -465,7 +450,7 @@ public class LeaveService {
      * @return true if the date is Friday, otherwise false
      */
     private boolean isFriday(final LocalDate date) {
-        return date.getDayOfWeek().getValue() == FRIDAY_DAY_VALUE;
+        return date.getDayOfWeek() == DayOfWeek.FRIDAY;
     }
 
     /**
@@ -475,7 +460,7 @@ public class LeaveService {
      * @return true if the date is Saturday or Sunday, otherwise false
      */
     private boolean isWeekend(final LocalDate date) {
-        int dayOfWeek = date.getDayOfWeek().getValue();
-        return dayOfWeek == SATURDAY_DAY_VALUE || dayOfWeek == SUNDAY_DAY_VALUE;
+        return date.getDayOfWeek() == DayOfWeek.SATURDAY
+                || date.getDayOfWeek() == DayOfWeek.SUNDAY;
     }
 }
