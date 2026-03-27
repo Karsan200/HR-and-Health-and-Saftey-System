@@ -8,10 +8,15 @@ import { ThemeContext } from '../src/theme/colourController';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
+jest.mock('react-native-wheel-color-picker', () => {
+  return () => null;
+});
+
 jest.mock('../src/logic/AuthenticationService');
 jest.mock('react-native-image-picker', () => ({
     launchImageLibrary: jest.fn(),
 }));
+
 jest.mock('react-native-paper-dates', () => ({
     DatePickerInput: ({ onChange, value }: any) => {
         const { TextInput } = require('react-native');
@@ -24,27 +29,14 @@ jest.mock('react-native-paper-dates', () => ({
         );
     },
 }));
-jest.mock('../src/screens/HazardForm.styles.ts', () => ({
-    __esModule: true,
-    default: () => ({
-        container: {},
-        spacer: {},
-        card: {},
-        cardTitle: {},
-        fieldLabel: {},
-        required: {},
-        input: {},
-        multiline: {},
-        errorText: {},
-        checkboxRow: {},
-        checkboxLabel: {},
-        uploadButton: {},
-        uploadLabel: {},
-        photoCountText: {},
-        bottomSpacer: {},
-    }),
-    getCommonInputProps: () => ({}),
-}));
+
+jest.mock('../src/screens/HazardForm.styles', () => {
+  const actual = jest.requireActual('../src/screens/HazardForm.styles');
+  return {
+    ...actual,
+  };
+});
+
 jest.mock('../src/components/ButtonActionBar.tsx', () => {
     const { TouchableOpacity, Text } = require('react-native');
     return ({ onSaveDraft, onSubmit }: any) => (
@@ -58,16 +50,24 @@ jest.mock('../src/components/ButtonActionBar.tsx', () => {
         </>
     );
 });
-jest.mock('../src/theme/theme', () => ({
-    FontSize: { xs14: 14 },
-    BorderRadius: { sm: 4 },
-}));
+
+// Mock Theme values
+jest.mock('../src/theme/theme', () => {
+  const actual = jest.requireActual('../src/theme/theme');
+
+  return {
+    ...actual,
+    TextStyles: {
+      ...actual.TextStyles,
+    },
+  };
+});
 
 // ─── Theme wrapper ────────────────────────────────────────────────────────────
 
 const renderWithTheme = (ui: React.ReactElement) =>
     render(
-        <ThemeContext.Provider value={{ theme: {} as any, updateTheme: () => {} }}>
+        <ThemeContext.Provider value={{ theme: {} as any, updateTheme: () => {}, accessibility: {} as any, updateAccessibility: () => {} }}>
             {ui}
         </ThemeContext.Provider>
     );
