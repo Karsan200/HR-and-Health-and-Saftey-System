@@ -1,5 +1,7 @@
 package uk.co.garagebridgend.backend.controller;
 
+import com.bastiaanjansen.otp.HMACAlgorithm;
+import com.bastiaanjansen.otp.TOTPGenerator;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
@@ -25,11 +27,13 @@ import uk.co.garagebridgend.backend.models.entity.PermissionsTable;
 import uk.co.garagebridgend.backend.models.entity.SessionTable;
 import uk.co.garagebridgend.backend.models.request.AuthRequest;
 import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
+import uk.co.garagebridgend.backend.models.request.MfaAuthoriseRequest;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.PermissionsRepository;
 import uk.co.garagebridgend.backend.repository.SessionRepository;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -276,6 +280,131 @@ public class AuthenticationControllerTest {
                         "username": "johnd18",
                         "password": "hashedPassword",
                         "isMobile": false
+                    }"""))
+                .andExpect(status().isInternalServerError()) // matches ResponseStatusException
+                .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
+                .andExpect(result -> {
+                    ResponseStatusException ex = (ResponseStatusException) result.getResolvedException();
+                    assertNotNull(ex);
+                    assertEquals("Internal sever error", ex.getReason()); // match your controller message
+                });
+    }
+
+    @Test
+    @Order(2)
+    void testAuthenticateMfaSuccess() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
+
+        // Get a TOTP code for the MFA secret
+        TOTPGenerator totp = new TOTPGenerator.Builder("NGXEIJWEXZ7NLRKF3P7VMRQMQ4GAT65Y")
+                .withHOTPGenerator(builder -> {
+                    builder.withPasswordLength(6);
+                    builder.withAlgorithm(HMACAlgorithm.SHA1);
+                })
+                .withPeriod(Duration.ofSeconds(30))
+                .build();
+
+        mockMvc.perform(post("/auth/mfa/authorise")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .cookie(new Cookie("refreshToken", "87cc6b24-d1aa-468a-bc98-ad1a902c8b3e"))
+                        .content("""
+                    {
+                        "code": "%s"
+                    }""".formatted(totp.now())))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(2)
+    void testAuthenticateMfaNoRefreshToken() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
+
+        mockMvc.perform(post("/auth/mfa/authorise")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "code": "123456"
+                    }"""))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @Order(2)
+    void testAuthenticateMfaInvalidCode() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
+
+        mockMvc.perform(post("/auth/mfa/authorise")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .cookie(new Cookie("refreshToken", "87cc6b24-d1aa-468a-bc98-ad1a902c8b3e"))
+                        .content("""
+                    {
+                        "code": "000000"
+                    }"""))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @Order(2)
+    @WithMockUser(username = "0")
+    void testAuthenticateMfaNotAuthenticated() throws Exception {
+        mockMvc.perform(post("/auth/mfa/authorise")
+                .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                .cookie(new Cookie("refreshToken", "87cc6b24-d1aa-468a-bc98-ad1a902c8b3e"))
+                .content("""
+                    {
+                        "code": "000000"
+                    }"""))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @Order(2)
+    void testAuthenticateMfaInvalidRefreshToken() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
+
+        // Get a TOTP code for the MFA secret
+        TOTPGenerator totp = new TOTPGenerator.Builder("NGXEIJWEXZ7NLRKF3P7VMRQMQ4GAT65Y")
+                .withHOTPGenerator(builder -> {
+                    builder.withPasswordLength(6);
+                    builder.withAlgorithm(HMACAlgorithm.SHA1);
+                })
+                .withPeriod(Duration.ofSeconds(30))
+                .build();
+
+        mockMvc.perform(post("/auth/mfa/authorise")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .cookie(new Cookie("refreshToken", "doesnotexist"))
+                        .content("""
+                    {
+                        "code": "%s"
+                    }""".formatted(totp.now())))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @Order(2)
+    void testAuthenticateMfaThrowsException() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
+
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(authenticationController).build();
+
+        // simulate your AuthenticationService throwing an exception
+        when(authenticationService.authenticateMfa(new MfaAuthoriseRequest("123456"), "doesnotexist"))
+                .thenThrow(new RuntimeException("Service failed"));
+
+        // perform a POST to /auth/mfa/authorise with an Authorization header
+        mockMvc.perform(post("/auth/mfa/authorise")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .cookie(new Cookie("refreshToken", "doesnotexist"))
+                        .content("""
+                    {
+                        "code": "123456"
                     }"""))
                 .andExpect(status().isInternalServerError()) // matches ResponseStatusException
                 .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
