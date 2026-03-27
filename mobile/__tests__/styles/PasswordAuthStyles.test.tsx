@@ -1,4 +1,4 @@
-import { passwordAuthScreenStyles } from '../../src/screens/auth/passwordAuthScreen.styles';
+import { passwordAuthScreenStyles } from '../../src/screens/auth/PasswordAuthScreen.styles';
 import { DefaultColours } from '../../src/theme/colours';
 
 describe('passwordAuthScreenStyles', () => {
