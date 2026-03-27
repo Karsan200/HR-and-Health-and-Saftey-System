@@ -172,5 +172,9 @@ export const dateDetailsStyles = (theme: any, accessibility: { largeText: boolea
         color: theme.redPrimary,
         marginTop: -2,
     },
+
+    addButtonDisabled: {
+      opacity: 0.35,
+    },
   });
 };

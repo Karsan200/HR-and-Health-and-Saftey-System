@@ -14,17 +14,25 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import org.springframework.http.MediaType;
 
+import uk.co.garagebridgend.backend.models.request.LeaveRequest;
+import uk.co.garagebridgend.backend.models.response.LeaveTypeResponse;
 import uk.co.garagebridgend.backend.RentATechApplication;
 import uk.co.garagebridgend.backend.logic.LeaveService;
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
+import uk.co.garagebridgend.backend.models.response.LeaveSummaryResponse;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -83,11 +91,16 @@ public class LeaveControllerTest {
     @Test
     void testGetLeaveForDayValid() throws Exception {
 
+        LocalDateTime start = LocalDateTime.now();
+        LocalDateTime end = start.plusHours(2);
+
         List<LeaveDayResponse> mockData = List.of(
                 new LeaveDayResponse(
                         "John Doe",
                         "Technician",
-                        LocalDateTime.now().plusDays(2)
+                        start,
+                        end,
+                        true // partialDay = true
                 )
         );
 
@@ -113,6 +126,154 @@ public class LeaveControllerTest {
                 .thenThrow(new RuntimeException("Database error"));
 
         mockMvc.perform(get("/api/leave/day/2026-03-01"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testGetSummarySuccess() throws Exception {
+        LeaveSummaryResponse mockSummary = new LeaveSummaryResponse(
+                120, // remainingHours
+                2,   // pendingCount
+                5    // approvedCount
+        );
+
+        when(leaveService.getLeaveSummaryForCurrentUser()).thenReturn(mockSummary);
+
+        mockMvc.perform(get("/api/leave/summary"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetSummaryThrowsException() throws Exception {
+        when(leaveService.getLeaveSummaryForCurrentUser()).thenThrow(new RuntimeException("Auth error"));
+
+        mockMvc.perform(get("/api/leave/summary"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testGetSummaryUnauthorized() throws Exception {
+        when(leaveService.getLeaveSummaryForCurrentUser())
+                .thenThrow(new AuthenticatedAccountNotFoundException());
+
+        mockMvc.perform(get("/api/leave/summary"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testGetLeaveTypesSuccess() throws Exception {
+
+        // Given the leave service returns a list of leave types for the request
+        List<LeaveTypeResponse> mockTypes = List.of(
+                new LeaveTypeResponse(
+                        1,
+                        "Annual Leave",
+                        "#111111",
+                        "#FFFFFF",
+                        "calendar"
+                )
+        );
+
+        when(leaveService.getLeaveTypes()).thenReturn(mockTypes);
+
+        // When the client calls the leave types endpoint, Then the controller should return HTTP 200 (OK)
+        mockMvc.perform(get("/api/leave/types"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetLeaveTypesThrowsException() throws Exception {
+
+        // Given the leave service throws an unexpected exception while retrieving leave types
+        when(leaveService.getLeaveTypes()).thenThrow(new RuntimeException("Database error"));
+
+        // When the client calls the leave types endpoint,
+        // Then the controller should return HTTP 500 (Internal Server Error)
+        mockMvc.perform(get("/api/leave/types"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testCreateLeaveSuccess() throws Exception {
+
+        // Given the leave service successfully processes a valid leave request
+        doNothing().when(leaveService).createLeave(any(LeaveRequest.class));
+
+        // When the client submits a valid leave request to the create endpoint
+        // Then the controller should return HTTP 200 (OK)
+        mockMvc.perform(post("/api/leave/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "startDate": "2026-04-20T08:00:00",
+                            "endDate": "2026-04-20T17:00:00",
+                            "leaveTypeId": 1,
+                            "notes": "Annual leave"
+                        }
+                        """))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testCreateLeaveUnauthorized() throws Exception {
+
+        // Given the leave service throws an exception because the user is not authenticated
+        doThrow(new AuthenticatedAccountNotFoundException())
+                .when(leaveService).createLeave(any(LeaveRequest.class));
+
+        // When the client submits a leave request without a valid authenticated account
+        // Then the controller should return HTTP 401 (Unauthorised)
+        mockMvc.perform(post("/api/leave/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "startDate": "2026-04-20T08:00:00",
+                            "endDate": "2026-04-20T17:00:00",
+                            "leaveTypeId": 1,
+                            "notes": "Annual leave"
+                        }
+                        """))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testCreateLeaveBadRequest() throws Exception {
+
+        // Given the leave service rejects the request due to invalid input data
+        doThrow(new IllegalArgumentException("Leave type is required."))
+                .when(leaveService).createLeave(any(LeaveRequest.class));
+
+        // When the client submits an invalid leave request, Then the controller should return HTTP 400 (Bad Request)
+        mockMvc.perform(post("/api/leave/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "startDate": "2026-04-20T08:00:00",
+                            "endDate": "2026-04-20T17:00:00",
+                            "notes": "Annual leave"
+                        }
+                        """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testCreateLeaveThrowsException() throws Exception {
+
+        // Given the leave service throws an unexpected runtime exception
+        doThrow(new RuntimeException("Unexpected error"))
+                .when(leaveService).createLeave(any(LeaveRequest.class));
+
+        // When the client submits a leave request, Then the controller should return HTTP 500 (Internal Server Error)
+        mockMvc.perform(post("/api/leave/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "startDate": "2026-04-20T08:00:00",
+                            "endDate": "2026-04-20T17:00:00",
+                            "leaveTypeId": 1,
+                            "notes": "Annual leave"
+                        }
+                        """))
                 .andExpect(status().isInternalServerError());
     }
 }
