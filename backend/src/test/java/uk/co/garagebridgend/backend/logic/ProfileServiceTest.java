@@ -27,6 +27,9 @@ public class ProfileServiceTest {
     @Mock
     private AccountRepository accountRepository;
 
+    @Mock
+    private AuthenticationService authenticationService;
+
     @InjectMocks
     private ProfileService profileService;
 
@@ -38,7 +41,6 @@ public class ProfileServiceTest {
     @Test
     void testGetCurrentProfileSuccess() {
         // Arrange
-        User mockUser = new User("123", "password", List.of());
         AccountTable account = new AccountTable();
         account.setFirstName("John");
         account.setLastName("Doe");
@@ -47,52 +49,43 @@ public class ProfileServiceTest {
         account.setCreated(LocalDateTime.of(2026, 3, 18, 10, 0));
 
         when(accountRepository.findById(123L)).thenReturn(Optional.of(account));
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
-        try (MockedStatic<AuthenticationService> authServiceMock = mockStatic(AuthenticationService.class)) {
-            authServiceMock.when(AuthenticationService::getCurrentUser).thenReturn(mockUser);
+        // Act
+        ProfileResponse response = profileService.getCurrentProfile();
 
-            // Act
-            ProfileResponse response = profileService.getCurrentProfile();
-
-            // Assert
-            assertNotNull(response);
-            assertEquals("John", response.getFirstName());
-            assertEquals("Doe", response.getLastName());
-            assertEquals("john.doe@example.com", response.getEmail());
-            assertEquals("1234567890", response.getPhoneNumber());
-            assertFalse(response.isHasPinCode());
-            assertEquals("18 March 2026", response.getCreated());
-        }
+        // Assert
+        assertNotNull(response);
+        assertEquals("John", response.getFirstName());
+        assertEquals("Doe", response.getLastName());
+        assertEquals("john.doe@example.com", response.getEmail());
+        assertEquals("1234567890", response.getPhoneNumber());
+        assertFalse(response.isHasPinCode());
+        assertEquals("18 March 2026", response.getCreated());
     }
 
     @Test
     void testGetCurrentProfileAccountNotFound() {
         // Arrange
-        User mockUser = new User("123", "password", List.of());
         when(accountRepository.findById(123L)).thenReturn(Optional.empty());
+        when(authenticationService.getCurrentUser()).thenReturn(new AccountTable());
 
-        try (MockedStatic<AuthenticationService> authServiceMock = mockStatic(AuthenticationService.class)) {
-            authServiceMock.when(AuthenticationService::getCurrentUser).thenReturn(mockUser);
+        // Act & Assert
+        AuthenticatedAccountNotFoundException exception =
+                assertThrows(AuthenticatedAccountNotFoundException.class, () -> {
+                    profileService.getCurrentProfile();
+                });
 
-            // Act & Assert
-            AuthenticatedAccountNotFoundException exception =
-                    assertThrows(AuthenticatedAccountNotFoundException.class, () -> {
-                        profileService.getCurrentProfile();
-                    });
-
-            assertEquals("Account not found.", exception.getMessage());
-        }
+        assertEquals("Account not found.", exception.getMessage());
     }
 
     @Test
     void testGetCurrentProfileNoAuthenticatedUser() {
-        try (MockedStatic<AuthenticationService> authServiceMock = mockStatic(AuthenticationService.class)) {
-            authServiceMock.when(AuthenticationService::getCurrentUser).thenReturn(null);
+        when(authenticationService.getCurrentUser()).thenReturn(null);
 
-            // Act & Assert
-            assertThrows(AuthenticatedAccountNotFoundException.class, () -> {
-                profileService.getCurrentProfile();
-            });
-        }
+        // Act & Assert
+        assertThrows(AuthenticatedAccountNotFoundException.class, () -> {
+            profileService.getCurrentProfile();
+        });
     }
 }
