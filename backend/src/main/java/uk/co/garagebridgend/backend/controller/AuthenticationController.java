@@ -24,6 +24,7 @@ import uk.co.garagebridgend.backend.models.exception.NotFoundException;
 import uk.co.garagebridgend.backend.models.internal.RotateRefreshTokenInternal;
 import uk.co.garagebridgend.backend.models.request.AuthRequest;
 import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
+import uk.co.garagebridgend.backend.models.request.MfaAuthoriseRequest;
 import uk.co.garagebridgend.backend.models.response.MfaCheckResponse;
 import uk.co.garagebridgend.backend.models.response.RefreshTokenResponse;
 
@@ -49,6 +50,26 @@ public class AuthenticationController {
 
     /** Authentication service for handling authentication operations. */
     private final AuthenticationService authenticationService;
+
+    /**
+     * Extracts the refresh token from the request cookies.
+     * @param request The HTTP request containing the cookies from which to extract the refresh token.
+     * @return the refresh token if found in the cookies, or null if not found.
+     */
+    private String extractRefreshToken(HttpServletRequest request) {
+        // Get refresh token from cookie
+        String refreshToken = null;
+
+        if (request.getCookies() != null) {
+            refreshToken = Arrays.stream(request.getCookies())
+                    .filter(cookie -> "refreshToken".equals(cookie.getName()))
+                    .map(Cookie::getValue)
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        return refreshToken;
+    }
 
     /** Authenticates a user and issues access and refresh tokens.
      * @param body The request body containing the username, password, and client type.
@@ -93,6 +114,49 @@ public class AuthenticationController {
         }
     }
 
+    /** Authorises a user for MFA by validating the provided TOTP code.
+     * @param body The request body containing the TOTP code for MFA authorisation.
+     * @return RefreshTokenResponse containing a new access token if MFA authorisation is successful.
+     * */
+    @PostMapping("/mfa/authorise")
+    public RefreshTokenResponse authoriseMfa(
+            final @RequestBody MfaAuthoriseRequest body,
+            final HttpServletRequest request) {
+        // Get refresh token from cookie
+        String refreshToken = extractRefreshToken(request);
+
+        if (refreshToken == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Refresh token not found in cookies"
+            );
+        }
+
+        try {
+            return authenticationService.authenticateMfa(body, refreshToken);
+        } catch (InvalidPasswordException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Invalid TOTP code provided."
+            );
+        } catch (AuthenticatedAccountNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Authenticated account not found."
+            );
+        } catch (Exception e) {
+            LOG.error("Error authorising MFA", e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal sever error"
+            );
+        }
+    }
+
+    /** Checks if the currently authenticated user has completed MFA authorisation.
+     * @param response The HTTP response to set the appropriate status code on.
+     * @return MfaCheckResponse indicating whether MFA is authorised or not.
+     * */
     @GetMapping("/mfa/check")
     public MfaCheckResponse checkMfa(final HttpServletResponse response) {
         try {
@@ -159,20 +223,12 @@ public class AuthenticationController {
     @GetMapping("/refresh")
     public RefreshTokenResponse refreshToken(final HttpServletRequest request) {
         // Get refresh token from cookie
-        String refreshToken = null;
-
-        if (request.getCookies() != null) {
-            refreshToken = Arrays.stream(request.getCookies())
-                    .filter(cookie -> "refreshToken".equals(cookie.getName()))
-                    .map(Cookie::getValue)
-                    .findFirst()
-                    .orElse(null);
-        }
+        String refreshToken = extractRefreshToken(request);
 
         if (refreshToken == null) {
             throw new ResponseStatusException(
-                HttpStatus.UNAUTHORIZED,
-                "Refresh token not found in cookies"
+                    HttpStatus.UNAUTHORIZED,
+                    "Refresh token not found in cookies"
             );
         }
 

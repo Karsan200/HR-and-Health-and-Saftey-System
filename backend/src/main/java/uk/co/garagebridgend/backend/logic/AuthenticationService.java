@@ -1,11 +1,12 @@
 package uk.co.garagebridgend.backend.logic;
 
+import com.bastiaanjansen.otp.HMACAlgorithm;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.apache.commons.codec.binary.Base32;
-import org.jspecify.annotations.Nullable;
+import com.bastiaanjansen.otp.TOTPGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.security.SecureRandom;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -34,6 +36,7 @@ import uk.co.garagebridgend.backend.models.exception.NotFoundException;
 import uk.co.garagebridgend.backend.models.internal.RotateRefreshTokenInternal;
 import uk.co.garagebridgend.backend.models.request.AuthRequest;
 import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
+import uk.co.garagebridgend.backend.models.request.MfaAuthoriseRequest;
 import uk.co.garagebridgend.backend.models.response.MfaCheckResponse;
 import uk.co.garagebridgend.backend.models.response.RefreshTokenResponse;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
@@ -113,6 +116,57 @@ public class AuthenticationService {
         RefreshTokenResponse token = refreshAccessToken(refreshToken);
 
         return new RotateRefreshTokenInternal(refreshToken, token.getAccessToken());
+    }
+
+    /**
+     * Authenticates a user for multifactor authentication (MFA) using a provided TOTP code and refresh token.
+     * Validates the TOTP code against the user's 2FA secret, updates the session to indicate 2FA has been authenticated,
+     * and returns a new access token with updated claims.
+     * @param body the request body containing the TOTP code for MFA authentication
+     * @param refreshToken the refresh token associated with the current session to update
+     * @return a RefreshTokenResponse containing a new access token with updated claims
+     * @throws AuthenticatedAccountNotFoundException if no authenticated user is found in the security context
+     * @throws InvalidPasswordException if the provided TOTP code is invalid
+     * @throws InvalidRefreshTokenException if the provided refresh token is invalid
+     */
+    public RefreshTokenResponse authenticateMfa(final MfaAuthoriseRequest body, final String refreshToken)
+        throws AuthenticatedAccountNotFoundException, InvalidPasswordException, InvalidRefreshTokenException {
+        // Get the current user
+        AccountTable account = this.getCurrentUser();
+
+        // Decode the secret into a byte array
+        byte[] secret = new Base32().decode(account.getTwoFactorSecret());
+
+        // Encode the secret as a base32 byte array
+        secret = new Base32().encode(secret);
+
+        // Create a TOTP generator
+        TOTPGenerator totp = new TOTPGenerator.Builder(secret)
+                .withHOTPGenerator(builder -> {
+                    builder.withPasswordLength(6);
+                    builder.withAlgorithm(HMACAlgorithm.SHA1);
+                })
+                .withPeriod(Duration.ofSeconds(30))
+                .build();
+
+        // Validate the provided TOTP code
+        if (!totp.verify(body.getCode())) {
+            throw new InvalidPasswordException("Invalid TOTP code");
+        }
+
+        // Get the current session using the refresh token
+        Optional<SessionTable> sessionOpt = sessionRepository.findByRefreshToken(refreshToken);
+        if (sessionOpt.isEmpty()) {
+            throw new InvalidRefreshTokenException();
+        }
+
+        // Update the session to indicate that 2FA has been authenticated
+        SessionTable session = sessionOpt.get();
+        session.setTwoFactor(true);
+        sessionRepository.save(session);
+
+        // Return new access token with updated claims
+        return this.refreshAccessToken(refreshToken);
     }
 
     /**
