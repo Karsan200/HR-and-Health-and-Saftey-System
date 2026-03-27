@@ -18,7 +18,11 @@ export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boole
     const [visible, setVisible] = useState(false);
     const [error, setError] = useState('');
 
-    const { theme } = useContext(ThemeContext)
+    const { theme, accessibility } = useContext(ThemeContext)
+    const themedStyles = styles(theme, accessibility);
+    const homeThemedStyles = homeStyles(theme, accessibility);
+    const authThemedStyles = passwordAuthScreenStyles(theme, accessibility);
+
 
     async function onButtonPress(buttonValue: string) {
         switch(buttonValue) {
@@ -140,31 +144,31 @@ export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boole
     }, []);
 
     return (
-        <ScrollView contentContainerStyle={styles(theme).container}>
-            <ScrollView contentContainerStyle={passwordAuthScreenStyles(theme).imageContainer}>
+        <ScrollView contentContainerStyle={themedStyles.container}>
+            <ScrollView contentContainerStyle={authThemedStyles.imageContainer}>
                 <Image
                     source={require('../../assets/images/Rent-a-Tech-Logo.png')}
-                    style={passwordAuthScreenStyles(theme).image}
+                    style={authThemedStyles.image}
                 />
             </ScrollView>
             <Avatar.Icon
                 size={300}
                 icon="account-circle"
-                style={homeStyles(theme).profileIcon}
+                style={homeThemedStyles.profileIcon}
                 color={theme.redPrimary}
             />
-            <Text style={styles(theme).welcomeBackText}>{greeting}</Text>
-            <View style={styles(theme).bubbleContainer}>
+            <Text style={themedStyles.welcomeBackText}>{greeting}</Text>
+            <View style={themedStyles.bubbleContainer}>
                 {pinBubbles.map((isEnabled, index) => (
                     <PinCodeBubble key={index} isEnabled={isEnabled} />
                 ))}
             </View>
             {[["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"], ["x", "0", ">"]].map((row, index) => (
-                <View key={index} style={styles(theme).buttonContainer}>
+                <View key={index} style={themedStyles.buttonContainer}>
                     {row.map((buttonValue, buttonIndex) => (
                         <Text
                             key={buttonIndex}
-                            style={styles(theme).button}
+                            style={themedStyles.button}
                             onPress={() => onButtonPress(buttonValue)}
                         >{buttonValue}</Text>
                     ))}
@@ -175,7 +179,7 @@ export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boole
                 <Dialog visible={visible} onDismiss={() => setVisible(false)}>
                     <Dialog.Title>Error</Dialog.Title>
                     <Dialog.Content>
-                        <Text style={passwordAuthScreenStyles(theme).dialogText}>{error}</Text>
+                        <Text style={authThemedStyles.dialogText}>{error}</Text>
                     </Dialog.Content>
                     <Dialog.Actions>
                         <Button

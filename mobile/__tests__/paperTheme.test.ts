@@ -7,6 +7,8 @@ const mockThemeContext = {
     greyIconLight: '#AAAAAA',
     greyBackground: '#F5F5F5',
   },
+  accessibility: {
+  },
 } as any;
 
 describe('paperTheme', () => {

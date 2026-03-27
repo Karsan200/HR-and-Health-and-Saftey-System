@@ -8,6 +8,10 @@ import { paperTheme } from '../src/theme/paperTheme.ts';
 declare const global: any;
 global.fetch = jest.fn();
 
+jest.mock('react-native-wheel-color-picker', () => {
+  return () => null;
+});
+
 describe('PasswordAuthScreen', () => {
   let mockSetIsAuthenticated: jest.Mock;
 

@@ -7,12 +7,40 @@ import DateDetailsScreen from '../src/screens/DateDetailsScreen';
 import dayjs from 'dayjs';
 import AuthenticationService from '../src/logic/AuthenticationService.ts';
 
+jest.mock('react-native-wheel-color-picker', () => {
+  return () => null;
+});
+
 // Mock SafeAreaView to render children directly
 jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-// Mock AuthenticationService
+// Mock Colours to avoid undefined
+jest.mock('../src/theme/colours', () => ({
+  DefaultColours: {
+    greyBackground: '#eee',
+    black: '#000',
+    redPrimary: '#f00',
+    white: '#fff',
+    greyPrimaryMainText: '#666',
+    redBackgroundLight: '#fcc',
+    redTextDark: '#900',
+  },
+}));
+
+// Mock Theme values
+jest.mock('../src/theme/theme', () => {
+  const actual = jest.requireActual('../src/theme/theme');
+
+  return {
+    ...actual,
+    TextStyles: {
+      ...actual.TextStyles,
+    },
+  };
+});
+
 jest.mock('../src/logic/AuthenticationService.ts', () => ({
   fetch: jest.fn(),
 }));
@@ -52,6 +80,7 @@ describe('DateDetailsScreen', () => {
 
   beforeEach(() => {
     fetchMock = AuthenticationService.fetch as jest.Mock;
+
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });

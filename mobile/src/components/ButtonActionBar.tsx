@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { Button } from 'react-native-paper';
 import { ThemeContext } from '../theme/colourController.tsx';
 import {Icon} from "react-native-paper/src";
-import buttonActionBarStyles from "./ButtonActionBar.styles.ts";
+import { ButtonActionBarStyles as styles } from "./ButtonActionBar.styles.ts";
 
 type Props = {
     onSaveDraft: () => void;
@@ -11,20 +11,20 @@ type Props = {
 };
 
 export default function ButtonActionBar({ onSaveDraft, onSubmit }: Props) {
-    const { theme } = useContext(ThemeContext);
-    const styles = buttonActionBarStyles(theme);
+    const { theme, accessibility } = useContext(ThemeContext);
+    const themedStyles = styles(theme, accessibility);
 
     return (
-        <View style={styles.container} pointerEvents="box-none">
+        <View style={themedStyles.container} pointerEvents="box-none">
             {/*save as draft button*/}
-            <View style={styles.card}>
+            <View style={themedStyles.card}>
                 <Button
                     mode="outlined"
                     onPress={onSaveDraft}
                     icon={() => <Icon source="content-save-outline" size={20} color={theme.black} />}
-                    style={styles.button}
-                    labelStyle={[styles.label, styles.saveLabel]}
-                    contentStyle={styles.buttonContent}
+                    style={themedStyles.button}
+                    labelStyle={[themedStyles.label, themedStyles.saveLabel]}
+                    contentStyle={themedStyles.buttonContent}
                 >
                     Save Draft
                 </Button>
@@ -33,9 +33,9 @@ export default function ButtonActionBar({ onSaveDraft, onSubmit }: Props) {
                 <Button
                     mode="contained"
                     onPress={onSubmit}
-                    style={styles.button}
-                    labelStyle={[styles.label, styles.primaryLabel]}
-                    contentStyle={styles.buttonContent}
+                    style={themedStyles.button}
+                    labelStyle={[themedStyles.label, themedStyles.primaryLabel]}
+                    contentStyle={themedStyles.buttonContent}
                 >
                     Submit Hazard
                 </Button>

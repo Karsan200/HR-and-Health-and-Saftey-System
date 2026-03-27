@@ -2,6 +2,10 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import ButtonActionBar from '../src/components/ButtonActionBar';
 
+jest.mock('react-native-wheel-color-picker', () => {
+  return () => null;
+});
+
 describe('ButtonActionBar', () => {
 
     /**

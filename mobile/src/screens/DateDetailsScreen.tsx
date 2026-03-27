@@ -22,7 +22,8 @@ type Activity = {
 };
 
 const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
-  const { theme } = useContext(ThemeContext);
+  const { theme, accessibility } = useContext(ThemeContext); // Get current theme
+  const themedStyles = styles(theme, accessibility);
 
   const initialDate = initialDateStr || dayjs().format('YYYY-MM-DD');
 
@@ -30,7 +31,6 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
   const [activities, setActivities] = useState<Activity[]>([]);
 
   const startOfWeek = selectedDate.startOf('week');
-
 
   const weekDays = Array.from({ length: 7 }).map((_, i) =>
     startOfWeek.add(i, 'day'),
@@ -103,19 +103,19 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
   };
 
   return (
-    <SafeAreaView style={styles(theme).container}>
-      <ScrollView contentContainerStyle={styles(theme).content}>
+    <SafeAreaView style={themedStyles.container}>
+      <ScrollView contentContainerStyle={themedStyles.content}>
         {/* Date Header */}
-        <View style={styles(theme).dateHeader}>
-          <Text style={styles(theme).dateText}>
+        <View style={themedStyles.dateHeader}>
+          <Text style={themedStyles.dateText}>
             {selectedDate.format('D MMMM, YYYY')}
           </Text>
 
-          {isToday && <Text style={styles(theme).todayText}>TODAY</Text>}
+          {isToday && <Text style={themedStyles.todayText}>TODAY</Text>}
         </View>
 
         {/* Week Days Row */}
-        <View style={styles(theme).weekRow}>
+        <View style={themedStyles.weekRow}>
           {weekDays.map(day => {
             const selected = day.isSame(selectedDate, 'day');
 
@@ -123,15 +123,15 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
               <TouchableOpacity
                 key={day.format('YYYY-MM-DD')}
                 style={[
-                  styles(theme).dayCard,
-                  selected && styles(theme).dayCardSelected,
+                  themedStyles.dayCard,
+                  selected && themedStyles.dayCardSelected,
                 ]}
                 onPress={() => setSelectedDate(day)}
               >
                 <Text
                   style={[
-                    styles(theme).dayLabel,
-                    selected && styles(theme).dayLabelSelected,
+                    themedStyles.dayLabel,
+                    selected && themedStyles.dayLabelSelected,
                   ]}
                 >
                   {day.format('ddd').toUpperCase()}
@@ -139,8 +139,8 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
 
                 <Text
                   style={[
-                    styles(theme).dayNumber,
-                    selected && styles(theme).dayNumberSelected,
+                    themedStyles.dayNumber,
+                    selected && themedStyles.dayNumberSelected,
                   ]}
                 >
                   {day.format('D')}
@@ -151,19 +151,19 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
         </View>
 
         {/* Week Navigation Buttons */}
-        <View style={styles(theme).weekNavButtons}>
+        <View style={themedStyles.weekNavButtons}>
           <TouchableOpacity
-            style={styles(theme).weekButton}
+            style={themedStyles.weekButton}
             onPress={goToPreviousWeek}
           >
-            <Text style={styles(theme).weekButtonText}>‹</Text>
+            <Text style={themedStyles.weekButtonText}>‹</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles(theme).weekButton}
+            style={themedStyles.weekButton}
             onPress={goToNextWeek}
           >
-            <Text style={styles(theme).weekButtonText}>›</Text>
+            <Text style={themedStyles.weekButtonText}>›</Text>
           </TouchableOpacity>
         </View>
 
@@ -188,19 +188,19 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
         )}
 
         {activities.map((activity, index) => (
-          <View key={index} style={styles(theme).activityCard}>
-            <View style={styles(theme).activityRow}>
-              <View style={styles(theme).activityTitle}>
-                <View style={styles(theme).activityDot} />
+          <View key={index} style={themedStyles.activityCard}>
+            <View style={themedStyles.activityRow}>
+              <View style={themedStyles.activityTitle}>
+                <View style={themedStyles.activityDot} />
 
-                <View style={styles(theme).nameTag}>
-                  <Text style={styles(theme).nameText}>
+                <View style={themedStyles.nameTag}>
+                  <Text style={themedStyles.nameText}>
                     {activity.name} • {activity.role}
                   </Text>
                 </View>
               </View>
 
-              <Text style={styles(theme).activitySubtext}>
+              <Text style={themedStyles.activitySubtext}>
                 {activity.isPartial
                   ? `On leave ${activity.from} - ${activity.to}`
                   : `On leave til ${activity.until}`}
@@ -213,8 +213,8 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
       {/* Add Button */}
       <TouchableOpacity
         style={[
-          styles(theme).addButton,
-          !canOpenBookingModal && styles(theme).addButtonDisabled,
+          themedStyles.addButton,
+          !canOpenBookingModal && themedStyles.addButtonDisabled,
         ]}
         onPress={() => {
           if (canOpenBookingModal) {
@@ -225,8 +225,8 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
       >
         <Text
           style={[
-            styles(theme).addIcon,
-            !canOpenBookingModal && styles(theme).addButtonDisabled,
+            themedStyles.addIcon,
+            !canOpenBookingModal && themedStyles.addButtonDisabled,
           ]}
         >
           +

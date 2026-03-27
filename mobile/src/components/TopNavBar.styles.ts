@@ -1,8 +1,12 @@
 import { StyleSheet } from 'react-native';
-import { FontSize, Spacing, TextStyles } from '../theme/theme.ts';
+import { Fonts, FontSize, Spacing, TextStyles } from '../theme/theme.ts';
 
-export const topNavStyles = (theme: any) =>
-  StyleSheet.create({
+export const topNavStyles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
+
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
+
+  return StyleSheet.create({
   container: {
     height: 75,
     paddingHorizontal: Spacing.mediumPadding,
@@ -11,7 +15,7 @@ export const topNavStyles = (theme: any) =>
     justifyContent: 'space-between',
     backgroundColor: theme.white,
     borderBottomWidth: 1,
-    borderBottomColor: '#D9D9D9',
+    borderBottomColor: theme.greyBackground,
   },
   leftSection: {
     flexDirection: 'row',
@@ -36,8 +40,9 @@ export const topNavStyles = (theme: any) =>
     alignItems: 'center',
   },
   title: {
-    fontSize: FontSize.l24,
-    ...TextStyles.medium,
+    fontSize: FontSize.l24 * fontScale,
+    fontFamily: fontFamilies.regular,
+    fontWeight: TextStyles.medium.fontWeight,
     color: theme.black,
     includeFontPadding: false,
     textAlignVertical: 'center',
@@ -60,11 +65,13 @@ export const topNavStyles = (theme: any) =>
     paddingHorizontal: 2,
   },
   notificationBadgeText: {
-    fontSize: 9,
+    fontSize: FontSize.xxs12,
     color: theme.white,
-    ...TextStyles.medium,
+    fontFamily: fontFamilies.regular,
+    fontWeight: TextStyles.medium.fontWeight,
     lineHeight: 10,
     includeFontPadding: false,
     textAlign: 'center',
   },
-});
+  });
+};

@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { ThemeContext } from '../theme/colourController';
-import { BorderRadius, FontSize, TextStyles } from '../theme/theme';
+import { BorderRadius, Fonts, FontSize, TextStyles } from '../theme/theme';
 
 interface AlertBoxProps {
   label?: string;
@@ -20,26 +20,28 @@ const AlertBox: React.FC<AlertBoxProps> = ({
                                              labelBackground,
                                              style,
                                            }) => {
-  const { theme } = useContext(ThemeContext); // get theme dynamically
+  const { theme, accessibility } = useContext(ThemeContext); // get theme dynamically
+  const themedStyles = styles(theme, accessibility);
+  
 
   return (
-    <View style={[styles(theme).container, style]}>
-      <View style={styles(theme).topRow}>
+    <View style={[themedStyles.container, style]}>
+      <View style={themedStyles.topRow}>
         <View
           style={[
-            styles(theme).circle,
+            themedStyles.circle,
             { backgroundColor: circleColor || theme.redPrimary },
           ]}
         />
         <View
           style={[
-            styles(theme).labelWrap,
+            themedStyles.labelWrap,
             { backgroundColor: labelBackground || theme.redBackgroundLight },
           ]}
         >
           <Text
             style={[
-              styles(theme).labelText,
+              themedStyles.labelText,
               { color: labelColor || theme.redTextDark },
             ]}
             numberOfLines={1}
@@ -50,7 +52,7 @@ const AlertBox: React.FC<AlertBoxProps> = ({
         </View>
       </View>
 
-      <Text style={styles(theme).bodyText} numberOfLines={2}>
+      <Text style={themedStyles.bodyText} numberOfLines={2}>
         {body}
       </Text>
     </View>
@@ -59,8 +61,12 @@ const AlertBox: React.FC<AlertBoxProps> = ({
 
 export default AlertBox;
 
-const styles = (theme: any) =>
-  StyleSheet.create({
+const styles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
+
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
+
+  return StyleSheet.create({
     container: {
       height: 88,
       backgroundColor: theme.white,
@@ -91,13 +97,16 @@ const styles = (theme: any) =>
       borderRadius: BorderRadius.smallTextBackground,
     },
     labelText: {
-      ...TextStyles.regular,
-      fontSize: FontSize.s16,
+      fontFamily: fontFamilies.regular,
+      fontWeight: TextStyles.medium.fontWeight,
+      fontSize: FontSize.s16 * fontScale,
     },
     bodyText: {
       marginTop: 8,
-      ...TextStyles.regular,
-      fontSize: FontSize.xxs12,
+      fontFamily: fontFamilies.regular,
+      fontWeight: TextStyles.medium.fontWeight,
+      fontSize: FontSize.xxs12 * fontScale,
       color: theme.black,
     },
   });
+};
