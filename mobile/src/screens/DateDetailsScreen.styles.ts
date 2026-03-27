@@ -157,4 +157,8 @@ export const dateDetailsStyles = (theme: any) =>
         color: theme.redPrimary,
         marginTop: -2,
     },
+
+    addButtonDisabled: {
+      opacity: 0.35,
+    },
 });
