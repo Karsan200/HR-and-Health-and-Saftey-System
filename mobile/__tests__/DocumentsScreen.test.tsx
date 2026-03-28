@@ -3,7 +3,6 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react-nativ
 import DocumentsScreen from '../src/screens/DocumentsScreen';
 import AuthenticationService from '../src/logic/AuthenticationService';
 import { Alert } from 'react-native';
-import Pdf from 'react-native-pdf';
 
 jest.mock('../src/logic/AuthenticationService', () => ({
     fetch: jest.fn(),
