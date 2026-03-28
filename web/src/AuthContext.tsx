@@ -3,6 +3,7 @@ import * as React from "react";
 import { ActivityLoader } from "./components/ActivityLoader.tsx";
 import {LoginPage} from "./pages/LoginPage.tsx";
 import {AuthenticationService} from "./logic/AuthenticationService.ts";
+import {MfaQrCodePage} from "./pages/MfaQrCodePage.tsx";
 
 export type AuthContextType = {
     authenticationService: AuthenticationService;
@@ -29,6 +30,8 @@ interface AuthProviderProps {
 export function AuthProvider(
     { children, isAuthenticated, setIsAuthenticated, isMfaAuthenticated, setIsMfaAuthenticated }: AuthProviderProps) {
     const [accessToken, setAccessToken] = useState<string | null>(null);
+    const [mfaSecret, setMfaSecret] = useState<string | null>(null);
+
     const authenticationService = new AuthenticationService(
         { accessToken, setAccessToken, isAuthenticated, setIsAuthenticated, isMfaAuthenticated, setIsMfaAuthenticated }
     );
@@ -42,6 +45,18 @@ export function AuthProvider(
             } catch {
                 setIsAuthenticated(false)
             }
+
+            // Check if the user is MFA authenticated
+            const response = await authenticationService.fetch("/auth/mfa/check", { method: "GET" });
+
+            if (response.ok) {
+                const data = await response.json();
+                setIsMfaAuthenticated(data.isMfaAuthenticated);
+                setMfaSecret(data.secret);
+            }
+            else {
+                setIsMfaAuthenticated(false);
+            }
         }
         loadAuth();
     }, []);
@@ -51,7 +66,9 @@ export function AuthProvider(
         { authenticationService, accessToken, setAccessToken, isAuthenticated, setIsAuthenticated, isMfaAuthenticated, setIsMfaAuthenticated }
         }>
             {isAuthenticated === null ? <ActivityLoader /> :
-            isAuthenticated ? children : <LoginPage />}
+            isAuthenticated ?
+                mfaSecret === null ? <MfaQrCodePage secret={mfaSecret} /> : children
+             : <LoginPage />}
         </AuthContext.Provider>
     );
 }
