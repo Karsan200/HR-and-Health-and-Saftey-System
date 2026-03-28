@@ -3,7 +3,7 @@
 export const loginPageStyles = {
     container: {
         backgroundColor: DefaultColours.greyBackground,
-        borderRadius: 8,
+        borderRadius: 4,
         paddingTop: 3,
         paddingBottom: 5,
         alignItems: "center",
