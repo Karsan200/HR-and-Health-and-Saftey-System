@@ -129,7 +129,13 @@ export default function SettingsScreen() {
     if (!hasLoaded) return; // Prevent saving before initial load (which would overwrite their settings with defaults)
 
     try {
-      await updateSettings(update);
+      const currentSettings = await getSettings();
+      await updateSettings({
+        ...update,
+        themePreset: update.hasOwnProperty("themePreset")
+          ? update.themePreset
+          : currentSettings.themePreset,
+      });
     } catch (err) {
       console.error("Save failed", err);
     }
@@ -248,6 +254,9 @@ export default function SettingsScreen() {
       if (hasLoaded) return;
       try {
         const data = await getSettings();
+        console.log("Loaded settings", JSON.stringify(data,null, 2));
+        console.log("Theme Preset:", data.themePreset);
+        console.log("Accent Colour:", data.accentColour);
 
         updateAccessibility({
           largeText: data.largeText,
@@ -306,6 +315,7 @@ export default function SettingsScreen() {
   function toggleAccessibility(key: "largeText" | "dyslexicFont") {
     const newVal = !accessibility[key];
     updateAccessibility({ [key]: newVal });
+    console.log("Saving accessibility setting", { [key]: newVal });
     save({ [key]: newVal });
   }
 
@@ -344,6 +354,17 @@ export default function SettingsScreen() {
     setPickerVisible(true);
   }
 
+  function getCurrentPreset(accentColour: string): string | null {
+    switch (accentColour) {
+      case "#D20414": return "DEFAULT";
+      case "#0066FF": return "BLUE";
+      case "#2E7D32": return "GREEN";
+      case "#D20413": return "DARK";
+      default: return null;
+    }
+  }
+
+  const PRESET_COLOURS = ["#D20414", "#0066FF", "#2E7D32", "#D20413"];
 
   async function updateColor(hex: string) {
 
@@ -357,9 +378,7 @@ export default function SettingsScreen() {
     const newColors = generateColorSet(hex);
     setColors(newColors);
 
-    let payload: any = {
-      themePreset: null // Force Custom mode
-    };
+    let payload: any = { };
 
     if (editingColor === "accent") {
       updateTheme({
@@ -387,10 +406,14 @@ export default function SettingsScreen() {
       payload.backgroundColour = newColors.primary;
     }
 
+    const accentToCheck = editingColor === "accent" ? newColors.primary : theme.redPrimary;
+    payload.themePreset = PRESET_COLOURS.includes(accentToCheck) ? getCurrentPreset(accentToCheck) : null;
+
+    console.log("Saving settings", JSON.stringify(payload, null, 2));
     await save(payload);
   }
 
-  const PRESET_COLOURS = ["#D20414", "#0066FF", "#2E7D32", "#D20413"];
+
   const isCustom = !PRESET_COLOURS.includes(theme.redPrimary);
 
   return (
