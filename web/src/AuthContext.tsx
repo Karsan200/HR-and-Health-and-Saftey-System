@@ -2,8 +2,11 @@ import {createContext, type ReactNode, useContext, useEffect, useState} from "re
 import * as React from "react";
 import { ActivityLoader } from "./components/ActivityLoader.tsx";
 import {LoginPage} from "./pages/LoginPage.tsx";
+import {AuthenticationService} from "./logic/AuthenticationService.ts";
 
 export type AuthContextType = {
+    authenticationService: AuthenticationService;
+
     accessToken: string | null;
     setAccessToken: React.Dispatch<React.SetStateAction<string | null>>;
 
@@ -26,16 +29,29 @@ interface AuthProviderProps {
 export function AuthProvider(
     { children, isAuthenticated, setIsAuthenticated, isMfaAuthenticated, setIsMfaAuthenticated }: AuthProviderProps) {
     const [accessToken, setAccessToken] = useState<string | null>(null);
+    const authenticationService = new AuthenticationService(
+        { accessToken, setAccessToken, isAuthenticated, setIsAuthenticated, isMfaAuthenticated, setIsMfaAuthenticated }
+    );
 
     useEffect(() => {
-        setIsAuthenticated(false)
+        async function loadAuth() {
+            // Refresh the token on initial load
+            try {
+                await authenticationService.refresh()
+                setIsAuthenticated(true)
+            } catch {
+                setIsAuthenticated(false)
+            }
+        }
+        loadAuth();
     }, []);
 
     return (
         <AuthContext.Provider value={
-        { accessToken, setAccessToken, isAuthenticated, setIsAuthenticated, isMfaAuthenticated, setIsMfaAuthenticated }
+        { authenticationService, accessToken, setAccessToken, isAuthenticated, setIsAuthenticated, isMfaAuthenticated, setIsMfaAuthenticated }
         }>
-            {isAuthenticated === null ? <ActivityLoader /> : isAuthenticated ? children : <LoginPage />}
+            {isAuthenticated === null ? <ActivityLoader /> :
+            isAuthenticated ? children : <LoginPage />}
         </AuthContext.Provider>
     );
 }

@@ -1,12 +1,30 @@
-import { type AuthContextType } from "../AuthContext.tsx";
 import { HttpException } from "../models/HttpException.ts";
 import { AppSettings } from "../AppSettings.ts";
+import type { AuthType } from "../models/AuthType.ts";
 
 export class AuthenticationService {
-    auth: AuthContextType
+    auth: AuthType
 
-    constructor(auth: AuthContextType) {
+    constructor(auth: AuthType) {
         this.auth = auth;
+    }
+
+    async refresh() {
+        const response = await fetch(AppSettings.API_URL + "/auth/refresh", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: 'include' as RequestCredentials
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+
+            this.auth.setAccessToken(data.accessToken);
+        } else {
+            throw new HttpException(response.status, response.statusText);
+        }
     }
 
     async login(username: string, password: string) {

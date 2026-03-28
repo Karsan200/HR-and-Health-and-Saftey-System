@@ -4,7 +4,6 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 import { loginPageStyles as styles } from "./LoginPage.styles.ts";
 import { useAuth } from "../AuthContext.tsx";
-import { AuthenticationService } from "../logic/AuthenticationService.ts";
 import { HttpException } from "../models/HttpException.ts";
 
 export function LoginPage() {
@@ -24,7 +23,7 @@ export function LoginPage() {
         }
 
         try {
-            await new AuthenticationService(auth).login(username, password);
+            await auth.authenticationService.login(username, password);
         }
         catch (e) {
             if (e instanceof HttpException) {
