@@ -51,6 +51,8 @@
 	<false/>
 	<key>UIAppFonts</key>
 	<array>
+		<string>OpenDyslexic3-Bold.ttf</string>
+		<string>OpenDyslexic3-Regular.ttf</string>
 		<string>Poppins-Bold.ttf</string>
 		<string>Poppins-ExtraBold.ttf</string>
 		<string>Poppins-Medium.ttf</string>

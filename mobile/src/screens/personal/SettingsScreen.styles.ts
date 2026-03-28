@@ -1,14 +1,23 @@
 import { StyleSheet } from 'react-native';
-import { Spacing, FontSize, TextStyles } from '../../theme/theme';
+import { Spacing, FontSize, TextStyles, Fonts } from '../../theme/theme';
 
-export const settingsStyles = (theme: any) =>
-  StyleSheet.create({
+export const settingsStyles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
+
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
+
+  return StyleSheet.create({
   /**
    * Root container for the screen scroll content.
    * Applies horizontal padding and top offset.
    */
   container: {
     paddingHorizontal: Spacing.mediumPadding,
+    backgroundColor: theme.white,
+  },
+
+  smallContainer: {
+    paddingHorizontal: Spacing.smallPadding,
   },
 
   /**
@@ -28,8 +37,9 @@ export const settingsStyles = (theme: any) =>
    * Section header text style used for the "CHOOSE A SECTION" label.
    */
   sectionTitle: {
-    fontSize: FontSize.l24,
-    ...TextStyles.semiBold,
+    fontSize: FontSize.l24 * fontScale,
+    fontFamily: fontFamilies.semiBold,
+    fontWeight: TextStyles.semiBold.fontWeight,
     textAlign: 'center',
     color: theme.greyIconLight,
     marginBottom: 10,
@@ -46,8 +56,9 @@ export const settingsStyles = (theme: any) =>
    * Title style for the quick access section.
    */
   quickAccessTitle: {
-    fontSize: FontSize.m20,
-    ...TextStyles.semiBold,
+    fontSize: FontSize.m20 * fontScale,
+    fontFamily: fontFamilies.semiBold,
+    fontWeight: TextStyles.semiBold.fontWeight,
     textAlign: 'left',
     color: theme.greyIconLight,
     marginBottom: 10,
@@ -130,8 +141,9 @@ export const settingsStyles = (theme: any) =>
    * Label text above colour rows
    */
   label: {
-    fontSize: FontSize.m20,
-    ...TextStyles.semiBold,
+    fontSize: FontSize.m20 * fontScale,
+    fontFamily: fontFamilies.semiBold,
+    fontWeight: TextStyles.semiBold.fontWeight,
     color: theme.greyIconLight,
     marginTop: 10,
     marginBottom: 6,
@@ -141,7 +153,9 @@ export const settingsStyles = (theme: any) =>
    * Smaller Label
    */
   smallLabel: {
-    fontSize: FontSize.s16,
+    fontSize: FontSize.s16 * fontScale,
+    fontFamily: fontFamilies.regular,
+    fontWeight: TextStyles.regular.fontWeight,
     color: theme.greyIconLight,
     marginVertical: 4,
   },
@@ -197,8 +211,9 @@ export const settingsStyles = (theme: any) =>
   },
 
   pickerHeader: {
-    fontSize: FontSize.m20,
-    ...TextStyles.semiBold,
+    fontSize: FontSize.m20 * fontScale,
+    fontFamily: fontFamilies.semiBold,
+    fontWeight: TextStyles.semiBold.fontWeight,
     textAlign: 'left',
     color: theme.greyIconLight,
     marginBottom: 10,
@@ -221,8 +236,28 @@ export const settingsStyles = (theme: any) =>
   },
 
   previewText: {
-    fontSize: 12,
+    fontSize: FontSize.xs14 * fontScale,
+    fontFamily: fontFamilies.regular,
+    fontWeight: TextStyles.regular.fontWeight,
     color: theme.black,
     margin: 16,
   },
-});
+
+  settingRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 8
+  },
+
+  settingHeader: {
+    fontSize: FontSize.s16 * fontScale,
+    fontFamily: fontFamilies.semiBold,
+    fontWeight: TextStyles.semiBold.fontWeight,
+    textAlign: 'left',
+    color: theme.greyIconLight,
+    marginBottom: 10,
+  },
+  });
+};
+

@@ -17,7 +17,10 @@ export default function PasswordAuthScreen(props: { isAuth: Dispatch<SetStateAct
   const [visible, setVisible] = useState(false);
   const [error, setError] = useState('');
 
-  const { theme } = useContext(ThemeContext)
+  const { theme, accessibility } = useContext(ThemeContext)
+
+  const themedStyles = styles(theme, accessibility);
+  const homeThemedStyles = homeStyles(theme, accessibility);
 
   async function handleLogin() {
     // Check that there is a username and password entered
@@ -54,30 +57,30 @@ export default function PasswordAuthScreen(props: { isAuth: Dispatch<SetStateAct
   }
 
   return (
-    <ScrollView contentContainerStyle={styles(theme).container}>
-      <ScrollView contentContainerStyle={styles(theme).imageContainer}>
+    <ScrollView contentContainerStyle={themedStyles.container}>
+      <ScrollView contentContainerStyle={themedStyles.imageContainer}>
         <Image
           source={require('../../assets/images/Rent-a-Tech-Logo.png')}
-          style={styles(theme).image}
+          style={themedStyles.image}
         />
       </ScrollView>
       <Avatar.Icon
         size={300}
         icon="account-circle"
-        style={homeStyles(theme).profileIcon}
+        style={homeThemedStyles.profileIcon}
         color={theme.redPrimary}
       />
       <TextInput
         label="Username"
         mode="outlined"
-        style={styles(theme).inputStyle}
+        style={themedStyles.inputStyle}
         value={username}
         onChangeText={setUsername}
       />
       <TextInput
         label="Password"
         mode="outlined"
-        style={styles(theme).inputStyle}
+        style={themedStyles.inputStyle}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -85,19 +88,19 @@ export default function PasswordAuthScreen(props: { isAuth: Dispatch<SetStateAct
       <Button
         buttonColor={theme.redPrimary}
         textColor={theme.white}
-        style={styles(theme).inputStyle}
+        style={themedStyles.inputStyle}
         onPress={() => handleLogin()}
       >
         Login
       </Button>
       {/** TODO: Add forgot password functionality */}
-      <Text style={styles(theme).forgotPasswordText}>Forgot Password</Text>
+      <Text style={themedStyles.forgotPasswordText}>Forgot Password</Text>
       {/** Error message dialog */}
       <Portal>
           <Dialog visible={visible} onDismiss={() => setVisible(false)}>
               <Dialog.Title>Error</Dialog.Title>
               <Dialog.Content>
-                  <Text style={styles(theme).dialogText}>{error}</Text>
+                  <Text style={themedStyles.dialogText}>{error}</Text>
               </Dialog.Content>
               <Dialog.Actions>
                   <Button

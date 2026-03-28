@@ -47,10 +47,10 @@ interface HsOverviewResponse {
 
 // Main HsOverview screen component
 export default function HsOverview() {
-    const { theme } = useContext(ThemeContext); // get current theme
+    const { theme, accessibility } = useContext(ThemeContext); // get current theme
 
-    const styles = baseStyles(theme); // themed styles
-    const localStyles = baseLocalStyles(theme); // themed local styles
+    const styles = baseStyles(theme, accessibility); // themed styles
+    const localStyles = baseLocalStyles(theme, accessibility); // themed local styles
 
     const [pendingDocs, setPendingDocs] = useState<number>(0);
     const [signedDocs, setSignedDocs] = useState<number>(0);

@@ -1,12 +1,15 @@
 import { StyleSheet } from 'react-native';
-import { BorderRadius, FontSize, Spacing, TextStyles } from "../theme/theme";
-import { DefaultColours } from "../theme/colours";
+import { BorderRadius, Fonts, FontSize, Spacing, TextStyles } from '../theme/theme';
 
-export const dateDetailsStyles = (theme: any) =>
-  StyleSheet.create({
+export const dateDetailsStyles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
+
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
+
+  return StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: DefaultColours.greyBackground,
+        backgroundColor: theme.greyBackground,
     },
 
     content: {
@@ -21,13 +24,15 @@ export const dateDetailsStyles = (theme: any) =>
     },
 
     dateText: {
-        fontFamily: TextStyles.regular.fontFamily,
-        fontWeight: TextStyles.regular.fontWeight,
-        fontSize: 24,
+        fontWeight: TextStyles.medium.fontWeight,
+        fontFamily: fontFamilies.regular,
+        fontSize: FontSize.l24 * fontScale,
         color: theme.black,
     },
 
     todayText: {
+        fontFamily: fontFamilies.regular,
+        fontWeight: TextStyles.regular.fontWeight,
         color: theme.redPrimary,
     },
 
@@ -55,7 +60,9 @@ export const dateDetailsStyles = (theme: any) =>
     },
 
     weekButtonText: {
-        fontSize: 20,
+        fontSize: FontSize.m20 * fontScale,
+        fontFamily: fontFamilies.regular,
+        fontWeight: TextStyles.regular.fontWeight,
         color: theme.black,
     },
 
@@ -77,7 +84,9 @@ export const dateDetailsStyles = (theme: any) =>
     },
 
     dayLabel: {
-        fontSize: FontSize.xs14,
+        fontSize: FontSize.xs14 * fontScale,
+        fontFamily: fontFamilies.regular,
+        fontWeight: TextStyles.regular.fontWeight,
         color: theme.greyPrimaryMainText,
     },
 
@@ -86,7 +95,9 @@ export const dateDetailsStyles = (theme: any) =>
     },
 
     dayNumber: {
-        fontSize: 24,
+        fontSize: FontSize.l24 * fontScale,
+        fontFamily: fontFamilies.regular,
+        fontWeight: TextStyles.regular.fontWeight,
         color: theme.black,
     },
 
@@ -133,7 +144,9 @@ export const dateDetailsStyles = (theme: any) =>
     },
 
     activitySubtext: {
-        fontSize: FontSize.xs14,
+        fontSize: FontSize.xs14 * fontScale,
+        fontFamily: fontFamilies.regular,
+        fontWeight: TextStyles.regular.fontWeight,
         color: theme.black,
         paddingLeft: 20,
     },
@@ -153,8 +166,15 @@ export const dateDetailsStyles = (theme: any) =>
     },
 
     addIcon: {
-        fontSize: 36,
+        fontSize: FontSize.xxl36 * fontScale,
+        fontFamily: fontFamilies.regular,
+        fontWeight: TextStyles.regular.fontWeight,
         color: theme.redPrimary,
         marginTop: -2,
     },
-});
+
+    addButtonDisabled: {
+      opacity: 0.35,
+    },
+  });
+};

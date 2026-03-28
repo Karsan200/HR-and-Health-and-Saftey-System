@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import { dateDetailsStyles as styles } from './DateDetailsScreen.styles';
 import AuthenticationService from '../logic/AuthenticationService';
 import { ThemeContext } from '../theme/colourController';
+import BookLeaveModal from './BookLeaveModal.tsx';
 
 type Props = {
   date: string | null;
@@ -21,7 +22,8 @@ type Activity = {
 };
 
 const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
-  const { theme } = useContext(ThemeContext);
+  const { theme, accessibility } = useContext(ThemeContext); // Get current theme
+  const themedStyles = styles(theme, accessibility);
 
   const initialDate = initialDateStr || dayjs().format('YYYY-MM-DD');
 
@@ -35,6 +37,22 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
   );
 
   const isToday = selectedDate.isSame(dayjs(), 'day');
+  const [isBookLeaveModalVisible, setIsBookLeaveModalVisible] = useState(false);
+
+  const refreshSelectedDateData = async () => {
+    await fetchLeaveForDate(selectedDate.format('YYYY-MM-DD'));
+  };
+
+  const daysInAdvance = 14;
+  const maxBookedDays = 2;
+
+  const minimumBookableDate = dayjs()
+    .add(daysInAdvance, 'day')
+    .startOf('day');
+
+  const canBookLeave = !selectedDate.isBefore(minimumBookableDate, 'day');
+  const isFullyBooked = activities.length >= maxBookedDays;
+  const canOpenBookingModal = canBookLeave && !isFullyBooked;
 
   const fetchLeaveForDate = async (date: string) => {
     try {
@@ -85,19 +103,19 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
   };
 
   return (
-    <SafeAreaView style={styles(theme).container}>
-      <ScrollView contentContainerStyle={styles(theme).content}>
+    <SafeAreaView style={themedStyles.container}>
+      <ScrollView contentContainerStyle={themedStyles.content}>
         {/* Date Header */}
-        <View style={styles(theme).dateHeader}>
-          <Text style={styles(theme).dateText}>
+        <View style={themedStyles.dateHeader}>
+          <Text style={themedStyles.dateText}>
             {selectedDate.format('D MMMM, YYYY')}
           </Text>
 
-          {isToday && <Text style={styles(theme).todayText}>TODAY</Text>}
+          {isToday && <Text style={themedStyles.todayText}>TODAY</Text>}
         </View>
 
         {/* Week Days Row */}
-        <View style={styles(theme).weekRow}>
+        <View style={themedStyles.weekRow}>
           {weekDays.map(day => {
             const selected = day.isSame(selectedDate, 'day');
 
@@ -105,15 +123,15 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
               <TouchableOpacity
                 key={day.format('YYYY-MM-DD')}
                 style={[
-                  styles(theme).dayCard,
-                  selected && styles(theme).dayCardSelected,
+                  themedStyles.dayCard,
+                  selected && themedStyles.dayCardSelected,
                 ]}
                 onPress={() => setSelectedDate(day)}
               >
                 <Text
                   style={[
-                    styles(theme).dayLabel,
-                    selected && styles(theme).dayLabelSelected,
+                    themedStyles.dayLabel,
+                    selected && themedStyles.dayLabelSelected,
                   ]}
                 >
                   {day.format('ddd').toUpperCase()}
@@ -121,8 +139,8 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
 
                 <Text
                   style={[
-                    styles(theme).dayNumber,
-                    selected && styles(theme).dayNumberSelected,
+                    themedStyles.dayNumber,
+                    selected && themedStyles.dayNumberSelected,
                   ]}
                 >
                   {day.format('D')}
@@ -133,21 +151,34 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
         </View>
 
         {/* Week Navigation Buttons */}
-        <View style={styles(theme).weekNavButtons}>
+        <View style={themedStyles.weekNavButtons}>
           <TouchableOpacity
-            style={styles(theme).weekButton}
+            style={themedStyles.weekButton}
             onPress={goToPreviousWeek}
           >
-            <Text style={styles(theme).weekButtonText}>‹</Text>
+            <Text style={themedStyles.weekButtonText}>‹</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles(theme).weekButton}
+            style={themedStyles.weekButton}
             onPress={goToNextWeek}
           >
-            <Text style={styles(theme).weekButtonText}>›</Text>
+            <Text style={themedStyles.weekButtonText}>›</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Booking Status Message */}
+        {!canBookLeave && (
+          <Text style={{ color: theme.greyPrimaryMainText }}>
+            Leave must be booked at least {daysInAdvance} days in advance
+          </Text>
+        )}
+
+        {canBookLeave && isFullyBooked && (
+          <Text style={{ color: theme.greyPrimaryMainText }}>
+            This day is fully booked
+          </Text>
+        )}
 
         {/* Activity Cards */}
         {activities.length === 0 && (
@@ -157,19 +188,19 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
         )}
 
         {activities.map((activity, index) => (
-          <View key={index} style={styles(theme).activityCard}>
-            <View style={styles(theme).activityRow}>
-              <View style={styles(theme).activityTitle}>
-                <View style={styles(theme).activityDot} />
+          <View key={index} style={themedStyles.activityCard}>
+            <View style={themedStyles.activityRow}>
+              <View style={themedStyles.activityTitle}>
+                <View style={themedStyles.activityDot} />
 
-                <View style={styles(theme).nameTag}>
-                  <Text style={styles(theme).nameText}>
+                <View style={themedStyles.nameTag}>
+                  <Text style={themedStyles.nameText}>
                     {activity.name} • {activity.role}
                   </Text>
                 </View>
               </View>
 
-              <Text style={styles(theme).activitySubtext}>
+              <Text style={themedStyles.activitySubtext}>
                 {activity.isPartial
                   ? `On leave ${activity.from} - ${activity.to}`
                   : `On leave til ${activity.until}`}
@@ -180,9 +211,34 @@ const DateDetailsScreen: React.FC<Props> = ({ date: initialDateStr }) => {
       </ScrollView>
 
       {/* Add Button */}
-      <TouchableOpacity style={styles(theme).addButton}>
-        <Text style={styles(theme).addIcon}>+</Text>
+      <TouchableOpacity
+        style={[
+          themedStyles.addButton,
+          !canOpenBookingModal && themedStyles.addButtonDisabled,
+        ]}
+        onPress={() => {
+          if (canOpenBookingModal) {
+            setIsBookLeaveModalVisible(true);
+          }
+        }}
+        disabled={!canOpenBookingModal}
+      >
+        <Text
+          style={[
+            themedStyles.addIcon,
+            !canOpenBookingModal && themedStyles.addButtonDisabled,
+          ]}
+        >
+          +
+        </Text>
       </TouchableOpacity>
+
+      <BookLeaveModal
+        visible={isBookLeaveModalVisible}
+        initialDate={selectedDate.format('YYYY-MM-DD')}
+        onClose={() => setIsBookLeaveModalVisible(false)}
+        onSuccess={refreshSelectedDateData}
+      />
     </SafeAreaView>
   );
 };

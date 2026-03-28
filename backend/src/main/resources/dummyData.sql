@@ -803,44 +803,45 @@ INSERT INTO settings_table (
     account_id,
     large_text,
     dyslexic_font,
+    highlight_text,
     text_to_speech,
     dictation,
     silent_start,
     silent_end
 ) VALUES
       (1, FALSE, FALSE, FALSE,
-       FALSE, NULL, NULL),
-
-      (2, FALSE, FALSE,
-       FALSE, FALSE, '22:00:00', '07:00:00'),
-
-      (3, TRUE,  TRUE,
-       FALSE, FALSE, '18:00:00', '05:00:00'),
-
-      (4, FALSE, FALSE,
-       TRUE,  FALSE, '18:00:00', '06:00:00'),
-
-      (5, FALSE, FALSE,
        FALSE, FALSE, NULL, NULL),
 
+      (2, FALSE, FALSE,
+       FALSE, FALSE, FALSE, '22:00:00', '07:00:00'),
+
+      (3, TRUE,  TRUE,
+       FALSE, FALSE, FALSE, '18:00:00', '05:00:00'),
+
+      (4, FALSE, FALSE,
+       TRUE, FALSE,  FALSE, '18:00:00', '06:00:00'),
+
+      (5, FALSE, FALSE,
+       FALSE, FALSE, FALSE, NULL, NULL),
+
       (6, TRUE,  FALSE,
-       TRUE,  FALSE, NULL, NULL),
+       TRUE, FALSE,  FALSE, NULL, NULL),
 
       (7, FALSE, TRUE,
-       FALSE, TRUE,  NULL, NULL),
+       FALSE, FALSE, TRUE,  NULL, NULL),
 
       (8, FALSE, FALSE,
-       FALSE, FALSE, NULL, NULL);
+       FALSE, FALSE, FALSE, NULL, NULL);
 
 INSERT INTO themes_table (
     account_id,
+    theme,
     background,
-    midground,
     text,
     accent
 ) VALUES
-      (2, 'F6F6F8', 'FFFFFF','000000', 'D20414'),
-      (4, 'F6F6F8', 'FFFFFF', '000000', '0066FF');
+      (2,'Blue', 'F6F6F8','000000', 'D20414'),
+      (4, 'Dark', 'F6F6F8', '000000', '0066FF');
 
 
 INSERT INTO leave_type_table (

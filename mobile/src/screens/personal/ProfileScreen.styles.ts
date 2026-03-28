@@ -1,8 +1,11 @@
 import { StyleSheet } from 'react-native';
-import { Spacing, BorderRadius, TextStyles, FontSize } from '../../theme/theme';
+import { Spacing, BorderRadius, TextStyles, FontSize, Fonts } from '../../theme/theme';
 
-export const profileStyles = (theme: any) =>
-  StyleSheet.create({
+export const profileStyles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
+
+  return StyleSheet.create({
     container: {
       flexGrow: 1,
       backgroundColor: theme.greyBackground,
@@ -22,18 +25,21 @@ export const profileStyles = (theme: any) =>
     },
 
     name: {
-      ...TextStyles.semiBold,
-      fontSize: FontSize.xl32,
+      fontFamily: fontFamilies.semiBold,
+      fontWeight: TextStyles.semiBold.fontWeight,
+      fontSize: FontSize.xl32 * fontScale,
       color: theme.black,
     },
 
     role: {
-      fontSize: FontSize.m20,
+      fontSize: FontSize.m20 * fontScale,
+      fontFamily: fontFamilies.regular,
       color: theme.greyPrimaryMainText,
     },
 
     employeeId: {
-      fontSize: FontSize.m20,
+      fontSize: FontSize.m20 * fontScale,
+      fontFamily: fontFamilies.regular,
       color: theme.greyIconLight,
     },
 
@@ -47,7 +53,8 @@ export const profileStyles = (theme: any) =>
 
     editText: {
       color: theme.white,
-      fontSize: FontSize.xs14,
+      fontSize: FontSize.xs14 * fontScale,
+      fontFamily: fontFamilies.regular,
       paddingLeft: -40,
       paddingRight: 8,
     },
@@ -65,8 +72,9 @@ export const profileStyles = (theme: any) =>
     },
 
     cardTitle: {
-      fontSize: FontSize.m20,
-      ...TextStyles.semiBold,
+      fontSize: FontSize.m20 * fontScale,
+      fontFamily: fontFamilies.semiBold,
+      fontWeight: TextStyles.semiBold.fontWeight,
       color: theme.black,
     },
 
@@ -85,12 +93,14 @@ export const profileStyles = (theme: any) =>
     },
 
     label: {
-      fontSize: FontSize.xs14,
+      fontSize: FontSize.xs14 * fontScale,
+      fontFamily: fontFamilies.regular,
       color: theme.greyPrimaryMainText,
     },
 
     value: {
-      fontSize: FontSize.s16,
+      fontSize: FontSize.s16 * fontScale,
+      fontFamily: fontFamilies.regular,
       color: theme.black,
     },
 
@@ -100,3 +110,4 @@ export const profileStyles = (theme: any) =>
       alignItems: 'center',
     },
   });
+};
