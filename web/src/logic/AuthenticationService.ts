@@ -33,6 +33,7 @@ export class AuthenticationService {
             headers: {
                 "Content-Type": "application/json",
             },
+            credentials: 'include' as RequestCredentials,
             body: JSON.stringify({
                 username: username,
                 password: password,
