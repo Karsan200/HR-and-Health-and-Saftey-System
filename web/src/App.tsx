@@ -41,11 +41,14 @@ function App() {
 
 function AppContent() {
     return (
+        <>
+        {/** Admin top navbar goes here */}
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<></>} />
             </Routes>
         </BrowserRouter>
+        </>
     )
 }
 

@@ -1,6 +1,7 @@
 import {createContext, type ReactNode, useContext, useEffect, useState} from "react";
 import * as React from "react";
 import { ActivityLoader } from "./components/ActivityLoader.tsx";
+import {LoginPage} from "./pages/LoginPage.tsx";
 
 export type AuthContextType = {
     accessToken: string | null;
@@ -27,14 +28,14 @@ export function AuthProvider(
     const [accessToken, setAccessToken] = useState<string | null>(null);
 
     useEffect(() => {
-
+        setIsAuthenticated(false)
     }, []);
 
     return (
         <AuthContext.Provider value={
         { accessToken, setAccessToken, isAuthenticated, setIsAuthenticated, isMfaAuthenticated, setIsMfaAuthenticated }
         }>
-            {isAuthenticated === null ? <ActivityLoader /> : children}
+            {isAuthenticated === null ? <ActivityLoader /> : isAuthenticated ? children : <LoginPage />}
         </AuthContext.Provider>
     );
 }
