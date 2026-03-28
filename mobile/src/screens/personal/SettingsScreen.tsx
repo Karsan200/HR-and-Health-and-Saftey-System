@@ -254,9 +254,6 @@ export default function SettingsScreen() {
       if (hasLoaded) return;
       try {
         const data = await getSettings();
-        console.log("Loaded settings", JSON.stringify(data,null, 2));
-        console.log("Theme Preset:", data.themePreset);
-        console.log("Accent Colour:", data.accentColour);
 
         updateAccessibility({
           largeText: data.largeText,
@@ -315,7 +312,6 @@ export default function SettingsScreen() {
   function toggleAccessibility(key: "largeText" | "dyslexicFont") {
     const newVal = !accessibility[key];
     updateAccessibility({ [key]: newVal });
-    console.log("Saving accessibility setting", { [key]: newVal });
     save({ [key]: newVal });
   }
 
@@ -409,7 +405,6 @@ export default function SettingsScreen() {
     const accentToCheck = editingColor === "accent" ? newColors.primary : theme.redPrimary;
     payload.themePreset = PRESET_COLOURS.includes(accentToCheck) ? getCurrentPreset(accentToCheck) : null;
 
-    console.log("Saving settings", JSON.stringify(payload, null, 2));
     await save(payload);
   }
 
