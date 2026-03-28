@@ -304,16 +304,9 @@ export default function SettingsScreen() {
   }, [hasLoaded, updateTheme, updateAccessibility, applyDefaultTheme, applyBlueTheme, applyGreenTheme, applyDarkTheme]);
 
   function toggleAccessibility(key: "largeText" | "dyslexicFont") {
-    updateAccessibility((prev: any) => {
-      const newVal = !prev[key];
-
-      save({ [key]: newVal });
-
-      return {
-        ...prev,
-        [key]: newVal,
-      };
-    });
+    const newVal = !accessibility[key];
+    updateAccessibility({ [key]: newVal });
+    save({ [key]: newVal });
   }
 
   function handleHighlightToggle() {

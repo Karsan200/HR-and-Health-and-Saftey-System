@@ -248,21 +248,7 @@ describe('SettingsScreen', () => {
       fireEvent(getByTestId('toggle-dyslexic'), 'onToggle');
     });
 
-    expect(mockUpdateAccessibility).toHaveBeenCalled();
-
-    const updateFn = mockUpdateAccessibility.mock.calls[0][0];
-
-    const result = updateFn({
-      dyslexicFont: false,
-      highlightText: false,
-      largeText: false,
-    });
-
-    expect(result).toEqual({
-      dyslexicFont: true,
-      highlightText: false,
-      largeText: false,
-    });
+    expect(mockUpdateAccessibility).toHaveBeenCalledWith({ dyslexicFont: true });
   });
 
   it('toggles large text when pressed', async () => {
@@ -275,21 +261,7 @@ describe('SettingsScreen', () => {
       fireEvent(getByTestId('toggle-large'), 'onToggle');
     });
 
-    expect(mockUpdateAccessibility).toHaveBeenCalled();
-
-    const updateFn = mockUpdateAccessibility.mock.calls[0][0];
-
-    const result = updateFn({
-      dyslexicFont: false,
-      highlightText: false,
-      largeText: false,
-    });
-
-    expect(result).toEqual({
-      dyslexicFont: false,
-      highlightText: false,
-      largeText: true,
-    });
+    expect(mockUpdateAccessibility).toHaveBeenCalledWith({ largeText: true });
   });
 
   it('toggles highlight text and updates theme when pressed', async () => {
