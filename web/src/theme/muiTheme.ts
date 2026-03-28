@@ -5,6 +5,9 @@ export const muiTheme = createTheme({
     palette: {
         primary: {
             main: DefaultColours.redPrimary,
+        },
+        error: {
+            main: DefaultColours.redBackgroundLight
         }
     }
 });

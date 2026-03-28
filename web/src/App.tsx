@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import { ThemeProvider } from "@mui/material";
+import {CssBaseline, ThemeProvider} from "@mui/material";
 
 import { muiTheme } from "./theme/muiTheme.ts";
 import { IncompatibleScreen } from "./components/IncompatibleScreen.tsx";
@@ -28,6 +28,7 @@ function App() {
 
     return (
         <ThemeProvider theme={muiTheme}>
+            <CssBaseline />
             {screenSize < 768 ? <IncompatibleScreen/> :
                 <AuthProvider isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated}
                     isMfaAuthenticated={isMfaAuthenticated} setIsMfaAuthenticated={setIsMfaAuthenticated}

@@ -34,7 +34,7 @@ export function LoginPage() {
                         )
                     }}
                 />
-                <Button fullWidth variant="contained">Login</Button>
+                <Button sx={styles.buttonContainer} fullWidth size="large" variant="contained">Login</Button>
             </Container>
         </Box>
     )

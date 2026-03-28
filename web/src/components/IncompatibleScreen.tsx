@@ -8,7 +8,7 @@ import { IncompatibleScreenStyles as styles } from "./IncompatibleScreen.styles.
 export function IncompatibleScreen() {
     return (
         <Box sx={styles.container}>
-            <Alert icon={false} severity="error" sx={styles.alert}>
+            <Alert variant="filled" icon={false} severity="error" sx={styles.alert}>
                 <NoCellIcon sx={styles.icon} />
                 <AlertTitle sx={styles.alert_title}>Incompatible Device!</AlertTitle>
                 Sorry, it looks like your device is not compatible with this application. Please try accessing it on a desktop computer.
