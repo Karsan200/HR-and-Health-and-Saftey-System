@@ -3,14 +3,12 @@ package uk.co.garagebridgend.backend.logic;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.SettingsResponse;
 import uk.co.garagebridgend.backend.models.entity.SettingsTable;
 import uk.co.garagebridgend.backend.models.entity.ThemesTable;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.repository.SettingsRepository;
 import uk.co.garagebridgend.backend.repository.ThemeRepository;
-import uk.co.garagebridgend.backend.repository.AccountRepository;
 
 /**
  * Service responsible for handling business logic related to user settings
@@ -27,23 +25,8 @@ public class SettingsService {
     /** Repository for fetching account theme visuals. */
     private final ThemeRepository themeRepository;
 
-    /** Repository for fetching account data related to session creation and validation. */
-    private final AccountRepository accountRepository;
-
-    /**
-     * Helper method to get the currently authenticated account.
-     * @return account found by ID.
-     */
-    private AccountTable getCurrentAccount() {
-        var user = AuthenticationService.getCurrentUser();
-
-        if (user == null) {
-            throw new AuthenticatedAccountNotFoundException();
-        }
-
-        return accountRepository.findById(Long.valueOf(user.getUsername()))
-                .orElseThrow(AuthenticatedAccountNotFoundException::new);
-    }
+    /** Service for handling authentication and retrieving the current user. */
+    private final AuthenticationService authenticationService;
 
     /**
      * Retrieves all settings and theme data for the current user.
@@ -53,7 +36,7 @@ public class SettingsService {
 
         // System.out.println("Step 1: Entered getAllSettings()");
 
-        AccountTable account = getCurrentAccount();
+        AccountTable account = authenticationService.getCurrentUser();
         // System.out.println("Step 2: Retrieved current account with ID: " + account.getAccountId());
 
         // Get or create settings
@@ -122,7 +105,7 @@ public class SettingsService {
      */
     public void updateAllSettings(final SettingsResponse request) {
 
-        AccountTable account = getCurrentAccount();
+        AccountTable account = authenticationService.getCurrentUser();
 
         SettingsTable settings = settingsRepository
                 .findByAccountId(account.getAccountId())
