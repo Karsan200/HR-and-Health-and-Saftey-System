@@ -69,7 +69,7 @@ export function AuthProvider(
         }>
             {isAuthenticated === null ? <ActivityLoader /> :
             isAuthenticated ?
-                mfaSecret === null ? children : <MfaQrCodePage secret={mfaSecret} />
+                mfaSecret === null ? children : <MfaQrCodePage secret={mfaSecret} onComplete={() => setMfaSecret(null)}/>
              : <LoginPage />}
         </AuthContext.Provider>
     );

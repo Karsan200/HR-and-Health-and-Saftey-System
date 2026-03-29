@@ -4,7 +4,7 @@ import { QRCodeSVG } from "qrcode.react";
 import {DefaultColours} from "../theme/colours.ts";
 import {useState} from "react";
 
-export function MfaQrCodePage({secret}: {secret: string | null}) {
+export function MfaQrCodePage({ secret, onComplete }: { secret: string; onComplete: () => void }) {
     const [showSecret, setShowSecret] = useState(false);
 
     if (secret === null) {
@@ -31,6 +31,10 @@ export function MfaQrCodePage({secret}: {secret: string | null}) {
                         {secret.split("secret=")[1].split("&issuer=")[0]}
                     </Typography>
                 </Collapse>
+                <hr />
+                <Button variant="contained" onClick={onComplete}>
+                    Continue
+                </Button>
             </Container>
         </Box>
     )
