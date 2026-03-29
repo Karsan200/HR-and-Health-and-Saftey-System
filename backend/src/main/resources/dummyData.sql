@@ -27,7 +27,7 @@ INSERT INTO account_table (
           '12 Test Street',
           NULL,
           'CF31 1AA',
-          NULL,
+          '532MDCTNSUJLFXJ2TJTLRSSJKQCR5LFD',
           NULL,
           '2025-02-14 09:12:00'
       ),

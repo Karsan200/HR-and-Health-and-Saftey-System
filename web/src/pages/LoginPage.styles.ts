@@ -7,6 +7,7 @@ export const loginPageStyles = {
         paddingTop: 3,
         paddingBottom: 5,
         alignItems: "center",
+        textAlign: "center",
         justifyContent: "center",
     },
     centreContainer: {
@@ -30,6 +31,7 @@ export const loginPageStyles = {
         marginTop: 2,
     },
     qrcodeContainer: {
+        display: "flex",
         alignItems: "center",
         justifyContent: "center",
         padding: 2
