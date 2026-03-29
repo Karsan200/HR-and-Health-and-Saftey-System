@@ -2,6 +2,7 @@
 import {Alert, Box, Button, Container, TextField} from "@mui/material";
 import {useState} from "react";
 import {useAuth} from "../../AuthContext.tsx";
+import {HttpException} from "../../models/HttpException.ts";
 
 export function MfaTotpPage() {
     const [totpCode, setTotpCode] = useState('');
@@ -18,6 +19,24 @@ export function MfaTotpPage() {
         }
 
         setLoading(true);
+
+        try {
+            await auth.authenticationService.mfaTotp(totpCode);
+        }
+        catch (e) {
+            if (e instanceof HttpException) {
+                switch (e.statusCode) {
+                    case 403:
+                        setError("Invalid or expired TOTP code. Please try again.");
+                        break;
+                    default:
+                        setError("An error occurred while trying to verify the MFA code. Please try again later.");
+                }
+            }
+        }
+        finally {
+            setLoading(false);
+        }
     }
 
     return (

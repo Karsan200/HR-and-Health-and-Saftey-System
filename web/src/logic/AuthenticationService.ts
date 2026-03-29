@@ -62,6 +62,30 @@ export class AuthenticationService {
         }
     }
 
+    async mfaTotp(code: string) {
+        const response = await this.fetch("/auth/mfa/authorise", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: 'include' as RequestCredentials,
+            body: JSON.stringify({
+                code: code
+            }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+
+            this.auth.accessToken = data.accessToken;
+            this.auth.setAccessToken(this.auth.accessToken);
+            this.auth.setIsMfaAuthenticated(true);
+        }
+        else {
+            throw new HttpException(response.status, response.statusText);
+        }
+    }
+
     async login(username: string, password: string) {
         const response = await fetch(AppSettings.API_URL + "/auth/login", {
             method: "POST",
@@ -79,7 +103,8 @@ export class AuthenticationService {
         if (response.ok) {
             const data = await response.json();
 
-            this.auth.setAccessToken(data.accessToken);
+            this.auth.accessToken = data.accessToken;
+            this.auth.setAccessToken(this.auth.accessToken);
             this.auth.setIsAuthenticated(true);
             this.auth.setIsMfaAuthenticated(false);
         }
