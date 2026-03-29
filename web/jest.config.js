@@ -1,18 +1,19 @@
 export default {
     preset: "ts-jest",
     testEnvironment: "jsdom",
-    globals: {
-        "ts-jest": {
+    transform: {
+        "^.+\\.(ts|tsx)$": ["ts-jest", {
             tsconfig: {
                 jsx: "react-jsx",
-                esModuleInterop: true
+                esModuleInterop: true,
+                types: ["jest", "@testing-library/jest-dom", "node"]
             }
-        }
+        }]
     },
+    setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
     moduleNameMapper: {
         "\\.(css|less|scss|sass)$": "identity-obj-proxy",
     },
-    setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
     coveragePathIgnorePatterns: [
         '/node_modules/',
         'src/App.tsx',

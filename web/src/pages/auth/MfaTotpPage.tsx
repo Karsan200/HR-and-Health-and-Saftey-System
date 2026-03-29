@@ -45,11 +45,11 @@ export function MfaTotpPage() {
                 <Box sx={styles.imgContainer}>
                     <img src="/assets/images/Rent-a-Tech-Logo.png" alt="Rent-A-Tech" height={90} />
                 </Box>
-                <div hidden={error === null}>
+                {error !== null && (
                     <Alert variant="filled" severity="error">
                         {error}
                     </Alert>
-                </div>
+                )}
                 <TextField
                     required fullWidth margin="normal" label="MFA Code" id="Totp"
                     value={totpCode} onChange={(e) => setTotpCode(e.target.value)}
