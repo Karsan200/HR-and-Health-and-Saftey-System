@@ -18,13 +18,15 @@ export class AuthenticationService {
      * @returns Promise The fetch response
      */
     async fetch(url: string, options: RequestInit = {}, hasRefreshed: boolean = false): Promise<Response> {
-        // Add the Authorisation header with the access token to the request options
-        options.headers = {
-            ...options.headers,
-            'Authorization': `Bearer ${this.auth.accessToken}`,
-        }
+        const { headers, ...rest } = options;
 
-        const response = await fetch(url, options)
+        const response = await fetch(AppSettings.API_URL + url, {
+            ...rest,
+            headers: {
+                ...headers,
+                'Authorization': `Bearer ${this.auth.accessToken}`,
+            }
+        });
 
         // Refresh the token if the response was unauthorised
         if (response.status === 401 && !hasRefreshed) {
@@ -53,7 +55,8 @@ export class AuthenticationService {
         if (response.ok) {
             const data = await response.json();
 
-            this.auth.setAccessToken(data.accessToken);
+            this.auth.accessToken = data.accessToken;
+            this.auth.setAccessToken(this.auth.accessToken);
         } else {
             throw new HttpException(response.status, response.statusText);
         }

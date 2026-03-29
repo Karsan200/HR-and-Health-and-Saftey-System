@@ -15,6 +15,9 @@ public class MfaCheckResponse {
     /** The secret key used to set up MFA for the user. Null if MFA is already setup. */
     private String secret;
 
+    /** The username of the user for whom the MFA check is being performed. */
+    private String username;
+
     /** Whether the user is mfa authorised or not. */
     private boolean isMfaAuthorised;
 }

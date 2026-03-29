@@ -211,7 +211,7 @@ public class AuthenticationService {
             accountRepository.save(account);
         }
 
-        return new MfaCheckResponse(mfaSecret, mfaRequired);
+        return new MfaCheckResponse(mfaSecret, account.getUsername(), mfaRequired);
     }
 
     /**

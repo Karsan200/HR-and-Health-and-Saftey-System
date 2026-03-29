@@ -52,7 +52,9 @@ export function AuthProvider(
             if (response.ok) {
                 const data = await response.json();
                 setIsMfaAuthenticated(data.isMfaAuthenticated);
-                setMfaSecret(data.secret);
+                if (data.secret !== null) {
+                    setMfaSecret(`otpauth://totp/RentATech:${data.username}?secret=${data.secret}&issuer=RentATech`);
+                }
             }
             else {
                 setIsMfaAuthenticated(false);
@@ -67,7 +69,7 @@ export function AuthProvider(
         }>
             {isAuthenticated === null ? <ActivityLoader /> :
             isAuthenticated ?
-                mfaSecret === null ? <MfaQrCodePage secret={mfaSecret} /> : children
+                mfaSecret === null ? children : <MfaQrCodePage secret={mfaSecret} />
              : <LoginPage />}
         </AuthContext.Provider>
     );

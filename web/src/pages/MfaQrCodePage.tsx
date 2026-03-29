@@ -1,21 +1,20 @@
-﻿import QRCode from "react-qr-code";
-import {loginPageStyles as styles} from "./LoginPage.styles.ts";
-import { Box, Container } from "@mui/material";
+﻿import {loginPageStyles as styles} from "./LoginPage.styles.ts";
+import {Box, Container, Typography} from "@mui/material";
+import { QRCodeSVG } from "qrcode.react";
+import {DefaultColours} from "../theme/colours.ts";
 
 export function MfaQrCodePage({secret}: {secret: string | null}) {
-    if (!secret) {
-        return null;
-    }
+    console.log(secret)
 
     return (
         <Box sx={styles.centreContainer}>
             <Container maxWidth="sm" sx={styles.container}>
-                <QRCode
-                    size={256}
-                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                    value={secret}
-                    viewBox={`0 0 256 256`}
-                />
+                <Typography variant={"h4"} color={DefaultColours.greyPrimaryMainText}>
+                    Set up Multi-Factor Authentication
+                </Typography>
+                <Container sx={styles.qrcodeContainer}>
+                    <QRCodeSVG value={secret ?? "null"} size={256} />
+                </Container>
             </Container>
         </Box>
     )

@@ -28,5 +28,10 @@ export const loginPageStyles = {
     },
     buttonContainer: {
         marginTop: 2,
+    },
+    qrcodeContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 2
     }
 }
