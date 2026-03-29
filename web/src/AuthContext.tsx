@@ -60,7 +60,7 @@ export function AuthProvider(
 
             if (response.ok) {
                 const data = await response.json();
-                setIsMfaAuthenticated(data.isMfaAuthenticated);
+                setIsMfaAuthenticated(data.mfaAuthorised);
                 if (data.secret !== null) {
                     setMfaSecret(
                     `otpauth://totp/${AppSettings.COMPANY_NAME}:${data.username}?secret=${data.secret}&issuer=${AppSettings.COMPANY_NAME}`
