@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, ScrollView, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar, DateData } from 'react-native-calendars';
 import dayjs from 'dayjs';
@@ -15,15 +15,33 @@ type Props = {
 };
 
 const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
-  const { theme } = useContext(ThemeContext); // Get current theme
+  const { theme, accessibility } = useContext(ThemeContext); // Get current theme
+  const themedStyles = styles(theme, accessibility);
   const today = dayjs();
 
   const MaxBookedDays = 2;
 
   const [bookedDays, setBookedDays] = useState<string[]>([]);
 
+  const [summary, setSummary] = useState({
+    totalDays: 0,
+    pendingCount: 0,
+    approvedCount: 0,
+  });
+
+const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true); // start refreshing
+
+    await Promise.all([fetchLeave(), fetchSummary()]); // fetch both leave data and summary
+
+    setRefreshing(false); // stop refreshing
+  };
+
   useEffect(() => {
     fetchLeave();
+    fetchSummary();
   }, []);
 
   const fetchLeave = async () => {
@@ -46,6 +64,19 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
       setBookedDays(dates);
     } catch (error) {
       console.error('Error fetching leave', error);
+    }
+  };
+
+  const fetchSummary = async () => {
+    try {
+      const response = await AuthenticationService.fetch(
+        '/api/leave/summary',
+        {},
+      );
+      const data = await response.json();
+      setSummary(data);
+    } catch (error) {
+      console.error('Error fetching summary', error);
     }
   };
 
@@ -127,62 +158,70 @@ const CalendarScreen: React.FC<Props> = ({ onDayPress }) => {
   };
 
   return (
-    <SafeAreaView style={styles(theme).container}>
-      <View style={styles(theme).summaryWrapper}>
-        <SummaryRow>
-          <SummaryCard
-            label="Hours"
-            value={82}
-            icon="clock-outline"
-            colour="red"
+    <SafeAreaView style={themedStyles.container}>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.redPrimary}
+          />
+        }
+      >
+        <View style={themedStyles.summaryWrapper}>
+          <SummaryRow>
+            <SummaryCard
+              label="Hours"
+              value={summary.totalDays}
+              icon="clock-outline"
+              colour="red"
+            />
+            <SummaryCard
+              label="Pending"
+              value={summary.pendingCount}
+              icon="alert-circle-outline"
+              colour="amber"
+            />
+            <SummaryCard
+              label="Approved"
+              value={summary.approvedCount}
+              icon="check-circle-outline"
+              colour="green"
+            />
+          </SummaryRow>
+        </View>
+
+        <View style={themedStyles.calendarContainer}>
+          <Calendar
+            onDayPress={handleDayPress}
+            markedDates={markedDates}
+            theme={{
+              calendarBackground: theme.white,
+              textSectionTitleColor: theme.greyPrimaryMainText,
+              selectedDayBackgroundColor: theme.redPrimary,
+              selectedDayTextColor: theme.white,
+              todayTextColor: theme.redPrimary,
+              arrowColor: theme.redPrimary,
+              monthTextColor: theme.black,
+            }}
           />
 
-          <SummaryCard
-            label="Pending"
-            value={4}
-            icon="alert-circle-outline"
-            colour="amber"
-          />
+          <View style={themedStyles.redStripe} />
 
-          <SummaryCard
-            label="Approved"
-            value={2}
-            icon="check-circle-outline"
-            colour="green"
-          />
-        </SummaryRow>
-      </View>
+          {/* Key */}
+          <View style={themedStyles.keyContainer}>
+            <View style={themedStyles.keyItem}>
+              <View style={themedStyles.fullyBookedCircle} />
+              <Text style={themedStyles.keyText}>Fully Booked Days</Text>
+            </View>
 
-      <View style={styles(theme).calendarContainer}>
-        <Calendar
-          onDayPress={handleDayPress}
-          markedDates={markedDates}
-          theme={{
-            calendarBackground: theme.white,
-            textSectionTitleColor: theme.greyPrimaryMainText,
-            selectedDayBackgroundColor: theme.redPrimary,
-            selectedDayTextColor: theme.white,
-            todayTextColor: theme.redPrimary,
-            arrowColor: theme.redPrimary,
-            monthTextColor: theme.black,
-          }}
-        />
-
-        <View style={styles(theme).redStripe} />
-
-        {/* Key */}
-        <View style={styles(theme).keyContainer}>
-          <View style={styles(theme).keyItem}>
-            <View style={styles(theme).fullyBookedCircle} />
-            <Text style={styles(theme).keyText}>Fully Booked Days</Text>
-          </View>
-
-          <View style={styles(theme).keyItem}>
-            <View style={styles(theme).partialBookedCircle} />
-            <Text style={styles(theme).keyText}>Partial Booked Days</Text>
+            <View style={themedStyles.keyItem}>
+              <View style={themedStyles.partialBookedCircle} />
+              <Text style={themedStyles.keyText}>Partial Booked Days</Text>
+            </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

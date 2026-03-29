@@ -6,6 +6,7 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import CalendarScreen from '../src/screens/CalendarScreen';
 import AuthenticationService from "../src/logic/AuthenticationService.ts";
+import { ScrollView } from 'react-native';
 
 jest.mock('../src/logic/AuthenticationService.ts', () => ({
   fetch: jest.fn(),
@@ -15,6 +16,10 @@ jest.mock('../src/logic/AuthenticationService.ts', () => ({
 jest.mock('react-native-calendars', () => {
   const mockReact = require('react');
   const { Text, TouchableOpacity } = require('react-native');
+
+jest.mock('react-native-wheel-color-picker', () => {
+  return () => null;
+});
 
   return {
     Calendar: ({ onDayPress }: any) =>
@@ -167,4 +172,36 @@ describe('CalendarScreen', () => {
       );
     });
   });
+
+  it('triggers data refresh when onRefresh is called', async () => {
+    fetchMock
+      .mockResolvedValueOnce({ json: async () => [] }) // initial fetchLeave
+      .mockResolvedValueOnce({
+        json: async () => ({ totalDays: 0, pendingCount: 0, approvedCount: 0 }),
+      }) // initial fetchSummary
+      .mockResolvedValueOnce({ json: async () => [] }) // refresh fetchLeave
+      .mockResolvedValueOnce({
+        json: async () => ({ totalDays: 0, pendingCount: 0, approvedCount: 0 }),
+      }); // refresh fetchSummary
+
+    const { UNSAFE_getByType } = render(
+      <CalendarScreen onDayPress={() => {}} />,
+    );
+
+    // Access the ScrollView and its props
+    const scrollView = UNSAFE_getByType(ScrollView);
+    const refreshControl = scrollView.props.refreshControl;
+
+    // Simulate pull-to-refresh by calling the onRefresh prop
+    await waitFor(async () => {
+      await refreshControl.props.onRefresh();
+    });
+
+    // Ensure both API endpoints were called twice (initial + refresh)
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+
+    // Check that refreshing prop is false after refresh completes
+    expect(refreshControl.props.refreshing).toBe(false);
+  });
+
 });

@@ -9,18 +9,18 @@ import { DatePickerInput} from "react-native-paper-dates";
 import ButtonActionBar from '../components/ButtonActionBar.tsx';
 import {Icon} from "react-native-paper/src";
 import {launchImageLibrary, ImageLibraryOptions} from 'react-native-image-picker';
-import hazardStyles, {getCommonInputProps}  from './HazardForm.styles.ts';
+import { styles as baseStyles, getCommonInputProps}  from './HazardForm.styles.ts';
 import AuthenticationService from "../logic/AuthenticationService.ts";
 
 type Props = {
     onDone?: () => void;
 }
 
-//represents the photo being uploaded from phones library
+//represents the photo being uploaded from a phones library
 type Photo = {
     fileName?: string;
     type?: string;
-    base64: string; // used to upload photo as base64 string to backend
+    base64: string; // used to upload a photo as base64 string to backend
 }
 
 const UploadIcon = ({ color }: { color: string }) => (
@@ -30,7 +30,8 @@ const UploadIcon = ({ color }: { color: string }) => (
 export default function HazardForm({ onDone }: Props): JSX.Element {
 
     //form state for date and text fields and errors
-    const { theme } = useContext(ThemeContext);
+    const { theme, accessibility } = useContext(ThemeContext);
+    const styles = baseStyles(theme, accessibility); // themed styles
     const [inputDate, setInputDate] = React.useState<Date | undefined>(undefined);
     const [title, setTitle] = useState<string>('');
     const [hazardDesc, setHazardDesc] = useState<string>('');
@@ -162,8 +163,7 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
     };
 
     //create styles with current theme
-    const styles = hazardStyles(theme);
-    const commonInputProps = getCommonInputProps(theme);
+    const commonInputProps = getCommonInputProps(theme, accessibility);
 
 
     const MAX_TOTAL = 5; // maximum images per hazard form

@@ -22,110 +22,111 @@ export default function HomeScreen({
                                      onSelectProfile,
                                    }: HomeScreenProps) {
   // Pull the current theme from the ThemeContext
-  const { theme } = useContext(ThemeContext);
+  const { theme, accessibility } = useContext(ThemeContext);
+  const themedStyles = styles(theme, accessibility);
 
   return (
-    <ScrollView contentContainerStyle={styles(theme).container}>
+    <ScrollView contentContainerStyle={themedStyles.container}>
       {/* Profile Icon */}
       <Avatar.Icon
         size={150}
         icon="account-circle"
-        style={styles(theme).profileIcon}
+        style={themedStyles.profileIcon}
         color={theme.redPrimary} // dynamic color from context
       />
 
       {/* Welcome Text */}
-      <Text style={styles(theme).welcomeText}>Welcome Back</Text>
-      <Text style={styles(theme).userName}>Maggie May</Text>
+      <Text style={themedStyles.welcomeText}>Welcome Back</Text>
+      <Text style={themedStyles.userName}>Maggie May</Text>
 
       {/* Section Selection */}
-      <Text style={styles(theme).sectionTitle}>CHOOSE A SECTION</Text>
+      <Text style={themedStyles.sectionTitle}>CHOOSE A SECTION</Text>
 
       {/* HR Portal */}
-      <Pressable style={styles(theme).sectionButton} onPress={onSelectHr}>
-        <View style={styles(theme).sectionButtonContent}>
+      <Pressable style={themedStyles.sectionButton} onPress={onSelectHr}>
+        <View style={themedStyles.sectionButtonContent}>
           <IconButton
             icon="briefcase-outline"
             size={35}
             iconColor={theme.black}
             containerColor="transparent"
-            style={styles(theme).iconButton}
+            style={themedStyles.iconButton}
           />
-          <Text style={styles(theme).sectionButtonText}>HR Portal</Text>
+          <Text style={themedStyles.sectionButtonText}>HR Portal</Text>
         </View>
       </Pressable>
 
       {/* Health & Safety */}
-      <Pressable style={styles(theme).sectionButton} onPress={onSelectHealthSafety}>
-        <View style={styles(theme).sectionButtonContent}>
+      <Pressable style={themedStyles.sectionButton} onPress={onSelectHealthSafety}>
+        <View style={themedStyles.sectionButtonContent}>
           <IconButton
             icon="shield-outline"
             size={35}
             iconColor={theme.black}
             containerColor="transparent"
-            style={styles(theme).iconButton}
+            style={themedStyles.iconButton}
           />
-          <Text style={styles(theme).sectionButtonText}>Health &amp; Safety</Text>
+          <Text style={themedStyles.sectionButtonText}>Health &amp; Safety</Text>
         </View>
       </Pressable>
 
       {/* Quick Access Buttons */}
-      <View style={styles(theme).quickAccessContainer}>
-        <Text style={styles(theme).quickAccessTitle}>QUICK ACCESS</Text>
+      <View style={themedStyles.quickAccessContainer}>
+        <Text style={themedStyles.quickAccessTitle}>QUICK ACCESS</Text>
 
         {/* Profile */}
-        <Pressable style={styles(theme).quickAccessButtonContainer} onPress={onSelectProfile}>
-          <View style={styles(theme).quickAccessButtonContent}>
+        <Pressable style={themedStyles.quickAccessButtonContainer} onPress={onSelectProfile}>
+          <View style={themedStyles.quickAccessButtonContent}>
             <IconButton
               icon="account-circle"
               size={24}
               iconColor={theme.black}
               containerColor="transparent"
-              style={styles(theme).iconButton}
+              style={themedStyles.iconButton}
             />
-            <Text style={styles(theme).quickAccessButton}>Profile</Text>
+            <Text style={themedStyles.quickAccessButton}>Profile</Text>
           </View>
         </Pressable>
 
         {/* Notifications */}
-        <Pressable style={styles(theme).quickAccessButtonContainer} onPress={onSelectNotifications}>
-          <View style={styles(theme).quickAccessButtonContent}>
+        <Pressable style={themedStyles.quickAccessButtonContainer} onPress={onSelectNotifications}>
+          <View style={themedStyles.quickAccessButtonContent}>
             <IconButton
               icon="bell-outline"
               size={24}
               iconColor={theme.black}
               containerColor="transparent"
-              style={styles(theme).iconButton}
+              style={themedStyles.iconButton}
             />
-            <Text style={styles(theme).quickAccessButton}>Notifications</Text>
+            <Text style={themedStyles.quickAccessButton}>Notifications</Text>
           </View>
         </Pressable>
 
         {/* Settings */}
-        <Pressable style={styles(theme).quickAccessButtonContainer} onPress={onSelectSettings}>
-          <View style={styles(theme).quickAccessButtonContent}>
+        <Pressable style={themedStyles.quickAccessButtonContainer} onPress={onSelectSettings}>
+          <View style={themedStyles.quickAccessButtonContent}>
             <IconButton
               icon="cog"
               size={24}
               iconColor={theme.black}
               containerColor="transparent"
-              style={styles(theme).iconButton}
+              style={themedStyles.iconButton}
             />
-            <Text style={styles(theme).quickAccessButton}>Settings</Text>
+            <Text style={themedStyles.quickAccessButton}>Settings</Text>
           </View>
         </Pressable>
 
         {/* Logout */}
-        <Pressable style={styles(theme).quickAccessButtonContainer} onPress={onSelectLogout}>
-          <View style={styles(theme).quickAccessButtonContent}>
+        <Pressable style={themedStyles.quickAccessButtonContainer} onPress={onSelectLogout}>
+          <View style={themedStyles.quickAccessButtonContent}>
             <IconButton
               icon="logout"
               size={24}
               iconColor={theme.black}
               containerColor="transparent"
-              style={styles(theme).iconButton}
+              style={themedStyles.iconButton}
             />
-            <Text style={styles(theme).quickAccessButton}>Logout</Text>
+            <Text style={themedStyles.quickAccessButton}>Logout</Text>
           </View>
         </Pressable>
       </View>

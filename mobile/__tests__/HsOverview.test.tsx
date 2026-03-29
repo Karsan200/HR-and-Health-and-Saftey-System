@@ -8,6 +8,10 @@ import AlertBox from '../src/components/AlertBox';
 import { DefaultColours } from '../src/theme/colours';
 import AuthenticationService from "../src/logic/AuthenticationService.ts";
 
+jest.mock('react-native-wheel-color-picker', () => {
+  return () => null;
+});
+
 jest.mock('../src/logic/AuthenticationService.ts', () => ({
     fetch: jest.fn(),
 }));

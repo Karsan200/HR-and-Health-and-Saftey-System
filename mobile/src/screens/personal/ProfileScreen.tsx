@@ -9,7 +9,8 @@ import ProfileService from '../../logic/ProfileService';
 import { ProfileModel } from '../../model/response/ProfileModel';
 
 const ProfileScreen = () => {
-  const { theme } = useContext(ThemeContext);
+  const { theme, accessibility } = useContext(ThemeContext);
+  const themedStyles = styles(theme, accessibility);
 
   const [profile, setProfile] = useState<ProfileModel | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,7 +32,7 @@ const ProfileScreen = () => {
   // Show loading indicator when profile is loading
   if (loading) {
     return (
-      <View style={styles(theme).loadingContainer}>
+      <View style={themedStyles.loadingContainer}>
         <ActivityIndicator size="large" color={theme.redPrimary} />
       </View>
     );
@@ -43,38 +44,38 @@ const ProfileScreen = () => {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles(theme).container}>
+    <ScrollView contentContainerStyle={themedStyles.container}>
       {/* Profile Avatar */}
       <Avatar.Icon
         size={150}
         icon="account-circle"
         color={theme.redPrimary}
-        style={styles(theme).avatar}
+        style={themedStyles.avatar}
       />
 
       {/* Name */}
-      <View style={styles(theme).textContainer}>
-        <Text style={styles(theme).name}>
+      <View style={themedStyles.textContainer}>
+        <Text style={themedStyles.name}>
           {profile.firstName} {profile.lastName}
         </Text>
-        <Text style={styles(theme).role}>Technician</Text>
+        <Text style={themedStyles.role}>Technician</Text>
       </View>
 
       {/* Edit Button */}
-      <Pressable style={styles(theme).editButton}>
+      <Pressable style={themedStyles.editButton}>
         <IconButton icon="pencil" size={16} iconColor={theme.white} />
-        <Text style={styles(theme).editText}>Edit Profile</Text>
+        <Text style={themedStyles.editText}>Edit Profile</Text>
       </Pressable>
 
       {/* Personal Details */}
-      <View style={styles(theme).card}>
-        <Text style={styles(theme).cardTitle}>Personal Details</Text>
+      <View style={themedStyles.card}>
+        <Text style={themedStyles.cardTitle}>Personal Details</Text>
 
         {/* Email */}
-        <View style={styles(theme).row}>
+        <View style={themedStyles.row}>
           <View
             style={[
-              styles(theme).iconBox,
+              themedStyles.iconBox,
               { backgroundColor: theme.redBackgroundLight },
             ]}
           >
@@ -85,16 +86,16 @@ const ProfileScreen = () => {
             />
           </View>
           <View>
-            <Text style={styles(theme).label}>Email</Text>
-            <Text style={styles(theme).value}>{profile.email}</Text>
+            <Text style={themedStyles.label}>Email</Text>
+            <Text style={themedStyles.value}>{profile.email}</Text>
           </View>
         </View>
 
         {/* Phone */}
-        <View style={styles(theme).row}>
+        <View style={themedStyles.row}>
           <View
             style={[
-              styles(theme).iconBox,
+              themedStyles.iconBox,
               { backgroundColor: theme.redBackgroundLight },
             ]}
           >
@@ -105,8 +106,8 @@ const ProfileScreen = () => {
             />
           </View>
           <View>
-            <Text style={styles(theme).label}>Phone</Text>
-            <Text style={styles(theme).value}>
+            <Text style={themedStyles.label}>Phone</Text>
+            <Text style={themedStyles.value}>
               {profile.phoneNumber}
             </Text>
           </View>
@@ -114,14 +115,14 @@ const ProfileScreen = () => {
       </View>
 
       {/* Employee Details */}
-      <View style={styles(theme).card}>
-        <Text style={styles(theme).cardTitle}>Employee Details</Text>
+      <View style={themedStyles.card}>
+        <Text style={themedStyles.cardTitle}>Employee Details</Text>
 
         {/* Hardcoded Position */}
-        <View style={styles(theme).row}>
+        <View style={themedStyles.row}>
           <View
             style={[
-              styles(theme).iconBox,
+              themedStyles.iconBox,
               { backgroundColor: theme.greenBackgroundLight },
             ]}
           >
@@ -132,16 +133,16 @@ const ProfileScreen = () => {
             />
           </View>
           <View>
-            <Text style={styles(theme).label}>Position</Text>
-            <Text style={styles(theme).value}>Technician</Text>
+            <Text style={themedStyles.label}>Position</Text>
+            <Text style={themedStyles.value}>Technician</Text>
           </View>
         </View>
 
         {/* Join Date */}
-        <View style={styles(theme).row}>
+        <View style={themedStyles.row}>
           <View
             style={[
-              styles(theme).iconBox,
+              themedStyles.iconBox,
               { backgroundColor: theme.greenBackgroundLight },
             ]}
           >
@@ -152,8 +153,8 @@ const ProfileScreen = () => {
             />
           </View>
           <View>
-            <Text style={styles(theme).label}>Join Date</Text>
-            <Text style={styles(theme).value}>{profile.created}</Text>
+            <Text style={themedStyles.label}>Join Date</Text>
+            <Text style={themedStyles.value}>{profile.created}</Text>
           </View>
         </View>
       </View>

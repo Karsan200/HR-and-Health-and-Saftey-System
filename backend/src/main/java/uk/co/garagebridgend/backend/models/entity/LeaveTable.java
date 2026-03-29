@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -65,6 +66,7 @@ public class LeaveTable {
     private String response;
 
     /** Creation timestamp (auto-populated, not updatable). */
+    @CreationTimestamp
     @Column(name = "created", nullable = false, updatable = false)
     private LocalDateTime created;
 }
