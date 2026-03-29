@@ -7,6 +7,8 @@ import {MfaQrCodePage} from "./pages/auth/MfaQrCodePage";
 import {AppSettings} from "./AppSettings";
 import {MfaTotpPage} from "./pages/auth/MfaTotpPage";
 
+/* eslint-disable react-refresh/only-export-components */
+
 export type AuthContextType = {
     authenticationService: AuthenticationService;
 
