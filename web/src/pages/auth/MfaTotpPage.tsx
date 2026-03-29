@@ -1,13 +1,24 @@
 ﻿import {loginPageStyles as styles} from "./LoginPage.styles.ts";
-import {Alert, Box, Container} from "@mui/material";
+import {Alert, Box, Button, Container, TextField} from "@mui/material";
 import {useState} from "react";
 import {useAuth} from "../../AuthContext.tsx";
 
 export function MfaTotpPage() {
+    const [totpCode, setTotpCode] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
     const auth = useAuth();
+
+    async function handleTotp() {
+        // check if totp code is 6 digits
+        if (!/^\d{6}$/.test(totpCode)) {
+            setError("Please enter a valid 6-digit code.");
+            return;
+        }
+
+        setLoading(true);
+    }
 
     return (
         <Box sx={styles.centreContainer}>
@@ -20,6 +31,15 @@ export function MfaTotpPage() {
                         {error}
                     </Alert>
                 </div>
+                <TextField
+                    required fullWidth margin="normal" label="MFA Code" id="Totp"
+                    value={totpCode} onChange={(e) => setTotpCode(e.target.value)}
+                    helperText="Please enter the 6-digit code from your authenticator app"
+                />
+                <Button sx={styles.buttonContainer} fullWidth size="large" variant="contained"
+                        loading={loading} onClick={() => handleTotp()}>
+                    Verify
+                </Button>
             </Container>
         </Box>
     )
