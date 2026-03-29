@@ -3,7 +3,7 @@ import AlertTitle from '@mui/material/AlertTitle';
 
 import NoCellIcon from '@mui/icons-material/NoCell';
 
-import { IncompatibleScreenStyles as styles } from "./IncompatibleScreen.styles.ts";
+import { IncompatibleScreenStyles as styles } from "./IncompatibleScreen.styles";
 
 export function IncompatibleScreen() {
     return (

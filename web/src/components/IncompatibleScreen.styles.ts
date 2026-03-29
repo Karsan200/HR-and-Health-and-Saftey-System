@@ -1,4 +1,4 @@
-import {FontSize, TextStyles} from "../theme/theme.ts";
+import {FontSize, TextStyles} from "../theme/theme";
 
 export const IncompatibleScreenStyles = {
     container: {

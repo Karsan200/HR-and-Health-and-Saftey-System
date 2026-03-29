@@ -1,5 +1,5 @@
 import { createTheme } from '@mui/material/styles';
-import {DefaultColours} from "./colours.ts";
+import {DefaultColours} from "./colours";
 
 export const muiTheme = createTheme({
     palette: {

@@ -1,4 +1,4 @@
-﻿import {DefaultColours} from "../../theme/colours.ts";
+﻿import {DefaultColours} from "../../theme/colours";
 
 export const loginPageStyles = {
     container: {

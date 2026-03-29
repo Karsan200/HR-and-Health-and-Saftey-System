@@ -1,10 +1,18 @@
-import { HttpException } from "../models/HttpException.ts";
-import { AppSettings } from "../AppSettings.ts";
-import type { AuthType } from "../models/AuthType.ts";
+import { HttpException } from "../models/HttpException";
+import { AppSettings } from "../AppSettings";
+import type { AuthType } from "../models/AuthType";
 
+/**
+ * Service for handling authentication-related tasks, such as logging in, refreshing tokens, and making authenticated API requests.
+ */
 export class AuthenticationService {
+    /** The authentication state and setters from the AuthContext, used to manage the authentication state of the application */
     auth: AuthType
 
+    /**
+     * Constructor for the AuthenticationService class.
+     * @param auth The authentication state and setters from the AuthContext, used to manage the authentication state of the application
+     */
     constructor(auth: AuthType) {
         this.auth = auth;
     }
@@ -43,6 +51,10 @@ export class AuthenticationService {
         return response;
     }
 
+    /**
+     * Refreshes the access token by making a request to the refresh endpoint.
+     * @throws HttpException if the refresh request fails, which will be caught in the AuthProvider to set the user as unauthenticated
+     */
     async refresh() {
         const response = await fetch(AppSettings.API_URL + "/auth/refresh", {
             method: "GET",
@@ -62,6 +74,10 @@ export class AuthenticationService {
         }
     }
 
+    /**
+     * Authorises the user for MFA by sending the TOTP code to the server for verification.
+     * @param code The TOTP code from the user's authenticator app
+     */
     async mfaTotp(code: string) {
         const response = await this.fetch("/auth/mfa/authorise", {
             method: "POST",
@@ -86,6 +102,11 @@ export class AuthenticationService {
         }
     }
 
+    /**
+     * Logs in the user by sending their username and password to the server for authentication.
+     * @param username The user's username
+     * @param password The user's password
+     */
     async login(username: string, password: string) {
         const response = await fetch(AppSettings.API_URL + "/auth/login", {
             method: "POST",

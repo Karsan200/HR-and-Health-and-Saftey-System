@@ -1,11 +1,11 @@
 import {createContext, type ReactNode, useContext, useEffect, useState} from "react";
 import * as React from "react";
-import { ActivityLoader } from "./components/ActivityLoader.tsx";
-import {LoginPage} from "./pages/auth/LoginPage.tsx";
-import {AuthenticationService} from "./logic/AuthenticationService.ts";
-import {MfaQrCodePage} from "./pages/auth/MfaQrCodePage.tsx";
-import {AppSettings} from "./AppSettings.ts";
-import {MfaTotpPage} from "./pages/auth/MfaTotpPage.tsx";
+import { ActivityLoader } from "./components/ActivityLoader";
+import {LoginPage} from "./pages/auth/LoginPage";
+import {AuthenticationService} from "./logic/AuthenticationService";
+import {MfaQrCodePage} from "./pages/auth/MfaQrCodePage";
+import {AppSettings} from "./AppSettings";
+import {MfaTotpPage} from "./pages/auth/MfaTotpPage";
 
 export type AuthContextType = {
     authenticationService: AuthenticationService;

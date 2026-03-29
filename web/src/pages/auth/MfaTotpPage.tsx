@@ -1,8 +1,8 @@
-﻿import {loginPageStyles as styles} from "./LoginPage.styles.ts";
+﻿import {loginPageStyles as styles} from "./LoginPage.styles";
 import {Alert, Box, Button, Container, TextField} from "@mui/material";
 import {useState} from "react";
-import {useAuth} from "../../AuthContext.tsx";
-import {HttpException} from "../../models/HttpException.ts";
+import {useAuth} from "../../AuthContext";
+import {HttpException} from "../../models/HttpException";
 
 export function MfaTotpPage() {
     const [totpCode, setTotpCode] = useState('');

@@ -1,5 +1,5 @@
 import { Box, CircularProgress } from "@mui/material";
-import { IncompatibleScreenStyles as styles } from "./IncompatibleScreen.styles.ts";
+import { IncompatibleScreenStyles as styles } from "./IncompatibleScreen.styles";
 
 export function ActivityLoader() {
     return (

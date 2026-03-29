@@ -1,7 +1,7 @@
-﻿import {loginPageStyles as styles} from "./LoginPage.styles.ts";
+﻿import {loginPageStyles as styles} from "./LoginPage.styles";
 import {Box, Container, Typography, Button, Collapse} from "@mui/material";
 import { QRCodeSVG } from "qrcode.react";
-import {DefaultColours} from "../../theme/colours.ts";
+import {DefaultColours} from "../../theme/colours";
 import {useState} from "react";
 
 export function MfaQrCodePage({ secret, onComplete }: { secret: string; onComplete: () => void }) {
