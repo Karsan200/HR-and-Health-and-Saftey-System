@@ -12,6 +12,7 @@ export function LoginPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
     const auth = useAuth();
 
@@ -21,6 +22,8 @@ export function LoginPage() {
             setError("Please enter both username and password.");
             return;
         }
+
+        setLoading(true);
 
         try {
             await auth.authenticationService.login(username, password);
@@ -38,6 +41,8 @@ export function LoginPage() {
                         setError("An error occurred while trying to log in. Please try again later.");
                 }
             }
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -70,7 +75,7 @@ export function LoginPage() {
                     }}
                 />
                 <Button sx={styles.buttonContainer} fullWidth size="large" variant="contained"
-                onClick={() => handleLogin()}>
+                loading={loading} onClick={() => handleLogin()}>
                     Login
                 </Button>
             </Container>

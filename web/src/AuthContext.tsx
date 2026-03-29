@@ -37,16 +37,21 @@ export function AuthProvider(
     );
 
     useEffect(() => {
-        async function loadAuth() {
-            // Refresh the token on initial load
+        async function init() {
             try {
-                await authenticationService.refresh()
-                setIsAuthenticated(true)
+                await authenticationService.refresh();
+                setIsAuthenticated(true);
             } catch {
-                setIsAuthenticated(false)
+                setIsAuthenticated(false);
             }
+        }
+        init();
+    }, []);
 
-            // Check if the user is MFA authenticated
+    useEffect(() => {
+        if (!isAuthenticated) return;
+
+        async function loadAuth() {
             const response = await authenticationService.fetch("/auth/mfa/check", { method: "GET" });
 
             if (response.ok) {
@@ -55,13 +60,13 @@ export function AuthProvider(
                 if (data.secret !== null) {
                     setMfaSecret(`otpauth://totp/RentATech:${data.username}?secret=${data.secret}&issuer=RentATech`);
                 }
-            }
-            else {
+            } else {
                 setIsMfaAuthenticated(false);
             }
         }
+
         loadAuth();
-    }, []);
+    }, [isAuthenticated]);
 
     return (
         <AuthContext.Provider value={
