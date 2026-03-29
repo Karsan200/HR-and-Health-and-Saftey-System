@@ -3,8 +3,8 @@ import { Box, Button, Container, TextField, InputAdornment, IconButton, Alert } 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 import { loginPageStyles as styles } from "./LoginPage.styles.ts";
-import { useAuth } from "../AuthContext.tsx";
-import { HttpException } from "../models/HttpException.ts";
+import { useAuth } from "../../AuthContext.tsx";
+import { HttpException } from "../../models/HttpException.ts";
 
 export function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);

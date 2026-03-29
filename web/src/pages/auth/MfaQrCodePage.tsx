@@ -1,7 +1,7 @@
 ﻿import {loginPageStyles as styles} from "./LoginPage.styles.ts";
 import {Box, Container, Typography, Button, Collapse} from "@mui/material";
 import { QRCodeSVG } from "qrcode.react";
-import {DefaultColours} from "../theme/colours.ts";
+import {DefaultColours} from "../../theme/colours.ts";
 import {useState} from "react";
 
 export function MfaQrCodePage({ secret, onComplete }: { secret: string; onComplete: () => void }) {
@@ -27,7 +27,7 @@ export function MfaQrCodePage({ secret, onComplete }: { secret: string; onComple
                     {showSecret ? "Hide secret" : "Can't scan? Show secret"}
                 </Button>
                 <Collapse in={showSecret}>
-                    <Typography fontFamily="monospace" fontSize={14} letterSpacing={2} textAlign="center" mt={1}>
+                    <Typography sx={styles.readableCodeText}>
                         {secret.split("secret=")[1].split("&issuer=")[0]}
                     </Typography>
                 </Collapse>

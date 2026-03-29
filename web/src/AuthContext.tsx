@@ -1,9 +1,11 @@
 import {createContext, type ReactNode, useContext, useEffect, useState} from "react";
 import * as React from "react";
 import { ActivityLoader } from "./components/ActivityLoader.tsx";
-import {LoginPage} from "./pages/LoginPage.tsx";
+import {LoginPage} from "./pages/auth/LoginPage.tsx";
 import {AuthenticationService} from "./logic/AuthenticationService.ts";
-import {MfaQrCodePage} from "./pages/MfaQrCodePage.tsx";
+import {MfaQrCodePage} from "./pages/auth/MfaQrCodePage.tsx";
+import {AppSettings} from "./AppSettings.ts";
+import {MfaTotpPage} from "./pages/auth/MfaTotpPage.tsx";
 
 export type AuthContextType = {
     authenticationService: AuthenticationService;
@@ -36,6 +38,7 @@ export function AuthProvider(
         { accessToken, setAccessToken, isAuthenticated, setIsAuthenticated, isMfaAuthenticated, setIsMfaAuthenticated }
     );
 
+    // On mount, try to refresh the token to check if the user is authenticated
     useEffect(() => {
         async function init() {
             try {
@@ -48,6 +51,7 @@ export function AuthProvider(
         init();
     }, []);
 
+    // When the authentication state changes, check if the user is authenticated and if they have MFA enabled
     useEffect(() => {
         if (!isAuthenticated) return;
 
@@ -58,7 +62,9 @@ export function AuthProvider(
                 const data = await response.json();
                 setIsMfaAuthenticated(data.isMfaAuthenticated);
                 if (data.secret !== null) {
-                    setMfaSecret(`otpauth://totp/RentATech:${data.username}?secret=${data.secret}&issuer=RentATech`);
+                    setMfaSecret(
+                    `otpauth://totp/${AppSettings.COMPANY_NAME}:${data.username}?secret=${data.secret}&issuer=${AppSettings.COMPANY_NAME}`
+                    );
                 }
             } else {
                 setIsMfaAuthenticated(false);
@@ -74,8 +80,9 @@ export function AuthProvider(
         }>
             {isAuthenticated === null ? <ActivityLoader /> :
             isAuthenticated ?
-                mfaSecret === null ? children : <MfaQrCodePage secret={mfaSecret} onComplete={() => setMfaSecret(null)}/>
-             : <LoginPage />}
+                mfaSecret === null ? isMfaAuthenticated ? children: <MfaTotpPage />
+                : <MfaQrCodePage secret={mfaSecret} onComplete={() => setMfaSecret(null)}/>
+            : <LoginPage />}
         </AuthContext.Provider>
     );
 }

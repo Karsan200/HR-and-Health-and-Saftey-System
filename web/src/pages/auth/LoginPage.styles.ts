@@ -1,4 +1,4 @@
-﻿import {DefaultColours} from "../theme/colours.ts";
+﻿import {DefaultColours} from "../../theme/colours.ts";
 
 export const loginPageStyles = {
     container: {
@@ -35,5 +35,12 @@ export const loginPageStyles = {
         alignItems: "center",
         justifyContent: "center",
         padding: 2
+    },
+    readableCodeText: {
+        fontFamily: "monospace",
+        fontSize: 14,
+        letterSpacing: 2,
+        textAlign: "center",
+        marginTop: 1
     }
 }
