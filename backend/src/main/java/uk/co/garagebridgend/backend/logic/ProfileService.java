@@ -19,6 +19,9 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class ProfileService {
 
+    /** Minimum number of characters required for a new password. */
+    private static final int MIN_PASSWORD_LENGTH = 8;
+
     /** Service for handling authentication and retrieving the current user. */
     private final AuthenticationService authenticationService;
 
@@ -29,18 +32,20 @@ public class ProfileService {
     private final PasswordEncoder passwordEncoder;
 
     /**
-     * Constructor for dependency injection of required repositories.
+     * Constructor for dependency injection of required services and repositories.
      *
      * @param authenticationServiceImpl the AuthenticationService implementation to use
+     * @param accountRepositoryImpl     the AccountRepository for persistence
+     * @param passwordEncoderImpl       the PasswordEncoder for password hashing
      */
     @Autowired
     public ProfileService(
             final AuthenticationService authenticationServiceImpl,
-            final AccountRepository accountRepository,
-            final PasswordEncoder passwordEncoder) {
+            final AccountRepository accountRepositoryImpl,
+            final PasswordEncoder passwordEncoderImpl) {
         this.authenticationService = authenticationServiceImpl;
-        this.accountRepository = accountRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.accountRepository = accountRepositoryImpl;
+        this.passwordEncoder = passwordEncoderImpl;
     }
 
     /**
@@ -106,8 +111,8 @@ public class ProfileService {
         }
 
         // Password change
-        boolean hasOld     = request.getOldPassword()     != null && !request.getOldPassword().isBlank();
-        boolean hasNew     = request.getNewPassword()     != null && !request.getNewPassword().isBlank();
+        boolean hasOld     = request.getOldPassword() != null && !request.getOldPassword().isBlank();
+        boolean hasNew     = request.getNewPassword() != null && !request.getNewPassword().isBlank();
         boolean hasConfirm = request.getConfirmNewPassword() != null && !request.getConfirmNewPassword().isBlank();
 
         if (hasOld || hasNew || hasConfirm) {
@@ -127,8 +132,7 @@ public class ProfileService {
                 throw new IllegalArgumentException("New password and confirmation do not match");
             }
 
-            // Minimum length check (8 characters)
-            if (request.getNewPassword().length() < 8) {
+            if (request.getNewPassword().length() < MIN_PASSWORD_LENGTH) {
                 throw new IllegalArgumentException("New password must be at least 8 characters");
             }
 
