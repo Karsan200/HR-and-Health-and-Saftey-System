@@ -33,7 +33,7 @@ export const editProfileStyles = (
       backgroundColor: theme.greyBackground,
     },
 
-    // ── Section titles
+    // Section titles
     sectionTitle: {
       fontFamily: fontFamilies.medium,
       fontWeight: TextStyles.medium.fontWeight,
@@ -42,21 +42,24 @@ export const editProfileStyles = (
       marginTop: Spacing.largePadding,
     },
 
+    // Group of field cards
     fieldsGroup: {
       width: '100%',
       gap: Spacing.largePadding,
     },
 
+    // Individual field card
     fieldCard: {
       width: '100%',
       borderWidth: 1,
       borderColor: theme.greyIconLight,
       borderRadius: BorderRadius.mediumNotification,
-      paddingHorizontal: Spacing.smallPadding + 2, // 12 px
-      paddingTop: Spacing.smallPadding - 1, // 9 px  (matches Figma 9px top)
-      paddingBottom: Spacing.smallPadding - 2, // 8 px  (matches Figma 8px bottom)
+      paddingHorizontal: Spacing.smallPadding,
+      paddingTop: Spacing.smallPadding,
+      paddingBottom: Spacing.smallPadding,
     },
 
+    // Field label
     fieldLabel: {
       fontFamily: fontFamilies.medium,
       fontWeight: TextStyles.medium.fontWeight,
@@ -106,6 +109,14 @@ export const editProfileStyles = (
       fontSize: FontSize.m20 * fontScale,
       color: theme.white,
       letterSpacing: 0.17,
+    },
+
+    // Inline validation error beneath a field
+    errorText: {
+      fontFamily: fontFamilies.regular,
+      fontSize: FontSize.xxs12 * fontScale,
+      color: theme.redTextDark,
+      marginTop: 2,
     },
   });
 };

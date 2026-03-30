@@ -1,8 +1,73 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, ScrollView, Pressable, TextInput, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  TextInput,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 
 import { ThemeContext } from '../../theme/colourController';
 import { editProfileStyles as styles } from './EditProfileScreen.styles';
+import ProfileService from '../../logic/ProfileService';
+
+// Validation helpers
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^\+?[\d\s\-().]{7,17}$/;
+
+interface FieldErrors {
+  email?: string;
+  phone?: string;
+  username?: string;
+  oldPassword?: string;
+  newPassword?: string;
+  confirmNewPassword?: string;
+}
+
+function validate(
+  email: string,
+  phone: string,
+  username: string,
+  oldPassword: string,
+  newPassword: string,
+  confirmNewPassword: string,
+): FieldErrors {
+  const errors: FieldErrors = {};
+
+  if (email.trim() && !EMAIL_REGEX.test(email.trim())) {
+    errors.email = 'Please enter a valid email address';
+  }
+
+  if (phone.trim() && !PHONE_REGEX.test(phone.trim())) {
+    errors.phone = 'Please enter a valid phone number';
+  }
+
+  if (username.trim() && username.trim().length < 3) {
+    errors.username = 'Username must be at least 3 characters';
+  }
+
+  const hasOld = oldPassword.trim().length > 0;
+  const hasNew = newPassword.trim().length > 0;
+  const hasConfirm = confirmNewPassword.trim().length > 0;
+
+  if (hasOld || hasNew || hasConfirm) {
+    if (!hasOld) errors.oldPassword = 'Please enter your current password';
+    if (!hasNew) errors.newPassword = 'Please enter a new password';
+    else if (newPassword.length < 8)
+      errors.newPassword = 'New password must be at least 8 characters';
+    if (!hasConfirm)
+      errors.confirmNewPassword = 'Please confirm your new password';
+    else if (hasNew && newPassword !== confirmNewPassword)
+      errors.confirmNewPassword = 'Passwords do not match';
+  }
+
+  return errors;
+}
+
+// Component
 
 const EditProfileScreen = () => {
   const { theme, accessibility } = useContext(ThemeContext);
@@ -15,19 +80,56 @@ const EditProfileScreen = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
-  const [loading] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [saving, setSaving] = useState(false);
+
+  const clearError = (field: keyof FieldErrors) =>
+    setErrors(prev => ({ ...prev, [field]: undefined }));
 
   const handleSave = async () => {
-    // TODO: wire up save logic
-  };
-
-  if (loading) {
-    return (
-      <View style={themedStyles.loadingContainer}>
-        <ActivityIndicator size="large" color={theme.redPrimary} />
-      </View>
+    const validationErrors = validate(
+      email,
+      phone,
+      username,
+      oldPassword,
+      newPassword,
+      confirmNewPassword,
     );
-  }
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({});
+    setSaving(true);
+
+    try {
+      await ProfileService.updateProfile({
+        email,
+        phoneNumber: phone,
+        username,
+        oldPassword,
+        newPassword,
+        confirmNewPassword,
+      });
+
+      // Clear password fields after a successful save
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+
+      Alert.alert('Success', 'Your profile has been updated.');
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ??
+        error?.message ??
+        'Something went wrong. Please try again.';
+      Alert.alert('Update failed', message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={themedStyles.container}>
@@ -41,12 +143,18 @@ const EditProfileScreen = () => {
           <TextInput
             style={themedStyles.fieldInput}
             value={email}
-            onChangeText={setEmail}
+            onChangeText={v => {
+              setEmail(v);
+              clearError('email');
+            }}
             keyboardType="email-address"
             autoCapitalize="none"
             placeholderTextColor={theme.greyIconLight}
+            placeholder="New Email"
           />
-          <View/>
+          {errors.email && (
+            <Text style={themedStyles.errorText}>{errors.email}</Text>
+          )}
         </View>
 
         {/* Phone */}
@@ -55,11 +163,17 @@ const EditProfileScreen = () => {
           <TextInput
             style={themedStyles.fieldInput}
             value={phone}
-            onChangeText={setPhone}
+            onChangeText={v => {
+              setPhone(v);
+              clearError('phone');
+            }}
             keyboardType="phone-pad"
             placeholderTextColor={theme.greyIconLight}
+            placeholder="New Phone Number"
           />
-          <View/>
+          {errors.phone && (
+            <Text style={themedStyles.errorText}>{errors.phone}</Text>
+          )}
         </View>
       </View>
 
@@ -73,11 +187,17 @@ const EditProfileScreen = () => {
           <TextInput
             style={themedStyles.fieldInput}
             value={username}
-            onChangeText={setUsername}
+            onChangeText={v => {
+              setUsername(v);
+              clearError('username');
+            }}
             autoCapitalize="none"
             placeholderTextColor={theme.greyIconLight}
+            placeholder="New Username"
           />
-          <View/>
+          {errors.username && (
+            <Text style={themedStyles.errorText}>{errors.username}</Text>
+          )}
         </View>
 
         {/* Old Password */}
@@ -86,11 +206,17 @@ const EditProfileScreen = () => {
           <TextInput
             style={themedStyles.fieldInput}
             value={oldPassword}
-            onChangeText={setOldPassword}
+            onChangeText={v => {
+              setOldPassword(v);
+              clearError('oldPassword');
+            }}
             secureTextEntry
             placeholderTextColor={theme.greyIconLight}
+            placeholder="Required to change password"
           />
-          <View/>
+          {errors.oldPassword && (
+            <Text style={themedStyles.errorText}>{errors.oldPassword}</Text>
+          )}
         </View>
 
         {/* New Password */}
@@ -99,11 +225,17 @@ const EditProfileScreen = () => {
           <TextInput
             style={themedStyles.fieldInput}
             value={newPassword}
-            onChangeText={setNewPassword}
+            onChangeText={v => {
+              setNewPassword(v);
+              clearError('newPassword');
+            }}
             secureTextEntry
             placeholderTextColor={theme.greyIconLight}
+            placeholder="Min. 8 characters"
           />
-          <View/>
+          {errors.newPassword && (
+            <Text style={themedStyles.errorText}>{errors.newPassword}</Text>
+          )}
         </View>
 
         {/* Confirm New Password */}
@@ -112,11 +244,19 @@ const EditProfileScreen = () => {
           <TextInput
             style={themedStyles.fieldInput}
             value={confirmNewPassword}
-            onChangeText={setConfirmNewPassword}
+            onChangeText={v => {
+              setConfirmNewPassword(v);
+              clearError('confirmNewPassword');
+            }}
             secureTextEntry
             placeholderTextColor={theme.greyIconLight}
+            placeholder="Re-enter new password"
           />
-          <View/>
+          {errors.confirmNewPassword && (
+            <Text style={themedStyles.errorText}>
+              {errors.confirmNewPassword}
+            </Text>
+          )}
         </View>
       </View>
 
@@ -128,8 +268,13 @@ const EditProfileScreen = () => {
             pressed && themedStyles.saveButtonPressed,
           ]}
           onPress={handleSave}
+          disabled={saving}
         >
-          <Text style={themedStyles.saveButtonText}>Save Changes</Text>
+          {saving ? (
+            <ActivityIndicator color={theme.white} />
+          ) : (
+            <Text style={themedStyles.saveButtonText}>Save Changes</Text>
+          )}
         </Pressable>
       </View>
     </ScrollView>
