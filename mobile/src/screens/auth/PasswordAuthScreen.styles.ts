@@ -13,7 +13,8 @@ export const passwordAuthScreenStyles = (theme: any, accessibility: { largeText:
    */
   container: {
     paddingHorizontal: Spacing.largePadding,
-    paddingTop: 100,
+    paddingTop: 40,
+    paddingBottom: 40
   },
 
   /** Logo image styling: fixed dimensions and aspect ratio preservation. */

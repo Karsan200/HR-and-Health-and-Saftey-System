@@ -20,7 +20,6 @@ export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boole
 
     const { theme, accessibility } = useContext(ThemeContext)
     const themedStyles = styles(theme, accessibility);
-    const homeThemedStyles = homeStyles(theme, accessibility);
     const authThemedStyles = passwordAuthScreenStyles(theme, accessibility);
 
 
@@ -151,13 +150,9 @@ export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boole
                     style={authThemedStyles.image}
                 />
             </ScrollView>
-            <Avatar.Icon
-                size={300}
-                icon="account-circle"
-                style={homeThemedStyles.profileIcon}
-                color={theme.redPrimary}
-            />
+          <ScrollView contentContainerStyle={themedStyles.welcomeBackTextContainer}>
             <Text style={themedStyles.welcomeBackText}>{greeting}</Text>
+          </ScrollView>
             <View style={themedStyles.bubbleContainer}>
                 {pinBubbles.map((isEnabled, index) => (
                     <PinCodeBubble key={index} isEnabled={isEnabled} />
