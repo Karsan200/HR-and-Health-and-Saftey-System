@@ -2,12 +2,10 @@ package uk.co.garagebridgend.backend.logic;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.DocumentTable;
 import uk.co.garagebridgend.backend.models.entity.SignatureTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.DocumentResponse;
-import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.DocumentRepository;
 import uk.co.garagebridgend.backend.repository.SignatureRepository;
 
@@ -20,14 +18,14 @@ public class DocumentService {
     /** Repository for accessing document data. */
     private final DocumentRepository documentRepository;
 
-    /** Repository for accessing account data. */
-    private final AccountRepository accountRepository;
-
     /** Repository for accessing signature data. */
     private final SignatureRepository signatureRepository;
 
     /** Service for generating pre-signed URLs for files in storage. */
     private final StorageService storageService;
+
+    /** Service for handling authentication and retrieving the current user. */
+    private final AuthenticationService authenticationService;
 
 
     /**
@@ -39,13 +37,7 @@ public class DocumentService {
      */
     public List<DocumentResponse> getAllDocuments() throws AuthenticatedAccountNotFoundException {
 
-        var user = AuthenticationService.getCurrentUser();
-        if (user == null) {
-            throw new AuthenticatedAccountNotFoundException();
-        }
-
-        AccountTable account = accountRepository.findById(Long.valueOf(user.getUsername()))
-                .orElseThrow(AuthenticatedAccountNotFoundException::new);
+        var account = authenticationService.getCurrentUser();
 
         return documentRepository.findAllByOrderByCreatedDesc()
                 .stream()
@@ -63,13 +55,7 @@ public class DocumentService {
      * @param documentId the ID of the document to sign
      */
     public void signDocument(final Long documentId) throws AuthenticatedAccountNotFoundException {
-        var user = AuthenticationService.getCurrentUser();
-        if (user == null) {
-            throw new AuthenticatedAccountNotFoundException();
-        }
-
-        AccountTable account = accountRepository.findById(Long.valueOf(user.getUsername()))
-                .orElseThrow(AuthenticatedAccountNotFoundException::new);
+        var account = authenticationService.getCurrentUser();
 
         DocumentTable document = documentRepository.findById(documentId)
                 .orElseThrow();

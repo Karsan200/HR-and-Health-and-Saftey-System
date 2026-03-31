@@ -1,10 +1,12 @@
 package uk.co.garagebridgend.backend.logic;
 
-import org.junit.jupiter.api.BeforeEach;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 import uk.co.garagebridgend.backend.models.entity.*;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.DocumentResponse;
@@ -17,29 +19,25 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
+@Transactional
 class DocumentServiceTest {
 
+    @Mock
     private DocumentRepository documentRepository;
-    private AccountRepository accountRepository;
+
+    @Mock
     private SignatureRepository signatureRepository;
+
+    @Mock
     private StorageService storageService;
 
+    @Mock
+    private AuthenticationService authenticationService;
+
+    @InjectMocks
     private DocumentService documentService;
-
-    @BeforeEach
-    void setup() {
-        documentRepository = mock(DocumentRepository.class);
-        accountRepository = mock(AccountRepository.class);
-        signatureRepository = mock(SignatureRepository.class);
-        storageService = mock(StorageService.class);
-
-        documentService = new DocumentService(
-                documentRepository,
-                accountRepository,
-                signatureRepository,
-                storageService
-        );
-    }
 
     @Test
     void testGetAllDocumentsSuccess() throws Exception {
@@ -55,8 +53,7 @@ class DocumentServiceTest {
         document.setTitle("Employee Contract");
         document.setFile(file);
 
-        when(accountRepository.findById(1L))
-                .thenReturn(Optional.of(account));
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
         when(documentRepository.findAllByOrderByCreatedDesc())
                 .thenReturn(List.of(document));
@@ -67,58 +64,23 @@ class DocumentServiceTest {
         when(signatureRepository.existsByAccountAndDocument(account, document))
                 .thenReturn(false);
 
-        try (MockedStatic<AuthenticationService> authMock =
-                     mockStatic(AuthenticationService.class)) {
+        List<DocumentResponse> result = documentService.getAllDocuments();
 
-            UserDetails user = new User("1", "", List.of());
-
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(user);
-
-            List<DocumentResponse> result = documentService.getAllDocuments();
-
-            assertEquals(1, result.size());
-            assertEquals("Employee Contract", result.get(0).getTitle());
-            assertEquals("test-url", result.get(0).getUrl());
-            assertFalse(result.get(0).isSigned());
-        }
+        assertEquals(1, result.size());
+        assertEquals("Employee Contract", result.get(0).getTitle());
+        assertEquals("test-url", result.get(0).getUrl());
+        assertFalse(result.get(0).isSigned());
     }
 
     @Test
     void testUserNotAuthenticated() {
 
-        try (MockedStatic<AuthenticationService> authMock =
-                     mockStatic(AuthenticationService.class)) {
+        when(authenticationService.getCurrentUser()).thenThrow(new AuthenticatedAccountNotFoundException());
 
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(null);
-
-            assertThrows(
-                    AuthenticatedAccountNotFoundException.class,
-                    () -> documentService.getAllDocuments()
-            );
-        }
-    }
-
-    @Test
-    void testAccountNotFound() {
-
-        try (MockedStatic<AuthenticationService> authMock =
-                     mockStatic(AuthenticationService.class)) {
-
-            UserDetails user = new User("1", "", List.of());
-
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(user);
-
-            when(accountRepository.findById(1L))
-                    .thenReturn(Optional.empty());
-
-            assertThrows(
-                    AuthenticatedAccountNotFoundException.class,
-                    () -> documentService.getAllDocuments()
-            );
-        }
+        assertThrows(
+                AuthenticatedAccountNotFoundException.class,
+                () -> documentService.getAllDocuments()
+        );
     }
 
     @Test
@@ -130,8 +92,7 @@ class DocumentServiceTest {
         DocumentTable document = new DocumentTable();
         document.setDocumentId(1L);
 
-        when(accountRepository.findById(1L))
-                .thenReturn(Optional.of(account));
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
         when(documentRepository.findById(1L))
                 .thenReturn(Optional.of(document));
@@ -139,18 +100,9 @@ class DocumentServiceTest {
         when(signatureRepository.existsByAccountAndDocument(account, document))
                 .thenReturn(false);
 
-        try (MockedStatic<AuthenticationService> authMock =
-                     mockStatic(AuthenticationService.class)) {
+        documentService.signDocument(1L);
 
-            UserDetails user = new User("1", "", List.of());
-
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(user);
-
-            documentService.signDocument(1L);
-
-            verify(signatureRepository).save(any(SignatureTable.class));
-        }
+        verify(signatureRepository).save(any(SignatureTable.class));
     }
 
     @Test
@@ -162,8 +114,7 @@ class DocumentServiceTest {
         DocumentTable document = new DocumentTable();
         document.setDocumentId(1L);
 
-        when(accountRepository.findById(1L))
-                .thenReturn(Optional.of(account));
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
         when(documentRepository.findById(1L))
                 .thenReturn(Optional.of(document));
@@ -171,17 +122,8 @@ class DocumentServiceTest {
         when(signatureRepository.existsByAccountAndDocument(account, document))
                 .thenReturn(true);
 
-        try (MockedStatic<AuthenticationService> authMock =
-                     mockStatic(AuthenticationService.class)) {
+        documentService.signDocument(1L);
 
-            UserDetails user = new User("1", "", List.of());
-
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(user);
-
-            documentService.signDocument(1L);
-
-            verify(signatureRepository, never()).save(any());
-        }
+        verify(signatureRepository, never()).save(any());
     }
 }

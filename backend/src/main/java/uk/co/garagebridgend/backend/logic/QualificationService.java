@@ -2,10 +2,8 @@ package uk.co.garagebridgend.backend.logic;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.QualificationResponse;
-import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.QualificationRepository;
 
 import java.util.List;
@@ -20,11 +18,11 @@ public class QualificationService {
     /** Repository for qualification entities. */
     private final QualificationRepository qualificationRepository;
 
-    /** Repository for account entities. */
-    private final AccountRepository accountRepository;
-
     /** Storage service for generating file URLs. */
     private final StorageService storageService;
+
+    /** Service for handling authentication and retrieving the current user. */
+    private final AuthenticationService authenticationService;
 
     /**
      * Retrieves qualifications for the current user.
@@ -35,15 +33,7 @@ public class QualificationService {
     public List<QualificationResponse> getQualificationsForCurrentUser()
             throws AuthenticatedAccountNotFoundException {
 
-        var user = AuthenticationService.getCurrentUser();
-
-        AccountTable account;
-        if (user != null) {
-            account = accountRepository.findById(Long.valueOf(user.getUsername()))
-                    .orElseThrow(AuthenticatedAccountNotFoundException::new);
-        } else {
-            throw new AuthenticatedAccountNotFoundException();
-        }
+        var account = authenticationService.getCurrentUser();
 
         return qualificationRepository
                 .findByAccountOrderByCreatedDesc(account)
