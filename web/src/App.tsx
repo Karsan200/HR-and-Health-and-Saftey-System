@@ -5,6 +5,7 @@ import {CssBaseline, ThemeProvider} from "@mui/material";
 import { muiTheme } from "./theme/muiTheme";
 import { IncompatibleScreen } from "./components/IncompatibleScreen";
 import { AuthProvider } from "./AuthContext";
+import { Navbar } from "./components/Navbar";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
@@ -47,7 +48,7 @@ function App() {
 function AppContent() {
     return (
         <>
-        {/** Admin top navbar goes here */}
+        <Navbar />
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<></>} />
