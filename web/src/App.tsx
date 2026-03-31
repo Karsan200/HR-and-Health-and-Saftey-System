@@ -48,10 +48,15 @@ function App() {
 function AppContent() {
     return (
         <>
-        <Navbar />
         <BrowserRouter>
+            <Navbar />
             <Routes>
                 <Route path="/" element={<></>} />
+                <Route path="/calendar" element={<></>} />
+                <Route path="/employee-overview" element={<></>} />
+                <Route path="/health-and-safety" element={<></>} />
+                <Route path="/notifications" element={<></>} />
+                <Route path="/profile" element={<></>} />
             </Routes>
         </BrowserRouter>
         </>
