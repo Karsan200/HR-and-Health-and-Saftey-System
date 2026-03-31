@@ -8,6 +8,9 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import io.minio.GetPresignedObjectUrlArgs;
+import io.minio.http.Method;
+import java.util.concurrent.TimeUnit;
 
 import java.io.InputStream;
 
@@ -66,5 +69,26 @@ public class StorageService {
      */
     public byte[] decodeBase64(final String base64Data) {
         return java.util.Base64.getDecoder().decode(base64Data);
+    }
+
+    /**
+     * Generates a pre-signed URL for accessing a file in MinIO storage.
+     * @param objectName the name of the object in MinIO storage
+     * @return a pre-signed URL string valid for 1 hour
+     * @throws RuntimeException if any error occurs during URL generation
+     */
+    public String getPresignedUrl(final String objectName) throws RuntimeException {
+        try {
+            return minioClient.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .method(Method.GET)
+                            .bucket(bucketName)
+                            .object(objectName)
+                            .expiry(1, TimeUnit.HOURS)
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Error generating presigned URL: " + e.getMessage());
+        }
     }
 }

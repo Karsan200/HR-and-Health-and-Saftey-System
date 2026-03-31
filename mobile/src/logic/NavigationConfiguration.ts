@@ -1,22 +1,23 @@
 export type AppSection = 'hr' | 'health-safety' | null;
 
 export type ScreenKey =
-  | 'home'
-  | 'calendar'
-  | 'payslips'
-  | 'handbook'
-  | 'clockIn'
-  | 'overview'
-  | 'documents'
-  | 'risk'
-  | 'personal'
-  | 'settings'
-  | 'logout'
-  | 'profile'
-  | 'notifications'
-  | 'dateDetails'
-  | 'hazardForm'
-  | 'editProfile';
+    | 'home'
+    | 'calendar'
+    | 'payslips'
+    | 'handbook'
+    | 'clockIn'
+    | 'overview'
+    | 'documents'
+    | 'risk'
+    | 'personal'
+    | 'settings'
+    | 'logout'
+    | 'profile'
+    | 'notifications'
+    | 'dateDetails'
+    | 'hazardForm'
+    | 'editProfile'
+    | 'viewDocuments';
 
 export type BottomNavItem = {
     key: ScreenKey;
