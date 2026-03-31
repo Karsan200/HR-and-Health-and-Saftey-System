@@ -66,6 +66,7 @@ const HrPdfCard: React.FC<HrPdfCardProps> = ({
 
                 <View style={styles.actions}>
                     <Pressable
+                        testID="download-button"
                         style={({ pressed }) => [
                             styles.downloadButton,
                             pressed && styles.downloadPressed,
