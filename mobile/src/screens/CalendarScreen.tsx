@@ -212,12 +212,12 @@ const [refreshing, setRefreshing] = useState(false);
           <View style={themedStyles.keyContainer}>
             <View style={themedStyles.keyItem}>
               <View style={themedStyles.fullyBookedCircle} />
-              <Text style={themedStyles.keyText}>Fully Booked Days</Text>
+              <Text style={themedStyles.keyText}>Fully Booked</Text>
             </View>
 
             <View style={themedStyles.keyItem}>
               <View style={themedStyles.partialBookedCircle} />
-              <Text style={themedStyles.keyText}>Partial Booked Days</Text>
+              <Text style={themedStyles.keyText}>Partially Booked</Text>
             </View>
           </View>
         </View>
