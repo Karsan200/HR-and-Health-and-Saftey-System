@@ -2,6 +2,7 @@
 
 ### Added
 - V0.2.0 flyway database migration (V3) to account for changes in this version
+- App icon for mobile app of the Rent-A-Tech logo
 
 ### Fixed
 - (QoL) Issue with padding on the login screen for the mobile app where there is no bottom padding
