@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -290,16 +291,16 @@ export default function BookLeaveModal({
             onDismiss={onClose}
             contentContainerStyle={styles.modalWrapper}
         >
-          <View style={styles.modalContainer}>
-            <View style={styles.headerRow}>
+          <ScrollView contentContainerStyle={styles.modalContainer}>
+            <ScrollView contentContainerStyle={styles.headerRow}>
               <Text style={styles.title}>Book Time Off</Text>
 
               <TouchableOpacity onPress={onClose} style={styles.closeButtonWrapper}>
                 <Text style={styles.closeButtonText}>×</Text>
               </TouchableOpacity>
-            </View>
+            </ScrollView>
 
-            <View style={styles.fieldWrapper}>
+            <ScrollView contentContainerStyle={styles.fieldWrapper}>
               <Text style={styles.fieldLabel}>Selected Start Date</Text>
               <DatePickerInput
                 value={startDate}
@@ -312,9 +313,9 @@ export default function BookLeaveModal({
                 }}
                 {...commonDatePickerProps}
               />
-            </View>
+            </ScrollView>
 
-            <View style={styles.fieldWrapper}>
+            <ScrollView contentContainerStyle={styles.fieldWrapper}>
               <Text style={styles.fieldLabel}>Selected End Date</Text>
               <DatePickerInput
                 value={endDate}
@@ -332,7 +333,7 @@ export default function BookLeaveModal({
                 outlineStyle={styles.datePickerOutline}
                 style={styles.datePickerInput}
               />
-            </View>
+            </ScrollView>
 
           <PartialDayTimeSection
             isSingleDayBooking={isSingleDayBooking}
@@ -349,7 +350,7 @@ export default function BookLeaveModal({
             styles={styles}
           />
 
-            <View style={styles.fieldWrapper}>
+            <ScrollView contentContainerStyle={styles.fieldWrapper}>
               <Text style={styles.fieldLabel}>Type of Leave</Text>
 
               {isLoadingLeaveTypes ? (
@@ -366,9 +367,9 @@ export default function BookLeaveModal({
                     <Text style={styles.dropdownArrow}>▼</Text>
                   </TouchableOpacity>
               )}
-            </View>
+            </ScrollView>
 
-            <View style={styles.fieldWrapper}>
+            <ScrollView contentContainerStyle={styles.fieldWrapper}>
               <Text style={styles.fieldLabel}>Add any additional details...</Text>
               <TextInput
                   value={notes}
@@ -379,7 +380,7 @@ export default function BookLeaveModal({
                   textAlignVertical="top"
                   style={styles.notesInput}
               />
-            </View>
+            </ScrollView>
 
             {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
@@ -390,7 +391,7 @@ export default function BookLeaveModal({
             >
               <Text style={styles.submitButtonText}>Submit</Text>
             </TouchableOpacity>
-          </View>
+          </ScrollView>
         </PaperModal>
 
         <LeaveTypePickerModal
