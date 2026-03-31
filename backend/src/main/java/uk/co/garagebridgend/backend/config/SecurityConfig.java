@@ -23,8 +23,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import uk.co.garagebridgend.backend.logic.JwtAuthFilter;
 import uk.co.garagebridgend.backend.logic.UserInfoService;
+
+import java.util.List;
 
 /**
  * Spring Security configuration for the application.
@@ -64,6 +69,7 @@ public class SecurityConfig {
         http
                 // Disable CSRF (not needed for stateless JWT)
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 // Return 401 for unauthenticated requests
                 .exceptionHandling(exceptions -> exceptions
@@ -102,6 +108,29 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    /**
+     * Configures CORS settings for the application, allowing specified origins,
+     * methods, and headers.
+     * @return a CorsConfigurationSource with the defined CORS settings
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of(
+                "http://localhost",
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "https://ltp.tomsw.uk"
+        ));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 
     /**

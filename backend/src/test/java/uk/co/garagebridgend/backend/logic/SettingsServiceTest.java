@@ -42,6 +42,9 @@ public class SettingsServiceTest {
     @Mock
     private AccountRepository accountRepository;
 
+    @Mock
+    private AuthenticationService authenticationService;
+
     @InjectMocks
     private SettingsService settingsService;
 
@@ -82,88 +85,84 @@ public class SettingsServiceTest {
 
     @Test
     void testGetAllSettingsSuccess() {
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(new User("1", "password", Collections.emptyList()));
+        var account = new AccountTable();
+        account.setAccountId(1L);
 
-            when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
-            when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.of(mockSettings));
-            when(themeRepository.findByAccountId(1L)).thenReturn(Optional.of(mockTheme));
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
-            SettingsResponse result = settingsService.getAllSettings();
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
+        when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.of(mockSettings));
+        when(themeRepository.findByAccountId(1L)).thenReturn(Optional.of(mockTheme));
 
-            assertNotNull(result);
-            assertTrue(result.getLargeText());
-            assertFalse(result.getDyslexicFont());
-            assertTrue(result.getHighlightText());
-            assertFalse(result.getTextToSpeech());
-            assertTrue(result.getDictation());
-            assertEquals(Time.valueOf("22:00:00"), result.getSilentStart());
-            assertEquals(Time.valueOf("07:00:00"), result.getSilentEnd());
-            assertEquals("DEFAULT", result.getThemePreset());
-            assertEquals("#D20414", result.getAccentColour());
-            assertEquals("#F6F6F8", result.getBackgroundColour());
-            assertEquals("#000000", result.getTextColour());
-        }
+        SettingsResponse result = settingsService.getAllSettings();
+
+        assertNotNull(result);
+        assertTrue(result.getLargeText());
+        assertFalse(result.getDyslexicFont());
+        assertTrue(result.getHighlightText());
+        assertFalse(result.getTextToSpeech());
+        assertTrue(result.getDictation());
+        assertEquals(Time.valueOf("22:00:00"), result.getSilentStart());
+        assertEquals(Time.valueOf("07:00:00"), result.getSilentEnd());
+        assertEquals("DEFAULT", result.getThemePreset());
+        assertEquals("#D20414", result.getAccentColour());
+        assertEquals("#F6F6F8", result.getBackgroundColour());
+        assertEquals("#000000", result.getTextColour());
     }
 
     @Test
     void testGetAllSettingsCreatesDefaultSettingsWhenNoneExist() {
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(new User("1", "password", Collections.emptyList()));
+        var account = new AccountTable();
+        account.setAccountId(1L);
 
-            when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
-            when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.empty());
-            when(settingsRepository.save(any(SettingsTable.class))).thenReturn(mockSettings);
-            when(themeRepository.findByAccountId(1L)).thenReturn(Optional.of(mockTheme));
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
-            SettingsResponse result = settingsService.getAllSettings();
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
+        when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.empty());
+        when(settingsRepository.save(any(SettingsTable.class))).thenReturn(mockSettings);
+        when(themeRepository.findByAccountId(1L)).thenReturn(Optional.of(mockTheme));
 
-            assertNotNull(result);
-            verify(settingsRepository, times(1)).save(any(SettingsTable.class));
-        }
+        SettingsResponse result = settingsService.getAllSettings();
+
+        assertNotNull(result);
+        verify(settingsRepository, times(1)).save(any(SettingsTable.class));
     }
 
     @Test
     void testGetAllSettingsCreatesDefaultThemeWhenNoneExist() {
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(new User("1", "password", Collections.emptyList()));
+        var account = new AccountTable();
+        account.setAccountId(1L);
 
-            when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
-            when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.of(mockSettings));
-            when(themeRepository.findByAccountId(1L)).thenReturn(Optional.empty());
-            when(themeRepository.save(any(ThemesTable.class))).thenReturn(mockTheme);
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
-            SettingsResponse result = settingsService.getAllSettings();
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
+        when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.of(mockSettings));
+        when(themeRepository.findByAccountId(1L)).thenReturn(Optional.empty());
+        when(themeRepository.save(any(ThemesTable.class))).thenReturn(mockTheme);
 
-            assertNotNull(result);
-            verify(themeRepository, times(1)).save(any(ThemesTable.class));
-        }
+        SettingsResponse result = settingsService.getAllSettings();
+
+        assertNotNull(result);
+        verify(themeRepository, times(1)).save(any(ThemesTable.class));
     }
 
     @Test
     void testGetAllSettingsThrowsWhenUserIsNull() {
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser).thenReturn(null);
+        when(authenticationService.getCurrentUser()).thenThrow(new AuthenticatedAccountNotFoundException());
 
-            assertThrows(AuthenticatedAccountNotFoundException.class,
-                    () -> settingsService.getAllSettings());
-        }
+        assertThrows(AuthenticatedAccountNotFoundException.class,
+                () -> settingsService.getAllSettings());
     }
 
     @Test
     void testGetAllSettingsThrowsWhenAccountNotFound() {
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(new User("1", "password", Collections.emptyList()));
+        var account = new AccountTable();
+        account.setAccountId(1L);
 
-            when(accountRepository.findById(1L)).thenReturn(Optional.empty());
+        when(authenticationService.getCurrentUser()).thenThrow(new AuthenticatedAccountNotFoundException());
 
-            assertThrows(AuthenticatedAccountNotFoundException.class,
-                    () -> settingsService.getAllSettings());
-        }
+        assertThrows(AuthenticatedAccountNotFoundException.class,
+                () -> settingsService.getAllSettings());
     }
 
     // -------------------------------------------------------------------------
@@ -172,144 +171,140 @@ public class SettingsServiceTest {
 
     @Test
     void testUpdateAllSettingsSuccess() {
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(new User("1", "password", Collections.emptyList()));
+        var account = new AccountTable();
+        account.setAccountId(1L);
 
-            when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
-            when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.of(mockSettings));
-            when(themeRepository.findByAccountId(1L)).thenReturn(Optional.of(mockTheme));
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
-            SettingsResponse request = new SettingsResponse();
-            request.setLargeText(false);
-            request.setDyslexicFont(true);
-            request.setHighlightText(false);
-            request.setTextToSpeech(true);
-            request.setDictation(false);
-            request.setSilentStart(Time.valueOf("23:00:00"));
-            request.setSilentEnd(Time.valueOf("06:00:00"));
-            request.setThemePreset("DARK");
-            request.setAccentColour("#FFFFFF");
-            request.setBackgroundColour("#000000");
-            request.setTextColour("#CCCCCC");
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
+        when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.of(mockSettings));
+        when(themeRepository.findByAccountId(1L)).thenReturn(Optional.of(mockTheme));
 
-            settingsService.updateAllSettings(request);
+        SettingsResponse request = new SettingsResponse();
+        request.setLargeText(false);
+        request.setDyslexicFont(true);
+        request.setHighlightText(false);
+        request.setTextToSpeech(true);
+        request.setDictation(false);
+        request.setSilentStart(Time.valueOf("23:00:00"));
+        request.setSilentEnd(Time.valueOf("06:00:00"));
+        request.setThemePreset("DARK");
+        request.setAccentColour("#FFFFFF");
+        request.setBackgroundColour("#000000");
+        request.setTextColour("#CCCCCC");
 
-            verify(settingsRepository, times(1)).save(mockSettings);
-            verify(themeRepository, times(1)).save(mockTheme);
+        settingsService.updateAllSettings(request);
 
-            assertFalse(mockSettings.isLargeText());
-            assertTrue(mockSettings.isDyslexicFont());
-            assertFalse(mockSettings.isHighlightText());
-            assertTrue(mockSettings.isTextToSpeech());
-            assertFalse(mockSettings.isDictation());
-            assertEquals(Time.valueOf("23:00:00"), mockSettings.getSilentStart());
-            assertEquals(Time.valueOf("06:00:00"), mockSettings.getSilentEnd());
-            assertEquals("DARK", mockTheme.getThemePreset());
-            assertEquals("#FFFFFF", mockTheme.getAccentColour());
-            assertEquals("#000000", mockTheme.getBackgroundColour());
-            assertEquals("#CCCCCC", mockTheme.getTextColour());
-        }
+        verify(settingsRepository, times(1)).save(mockSettings);
+        verify(themeRepository, times(1)).save(mockTheme);
+
+        assertFalse(mockSettings.isLargeText());
+        assertTrue(mockSettings.isDyslexicFont());
+        assertFalse(mockSettings.isHighlightText());
+        assertTrue(mockSettings.isTextToSpeech());
+        assertFalse(mockSettings.isDictation());
+        assertEquals(Time.valueOf("23:00:00"), mockSettings.getSilentStart());
+        assertEquals(Time.valueOf("06:00:00"), mockSettings.getSilentEnd());
+        assertEquals("DARK", mockTheme.getThemePreset());
+        assertEquals("#FFFFFF", mockTheme.getAccentColour());
+        assertEquals("#000000", mockTheme.getBackgroundColour());
+        assertEquals("#CCCCCC", mockTheme.getTextColour());
     }
 
     @Test
     void testUpdateAllSettingsNullFieldsAreIgnored() {
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(new User("1", "password", Collections.emptyList()));
+        var account = new AccountTable();
+        account.setAccountId(1L);
 
-            when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
-            when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.of(mockSettings));
-            when(themeRepository.findByAccountId(1L)).thenReturn(Optional.of(mockTheme));
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
-            // Only set one field, leave the rest null
-            SettingsResponse request = new SettingsResponse();
-            request.setAccentColour("#123456");
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
+        when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.of(mockSettings));
+        when(themeRepository.findByAccountId(1L)).thenReturn(Optional.of(mockTheme));
 
-            settingsService.updateAllSettings(request);
+        // Only set one field, leave the rest null
+        SettingsResponse request = new SettingsResponse();
+        request.setAccentColour("#123456");
 
-            // Unchanged fields should retain original values
-            assertTrue(mockSettings.isLargeText());
-            assertFalse(mockSettings.isDyslexicFont());
-            assertEquals("#123456", mockTheme.getAccentColour());
-            assertEquals("#F6F6F8", mockTheme.getBackgroundColour());
-        }
+        settingsService.updateAllSettings(request);
+
+        // Unchanged fields should retain original values
+        assertTrue(mockSettings.isLargeText());
+        assertFalse(mockSettings.isDyslexicFont());
+        assertEquals("#123456", mockTheme.getAccentColour());
+        assertEquals("#F6F6F8", mockTheme.getBackgroundColour());
     }
 
     @Test
     void testUpdateAllSettingsNullThemePresetSetsNull() {
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(new User("1", "password", Collections.emptyList()));
+        var account = new AccountTable();
+        account.setAccountId(1L);
 
-            when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
-            when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.of(mockSettings));
-            when(themeRepository.findByAccountId(1L)).thenReturn(Optional.of(mockTheme));
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
-            // ThemePreset is explicitly null — service should set it to null
-            SettingsResponse request = new SettingsResponse();
-            request.setThemePreset(null);
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
+        when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.of(mockSettings));
+        when(themeRepository.findByAccountId(1L)).thenReturn(Optional.of(mockTheme));
 
-            settingsService.updateAllSettings(request);
+        // ThemePreset is explicitly null — service should set it to null
+        SettingsResponse request = new SettingsResponse();
+        request.setThemePreset(null);
 
-            assertNull(mockTheme.getThemePreset());
-        }
+        settingsService.updateAllSettings(request);
+
+        assertNull(mockTheme.getThemePreset());
     }
 
     @Test
     void testUpdateAllSettingsCreatesDefaultSettingsWhenNoneExist() {
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(new User("1", "password", Collections.emptyList()));
+        var account = new AccountTable();
+        account.setAccountId(1L);
 
-            when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
-            when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.empty());
-            when(settingsRepository.save(any(SettingsTable.class))).thenReturn(mockSettings);
-            when(themeRepository.findByAccountId(1L)).thenReturn(Optional.of(mockTheme));
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
-            settingsService.updateAllSettings(new SettingsResponse());
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
+        when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.empty());
+        when(settingsRepository.save(any(SettingsTable.class))).thenReturn(mockSettings);
+        when(themeRepository.findByAccountId(1L)).thenReturn(Optional.of(mockTheme));
 
-            verify(settingsRepository, atLeast(1)).save(any(SettingsTable.class));
-        }
+        settingsService.updateAllSettings(new SettingsResponse());
+
+        verify(settingsRepository, atLeast(1)).save(any(SettingsTable.class));
     }
 
     @Test
     void testUpdateAllSettingsCreatesDefaultThemeWhenNoneExist() {
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(new User("1", "password", Collections.emptyList()));
+        var account = new AccountTable();
+        account.setAccountId(1L);
 
-            when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
-            when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.of(mockSettings));
-            when(themeRepository.findByAccountId(1L)).thenReturn(Optional.empty());
-            when(themeRepository.save(any(ThemesTable.class))).thenReturn(mockTheme);
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
-            settingsService.updateAllSettings(new SettingsResponse());
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(mockAccount));
+        when(settingsRepository.findByAccountId(1L)).thenReturn(Optional.of(mockSettings));
+        when(themeRepository.findByAccountId(1L)).thenReturn(Optional.empty());
+        when(themeRepository.save(any(ThemesTable.class))).thenReturn(mockTheme);
 
-            verify(themeRepository, atLeast(1)).save(any(ThemesTable.class));
-        }
+        settingsService.updateAllSettings(new SettingsResponse());
+
+        verify(themeRepository, atLeast(1)).save(any(ThemesTable.class));
     }
 
     @Test
     void testUpdateAllSettingsThrowsWhenUserIsNull() {
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser).thenReturn(null);
+        when(authenticationService.getCurrentUser()).thenThrow(new AuthenticatedAccountNotFoundException());
 
-            assertThrows(AuthenticatedAccountNotFoundException.class,
-                    () -> settingsService.updateAllSettings(new SettingsResponse()));
-        }
+        assertThrows(AuthenticatedAccountNotFoundException.class,
+                () -> settingsService.updateAllSettings(new SettingsResponse()));
     }
 
     @Test
     void testUpdateAllSettingsThrowsWhenAccountNotFound() {
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(new User("1", "password", Collections.emptyList()));
+        var account = new AccountTable();
+        account.setAccountId(1L);
 
-            when(accountRepository.findById(1L)).thenReturn(Optional.empty());
+        when(authenticationService.getCurrentUser()).thenThrow(new AuthenticatedAccountNotFoundException());
 
-            assertThrows(AuthenticatedAccountNotFoundException.class,
-                    () -> settingsService.updateAllSettings(new SettingsResponse()));
-        }
+        assertThrows(AuthenticatedAccountNotFoundException.class,
+                () -> settingsService.updateAllSettings(new SettingsResponse()));
     }
 }

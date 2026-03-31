@@ -10,17 +10,14 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
-import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.request.LeaveRequest;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 import uk.co.garagebridgend.backend.models.entity.LeaveTable;
 import uk.co.garagebridgend.backend.models.response.LeaveSummaryResponse;
-import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.LeaveRepository;
 import uk.co.garagebridgend.backend.models.entity.LeaveTypeTable;
 import uk.co.garagebridgend.backend.models.response.LeaveTypeResponse;
@@ -75,10 +72,8 @@ public class LeaveService {
      */
     private final LeaveTypeRepository leaveTypeRepository;
 
-    /**
-     * Repository used to access account data from the database.
-     */
-    private final AccountRepository accountRepository;
+    /** Service for handling authentication and retrieving the current user. */
+    private final AuthenticationService authenticationService;
 
     /**
      * Retrieves all approved leave entries for calendar display.
@@ -144,12 +139,9 @@ public class LeaveService {
      * @throws RuntimeException if no user is currently authenticated
      */
     public LeaveSummaryResponse getLeaveSummaryForCurrentUser() {
-        User user = AuthenticationService.getCurrentUser();
-        if (user == null) {
-            throw new AuthenticatedAccountNotFoundException();
-        }
+        AccountTable account = authenticationService.getCurrentUser();
 
-        Long accountId = Long.valueOf(user.getUsername());
+        Long accountId = account.getAccountId();
 
         List<LeaveTable> leaves = leaveRepository.findAll()
                 .stream()
@@ -218,7 +210,7 @@ public class LeaveService {
         validateLeaveRequestWithinWorkingHours(request);
         validateLeaveRequestDayCapacity(request);
 
-        AccountTable account = getAuthenticatedAccount();
+        AccountTable account = authenticationService.getCurrentUser();
         LeaveTypeTable leaveType = leaveTypeRepository.findById(request.getLeaveTypeId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid leave type id."));
 
@@ -334,23 +326,6 @@ public class LeaveService {
         if (endDateTime.toLocalTime().isBefore(allowedStartTimeForEndDate)
                 || endDateTime.toLocalTime().isAfter(allowedEndTimeForEndDate)) {
             throw new IllegalArgumentException("End time must be within working hours.");
-        }
-    }
-
-    /**
-     * Retrieves the currently authenticated account.
-     *
-     * @return the authenticated account
-     * @throws AuthenticatedAccountNotFoundException if no authenticated user or account is found
-     */
-    private AccountTable getAuthenticatedAccount() {
-        var user = AuthenticationService.getCurrentUser();
-
-        if (user != null) {
-            return accountRepository.findById(Long.valueOf(user.getUsername()))
-                    .orElseThrow(AuthenticatedAccountNotFoundException::new);
-        } else {
-            throw new AuthenticatedAccountNotFoundException();
         }
     }
 

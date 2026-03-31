@@ -2,10 +2,7 @@ package uk.co.garagebridgend.backend.logic;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.co.garagebridgend.backend.models.entity.AccountTable;
-import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.HsOverviewResponseModel;
-import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.DocumentRepository;
 import uk.co.garagebridgend.backend.repository.HazardRepository;
 import uk.co.garagebridgend.backend.repository.SignatureRepository;
@@ -19,8 +16,8 @@ import uk.co.garagebridgend.backend.repository.SignatureRepository;
  */
 @Service
 public class HsOverviewService {
-    /** Repository to access account data. */
-    private final AccountRepository accountRepository;
+    /** Service for handling authentication and retrieving the current user. */
+    private final AuthenticationService authenticationService;
 
     /** Repository to access document data. */
     private final DocumentRepository documentRepository;
@@ -34,18 +31,18 @@ public class HsOverviewService {
     /**
      * Constructs the HsOverviewService with the required repositories.
      *
-     * @param accountRepositoryImpl   repository for AccountTable
+     * @param authenticationServiceImpl service for handling authentication and retrieving the current user
      * @param documentRepositoryImpl  repository for DocumentTable
      * @param signatureRepositoryImpl repository for SignatureTable
      * @param hazardRepositoryImpl    repository for HazardTable
      */
     @Autowired
     public HsOverviewService(
-            final AccountRepository accountRepositoryImpl,
+            final AuthenticationService authenticationServiceImpl,
             final DocumentRepository documentRepositoryImpl,
             final SignatureRepository signatureRepositoryImpl,
             final HazardRepository hazardRepositoryImpl) {
-        this.accountRepository = accountRepositoryImpl;
+        this.authenticationService = authenticationServiceImpl;
         this.documentRepository = documentRepositoryImpl;
         this.signatureRepository = signatureRepositoryImpl;
         this.hazardRepository = hazardRepositoryImpl;
@@ -58,15 +55,7 @@ public class HsOverviewService {
      */
     public HsOverviewResponseModel getOverview() {
         // Get the current authenticated user
-        var user = AuthenticationService.getCurrentUser();
-
-        AccountTable account;
-        if (user != null) {
-            account = accountRepository.findById(Long.valueOf(user.getUsername()))
-                    .orElseThrow(AuthenticatedAccountNotFoundException::new);
-        } else {
-            throw new AuthenticatedAccountNotFoundException();
-        }
+        var account = authenticationService.getCurrentUser();
 
         int pendingDocs = documentRepository.countByFileAccount(account);
         int signed = signatureRepository.countByAccount(account);

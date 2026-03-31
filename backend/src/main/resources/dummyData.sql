@@ -27,7 +27,7 @@ INSERT INTO account_table (
           '12 Test Street',
           NULL,
           'CF31 1AA',
-          NULL,
+          '532MDCTNSUJLFXJ2TJTLRSSJKQCR5LFD',
           NULL,
           '2025-02-14 09:12:00'
       ),
@@ -789,7 +789,7 @@ INSERT INTO permissions_table (
     is_manager,
     created
 ) VALUES
-      (1, 2, FALSE, FALSE, CURRENT_TIMESTAMP),
+      (1, 2, TRUE, TRUE, CURRENT_TIMESTAMP),
       (2, NULL, TRUE, TRUE, CURRENT_TIMESTAMP),
       (3, 2, FALSE, TRUE, CURRENT_TIMESTAMP),
       (4, 2, FALSE, TRUE, CURRENT_TIMESTAMP),

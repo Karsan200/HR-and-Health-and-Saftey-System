@@ -1,18 +1,19 @@
 package uk.co.garagebridgend.backend.controller;
 
+import com.bastiaanjansen.otp.HMACAlgorithm;
+import com.bastiaanjansen.otp.TOTPGenerator;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -26,11 +27,13 @@ import uk.co.garagebridgend.backend.models.entity.PermissionsTable;
 import uk.co.garagebridgend.backend.models.entity.SessionTable;
 import uk.co.garagebridgend.backend.models.request.AuthRequest;
 import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
+import uk.co.garagebridgend.backend.models.request.MfaAuthoriseRequest;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.PermissionsRepository;
 import uk.co.garagebridgend.backend.repository.SessionRepository;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -78,6 +81,7 @@ public class AuthenticationControllerTest {
         account.setEmail("johnd@test.com");
         account.setPassword(BCrypt.hashpw("hashedPassword", BCrypt.gensalt()));
         account.setMobilePin(BCrypt.hashpw("123456", BCrypt.gensalt()));
+        account.setTwoFactorSecret("NGXEIJWEXZ7NLRKF3P7VMRQMQ4GAT65Y");
         account.setAddressOne("123 Main St");
         account.setPostalCode("12345");
         accountRepository.save(account);
@@ -106,7 +110,7 @@ public class AuthenticationControllerTest {
         valid.setRefreshToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
         valid.setExpires(LocalDateTime.now(Clock.systemUTC()).plusHours(2));
         valid.setMobile(false);
-        valid.setTwoFactor(false);
+        valid.setTwoFactor(true);
         sessionRepository.save(valid);
 
         // Create a new account (for mobile)
@@ -288,6 +292,212 @@ public class AuthenticationControllerTest {
 
     @Test
     @Order(2)
+    void testAuthenticateMfaSuccess() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
+
+        // Get a TOTP code for the MFA secret
+        TOTPGenerator totp = new TOTPGenerator.Builder("NGXEIJWEXZ7NLRKF3P7VMRQMQ4GAT65Y")
+                .withHOTPGenerator(builder -> {
+                    builder.withPasswordLength(6);
+                    builder.withAlgorithm(HMACAlgorithm.SHA1);
+                })
+                .withPeriod(Duration.ofSeconds(30))
+                .build();
+
+        mockMvc.perform(post("/auth/mfa/authorise")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .cookie(new Cookie("refreshToken", "87cc6b24-d1aa-468a-bc98-ad1a902c8b3e"))
+                        .content("""
+                    {
+                        "code": "%s"
+                    }""".formatted(totp.now())))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(2)
+    void testAuthenticateMfaNoRefreshToken() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
+
+        mockMvc.perform(post("/auth/mfa/authorise")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "code": "123456"
+                    }"""))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @Order(2)
+    void testAuthenticateMfaInvalidCode() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
+
+        mockMvc.perform(post("/auth/mfa/authorise")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .cookie(new Cookie("refreshToken", "87cc6b24-d1aa-468a-bc98-ad1a902c8b3e"))
+                        .content("""
+                    {
+                        "code": "000000"
+                    }"""))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @Order(2)
+    @WithMockUser(username = "0")
+    void testAuthenticateMfaNotAuthenticated() throws Exception {
+        mockMvc.perform(post("/auth/mfa/authorise")
+                .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                .cookie(new Cookie("refreshToken", "87cc6b24-d1aa-468a-bc98-ad1a902c8b3e"))
+                .content("""
+                    {
+                        "code": "000000"
+                    }"""))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @Order(2)
+    void testAuthenticateMfaInvalidRefreshToken() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
+
+        // Get a TOTP code for the MFA secret
+        TOTPGenerator totp = new TOTPGenerator.Builder("NGXEIJWEXZ7NLRKF3P7VMRQMQ4GAT65Y")
+                .withHOTPGenerator(builder -> {
+                    builder.withPasswordLength(6);
+                    builder.withAlgorithm(HMACAlgorithm.SHA1);
+                })
+                .withPeriod(Duration.ofSeconds(30))
+                .build();
+
+        mockMvc.perform(post("/auth/mfa/authorise")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .cookie(new Cookie("refreshToken", "doesnotexist"))
+                        .content("""
+                    {
+                        "code": "%s"
+                    }""".formatted(totp.now())))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @Order(2)
+    void testAuthenticateMfaThrowsException() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
+
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(authenticationController).build();
+
+        // simulate your AuthenticationService throwing an exception
+        when(authenticationService.authenticateMfa(new MfaAuthoriseRequest("123456"), "doesnotexist"))
+                .thenThrow(new RuntimeException("Service failed"));
+
+        // perform a POST to /auth/mfa/authorise with an Authorization header
+        mockMvc.perform(post("/auth/mfa/authorise")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .cookie(new Cookie("refreshToken", "doesnotexist"))
+                        .content("""
+                    {
+                        "code": "123456"
+                    }"""))
+                .andExpect(status().isInternalServerError()) // matches ResponseStatusException
+                .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
+                .andExpect(result -> {
+                    ResponseStatusException ex = (ResponseStatusException) result.getResolvedException();
+                    assertNotNull(ex);
+                    assertEquals("Internal sever error", ex.getReason()); // match your controller message
+                });
+    }
+
+    @Test
+    @Order(2)
+    void testCheckMfaSuccess() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902fghfghf");
+        mockMvc.perform(get("/auth/mfa/check").header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(result -> {;
+                    String responseBody = result.getResponse().getContentAsString();
+                    assertFalse(responseBody.isBlank(), "Response body should not be empty");
+
+                    boolean requiresMfa = new ObjectMapper()
+                            .readTree(responseBody)
+                            .path("mfaAuthorised")
+                            .asBoolean();
+
+                    assertFalse(requiresMfa, "Expected mfaAuthorised to be false");
+
+                    String mfaSecret = new ObjectMapper()
+                            .readTree(responseBody)
+                            .path("secret")
+                            .asText();
+                    assertFalse(mfaSecret.isBlank(), "MFA secret should not be empty");
+                });
+    }
+
+    @Test
+    @Order(2)
+    void testCheckMfaSuccessNullSecret() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
+        mockMvc.perform(get("/auth/mfa/check").header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(result -> {;
+                    String responseBody = result.getResponse().getContentAsString();
+                    assertFalse(responseBody.isBlank(), "Response body should not be empty");
+
+                    boolean requiresMfa = new ObjectMapper()
+                            .readTree(responseBody)
+                            .path("mfaAuthorised")
+                            .asBoolean();
+
+                    assertTrue(requiresMfa, "Expected mfaAuthorised to be true");
+
+                    String mfaSecret = new ObjectMapper()
+                            .readTree(responseBody)
+                            .path("secret")
+                            .asText();
+                    assertTrue(mfaSecret.isBlank(), "MFA secret should be null");
+                });
+    }
+
+    @Test
+    @Order(2)
+    @WithMockUser(username = "0")
+    void testCheckMfaNotAuthenticated() throws Exception {
+        mockMvc.perform(get("/auth/mfa/check"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @Order(2)
+    void testCheckMfaThrowsException() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902fghfghf");
+
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(authenticationController).build();
+
+        // simulate your AuthenticationService throwing an exception
+        when(authenticationService.checkMfa())
+                .thenThrow(new RuntimeException("Service failed"));
+
+        // perform a GET to /auth/mfa/check with an Authorization header
+        mockMvc.perform(get("/auth/mfa/check").header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isInternalServerError()) // matches ResponseStatusException
+                .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
+                .andExpect(result -> {
+                    ResponseStatusException ex = (ResponseStatusException) result.getResolvedException();
+                    assertNotNull(ex);
+                    assertEquals("Internal sever error", ex.getReason()); // match your controller message
+                });
+    }
+
+    @Test
+    @Order(2)
     void testRotateNotAuthenticated() throws Exception {
         mockMvc.perform(post("/auth/rotate"))
                 .andExpect(status().isUnauthorized());
@@ -322,6 +532,7 @@ public class AuthenticationControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "0")
     @Order(2)
     void testRotateAccountNotFound() throws Exception {
         String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902fghfghf");
@@ -331,19 +542,14 @@ public class AuthenticationControllerTest {
 
         assertTrue(session.isPresent(), "Session should exist before deletion");
 
-        // Mock getCurrentUser to return null
-        try (MockedStatic<AuthenticationService> mocked = Mockito.mockStatic(AuthenticationService.class)) {
-            mocked.when(AuthenticationService::getCurrentUser).thenReturn(null);
-
-            mockMvc.perform(post("/auth/rotate")
-                            .header("Authorization", "Bearer " + accessToken)
-                            .contentType(String.valueOf(MediaType.APPLICATION_JSON))
-                            .content("""
-                    {
-                        "pinCode": "123456"
-                    }"""))
-                    .andExpect(status().isUnauthorized());
-        }
+        mockMvc.perform(post("/auth/rotate")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                {
+                    "pinCode": "123456"
+                }"""))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

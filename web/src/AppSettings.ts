@@ -9,4 +9,7 @@ export const AppSettings = {
   
   // CDN URL for static assets
   CDN_URL: 'https://cdn-ltp.tomsw.uk',
+
+  // Name of the company
+  COMPANY_NAME: 'Rent-A-Tech',
 };

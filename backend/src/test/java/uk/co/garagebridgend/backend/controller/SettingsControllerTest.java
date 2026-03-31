@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import uk.co.garagebridgend.backend.RentATechApplication;
 import uk.co.garagebridgend.backend.logic.AuthenticationService;
 import uk.co.garagebridgend.backend.logic.SettingsService;
+import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.SettingsResponse;
 
@@ -58,6 +60,9 @@ public class SettingsControllerTest {
     @InjectMocks
     private SettingsController settingsController;
 
+    @Mock
+    private AuthenticationService authenticationService;
+
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
@@ -87,25 +92,24 @@ public class SettingsControllerTest {
 
         when(settingsService.getAllSettings()).thenReturn(mockSettings);
 
-        try (MockedStatic<AuthenticationService> authMock =
-                     mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(new User("123", "password", Collections.emptyList()));
+        var account = new AccountTable();
+        account.setAccountId(1L);
 
-            mockMvc.perform(get("/api/settings"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.largeText",        is(true)))
-                    .andExpect(jsonPath("$.dyslexicFont",     is(false)))
-                    .andExpect(jsonPath("$.highlightText",    is(true)))
-                    .andExpect(jsonPath("$.textToSpeech",     is(false)))
-                    .andExpect(jsonPath("$.dictation",        is(true)))
-                    .andExpect(jsonPath("$.silentStart",      is("22:00:00")))
-                    .andExpect(jsonPath("$.silentEnd",        is("07:00:00")))
-                    .andExpect(jsonPath("$.themePreset",      is("DEFAULT")))
-                    .andExpect(jsonPath("$.accentColour",     is("#D20414")))
-                    .andExpect(jsonPath("$.backgroundColour", is("#F6F6F8")))
-                    .andExpect(jsonPath("$.textColour",       is("#000000")));
-        }
+        when(authenticationService.getCurrentUser()).thenReturn(account);
+
+        mockMvc.perform(get("/api/settings"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.largeText",        is(true)))
+                .andExpect(jsonPath("$.dyslexicFont",     is(false)))
+                .andExpect(jsonPath("$.highlightText",    is(true)))
+                .andExpect(jsonPath("$.textToSpeech",     is(false)))
+                .andExpect(jsonPath("$.dictation",        is(true)))
+                .andExpect(jsonPath("$.silentStart",      is("22:00:00")))
+                .andExpect(jsonPath("$.silentEnd",        is("07:00:00")))
+                .andExpect(jsonPath("$.themePreset",      is("DEFAULT")))
+                .andExpect(jsonPath("$.accentColour",     is("#D20414")))
+                .andExpect(jsonPath("$.backgroundColour", is("#F6F6F8")))
+                .andExpect(jsonPath("$.textColour",       is("#000000")));
     }
 
     @Test
@@ -152,16 +156,15 @@ public class SettingsControllerTest {
 
         doNothing().when(settingsService).updateAllSettings(any(SettingsResponse.class));
 
-        try (MockedStatic<AuthenticationService> authMock =
-                     mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser)
-                    .thenReturn(new User("123", "password", Collections.emptyList()));
+        var account = new AccountTable();
+        account.setAccountId(1L);
 
-            mockMvc.perform(put("/api/settings")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(updateRequest)))
-                    .andExpect(status().isOk());
-        }
+        when(authenticationService.getCurrentUser()).thenReturn(account);
+
+        mockMvc.perform(put("/api/settings")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
     }
 
     @Test

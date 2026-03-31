@@ -48,6 +48,9 @@ public class LeaveServiceTest {
     @Mock
     private AccountRepository accountRepository;
 
+    @Mock
+    private AuthenticationService authenticationService;
+
     @InjectMocks
     private LeaveService leaveService;
 
@@ -199,27 +202,24 @@ public class LeaveServiceTest {
 
         when(leaveRepository.findAll()).thenReturn(List.of(approvedLeave, pendingLeave));
 
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser).thenReturn(mockUser);
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
-            LeaveSummaryResponse summary = leaveService.getLeaveSummaryForCurrentUser();
+        LeaveSummaryResponse summary = leaveService.getLeaveSummaryForCurrentUser();
 
-            // Approved = 1, Pending = 1
-            assertEquals(1, summary.getApprovedCount());
-            assertEquals(1, summary.getPendingCount());
-            assertEquals(142, summary.getTotalDays());
-        }
+        // Approved = 1, Pending = 1
+        assertEquals(1, summary.getApprovedCount());
+        assertEquals(1, summary.getPendingCount());
+        assertEquals(142, summary.getTotalDays());
+
     }
 
     @Test
     void testGetLeaveSummaryForCurrentUserNoAuthenticatedUser() {
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser).thenReturn(null);
+        when(authenticationService.getCurrentUser()).thenThrow(new AuthenticatedAccountNotFoundException());
 
-            assertThrows(AuthenticatedAccountNotFoundException.class, () ->
-                    leaveService.getLeaveSummaryForCurrentUser()
-            );
-        }
+        assertThrows(AuthenticatedAccountNotFoundException.class, () ->
+                leaveService.getLeaveSummaryForCurrentUser()
+        );
     }
 
     @Test
@@ -268,17 +268,15 @@ public class LeaveServiceTest {
 
         when(leaveRepository.findAll()).thenReturn(List.of(approvedLeave));
 
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser).thenReturn(mockUser);
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
-            // When the summary is calculated for the current user
-            LeaveSummaryResponse summary = leaveService.getLeaveSummaryForCurrentUser();
+        // When the summary is calculated for the current user
+        LeaveSummaryResponse summary = leaveService.getLeaveSummaryForCurrentUser();
 
-            // Then only the hours for that partial leave should be deducted from the allowance
-            assertEquals(1, summary.getApprovedCount());
-            assertEquals(0, summary.getPendingCount());
-            assertEquals(155, summary.getTotalDays());
-        }
+        // Then only the hours for that partial leave should be deducted from the allowance
+        assertEquals(1, summary.getApprovedCount());
+        assertEquals(0, summary.getPendingCount());
+        assertEquals(155, summary.getTotalDays());
     }
 
     @Test
@@ -298,17 +296,15 @@ public class LeaveServiceTest {
 
         when(leaveRepository.findAll()).thenReturn(List.of(approvedLeave));
 
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser).thenReturn(mockUser);
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
-            // When the summary is calculated for a leave crossing a weekend
-            LeaveSummaryResponse summary = leaveService.getLeaveSummaryForCurrentUser();
+        // When the summary is calculated for a leave crossing a weekend
+        LeaveSummaryResponse summary = leaveService.getLeaveSummaryForCurrentUser();
 
-            // Then Friday and Monday hours should count, but weekend days should be ignored
-            assertEquals(1, summary.getApprovedCount());
-            assertEquals(0, summary.getPendingCount());
-            assertEquals(147, summary.getTotalDays());
-        }
+        // Then Friday and Monday hours should count, but weekend days should be ignored
+        assertEquals(1, summary.getApprovedCount());
+        assertEquals(0, summary.getPendingCount());
+        assertEquals(147, summary.getTotalDays());
     }
 
     @Test
@@ -328,17 +324,15 @@ public class LeaveServiceTest {
 
         when(leaveRepository.findAll()).thenReturn(List.of(approvedLeave));
 
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser).thenReturn(mockUser);
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
-            // When the summary is calculated for that invalid leave record
-            LeaveSummaryResponse summary = leaveService.getLeaveSummaryForCurrentUser();
+        // When the summary is calculated for that invalid leave record
+        LeaveSummaryResponse summary = leaveService.getLeaveSummaryForCurrentUser();
 
-            // Then the leave should contribute zero used hours and not reduce the allowance
-            assertEquals(1, summary.getApprovedCount());
-            assertEquals(0, summary.getPendingCount());
-            assertEquals(160, summary.getTotalDays());
-        }
+        // Then the leave should contribute zero used hours and not reduce the allowance
+        assertEquals(1, summary.getApprovedCount());
+        assertEquals(0, summary.getPendingCount());
+        assertEquals(160, summary.getTotalDays());
     }
 
     @Test
@@ -385,15 +379,13 @@ public class LeaveServiceTest {
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
         when(leaveTypeRepository.findById(1)).thenReturn(Optional.of(leaveType));
 
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser).thenReturn(mockUser);
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
-            // When a new leave request is created
-            leaveService.createLeave(request);
+        // When a new leave request is created
+        leaveService.createLeave(request);
 
-            // Then the leave should be saved to the repository
-            verify(leaveRepository).save(any(LeaveTable.class));
-        }
+        // Then the leave should be saved to the repository
+        verify(leaveRepository).save(any(LeaveTable.class));
     }
 
     @Test
@@ -570,17 +562,15 @@ public class LeaveServiceTest {
         LeaveRequest request = buildValidLeaveRequest();
         when(leaveRepository.findLeaveForDate(any(), any())).thenReturn(List.of());
 
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser).thenReturn(null);
+        when(authenticationService.getCurrentUser()).thenThrow(new AuthenticatedAccountNotFoundException());
 
-            // When the service attempts to create leave without an authenticated user
-            assertThrows(AuthenticatedAccountNotFoundException.class, () ->
-                    leaveService.createLeave(request)
-            );
+        // When the service attempts to create leave without an authenticated user
+        assertThrows(AuthenticatedAccountNotFoundException.class, () ->
+                leaveService.createLeave(request)
+        );
 
-            // Then the leave should not be saved
-            verify(leaveRepository, never()).save(any(LeaveTable.class));
-        }
+        // Then the leave should not be saved
+        verify(leaveRepository, never()).save(any(LeaveTable.class));
     }
 
     @Test
@@ -588,22 +578,19 @@ public class LeaveServiceTest {
 
         // Given a valid request and authenticated user id, but no matching account exists in the repository
         LeaveRequest request = buildValidLeaveRequest();
-        User mockUser = new User("1", "pass", List.of());
 
         when(leaveRepository.findLeaveForDate(any(), any())).thenReturn(List.of());
         when(accountRepository.findById(1L)).thenReturn(Optional.empty());
 
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser).thenReturn(mockUser);
+        when(authenticationService.getCurrentUser()).thenThrow(new AuthenticatedAccountNotFoundException());
 
-            // When the service attempts to load the authenticated account
-            assertThrows(AuthenticatedAccountNotFoundException.class, () ->
-                    leaveService.createLeave(request)
-            );
+        // When the service attempts to load the authenticated account
+        assertThrows(AuthenticatedAccountNotFoundException.class, () ->
+                leaveService.createLeave(request)
+        );
 
-            // Then the leave should not be saved because the account could not be found
-            verify(leaveRepository, never()).save(any(LeaveTable.class));
-        }
+        // Then the leave should not be saved because the account could not be found
+        verify(leaveRepository, never()).save(any(LeaveTable.class));
     }
 
     @Test
@@ -620,16 +607,14 @@ public class LeaveServiceTest {
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
         when(leaveTypeRepository.findById(1)).thenReturn(Optional.empty());
 
-        try (MockedStatic<AuthenticationService> authMock = mockStatic(AuthenticationService.class)) {
-            authMock.when(AuthenticationService::getCurrentUser).thenReturn(mockUser);
+        when(authenticationService.getCurrentUser()).thenReturn(account);
 
-            // When the service tries to resolve the leave type during creation
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                    leaveService.createLeave(request)
-            );
+        // When the service tries to resolve the leave type during creation
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                leaveService.createLeave(request)
+        );
 
-            // Then the request should be rejected because the leave type id is invalid
-            assertEquals("Invalid leave type id.", exception.getMessage());
-        }
+        // Then the request should be rejected because the leave type id is invalid
+        assertEquals("Invalid leave type id.", exception.getMessage());
     }
 }
