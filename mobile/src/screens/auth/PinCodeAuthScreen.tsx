@@ -1,10 +1,9 @@
 import {Image, ScrollView, Text, View} from 'react-native';
-import {Avatar, Button, Dialog, Portal} from 'react-native-paper';
+import {Button, Dialog, Portal} from 'react-native-paper';
 import React, { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react';
 import { ThemeContext } from '../../theme/colourController.tsx';
 
 import { passwordAuthScreenStyles } from './PasswordAuthScreen.styles.ts';
-import { homeStyles } from '../HomeScreen.styles.ts';
 import { PinCodeAuthScreen as styles } from './PinCodeAuthScreen.styles.ts';
 import {PinCodeBubble} from "../../components/auth/PinCodeBubble.tsx";
 import AuthenticationService from "../../logic/AuthenticationService.ts";

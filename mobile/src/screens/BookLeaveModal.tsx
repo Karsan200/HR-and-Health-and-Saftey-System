@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
 } from 'react-native';
 import { Portal, Modal as PaperModal } from 'react-native-paper';
 import dayjs from 'dayjs';
