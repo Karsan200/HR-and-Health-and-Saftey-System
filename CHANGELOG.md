@@ -1,3 +1,12 @@
+## [V0.2.0] - 2026-03-31
+
+### Added
+- V0.2.0 flyway database migration (V3) to account for changes in this version
+
+### Fixed
+- (QoL) Issue with padding on the login screen for the mobile app where there is no bottom padding
+- (QoL) Issue with padding on the pin code screen for the mobile app where there is no bottom padding, removed the profile icon to make it so you do not need to scroll to get to the keypad for smaller phones
+
 ## [V0.1.3] - 2026-03-22
 
 ### Changed

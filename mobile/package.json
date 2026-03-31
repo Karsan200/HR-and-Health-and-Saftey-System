@@ -1,6 +1,6 @@
 {
   "name": "Rent-A-Tech",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
