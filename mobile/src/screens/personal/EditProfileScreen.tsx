@@ -177,7 +177,7 @@ const EditProfileScreen = () => {
         </View>
       </View>
 
-      {/* ── Profile Section ── */}
+      {/* Profile Section */}
       <Text style={themedStyles.sectionTitle}>Profile</Text>
 
       <View style={themedStyles.fieldsGroup}>
@@ -260,7 +260,7 @@ const EditProfileScreen = () => {
         </View>
       </View>
 
-      {/* ── Save Button ── */}
+      {/* Save Button */}
       <View style={themedStyles.buttonContainer}>
         <Pressable
           style={({ pressed }) => [
