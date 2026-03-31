@@ -15,7 +15,8 @@ export type ScreenKey =
     | 'profile'
     | 'notifications'
     | 'dateDetails'
-    | 'hazardForm';
+    | 'hazardForm'
+    | 'viewDocuments';
 
 export type BottomNavItem = {
     key: ScreenKey;

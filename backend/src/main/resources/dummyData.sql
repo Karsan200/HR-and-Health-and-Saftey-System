@@ -152,8 +152,17 @@ INSERT INTO files_table (
     extension,
     created
 ) VALUES
-      (UUID(), 1, 1,
+      ('d1b2c3d4-e5f6-7890-dcba-ef1234567890', 1, 1,
        'safety_policy', 'pdf', '2025-02-14 10:00:00'),
+
+      ('b1c2d3e4-f5a6-7890-bcde-123456abcdef', 1, 1,
+       'employee_handbook', 'pdf', '2026-03-24 10:00:00'),
+
+      ('c1b2c3d4-e5f6-7890-dcba-ef1234567891', 1, 1,
+       'sop_fire_safety', 'pdf', '2025-02-14 10:10:00'),
+
+      (UUID(), 1, 1,
+       'sop_equipment_procedures', 'pdf', '2025-02-14 10:15:00'),
 
       (UUID(), 1, 1,
        'fire_safety', 'pdf', '2025-02-14 10:05:00'),
@@ -203,7 +212,7 @@ INSERT INTO files_table (
       (UUID(), 3, 3,
        'missing_fire_extinguisher_photo', 'jpg', CURRENT_TIMESTAMP),
 
-      (UUID(), 1, 2,
+      ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 1, 2,
        'payslip_jan_2026_mmay', 'pdf', '2026-01-31 17:00:00'),
 
       (UUID(), 1, 2,
@@ -256,6 +265,15 @@ INSERT INTO document_table (
 ) VALUES
       ((SELECT file_id FROM files_table WHERE name = 'safety_policy'),
        'Company Safety Policy', '2025-02-14 10:00:00'),
+
+      ('b1c2d3e4-f5a6-7890-bcde-123456abcdef',
+       'Employee Handbook', '2026-03-24 10:05:00'),
+
+      ((SELECT file_id FROM files_table WHERE name = 'sop_fire_safety'),
+       'SOP: Fire Safety Procedures', '2025-02-14 10:10:00'),
+
+      ((SELECT file_id FROM files_table WHERE name = 'sop_equipment_procedures'),
+       'SOP: Equipment Handling Instructions', '2025-02-14 10:15:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'fire_safety'),
        'Fire Safety Guidelines', '2025-02-14 10:05:00'),
@@ -582,12 +600,6 @@ INSERT INTO signature_table (
     risk_assessment_id,
     created
 ) VALUES
-      (UUID(),1,
-       (SELECT document_id FROM document_table WHERE title = 'Company Safety Policy'),
-       NULL,
-       NULL,
-       '2025-02-14 10:30:00'),
-
       (UUID(), 1,
        (SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'),
        NULL,
@@ -1005,6 +1017,11 @@ INSERT INTO qualifications_table (
     details,
     created
 ) VALUES
+        (1,
+        (SELECT file_id FROM files_table WHERE name = 'safety_policy'),
+         'Workshop Safety Training',
+         'Internal safety training covering workshop hazards and procedures.',
+         '2024-06-12 10:05:00'),
 
       (5,
       (SELECT file_id FROM files_table WHERE name = 'nvq_level3_motor_vehicle_droberts'),
