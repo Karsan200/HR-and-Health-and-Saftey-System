@@ -1,10 +1,15 @@
 ## [V0.2.0] - 2026-03-31
 
 ### Added
+- Ability to book leave for specific hours of a day or full days in the mobile app
+- Accessibility settings in the mobile app to allow users to use large text, dyslexia friendly font and highlighted text
+- Authentication flow for the desktop admin panel, enforcing username/password and MFA. Provides options to setup MFA if it's the first time using the panel, and checks if the user's screen size is too small for the app
+- Scan functionality for the firmware Raspberry Pi pico to check for BLE advertisements and check for UUIDs
 - V0.2.0 flyway database migration (V3) to account for changes in this version
 - App icon for mobile app of the Rent-A-Tech logo
 
 ### Fixed
+- Issue where all default colour presents were highlighted by default in the mobile app
 - (QoL) Issue with padding on the login screen for the mobile app where there is no bottom padding
 - (QoL) Issue with padding on the pin code screen for the mobile app where there is no bottom padding, removed the profile icon to make it so you do not need to scroll to get to the keypad for smaller phones
 
