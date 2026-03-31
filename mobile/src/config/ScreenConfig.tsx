@@ -85,8 +85,9 @@ export function ScreenConfig(body: ScreenConfigProps) {
           <TopNavBar
             title="Payslips"
           />
-          <View style={styles.content} />
+          <View style={styles.content} >
             <PayslipScreen />
+            </View>
         </>
       );
 
@@ -96,8 +97,9 @@ export function ScreenConfig(body: ScreenConfigProps) {
           <TopNavBar
             title="Handbook"
           />
-          <View style={styles.content} />
+          <View style={styles.content} >
             <HandbookScreen />
+            </View>
         </>
       );
 
@@ -129,8 +131,9 @@ export function ScreenConfig(body: ScreenConfigProps) {
           <TopNavBar
             title="Documents"
           />
-          <View style={styles.content} />
+          <View style={styles.content}>
             <DocumentsScreen />
+            </View>
         </>
       );
 

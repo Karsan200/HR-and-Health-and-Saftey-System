@@ -218,6 +218,9 @@ INSERT INTO files_table (
       (UUID(), 1, 2,
        'payslip_feb_2026_mmay', 'pdf', '2026-02-28 17:00:00'),
 
+      (UUID(), 1, 2,
+       'p60_2025_mmay', 'pdf', '2025-04-05 17:00:00'),
+
       (UUID(), 5, 2,
        'payslip_jan_2026_droberts', 'pdf', '2026-01-31 17:00:00'),
 
@@ -985,6 +988,9 @@ INSERT INTO payslips_table (
 
       ((SELECT file_id FROM files_table WHERE name = 'payslip_feb_2026_mmay'),
        2026, 2, FALSE),
+
+      ((SELECT file_id FROM files_table WHERE name = 'p60_2025_mmay'),
+       2025, 4, TRUE),
 
       ((SELECT file_id FROM files_table WHERE name = 'payslip_jan_2026_droberts'),
        2026, 1, FALSE),
