@@ -32,10 +32,6 @@ jest.mock('react-native-wheel-color-picker', () => {
 /**
  * Mock Icon component
  */
-const MockIcon = (props: any) => {
-    const React = require('react');
-    return React.createElement('Icon', props);
-};
 
 jest.mock('react-native-paper', () => {
     const actual = jest.requireActual('react-native-paper');
