@@ -267,13 +267,13 @@ INSERT INTO document_table (
     created
 ) VALUES
       ((SELECT file_id FROM files_table WHERE name = 'safety_policy'),
-       'Company Safety Policy', '2025-02-14 10:00:00'),
+       'Company Safety Policy v2.1', '2025-02-14 10:00:00'),
 
       ('b1c2d3e4-f5a6-7890-bcde-123456abcdef',
        'Employee Handbook', '2026-03-24 10:05:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'sop_fire_safety'),
-       'SOP: Fire Safety Procedures', '2025-02-14 10:10:00'),
+       'SOP: Fire Safety Procedures v5', '2025-02-14 10:10:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'sop_equipment_procedures'),
        'SOP: Equipment Handling Instructions', '2025-02-14 10:15:00'),
@@ -282,19 +282,19 @@ INSERT INTO document_table (
        'Fire Safety Guidelines', '2025-02-14 10:05:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'training_manual'),
-       'Employee Training Manual', '2025-03-02 11:00:00'),
+       'Employee Training Manual v3.0', '2025-03-02 11:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'hr_guidelines'),
        'HR Guidelines', '2025-04-18 15:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'hazard_report_template'),
-       'Hazard Report Template', '2025-05-29 12:00:00'),
+       'Hazard Report Template v1', '2025-05-29 12:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'equipment_safety'),
        'Equipment Safety Procedures', '2025-07-12 09:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'workshop_rules'),
-       'Workshop Rules', '2025-08-20 17:00:00'),
+       'Workshop Rules v4.3', '2025-08-20 17:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'health_policy'),
        'Health and Safety Policy', '2025-09-15 14:00:00'),

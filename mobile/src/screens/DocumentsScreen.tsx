@@ -155,11 +155,18 @@ export default function DocumentsScreen() {
         return matchesCategory && matchesStatus;
     });
 
-    /**
-     * Strips the "SOP: " prefix from a title for display purposes.
-     */
+    // Strips the "SOP: " prefix from a title for display purposes. and the version suffix e.g. "v2.5"
     const getDisplayTitle = (title: string): string => {
-        return title.replace(/^SOP:\s*/i, '');
+        return title
+            .replace(/^SOP:\s*/i, '')
+            .replace(/\sv\d+(\.\d+)?$/i, '')
+            .trim();
+    };
+
+    // Extracts a version string from the end of a title e.g. "v2.5" → "2.5". returns "1.0" if no version found.
+    const getVersion = (title: string): string => {
+        const match = title.match(/\sv(\d+(\.\d+)?)$/i);
+        return match ? match[1] : '1.0';
     };
 
     // List of Documents
@@ -253,7 +260,7 @@ export default function DocumentsScreen() {
                                     {getDisplayTitle(item.title)}
                                 </Text>
                                 <Text style={styles.cardSubtitle} numberOfLines={1}>
-                                    {item.title.toLowerCase().includes('sop') ? 'SOP' : 'Safety'} • Version 1.0
+                                    {item.title.toLowerCase().includes('sop') ? 'SOP' : 'Safety'} • Version {getVersion(item.title)}
                                 </Text>
 
                                 {item.signed ? (
