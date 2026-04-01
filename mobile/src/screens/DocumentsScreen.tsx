@@ -1,8 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, Dimensions } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import {
+    View,
+    Text,
+    FlatList,
+    TouchableOpacity,
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+} from 'react-native';
 import Pdf from 'react-native-pdf';
-import { Checkbox } from 'react-native-paper';
+import { Button, Checkbox, Icon } from 'react-native-paper';
 import AuthenticationService from '../logic/AuthenticationService';
+import { ThemeContext } from '../theme/colourController';
+import { styles as screenStyles } from './DocumentsScreen.styles';
 
 type Document = {
     documentId: number;
@@ -11,13 +21,20 @@ type Document = {
     signed: boolean;
 };
 
+type CategoryFilter = 'policies' | 'sop';
+type StatusFilter = 'all' | 'awaiting' | 'signed';
+
 export default function DocumentsScreen() {
+    const { theme, accessibility } = useContext(ThemeContext);
+    const styles = screenStyles(theme, accessibility);
+
     const [documents, setDocuments] = useState<Document[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
     const [checked, setChecked] = useState(false);
 
-    const [filter, setFilter] = useState<'policies' | 'sop'>('policies');
+    const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('policies');
+    const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
     useEffect(() => {
         fetchDocuments();
@@ -79,12 +96,23 @@ export default function DocumentsScreen() {
         }
     };
 
-    if (loading) return <ActivityIndicator testID="loading-indicator" />;
+    // Loading
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator
+                    testID="loading-indicator"
+                    size="large"
+                    color={theme.redPrimary}
+                />
+            </View>
+        );
+    }
 
-    // When viewing a document
+    // PDF viewer
     if (selectedDocument) {
         return (
-            <View style={{ flex: 1 }}>
+            <View style={styles.pdfScreen}>
                 <TouchableOpacity onPress={() => setSelectedDocument(null)}>
                     <Text>Back</Text>
                 </TouchableOpacity>
@@ -99,7 +127,7 @@ export default function DocumentsScreen() {
 
                 <View>
                     <Checkbox
-                        testID={"documentAcknowledgedCheckbox"}
+                        testID="documentAcknowledgedCheckbox"
                         status={checked ? 'checked' : 'unchecked'}
                         onPress={handleCheckboxPress}
                     />
@@ -109,41 +137,140 @@ export default function DocumentsScreen() {
         );
     }
 
-    // Filtering logic
+    // Logic for filtering
     const filteredDocuments = documents.filter(doc => {
         const title = doc.title.toLowerCase();
 
-        if (filter === 'sop') {
+        if (categoryFilter === 'sop') {
             return title.includes('sop');
         }
 
         return !title.includes('sop') && !title.includes('handbook');
     });
 
+    // List of Documents
     return (
-        <View>
+        <View style={styles.screen}>
 
-            {/* Filter Buttons */}
-            <TouchableOpacity onPress={() => setFilter('policies')}>
-                <Text>Health and Safety Policies</Text>
-            </TouchableOpacity>
+            {/* Category Toggle */}
+            <View style={styles.categoryToggleContainer}>
+                <View style={[
+                    styles.categoryButtonWrapper,
+                    categoryFilter === 'policies' && styles.categoryButtonWrapperActive,
+                ]}>
+                    <TouchableOpacity
+                        style={styles.categoryButton}
+                        onPress={() => setCategoryFilter('policies')}
+                    >
+                        <Text style={[
+                            styles.categoryButtonText,
+                            categoryFilter === 'policies' && styles.categoryButtonTextActive,
+                        ]}>
+                            {'Health and Safety\nPolicies'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
 
-            <TouchableOpacity onPress={() => setFilter('sop')}>
-                <Text>SOPs and Instructions</Text>
-            </TouchableOpacity>
+                <View style={[
+                    styles.categoryButtonWrapper,
+                    categoryFilter === 'sop' && styles.categoryButtonWrapperActive,
+                ]}>
+                    <TouchableOpacity
+                        style={styles.categoryButton}
+                        onPress={() => setCategoryFilter('sop')}
+                    >
+                        <Text style={[
+                            styles.categoryButtonText,
+                            categoryFilter === 'sop' && styles.categoryButtonTextActive,
+                        ]}>
+                            {'SOPs/\nInstructions'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            {/* Status Filter Pills */}
+            <View style={styles.statusFilterContainer}>
+                {(['all', 'awaiting', 'signed'] as StatusFilter[]).map((s) => {
+                    const label = s === 'all' ? 'All' : s === 'awaiting' ? 'Awaiting Signature' : 'Signed';
+                    return (
+                        <TouchableOpacity
+                            key={s}
+                            style={[
+                                styles.statusPill,
+                                statusFilter === s && styles.statusPillActive,
+                            ]}
+                            onPress={() => setStatusFilter(s)}
+                        >
+                            <Text style={[
+                                styles.statusPillText,
+                                statusFilter === s && styles.statusPillTextActive,
+                            ]}>
+                                {label}
+                            </Text>
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
 
             {/* Document List */}
             <FlatList
                 data={filteredDocuments}
                 keyExtractor={(item) => item.documentId.toString()}
+                contentContainerStyle={styles.listContent}
                 renderItem={({ item }) => (
-                    <TouchableOpacity onPress={() => {
-                        setSelectedDocument(item);
-                        setChecked(item.signed);
-                    }}>
-                        <Text>{item.title}</Text>
-                        <Text>View</Text>
-                    </TouchableOpacity>
+                    <View style={styles.card}>
+
+                        {/* Card Header Row */}
+                        <View style={styles.cardHeader}>
+                            <View style={[
+                                styles.iconContainer,
+                                item.signed ? styles.iconContainerSigned : styles.iconContainerUnsigned,
+                            ]}>
+                                <Icon
+                                    source="file-document-outline"
+                                    size={22}
+                                    color={item.signed ? theme.greenPrimary : theme.redPrimary}
+                                />
+                            </View>
+
+                            <View style={styles.cardTextContainer}>
+                                <Text style={styles.cardTitle} numberOfLines={1}>
+                                    {item.title}
+                                </Text>
+                                <Text style={styles.cardSubtitle} numberOfLines={1}>
+                                    Safety • Version 1.0
+                                </Text>
+
+                                {item.signed ? (
+                                    <View style={styles.signedBadge}>
+                                        <Icon source="check" size={12} color={theme.greenPrimary} />
+                                        <Text style={styles.signedBadgeText}>Signed</Text>
+                                    </View>
+                                ) : (
+                                    <View style={styles.unsignedBadge}>
+                                        <Icon source="clock-outline" size={12} color={theme.redPrimary} />
+                                        <Text style={styles.unsignedBadgeText}>NEW • Signature Required</Text>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+
+                        {/* Action Button */}
+                        <Button
+                            mode="contained"
+                            icon="eye"
+                            onPress={() => {
+                                setSelectedDocument(item);
+                                setChecked(item.signed);
+                            }}
+                            style={item.signed ? styles.viewButtonSigned : styles.viewButtonUnsigned}
+                            labelStyle={styles.buttonLabel}
+                            contentStyle={styles.buttonContent}
+                        >
+                            {item.signed ? 'View' : 'Review & Sign'}
+                        </Button>
+                    </View>
                 )}
             />
         </View>
