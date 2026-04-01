@@ -33,6 +33,7 @@ export interface CalendarEvent {
     date: string;
     type: CalendarEventType;
     label: string;
+    notes?: string;
 }
 
 const DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
@@ -125,6 +126,18 @@ function eventConfig(type: CalendarEventType): {
     }
 }
 
+// Builds the tooltip content showing the name and optional notes
+function TooltipContent({ label, notes }: { label: string; notes?: string }) {
+    return (
+        <Box sx={styles.tooltipContent}>
+            <Typography sx={styles.tooltipLabel}>{label}</Typography>
+            {notes && (
+                <Typography sx={styles.tooltipNotes}>{notes}</Typography>
+            )}
+        </Box>
+    );
+}
+
 // Renders a single full-width coloured event chip inside a calendar day cell
 interface EventChipProps {
     event: CalendarEvent;
@@ -133,7 +146,11 @@ interface EventChipProps {
 function EventChip({ event }: EventChipProps) {
     const { chipBg, iconCircleBg, textColor, Icon } = eventConfig(event.type);
     return (
-        <Tooltip title={event.label} placement="top" arrow>
+        <Tooltip
+            title={<TooltipContent label={event.label} notes={event.notes} />}
+            placement="top"
+            arrow
+        >
             <Box sx={styles.eventChip(chipBg)}>
                 <Box sx={styles.eventIconCircle(iconCircleBg)}>
                     <Icon sx={{ fontSize: "14px", color: DefaultColours.white }} />
@@ -325,13 +342,13 @@ const m = String(now.getMonth() + 1).padStart(2, "0");
 
 const SAMPLE_EVENTS: CalendarEvent[] = [
     { id: "1",  date: `${y}-${m}-01`, type: "nationalHoliday", label: "New Year's Day" },
-    { id: "2",  date: `${y}-${m}-04`, type: "sickLeave",       label: "Maggie M" },
-    { id: "3",  date: `${y}-${m}-08`, type: "bookedLeave",     label: "Doug G" },
+    { id: "2",  date: `${y}-${m}-04`, type: "sickLeave",       label: "Maggie M",  notes: "Flu symptoms and doctor advised rest." },
+    { id: "3",  date: `${y}-${m}-08`, type: "bookedLeave",     label: "Doug G",    notes: "Family holiday booked earlier this year." },
     { id: "4",  date: `${y}-${m}-10`, type: "trainingLeave",   label: "Maggie M" },
-    { id: "5",  date: `${y}-${m}-10`, type: "sickLeave",       label: "Doug G" },
-    { id: "6",  date: `${y}-${m}-14`, type: "bookedLeave",     label: "Maggie M" },
+    { id: "5",  date: `${y}-${m}-10`, type: "sickLeave",       label: "Doug G",    notes: "Family emergency." },
+    { id: "6",  date: `${y}-${m}-14`, type: "bookedLeave",     label: "Maggie M",  notes: "Trip abroad planned." },
     { id: "7",  date: `${y}-${m}-17`, type: "trainingLeave",   label: "Doug G" },
     { id: "8",  date: `${y}-${m}-18`, type: "nationalHoliday", label: "Bank Holiday" },
-    { id: "9",  date: `${y}-${m}-21`, type: "sickLeave",       label: "Maggie M" },
+    { id: "9",  date: `${y}-${m}-21`, type: "sickLeave",       label: "Maggie M",  notes: "Personal time off requested." },
     { id: "11", date: `${y}-${m}-29`, type: "trainingLeave",   label: "Maggie M" },
 ];

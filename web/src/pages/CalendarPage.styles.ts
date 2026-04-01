@@ -158,7 +158,7 @@ export const calendarPageStyles = {
         color: DefaultColours.greyPrimaryMainText,
     },
 
-    // Day number for today shown as a red circle badge, aligned top left
+    // Day number for today shown as a red circle badge aligned to the top left
     dayNumberToday: {
         ...TextStyles.semiBold,
         fontSize: FontSize.l24,
@@ -228,6 +228,28 @@ export const calendarPageStyles = {
         color: DefaultColours.greyPrimaryMainText,
         paddingLeft: "4px",
         paddingTop: "2px",
+    },
+
+    // Wrapper inside the tooltip that stacks the name and notes vertically
+    tooltipContent: {
+        display: "flex",
+        flexDirection: "column" as const,
+        gap: "4px",
+        padding: "2px 0",
+    },
+
+    // Bold name line at the top of the tooltip
+    tooltipLabel: {
+        ...TextStyles.semiBold,
+        fontSize: FontSize.xs14,
+        color: DefaultColours.white,
+    },
+
+    // Lighter notes line below the name in the tooltip
+    tooltipNotes: {
+        ...TextStyles.regular,
+        fontSize: FontSize.xs14,
+        color: DefaultColours.greyIconLight,
     },
 
     // Row of key items shown below the calendar grid
