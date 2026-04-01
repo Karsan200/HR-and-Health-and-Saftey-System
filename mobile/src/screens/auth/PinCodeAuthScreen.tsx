@@ -1,10 +1,9 @@
 import {Image, ScrollView, Text, View} from 'react-native';
-import {Avatar, Button, Dialog, Portal} from 'react-native-paper';
+import {Button, Dialog, Portal} from 'react-native-paper';
 import React, { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react';
 import { ThemeContext } from '../../theme/colourController.tsx';
 
 import { passwordAuthScreenStyles } from './PasswordAuthScreen.styles.ts';
-import { homeStyles } from '../HomeScreen.styles.ts';
 import { PinCodeAuthScreen as styles } from './PinCodeAuthScreen.styles.ts';
 import {PinCodeBubble} from "../../components/auth/PinCodeBubble.tsx";
 import AuthenticationService from "../../logic/AuthenticationService.ts";
@@ -20,7 +19,6 @@ export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boole
 
     const { theme, accessibility } = useContext(ThemeContext)
     const themedStyles = styles(theme, accessibility);
-    const homeThemedStyles = homeStyles(theme, accessibility);
     const authThemedStyles = passwordAuthScreenStyles(theme, accessibility);
 
 
@@ -151,13 +149,9 @@ export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boole
                     style={authThemedStyles.image}
                 />
             </ScrollView>
-            <Avatar.Icon
-                size={300}
-                icon="account-circle"
-                style={homeThemedStyles.profileIcon}
-                color={theme.redPrimary}
-            />
+          <ScrollView contentContainerStyle={themedStyles.welcomeBackTextContainer}>
             <Text style={themedStyles.welcomeBackText}>{greeting}</Text>
+          </ScrollView>
             <View style={themedStyles.bubbleContainer}>
                 {pinBubbles.map((isEnabled, index) => (
                     <PinCodeBubble key={index} isEnabled={isEnabled} />
