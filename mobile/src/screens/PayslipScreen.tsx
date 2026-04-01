@@ -58,13 +58,13 @@ const formatP60Subtitle = (year: number, month: number): string => {
 };
 
 export default function PayslipScreen() {
-    const { theme, accessibility } = useContext(ThemeContext);
-    const styles = screenStyles(theme, accessibility);
+    const { theme} = useContext(ThemeContext);
+    const styles = screenStyles(theme);
 
     const [payslips, setPayslips] = useState<Payslip[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
-    // Tracks which card is currently expanded (by its unique key), or null if none.
+    // Tracks which card is currently expanded
     const [expandedKey, setExpandedKey] = useState<string | null>(null);
 
     useEffect(() => {
@@ -94,7 +94,7 @@ export default function PayslipScreen() {
         setExpandedKey(prev => (prev === key ? null : key));
     };
 
-    // ── Loading State ───────────────────────────────────────────────────────────
+    // Loading
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
@@ -107,7 +107,7 @@ export default function PayslipScreen() {
         );
     }
 
-    // ── Payslip List ────────────────────────────────────────────────────────────
+    // List of Payslips
     return (
         <View style={styles.screen}>
             <ScrollView style={styles.scrollView} contentContainerStyle={styles.container}>
