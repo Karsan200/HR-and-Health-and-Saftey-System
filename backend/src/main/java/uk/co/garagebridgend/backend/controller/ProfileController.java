@@ -63,7 +63,7 @@ public class ProfileController {
         } catch (IllegalArgumentException e) {
             // Validation failures (wrong password, username taken, etc.)
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, e.getMessage());
+                    HttpStatus.NOT_ACCEPTABLE, e.getMessage());
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");

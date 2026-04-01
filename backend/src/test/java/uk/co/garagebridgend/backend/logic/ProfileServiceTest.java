@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.context.ActiveProfiles;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
@@ -28,9 +28,6 @@ public class ProfileServiceTest {
     @Mock
     private AuthenticationService authenticationService;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
     @InjectMocks
     private ProfileService profileService;
 
@@ -48,7 +45,7 @@ public class ProfileServiceTest {
         account.setEmail("john.doe@example.com");
         account.setPhoneNumber("1234567890");
         account.setUsername("johndoe");
-        account.setPassword("$2a$hashed");
+        account.setPassword(BCrypt.hashpw("oldpass123", BCrypt.gensalt()));
         account.setCreated(LocalDateTime.of(2026, 3, 18, 10, 0));
     }
 
@@ -211,8 +208,6 @@ public class ProfileServiceTest {
     @Test
     void testUpdateProfilePasswordSuccess() throws AuthenticatedAccountNotFoundException {
         when(authenticationService.getCurrentUser()).thenReturn(account);
-        when(passwordEncoder.matches("oldpass123", "$2a$hashed")).thenReturn(true);
-        when(passwordEncoder.encode("newpass456")).thenReturn("$2a$newhash");
 
         UpdateProfileRequest request = new UpdateProfileRequest();
         request.setOldPassword("oldpass123");
@@ -221,7 +216,7 @@ public class ProfileServiceTest {
 
         profileService.updateProfile(request);
 
-        assertEquals("$2a$newhash", account.getPassword());
+        assertTrue(BCrypt.checkpw("newpass456", account.getPassword()));
         verify(accountRepository).save(account);
     }
 
@@ -279,7 +274,6 @@ public class ProfileServiceTest {
     @Test
     void testUpdateProfilePasswordIncorrectOldPassword() throws AuthenticatedAccountNotFoundException {
         when(authenticationService.getCurrentUser()).thenReturn(account);
-        when(passwordEncoder.matches("wrongpass", "$2a$hashed")).thenReturn(false);
 
         UpdateProfileRequest request = new UpdateProfileRequest();
         request.setOldPassword("wrongpass");
@@ -296,7 +290,6 @@ public class ProfileServiceTest {
     @Test
     void testUpdateProfilePasswordConfirmationMismatch() throws AuthenticatedAccountNotFoundException {
         when(authenticationService.getCurrentUser()).thenReturn(account);
-        when(passwordEncoder.matches("oldpass123", "$2a$hashed")).thenReturn(true);
 
         UpdateProfileRequest request = new UpdateProfileRequest();
         request.setOldPassword("oldpass123");
@@ -313,7 +306,6 @@ public class ProfileServiceTest {
     @Test
     void testUpdateProfilePasswordTooShort() throws AuthenticatedAccountNotFoundException {
         when(authenticationService.getCurrentUser()).thenReturn(account);
-        when(passwordEncoder.matches("oldpass123", "$2a$hashed")).thenReturn(true);
 
         UpdateProfileRequest request = new UpdateProfileRequest();
         request.setOldPassword("oldpass123");
@@ -343,7 +335,7 @@ public class ProfileServiceTest {
         verify(accountRepository, never()).save(any());
     }
 
-    // ── updateProfile, no fields filled
+    // updateProfile, no fields filled
 
     @Test
     void testUpdateProfileNoFieldsStillSaves() throws AuthenticatedAccountNotFoundException {

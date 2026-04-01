@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -82,6 +82,20 @@ const EditProfileScreen = () => {
 
   const [errors, setErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
+
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await ProfileService.getProfile();
+        setEmail(data.email ?? '');
+        setPhone(data.phoneNumber ?? '');
+        setUsername('');
+      } catch (error) {
+        console.error('Failed to load profile:', error);
+      }
+    })();
+  }, []);
 
   const clearError = (field: keyof FieldErrors) =>
     setErrors(prev => ({ ...prev, [field]: undefined }));

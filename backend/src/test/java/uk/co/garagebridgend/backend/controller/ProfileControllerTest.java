@@ -140,7 +140,7 @@ public class ProfileControllerTest {
     }
 
     @Test
-    void testUpdateCurrentUserBadRequest() throws Exception {
+    void testUpdateCurrentUserNotAcceptable() throws Exception {
         UpdateProfileRequest request = new UpdateProfileRequest();
         request.setOldPassword("wrongpassword");
         request.setNewPassword("newpass123");
@@ -152,7 +152,7 @@ public class ProfileControllerTest {
         mockMvc.perform(put("/api/profile/me")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotAcceptable())
                 .andExpect(status().reason("Current password is incorrect"));
     }
 

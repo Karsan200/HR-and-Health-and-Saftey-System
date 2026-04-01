@@ -2,8 +2,8 @@ package uk.co.garagebridgend.backend.logic;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.request.UpdateProfileRequest;
@@ -28,26 +28,19 @@ public class ProfileService {
     /** Repository for persisting account changes. */
     private final AccountRepository accountRepository;
 
-    /** Encoder used to hash and verify passwords. */
-    private final PasswordEncoder passwordEncoder;
-
     /**
      * Constructor for dependency injection of required services and repositories.
      *
      * @param authenticationServiceImpl the AuthenticationService implementation to use
      * @param accountRepositoryImpl     the AccountRepository for persistence
-     * @param passwordEncoderImpl       the PasswordEncoder for password hashing
      */
     @Autowired
     public ProfileService(
             final AuthenticationService authenticationServiceImpl,
-            final AccountRepository accountRepositoryImpl,
-            final PasswordEncoder passwordEncoderImpl) {
+            final AccountRepository accountRepositoryImpl) {
         this.authenticationService = authenticationServiceImpl;
         this.accountRepository = accountRepositoryImpl;
-        this.passwordEncoder = passwordEncoderImpl;
     }
-
     /**
      * Retrieves the profile information of the currently authenticated user.
      * This includes first name, last name, email, phone number, and account creation date.
@@ -123,7 +116,7 @@ public class ProfileService {
             }
 
             // Verify the current password is correct
-            if (!passwordEncoder.matches(request.getOldPassword(), account.getPassword())) {
+            if (!BCrypt.checkpw(request.getOldPassword(), account.getPassword())) {
                 throw new IllegalArgumentException("Current password is incorrect");
             }
 
@@ -136,7 +129,7 @@ public class ProfileService {
                 throw new IllegalArgumentException("New password must be at least 8 characters");
             }
 
-            account.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            account.setPassword(BCrypt.hashpw(request.getNewPassword(), BCrypt.gensalt()));
         }
 
         accountRepository.save(account);
