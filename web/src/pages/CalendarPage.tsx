@@ -86,54 +86,57 @@ function buildCalendarGrid(year: number, month: number): Date[][] {
     return weeks;
 }
 
-// Returns icon, background and text colour config for each event type
+// Returns icon, chip background, icon circle background and text colour for each event type
 function eventConfig(type: CalendarEventType): {
-    iconBg: string;
+    chipBg: string;
+    iconCircleBg: string;
     textColor: string;
     Icon: React.ElementType;
 } {
     switch (type) {
         case "nationalHoliday":
             return {
-                iconBg: DefaultColours.blueLight,
+                chipBg: DefaultColours.blueLight,
+                iconCircleBg: DefaultColours.bluePrimary,
                 textColor: DefaultColours.blueDark,
                 Icon: BeachAccessOutlined,
             };
         case "sickLeave":
             return {
-                iconBg: DefaultColours.redBackgroundLight,
+                chipBg: DefaultColours.redBackgroundLight,
+                iconCircleBg: DefaultColours.redPrimary,
                 textColor: DefaultColours.redTextDark,
                 Icon: SickOutlined,
             };
         case "bookedLeave":
             return {
-                iconBg: DefaultColours.amberBackgroundLight,
+                chipBg: DefaultColours.amberBackgroundLight,
+                iconCircleBg: DefaultColours.amberPrimary,
                 textColor: DefaultColours.amberTextDark,
                 Icon: EventAvailableOutlined,
             };
         case "trainingLeave":
             return {
-                iconBg: DefaultColours.greenBackgroundLight,
+                chipBg: DefaultColours.greenBackgroundLight,
+                iconCircleBg: DefaultColours.greenPrimary,
                 textColor: DefaultColours.greenTextDark,
                 Icon: SchoolOutlined,
             };
     }
 }
 
-// Renders a single coloured event chip inside a calendar day cell
+// Renders a single full-width coloured event chip inside a calendar day cell
 interface EventChipProps {
     event: CalendarEvent;
 }
 
 function EventChip({ event }: EventChipProps) {
-    const { iconBg, textColor, Icon } = eventConfig(event.type);
+    const { chipBg, iconCircleBg, textColor, Icon } = eventConfig(event.type);
     return (
         <Tooltip title={event.label} placement="top" arrow>
-            <Box sx={styles.eventChip}>
-                <Box sx={styles.eventIconWrap}>
-                    <Box sx={styles.eventIconCircle(iconBg)}>
-                        <Icon sx={{ fontSize: "14px", color: textColor }} />
-                    </Box>
+            <Box sx={styles.eventChip(chipBg)}>
+                <Box sx={styles.eventIconCircle(iconCircleBg)}>
+                    <Icon sx={{ fontSize: "14px", color: DefaultColours.white }} />
                 </Box>
                 <Typography sx={styles.eventLabel(textColor)}>
                     {event.label}
@@ -148,11 +151,11 @@ function CalendarKey() {
     return (
         <Box sx={styles.keyRow}>
             {KEY_ITEMS.map(({ type, label }) => {
-                const { iconBg, textColor, Icon } = eventConfig(type);
+                const { chipBg, iconCircleBg, textColor, Icon } = eventConfig(type);
                 return (
                     <Box key={type} sx={styles.keyItem}>
-                        <Box sx={styles.eventIconCircle(iconBg)}>
-                            <Icon sx={{ fontSize: "14px", color: textColor }} />
+                        <Box sx={styles.eventIconCircle(chipBg)}>
+                            <Icon sx={{ fontSize: "14px", color: iconCircleBg }} />
                         </Box>
                         <Typography sx={styles.keyLabel(textColor)}>
                             {label}
@@ -280,12 +283,12 @@ export function CalendarPage({
                                         sx={cellSx}
                                         onClick={() => isCurrentMonth && onDayClick?.(iso)}
                                     >
-                                        {/* Day number, styled differently for today and out-of-month days */}
+                                        {/* Day number in the top left, styled for today and out-of-month days */}
                                         <Box sx={numSx}>
                                             {date.getDate()}
                                         </Box>
 
-                                        {/* Event chips, capped at two with an overflow count below */}
+                                        {/* Event chips stacked below the day number */}
                                         <Box sx={styles.eventsContainer}>
                                             {visibleEvents.map(ev => (
                                                 <Box

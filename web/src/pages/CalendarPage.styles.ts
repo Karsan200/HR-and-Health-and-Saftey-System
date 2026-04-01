@@ -7,7 +7,7 @@ export const calendarPageStyles = {
         display: "flex",
         flexDirection: "column" as const,
         padding: "24px 80px 80px",
-        gap: "10px",
+        gap: "40px",
         minHeight: "100vh",
         backgroundColor: DefaultColours.greyBackground,
     },
@@ -106,13 +106,13 @@ export const calendarPageStyles = {
     dayCell: {
         display: "flex",
         flexDirection: "column" as const,
-        justifyContent: "space-between",
         alignItems: "flex-start",
         padding: "12px",
         minHeight: "140px",
         border: `1px solid ${DefaultColours.greyBackground}`,
         backgroundColor: DefaultColours.white,
         cursor: "pointer",
+        gap: "6px",
         "&:hover": {
             backgroundColor: DefaultColours.greyBackground,
         },
@@ -122,34 +122,33 @@ export const calendarPageStyles = {
     dayCellToday: {
         display: "flex",
         flexDirection: "column" as const,
-        justifyContent: "space-between",
         alignItems: "flex-start",
         padding: "12px",
         minHeight: "140px",
         border: `1px solid ${DefaultColours.greyBackground}`,
         backgroundColor: DefaultColours.white,
         cursor: "pointer",
+        gap: "6px",
     },
 
     // Day cell variant for days outside the current month
     dayCellOutsideMonth: {
         display: "flex",
         flexDirection: "column" as const,
-        justifyContent: "space-between",
         alignItems: "flex-start",
         padding: "12px",
         minHeight: "140px",
         border: `1px solid ${DefaultColours.greyBackground}`,
         backgroundColor: DefaultColours.greyBackground,
         cursor: "default",
+        gap: "6px",
     },
 
-    // Day number for a normal in-month day
+    // Day number aligned to the top left for a normal in-month day
     dayNumber: {
         ...TextStyles.semiBold,
         fontSize: FontSize.l24,
         color: DefaultColours.black,
-        margin: "0 auto",
     },
 
     // Day number for days outside the current month shown in grey
@@ -157,10 +156,9 @@ export const calendarPageStyles = {
         ...TextStyles.semiBold,
         fontSize: FontSize.l24,
         color: DefaultColours.greyPrimaryMainText,
-        margin: "0 auto",
     },
 
-    // Day number for today shown as a red circle badge
+    // Day number for today shown as a red circle badge, aligned top left
     dayNumberToday: {
         ...TextStyles.semiBold,
         fontSize: FontSize.l24,
@@ -172,29 +170,25 @@ export const calendarPageStyles = {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        margin: "0 auto",
     },
 
-    // Container that stacks event chips at the bottom of each day cell
+    // Container that stacks event chips below the day number
     eventsContainer: {
         display: "flex",
         flexDirection: "column" as const,
-        justifyContent: "flex-end",
         gap: "4px",
         width: "100%",
-        flex: 1,
-        paddingTop: "4px",
     },
 
-    // Pill-shaped chip showing a single event in a day cell
-    eventChip: {
+    // Full width event chip with coloured background, icon and label
+    eventChip: (bg: string) => ({
         display: "flex",
         flexDirection: "row" as const,
         alignItems: "center",
         gap: "8px",
-        padding: "0px",
+        padding: "4px 8px",
         height: "32px",
-        backgroundColor: DefaultColours.greyBackground,
+        backgroundColor: bg,
         borderRadius: "6px",
         width: "100%",
         overflow: "hidden",
@@ -202,17 +196,7 @@ export const calendarPageStyles = {
         "&:hover": {
             opacity: 0.85,
         },
-    },
-
-    // Fixed-width wrapper for the icon circle inside an event chip
-    eventIconWrap: {
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "32px",
-        height: "32px",
-        flexShrink: 0,
-    },
+    }),
 
     // Coloured circle behind the event icon, background colour passed as a param
     eventIconCircle: (bg: string) => ({
@@ -223,18 +207,18 @@ export const calendarPageStyles = {
         height: "24px",
         borderRadius: "50%",
         backgroundColor: bg,
+        flexShrink: 0,
     }),
 
     // Event label text, colour passed as a param to match the event type
     eventLabel: (color: string) => ({
         ...TextStyles.semiBold,
-        fontSize: FontSize.s16,
+        fontSize: FontSize.xs14,
         color,
         whiteSpace: "nowrap" as const,
         overflow: "hidden",
         textOverflow: "ellipsis",
         flex: 1,
-        paddingRight: "6px",
     }),
 
     // Small grey label shown when a day has more events than the visible cap
@@ -242,7 +226,7 @@ export const calendarPageStyles = {
         ...TextStyles.regular,
         fontSize: FontSize.xs14,
         color: DefaultColours.greyPrimaryMainText,
-        textAlign: "center" as const,
+        paddingLeft: "4px",
         paddingTop: "2px",
     },
 
