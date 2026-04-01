@@ -141,11 +141,18 @@ export default function DocumentsScreen() {
     const filteredDocuments = documents.filter(doc => {
         const title = doc.title.toLowerCase();
 
-        if (categoryFilter === 'sop') {
-            return title.includes('sop');
-        }
+        // Category filter
+        const matchesCategory = categoryFilter === 'sop'
+            ? title.includes('sop')
+            : !title.includes('sop') && !title.includes('handbook');
 
-        return !title.includes('sop') && !title.includes('handbook');
+        // Status filter
+        const matchesStatus =
+            statusFilter === 'all' ? true :
+                statusFilter === 'awaiting' ? !doc.signed :
+                    doc.signed;
+
+        return matchesCategory && matchesStatus;
     });
 
     // List of Documents
@@ -239,7 +246,7 @@ export default function DocumentsScreen() {
                                     {item.title}
                                 </Text>
                                 <Text style={styles.cardSubtitle} numberOfLines={1}>
-                                    Safety • Version 1.0
+                                    {item.title.toLowerCase().includes('sop') ? 'SOP' : 'Safety'} • Version 1.0
                                 </Text>
 
                                 {item.signed ? (
