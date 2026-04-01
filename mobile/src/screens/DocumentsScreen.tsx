@@ -24,6 +24,21 @@ type Document = {
 type CategoryFilter = 'policies' | 'sop';
 type StatusFilter = 'all' | 'awaiting' | 'signed';
 
+
+// Strips the "SOP: " prefix from a title for display purposes. and the version suffix e.g. "v2.5"
+const getDisplayTitle = (title: string): string => {
+    return title
+        .replace(/^SOP:\s*/i, '')
+        .replace(/\sv\d+(\.\d+)?$/i, '')
+        .trim();
+};
+
+// Extracts a version string from the end of a title e.g. "v2.5" → "2.5". returns "1.0" if no version found.
+const getVersion = (title: string): string => {
+    const match = title.match(/\sv(\d+(\.\d+)?)$/i);
+    return match ? match[1] : '1.0';
+};
+
 export default function DocumentsScreen() {
     const { theme, accessibility } = useContext(ThemeContext);
     const styles = screenStyles(theme, accessibility);
@@ -113,26 +128,44 @@ export default function DocumentsScreen() {
     if (selectedDocument) {
         return (
             <View style={styles.pdfScreen}>
-                <TouchableOpacity onPress={() => setSelectedDocument(null)}>
-                    <Text>Back</Text>
-                </TouchableOpacity>
 
-                <Text>{selectedDocument.title}</Text>
+                {/* Back header */}
+                <View style={styles.pdfHeader}>
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => setSelectedDocument(null)}
+                    >
+                        <Icon source="arrow-left" size={24} color={theme.black} />
+                    </TouchableOpacity>
+                    <Text style={styles.pdfHeaderTitle} numberOfLines={1}>
+                        {getDisplayTitle(selectedDocument.title)}
+                    </Text>
+                </View>
 
-                <Pdf
-                    source={{ uri: selectedDocument.url, cache: false }}
-                    trustAllCerts={false}
-                    style={{ flex: 1, width: Dimensions.get('window').width }}
-                />
+                {/* PDF Viewer */}
+                <View style={styles.pdfContainer}>
+                    <Pdf
+                        source={{ uri: selectedDocument.url, cache: false }}
+                        trustAllCerts={false}
+                        style={styles.pdf}
+                        onError={(error) => {
+                            console.error('PDF error:', error);
+                            Alert.alert('Error', 'Failed to load PDF.');
+                        }}
+                    />
+                </View>
 
-                <View>
+                {/* Acknowledgement Row */}
+                <View style={styles.acknowledgeContainer}>
                     <Checkbox
                         testID="documentAcknowledgedCheckbox"
                         status={checked ? 'checked' : 'unchecked'}
                         onPress={handleCheckboxPress}
+                        color={theme.redPrimary}
                     />
-                    <Text>I acknowledge this document</Text>
+                    <Text style={styles.acknowledgeText}>I acknowledge this document</Text>
                 </View>
+
             </View>
         );
     }
@@ -154,20 +187,6 @@ export default function DocumentsScreen() {
 
         return matchesCategory && matchesStatus;
     });
-
-    // Strips the "SOP: " prefix from a title for display purposes. and the version suffix e.g. "v2.5"
-    const getDisplayTitle = (title: string): string => {
-        return title
-            .replace(/^SOP:\s*/i, '')
-            .replace(/\sv\d+(\.\d+)?$/i, '')
-            .trim();
-    };
-
-    // Extracts a version string from the end of a title e.g. "v2.5" → "2.5". returns "1.0" if no version found.
-    const getVersion = (title: string): string => {
-        const match = title.match(/\sv(\d+(\.\d+)?)$/i);
-        return match ? match[1] : '1.0';
-    };
 
     // List of Documents
     return (

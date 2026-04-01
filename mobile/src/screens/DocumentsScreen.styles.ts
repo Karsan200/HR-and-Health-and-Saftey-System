@@ -16,11 +16,6 @@ export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslex
             backgroundColor: theme.greyBackground,
         },
 
-        pdfScreen: {
-            flex: 1,
-            backgroundColor: theme.black,
-        },
-
         // Category buttons
 
         categoryToggleContainer: {
@@ -236,6 +231,78 @@ export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslex
 
         buttonContent: {
             paddingVertical: 4,
+        },
+
+        // PDF viewer
+
+        pdfScreen: {
+            flex: 1,
+            backgroundColor: theme.greyBackground,
+        },
+
+        pdfContainer: {
+            flex: 1,
+            marginHorizontal: Spacing.mediumPadding,
+            marginTop: 12,
+            marginBottom: 8,
+            borderRadius: BorderRadius.largeButtonsAndOutlines,
+            overflow: 'hidden',
+            backgroundColor: theme.white,
+            shadowColor: theme.greyIconLight,
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 1,
+            shadowRadius: 4,
+            elevation: 4,
+        },
+
+        pdf: {
+            flex: 1,
+            backgroundColor: theme.white,
+        },
+
+        acknowledgeContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginHorizontal: Spacing.mediumPadding,
+            marginBottom: 24,
+            backgroundColor: theme.white,
+            borderRadius: BorderRadius.largeButtonsAndOutlines,
+            paddingVertical: 12,
+            paddingHorizontal: Spacing.mediumPadding,
+            shadowColor: theme.greyIconLight,
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 1,
+            shadowRadius: 4,
+            elevation: 4,
+        },
+
+        acknowledgeText: {
+            fontFamily: Fonts.poppins.regular,
+            fontWeight: TextStyles.regular.fontWeight,
+            fontSize: FontSize.s16,
+            color: theme.black,
+            flex: 1,
+        },
+
+        pdfHeader: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: Spacing.mediumPadding,
+            paddingVertical: 12,
+            backgroundColor: theme.greyBackground,
+            gap: 8,
+        },
+
+        backButton: {
+            padding: 4,
+        },
+
+        pdfHeaderTitle: {
+            fontFamily: Fonts.poppins.regular,
+            fontWeight: TextStyles.semiBold.fontWeight,
+            fontSize: FontSize.s16,
+            color: theme.black,
+            flex: 1,
         },
     });
 };
