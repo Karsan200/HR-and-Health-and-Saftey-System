@@ -3,7 +3,6 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { NavLink } from "react-router-dom";
 
-import logo from "../assets/images/Rent-a-Tech-Logo.png";
 import { navbarStyles as styles } from "./Navbar.styles";
 
 // Defining the items to be displayed in the navbar, with their corresponding paths.
@@ -22,7 +21,7 @@ export function Navbar() {
                 <Box sx={styles.logoContainer}>
                     <Box
                         component="img"
-                        src={logo}
+                        src="/assets/images/Rent-a-Tech-Logo.png"
                         alt="Rent-A-Tech"
                         sx={styles.logo}
                     />
