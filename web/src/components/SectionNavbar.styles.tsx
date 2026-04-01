@@ -1,4 +1,5 @@
 import { DefaultColours } from "../theme/colours";
+import { FontSize, TextStyles } from "../theme/theme";
 
 export const sectionNavBarStyles = {
     // Row containing all navigation tab cards
@@ -40,9 +41,8 @@ export const sectionNavBarStyles = {
 
     // Label text inside each tab card
     label: {
-        fontFamily: "Poppins, sans-serif",
-        fontWeight: "400",
-        fontSize: "20px",
+        ...TextStyles.regular,
+        fontSize: FontSize.m20,
         color: DefaultColours.black,
         textAlign: "center" as const,
         letterSpacing: "0.17px",

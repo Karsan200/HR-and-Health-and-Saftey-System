@@ -1,5 +1,5 @@
 import { DefaultColours } from "../theme/colours";
-import {Fonts, FontSize, TextStyles} from "../theme/theme.ts";
+import { FontSize, TextStyles } from "../theme/theme";
 
 export const calendarPageStyles = {
     // Page wrapper
@@ -55,9 +55,8 @@ export const calendarPageStyles = {
 
     // Month and year label between the navigation buttons
     navMonthLabel: {
-        fontFamily: "Poppins, sans-serif",
-        fontWeight: "500",
-        fontSize: "15px",
+        ...TextStyles.medium,
+        fontSize: FontSize.s16,
         color: DefaultColours.black,
         minWidth: "160px",
         textAlign: "center" as const,
@@ -87,9 +86,8 @@ export const calendarPageStyles = {
         height: "40px",
         backgroundColor: DefaultColours.blueLight,
         border: `1px solid ${DefaultColours.blueLight}`,
-        fontFamily: Fonts.regular,
-        fontWeight: TextStyles.medium,
-        fontSize: FontSize.m20,
+        ...TextStyles.medium,
+        fontSize: FontSize.s16,
         color: DefaultColours.greyPrimaryMainText,
     },
 
@@ -144,27 +142,24 @@ export const calendarPageStyles = {
 
     // Day number for a normal in-month day
     dayNumber: {
-        fontFamily: "Poppins, sans-serif",
-        fontWeight: "600",
-        fontSize: "24px",
+        ...TextStyles.semiBold,
+        fontSize: FontSize.l24,
         color: DefaultColours.black,
         margin: "0 auto",
     },
 
     // Day number for days outside the current month shown in grey
     dayNumberOutside: {
-        fontFamily: "Poppins, sans-serif",
-        fontWeight: "600",
-        fontSize: "24px",
+        ...TextStyles.semiBold,
+        fontSize: FontSize.l24,
         color: DefaultColours.greyPrimaryMainText,
         margin: "0 auto",
     },
 
     // Day number for today shown as a red circle badge
     dayNumberToday: {
-        fontFamily: "Poppins, sans-serif",
-        fontWeight: "600",
-        fontSize: "24px",
+        ...TextStyles.semiBold,
+        fontSize: FontSize.l24,
         color: DefaultColours.white,
         width: "35px",
         height: "35px",
@@ -228,9 +223,8 @@ export const calendarPageStyles = {
 
     // Event label text, colour passed as a param to match the event type
     eventLabel: (color: string) => ({
-        fontFamily: "Poppins, sans-serif",
-        fontWeight: "600",
-        fontSize: "13px",
+        ...TextStyles.semiBold,
+        fontSize: FontSize.s16,
         color,
         whiteSpace: "nowrap" as const,
         overflow: "hidden",
@@ -241,9 +235,8 @@ export const calendarPageStyles = {
 
     // Small grey label shown when a day has more events than the visible cap
     moreEventsLabel: {
-        fontFamily: "Poppins, sans-serif",
-        fontWeight: "400",
-        fontSize: "12px",
+        ...TextStyles.regular,
+        fontSize: FontSize.xs14,
         color: DefaultColours.greyPrimaryMainText,
         textAlign: "center" as const,
         paddingTop: "2px",
