@@ -4,7 +4,7 @@ import { Spacing } from '../theme/theme';
 /**
  * Styles used by the PayslipScreen.
  */
-export const styles = (theme: any, accessibility?: { largeText: boolean; dyslexicFont: boolean }) => {    return StyleSheet.create({
+export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslexicFont: boolean }) => {    return StyleSheet.create({
         /**
          * Root container - fills the screen with the app background colour.
          */
