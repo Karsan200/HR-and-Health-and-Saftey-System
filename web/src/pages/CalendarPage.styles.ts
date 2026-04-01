@@ -86,6 +86,10 @@ export const calendarPageStyles = {
         height: "40px",
         backgroundColor: DefaultColours.blueLight,
         border: `1px solid ${DefaultColours.blueLight}`,
+    },
+
+    // Text label inside each day name header cell
+    dayHeaderLabel: {
         ...TextStyles.medium,
         fontSize: FontSize.s16,
         color: DefaultColours.greyPrimaryMainText,
@@ -241,4 +245,31 @@ export const calendarPageStyles = {
         textAlign: "center" as const,
         paddingTop: "2px",
     },
+
+    // Row of key items shown below the calendar grid
+    keyRow: {
+        display: "flex",
+        flexDirection: "row" as const,
+        justifyContent: "center",
+        alignItems: "center",
+        gap: "32px",
+        paddingTop: "16px",
+        paddingBottom: "8px",
+        borderTop: `1px solid ${DefaultColours.greyBackground}`,
+    },
+
+    // Single key item containing an icon circle and label
+    keyItem: {
+        display: "flex",
+        flexDirection: "row" as const,
+        alignItems: "center",
+        gap: "8px",
+    },
+
+    // Label text for each key item, colour passed as a param to match the event type
+    keyLabel: (color: string) => ({
+        ...TextStyles.regular,
+        fontSize: FontSize.xs14,
+        color,
+    }),
 };

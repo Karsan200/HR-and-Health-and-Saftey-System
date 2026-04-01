@@ -8,9 +8,10 @@ import {
 import {
     ChevronLeft,
     ChevronRight,
-    PlaceOutlined,
-    AccessTimeOutlined,
-    CalendarMonthOutlined,
+    BeachAccessOutlined,
+    SickOutlined,
+    EventAvailableOutlined,
+    SchoolOutlined,
 } from "@mui/icons-material";
 
 import { calendarPageStyles as styles } from "./CalendarPage.styles";
@@ -25,7 +26,7 @@ const CALENDAR_TABS: SectionNavTab[] = [
 ];
 
 // Types for calendar events
-export type CalendarEventType = "visit" | "clockOverride" | "bankHoliday";
+export type CalendarEventType = "nationalHoliday" | "sickLeave" | "bookedLeave" | "trainingLeave";
 
 export interface CalendarEvent {
     id: string;
@@ -39,6 +40,14 @@ const DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 const MONTH_NAMES = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
+];
+
+// Describes each entry shown in the calendar key at the bottom
+const KEY_ITEMS: { type: CalendarEventType; label: string }[] = [
+    { type: "nationalHoliday", label: "National Holiday" },
+    { type: "sickLeave",       label: "Sick Leave" },
+    { type: "bookedLeave",     label: "Booked Leave" },
+    { type: "trainingLeave",   label: "Training Leave" },
 ];
 
 // Converts year, month, day into an ISO date string
@@ -84,23 +93,29 @@ function eventConfig(type: CalendarEventType): {
     Icon: React.ElementType;
 } {
     switch (type) {
-        case "visit":
-            return {
-                iconBg: DefaultColours.greenBackgroundLight,
-                textColor: DefaultColours.greenPrimary,
-                Icon: PlaceOutlined,
-            };
-        case "clockOverride":
-            return {
-                iconBg: DefaultColours.redBackgroundLight,
-                textColor: DefaultColours.redTextDark,
-                Icon: AccessTimeOutlined,
-            };
-        case "bankHoliday":
+        case "nationalHoliday":
             return {
                 iconBg: DefaultColours.blueLight,
                 textColor: DefaultColours.blueDark,
-                Icon: CalendarMonthOutlined,
+                Icon: BeachAccessOutlined,
+            };
+        case "sickLeave":
+            return {
+                iconBg: DefaultColours.redBackgroundLight,
+                textColor: DefaultColours.redTextDark,
+                Icon: SickOutlined,
+            };
+        case "bookedLeave":
+            return {
+                iconBg: DefaultColours.amberBackgroundLight,
+                textColor: DefaultColours.amberTextDark,
+                Icon: EventAvailableOutlined,
+            };
+        case "trainingLeave":
+            return {
+                iconBg: DefaultColours.greenBackgroundLight,
+                textColor: DefaultColours.greenTextDark,
+                Icon: SchoolOutlined,
             };
     }
 }
@@ -125,6 +140,27 @@ function EventChip({ event }: EventChipProps) {
                 </Typography>
             </Box>
         </Tooltip>
+    );
+}
+
+// Renders the colour key row at the bottom of the calendar
+function CalendarKey() {
+    return (
+        <Box sx={styles.keyRow}>
+            {KEY_ITEMS.map(({ type, label }) => {
+                const { iconBg, textColor, Icon } = eventConfig(type);
+                return (
+                    <Box key={type} sx={styles.keyItem}>
+                        <Box sx={styles.eventIconCircle(iconBg)}>
+                            <Icon sx={{ fontSize: "14px", color: textColor }} />
+                        </Box>
+                        <Typography sx={styles.keyLabel(textColor)}>
+                            {label}
+                        </Typography>
+                    </Box>
+                );
+            })}
+        </Box>
     );
 }
 
@@ -207,12 +243,7 @@ export function CalendarPage({
                     <Box sx={styles.dayHeaderRow}>
                         {DAYS.map(d => (
                             <Box key={d} sx={styles.dayHeaderCell}>
-                                <Typography sx={{
-                                    fontFamily: "Poppins, sans-serif",
-                                    fontWeight: "500",
-                                    fontSize: "15px",
-                                    color: DefaultColours.greyPrimaryMainText,
-                                }}>
+                                <Typography sx={styles.dayHeaderLabel}>
                                     {d}
                                 </Typography>
                             </Box>
@@ -276,6 +307,9 @@ export function CalendarPage({
                         </Box>
                     ))}
                 </Box>
+
+                {/* Colour key explaining each event type */}
+                <CalendarKey />
             </Box>
         </Box>
     );
@@ -287,15 +321,14 @@ const y = now.getFullYear();
 const m = String(now.getMonth() + 1).padStart(2, "0");
 
 const SAMPLE_EVENTS: CalendarEvent[] = [
-    { id: "1",  date: `${y}-${m}-01`, type: "visit",         label: "Maggie M" },
-    { id: "2",  date: `${y}-${m}-02`, type: "bankHoliday",   label: "Bank Holiday" },
-    { id: "3",  date: `${y}-${m}-08`, type: "visit",         label: "Maggie M" },
-    { id: "4",  date: `${y}-${m}-10`, type: "clockOverride", label: "Maggie M" },
-    { id: "5",  date: `${y}-${m}-10`, type: "bankHoliday",   label: "Doug G" },
-    { id: "6",  date: `${y}-${m}-14`, type: "visit",         label: "Maggie M" },
-    { id: "7",  date: `${y}-${m}-17`, type: "visit",         label: "Doug G" },
-    { id: "8",  date: `${y}-${m}-18`, type: "clockOverride", label: "Doug G" },
-    { id: "9",  date: `${y}-${m}-21`, type: "visit",         label: "Maggie M" },
-    { id: "10", date: `${y}-${m}-25`, type: "bankHoliday",   label: "Doug G" },
-    { id: "11", date: `${y}-${m}-29`, type: "visit",         label: "Maggie M" },
+    { id: "1",  date: `${y}-${m}-01`, type: "nationalHoliday", label: "New Year's Day" },
+    { id: "2",  date: `${y}-${m}-04`, type: "sickLeave",       label: "Maggie M" },
+    { id: "3",  date: `${y}-${m}-08`, type: "bookedLeave",     label: "Doug G" },
+    { id: "4",  date: `${y}-${m}-10`, type: "trainingLeave",   label: "Maggie M" },
+    { id: "5",  date: `${y}-${m}-10`, type: "sickLeave",       label: "Doug G" },
+    { id: "6",  date: `${y}-${m}-14`, type: "bookedLeave",     label: "Maggie M" },
+    { id: "7",  date: `${y}-${m}-17`, type: "trainingLeave",   label: "Doug G" },
+    { id: "8",  date: `${y}-${m}-18`, type: "nationalHoliday", label: "Bank Holiday" },
+    { id: "9",  date: `${y}-${m}-21`, type: "sickLeave",       label: "Maggie M" },
+    { id: "11", date: `${y}-${m}-29`, type: "trainingLeave",   label: "Maggie M" },
 ];
