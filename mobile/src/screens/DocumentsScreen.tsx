@@ -132,6 +132,7 @@ export default function DocumentsScreen() {
                 {/* Back header */}
                 <View style={styles.pdfHeader}>
                     <TouchableOpacity
+                        testID="pdf-back-button"
                         style={styles.backButton}
                         onPress={() => setSelectedDocument(null)}
                     >
