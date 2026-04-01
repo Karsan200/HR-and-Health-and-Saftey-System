@@ -1,12 +1,16 @@
 package uk.co.garagebridgend.backend.logic;
 
+import com.bastiaanjansen.otp.HMACAlgorithm;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.apache.commons.codec.binary.Base32;
+import com.bastiaanjansen.otp.TOTPGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,12 +20,15 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.security.SecureRandom;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.transaction.annotation.Transactional;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
@@ -33,6 +40,8 @@ import uk.co.garagebridgend.backend.models.exception.NotFoundException;
 import uk.co.garagebridgend.backend.models.internal.RotateRefreshTokenInternal;
 import uk.co.garagebridgend.backend.models.request.AuthRequest;
 import uk.co.garagebridgend.backend.models.request.AuthRotateRequest;
+import uk.co.garagebridgend.backend.models.request.MfaAuthoriseRequest;
+import uk.co.garagebridgend.backend.models.response.MfaCheckResponse;
 import uk.co.garagebridgend.backend.models.response.RefreshTokenResponse;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.SessionRepository;
@@ -48,6 +57,15 @@ public class AuthenticationService {
     /** Alphanumeric characters used for generating random strings. */
     private static final String ALPHANUMERIC =
             "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+    /** Length of the MFA secret in bytes. */
+    private static final int MFA_SECRET_LENGTH = 20;
+
+    /** Length of the TOTP code to be generated and validated. */
+    private static final int TOTP_CODE_LENGTH = 6;
+
+    /** Time period in seconds for which a TOTP code is valid. */
+    private static final int TOTP_PERIOD_SECONDS = 30;
 
     /** Secret key for signing JWTs, injected from application properties. */
     @Value("${jwt.secret}")
@@ -114,6 +132,89 @@ public class AuthenticationService {
     }
 
     /**
+     * Authenticates a user for multifactor authentication (MFA) using a provided TOTP code and refresh token.
+     * Validates the TOTP code against the user's 2FA secret, updates the session it's MFA authorised.
+     * and returns a new access token with updated claims.
+     * @param body the request body containing the TOTP code for MFA authentication
+     * @param refreshToken the refresh token associated with the current session to update
+     * @return a RefreshTokenResponse containing a new access token with updated claims
+     * @throws AuthenticatedAccountNotFoundException if no authenticated user is found in the security context
+     * @throws InvalidPasswordException if the provided TOTP code is invalid
+     * @throws InvalidRefreshTokenException if the provided refresh token is invalid
+     */
+    public RefreshTokenResponse authenticateMfa(final MfaAuthoriseRequest body, final String refreshToken)
+        throws AuthenticatedAccountNotFoundException, InvalidPasswordException, InvalidRefreshTokenException {
+        // Get the current user
+        AccountTable account = this.getCurrentUser();
+
+        // Decode the secret into a byte array
+        byte[] secret = new Base32().decode(account.getTwoFactorSecret());
+
+        // Encode the secret as a base32 byte array
+        secret = new Base32().encode(secret);
+
+        // Create a TOTP generator
+        TOTPGenerator totp = new TOTPGenerator.Builder(secret)
+                .withHOTPGenerator(builder -> {
+                    builder.withPasswordLength(TOTP_CODE_LENGTH);
+                    builder.withAlgorithm(HMACAlgorithm.SHA1);
+                })
+                .withPeriod(Duration.ofSeconds(TOTP_PERIOD_SECONDS))
+                .build();
+
+        // Validate the provided TOTP code
+        if (!totp.verify(body.getCode(), 2)) {
+            throw new InvalidPasswordException("Invalid TOTP code");
+        }
+
+        // Get the current session using the refresh token
+        Optional<SessionTable> sessionOpt = sessionRepository.findByRefreshToken(refreshToken);
+        if (sessionOpt.isEmpty()) {
+            throw new InvalidRefreshTokenException();
+        }
+
+        // Update the session to indicate that 2FA has been authenticated
+        SessionTable session = sessionOpt.get();
+        session.setTwoFactor(true);
+        sessionRepository.save(session);
+
+        // Return new access token with updated claims
+        return this.refreshAccessToken(refreshToken);
+    }
+
+    /**
+     * Checks if multifactor authentication (MFA) is required for the currently authenticated user.
+     * If the user does not have a 2FA secret set up, generates a new secret and saves it to the user's account.
+     * @return a MfaCheckResponse containing the MFA secret (if generated) and whether MFA is required for the user
+     * @throws AuthenticatedAccountNotFoundException if no authenticated user is found in the security context
+     */
+    public MfaCheckResponse checkMfa() throws AuthenticatedAccountNotFoundException {
+        AccountTable account = this.getCurrentUser();
+
+        // Get the current claims (authorities) of the authenticated user to determine if mfa is required
+        var authorities = this.getCurrentClaims();
+
+        boolean mfaRequired = authorities.contains("2FA_OK");
+
+        // Check the user's 2FA secret to determine if 2FA has been set up
+        String mfaSecret = null;
+        if (account.getTwoFactorSecret() == null) {
+            // Create a random 20 byte array
+            byte[] secret = new byte[MFA_SECRET_LENGTH];
+            new SecureRandom().nextBytes(secret);
+
+            // Encode the secret as a base32 string
+            mfaSecret = new Base32().encodeToString(secret);
+
+            // Save the secret to the user's account in the database
+            account.setTwoFactorSecret(mfaSecret);
+            accountRepository.save(account);
+        }
+
+        return new MfaCheckResponse(mfaSecret, account.getUsername(), mfaRequired);
+    }
+
+    /**
      * Rotates the refresh token for the currently authenticated user. Revokes all existing mobile refresh tokens,
      * creates a new mobile refresh token, and generates a new access token with appropriate claims.
      * @param body the request body containing the user's pin code
@@ -124,15 +225,7 @@ public class AuthenticationService {
     public RotateRefreshTokenInternal rotateRefreshToken(final AuthRotateRequest body)
             throws AuthenticatedAccountNotFoundException, InvalidPasswordException {
         // Get the current user
-        User user = AuthenticationService.getCurrentUser();
-
-        if (user == null) {
-            throw new AuthenticatedAccountNotFoundException();
-        }
-
-        // Get the account from the database
-        AccountTable account = accountRepository.findById(Long.valueOf(user.getUsername()))
-                .orElseThrow(AuthenticatedAccountNotFoundException::new);
+        AccountTable account = this.getCurrentUser();
 
         /* If the user does not have a pin code set, set it to the provided pin code,
          * otherwise validate the provided pin code against the stored hash. */
@@ -147,14 +240,14 @@ public class AuthenticationService {
         sessionRepository.deleteMobileSessionsByAccountId(account.getAccountId());
 
         // Create a new mobile refresh token
-        String newRefreshToken = createRefreshToken(Long.valueOf(user.getUsername()), true);
+        String newRefreshToken = createRefreshToken(account.getAccountId(), true);
 
         // Create a new access token
         Map<String, Object> claims = new HashMap<>();
         claims.put("mfa", false);
         claims.put("mobileToken", true);
 
-        String newAccessToken = createToken(claims, Long.valueOf(user.getUsername()));
+        String newAccessToken = createToken(claims, account.getAccountId());
 
         return new RotateRefreshTokenInternal(newRefreshToken, newAccessToken);
     }
@@ -187,16 +280,39 @@ public class AuthenticationService {
 
     /**
      * Retrieves the currently authenticated user from the Spring Security context. If the authentication
-     * is present and the principal is an instance of User, it returns the User object; otherwise, it returns null.
+     * is present and the principal is an instance of User, it returns the AccountTable object.
      * @return the currently authenticated User, or null if no authentication is present or the principal is not a User
+     * @throws AuthenticatedAccountNotFoundException if no authenticated user is found in the security context
      */
-    public static User getCurrentUser() {
+    public AccountTable getCurrentUser()
+        throws AuthenticatedAccountNotFoundException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication != null && authentication.getPrincipal() instanceof User) {
-            return (User) authentication.getPrincipal();
+        if (authentication != null && authentication.getPrincipal() instanceof User user) {
+            return accountRepository.findById(Long.valueOf(user.getUsername()))
+                    .orElseThrow(AuthenticatedAccountNotFoundException::new);
         }
-        return null;
+
+        throw new AuthenticatedAccountNotFoundException();
+    }
+
+    /**
+     * Retrieves the current claims (authorities) of the authenticated user from the Spring Security context.
+     * @return a list of claim strings representing the authorities of the authenticated user
+     * @throws AuthenticatedAccountNotFoundException if no authenticated user is found in the security context
+     */
+    public List<String> getCurrentClaims()
+        throws AuthenticatedAccountNotFoundException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null) {
+            var authorities = authentication.getAuthorities();
+
+            return authorities.stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+        }
+        throw new AuthenticatedAccountNotFoundException();
     }
 
     /**

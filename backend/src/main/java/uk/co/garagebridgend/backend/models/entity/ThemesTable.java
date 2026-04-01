@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ThemesTable {
     /** Length of the refresh token pin code. */
-    private static final int COLOUR_CODE_LENGTH = 6;
+    private static final int COLOUR_CODE_LENGTH = 7;
 
     /**
      * Account that owns these permissions (primary key).
@@ -37,13 +37,13 @@ public class ThemesTable {
     @JoinColumn(name = "account_id")
     private AccountTable account;
 
+    /** Preset Theme of the app. */
+    @Column(columnDefinition = "TEXT", name = "theme")
+    private String themePreset;
+
     /** Background colour of the app. */
     @Column(name = "background", length = COLOUR_CODE_LENGTH, nullable = false)
     private String backgroundColour;
-
-    /** Midground colour of the app. */
-    @Column(name = "midground", length = COLOUR_CODE_LENGTH, nullable = false)
-    private String midgroundColour;
 
     /** Text colour of the app. */
     @Column(name = "text", length = COLOUR_CODE_LENGTH, nullable = false)

@@ -1,7 +1,7 @@
 {
   "name": "Rent-A-Tech",
   "private": true,
-  "version": "0.1.2",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,8 +14,10 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fontsource/roboto": "^5.2.9",
+    "@mui/icons-material": "^7.3.9",
     "@mui/material": "^7.3.7",
     "@mui/styled-engine-sc": "^7.3.7",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.0",

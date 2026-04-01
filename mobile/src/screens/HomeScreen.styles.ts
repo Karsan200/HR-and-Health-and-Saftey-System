@@ -1,8 +1,12 @@
 import { StyleSheet } from 'react-native';
-import { Spacing, FontSize, BorderRadius, TextStyles } from '../theme/theme';
+import { Spacing, FontSize, BorderRadius, TextStyles, Fonts } from '../theme/theme';
 
-export const homeStyles = (theme: any) =>
-    StyleSheet.create({
+export const homeStyles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
+
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
+
+  return StyleSheet.create({
   /**
    * Root container for the screen scroll content.
    * Applies horizontal padding and top offset.
@@ -10,6 +14,7 @@ export const homeStyles = (theme: any) =>
   container: {
     paddingHorizontal: Spacing.mediumPadding,
     paddingTop: 64,
+    backgroundColor: theme.white,
   },
 
   /**
@@ -26,8 +31,9 @@ export const homeStyles = (theme: any) =>
    * Primary welcome heading style.
    */
   welcomeText: {
-    fontSize: FontSize.xl32,
-    ...TextStyles.medium,
+    fontSize: FontSize.xl32 * fontScale,
+    fontWeight: TextStyles.medium.fontWeight,
+    fontFamily: fontFamilies.regular,
     textAlign: 'center',
     marginBottom: 4,
     color: theme.black,
@@ -37,8 +43,9 @@ export const homeStyles = (theme: any) =>
    * Username style displayed beneath the welcome heading.
    */
   userName: {
-    fontSize: FontSize.m20,
-    ...TextStyles.medium,
+    fontSize: FontSize.m20 * fontScale,
+    fontWeight: TextStyles.medium.fontWeight,
+    fontFamily: fontFamilies.regular,
     textAlign: 'center',
     marginBottom: 40,
     color: theme.greyPrimaryMainText,
@@ -48,8 +55,9 @@ export const homeStyles = (theme: any) =>
    * Section header text style used for the "CHOOSE A SECTION" label.
    */
   sectionTitle: {
-    fontSize: FontSize.l24,
-    ...TextStyles.semiBold,
+    fontSize: FontSize.l24 * fontScale,
+    fontWeight: TextStyles.semiBold.fontWeight,
+    fontFamily: fontFamilies.regular,
     textAlign: 'center',
     color: theme.greyIconLight,
     marginBottom: 10,
@@ -82,8 +90,9 @@ export const homeStyles = (theme: any) =>
    * Text style for labels inside section buttons.
    */
   sectionButtonText: {
-    fontSize: FontSize.l24,
-    ...TextStyles.semiBold,
+    fontSize: FontSize.l24 * fontScale,
+    fontWeight: TextStyles.semiBold.fontWeight,
+    fontFamily: fontFamilies.regular,
     color: theme.black,
     textAlign: 'left',
     marginLeft: 12,
@@ -108,8 +117,9 @@ export const homeStyles = (theme: any) =>
    * Title style for the quick access section.
    */
   quickAccessTitle: {
-    fontSize: FontSize.m20,
-    ...TextStyles.semiBold,
+    fontSize: FontSize.m20 * fontScale,
+    fontWeight: TextStyles.semiBold.fontWeight,
+    fontFamily: fontFamilies.regular,
     textAlign: 'left',
     color: theme.greyIconLight,
     marginBottom: 10,
@@ -140,10 +150,12 @@ export const homeStyles = (theme: any) =>
    * Text style for quick access item labels.
    */
   quickAccessButton: {
-    fontSize: FontSize.s16,
-    ...TextStyles.medium,
+    fontSize: FontSize.s16 * fontScale,
+    fontWeight: TextStyles.medium.fontWeight,
+    fontFamily: fontFamilies.regular,
     textAlign: 'left',
     color: theme.black,
     marginLeft: 12,
   },
-});
+  });
+};

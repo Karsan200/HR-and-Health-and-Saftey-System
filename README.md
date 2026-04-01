@@ -11,7 +11,15 @@
 ```yaml
 spring.application.name=Rent-A-Tech
 
+  # --- FOR DEVELOPMENT USE ONLY ---
 spring.jpa.hibernate.ddl-auto=create-drop
+spring.flyway.enabled=false
+  # --- ---
+  # --- FOR PRODUCTION USE ONLY ---
+spring.jpa.hibernate.ddl-auto=none
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration
+  # --- ---
 spring.datasource.url=jdbc:mariadb://localhost:3306/rent_a_tech
 spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 spring.datasource.username={ DATABASE USERNAME }
@@ -23,10 +31,19 @@ minio.access.secret={ MINIO SECRET KEY }
 minio.bucket.name=rent-a-tech-dev
 minio.file.maxsize=10240
 
-jwt.secret={ JWT SECRET TOKEN }
+jwt.secret={ Base64 JWT SECRET TOKEN }
 jwt.access_token_expiration=300000
 jwt.refresh_token_expiration=3600
 jwt.refresh_token_expiration_mobile=2592000
+
+leave.total-allowance-hours=160
+leave.minimum-advance-booking-days=14
+leave.max-approved-per-day=2
+
+leave.working-hours.monday-thursday.start=08:00
+leave.working-hours.monday-thursday.end=17:00
+leave.working-hours.friday.start=08:00
+leave.working-hours.friday.end=12:00
 ```
 * For the database configuration, you must use MariaDB and create a database named `rent_a_tech`. You can use the following SQL command to create the database:
 ```sql

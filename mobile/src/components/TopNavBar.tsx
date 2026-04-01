@@ -20,30 +20,31 @@ export default function TopNavBar({
                                     onNotificationsPress,
                                     onProfilePress,
                                   }: TopNavBarProps) {
-  const { theme } = useContext(ThemeContext); // get theme from context
+  const { theme, accessibility } = useContext(ThemeContext); // get theme from context
+  const themedStyles = styles(theme, accessibility);
 
   return (
-    <View style={styles(theme).container}>
-      <View style={styles(theme).leftSection}>
+    <View style={themedStyles.container}>
+      <View style={themedStyles.leftSection}>
         {showBackButton && (
-          <Pressable style={styles(theme).backButton} onPress={onBackPress}>
+          <Pressable style={themedStyles.backButton} onPress={onBackPress}>
             <Icon source="arrow-left" size={24} color={theme.black} />
           </Pressable>
         )}
 
-        <Text style={styles(theme).title}>{title}</Text>
+        <Text style={themedStyles.title}>{title}</Text>
       </View>
 
-      <View style={styles(theme).rightSection}>
-        <Pressable style={styles(theme).iconButton} onPress={onNotificationsPress}>
-          <View style={styles(theme).notificationWrapper}>
+      <View style={themedStyles.rightSection}>
+        <Pressable style={themedStyles.iconButton} onPress={onNotificationsPress}>
+          <View style={themedStyles.notificationWrapper}>
             <Icon source="bell" size={22} color={theme.black} />
-            <View style={styles(theme).notificationBadge}>
-              <Text style={styles(theme).notificationBadgeText}>1</Text>
+            <View style={themedStyles.notificationBadge}>
+              <Text style={themedStyles.notificationBadgeText}>1</Text>
             </View>
           </View>
         </Pressable>
-        <Pressable style={styles(theme).iconButton} onPress={onProfilePress}>
+        <Pressable style={themedStyles.iconButton} onPress={onProfilePress}>
           <Icon source="account-circle" size={24} color={theme.black} />
         </Pressable>
       </View>

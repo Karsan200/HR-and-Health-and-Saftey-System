@@ -10,20 +10,21 @@ type RiskAssessmentsProps = {
 };
 
 export default function RiskAssessments({ onStartAssessment }: RiskAssessmentsProps): JSX.Element {
-    const { theme } = useContext(ThemeContext);
+    const { theme, accessibility } = useContext(ThemeContext);
+    const themedStyles = styles(theme, accessibility);
 
     function handlePress() {
         onStartAssessment();
     }
 
     return (
-        <View style={styles(theme).container}>
-            <Text style={styles(theme).forgotPasswordText}>Risk Assessments</Text>
+        <View style={themedStyles.container}>
+            <Text style={themedStyles.forgotPasswordText}>Risk Assessments</Text>
 
             <Button
                 buttonColor={theme.redPrimary}
                 textColor={theme.white}
-                style={styles(theme).inputStyle}
+                style={themedStyles.inputStyle}
                 onPress={handlePress}
             >
                 Start Assessment

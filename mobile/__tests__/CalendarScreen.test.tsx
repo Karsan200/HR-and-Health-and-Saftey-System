@@ -17,6 +17,10 @@ jest.mock('react-native-calendars', () => {
   const mockReact = require('react');
   const { Text, TouchableOpacity } = require('react-native');
 
+jest.mock('react-native-wheel-color-picker', () => {
+  return () => null;
+});
+
   return {
     Calendar: ({ onDayPress }: any) =>
       mockReact.createElement(
@@ -77,8 +81,8 @@ describe('CalendarScreen', () => {
   it('renders the key for booked days', () => {
     const { getByText } = render(<CalendarScreen onDayPress={() => {}} />);
 
-    expect(getByText('Fully Booked Days')).toBeTruthy();
-    expect(getByText('Partial Booked Days')).toBeTruthy();
+    expect(getByText('Fully Booked')).toBeTruthy();
+    expect(getByText('Partially Booked')).toBeTruthy();
   });
 
   it('calls onDayPress when a day is pressed', () => {
@@ -110,8 +114,8 @@ describe('CalendarScreen', () => {
 
     await waitFor(() => {
       // These checks ensure the key is still visible
-      expect(getByText('Fully Booked Days')).toBeTruthy();
-      expect(getByText('Partial Booked Days')).toBeTruthy();
+      expect(getByText('Fully Booked')).toBeTruthy();
+      expect(getByText('Partially Booked')).toBeTruthy();
     });
   });
 
@@ -120,8 +124,8 @@ describe('CalendarScreen', () => {
 
     const { getByText } = render(<CalendarScreen onDayPress={() => {}} />);
     await waitFor(() => {
-      expect(getByText('Fully Booked Days')).toBeTruthy();
-      expect(getByText('Partial Booked Days')).toBeTruthy();
+      expect(getByText('Fully Booked')).toBeTruthy();
+      expect(getByText('Partially Booked')).toBeTruthy();
     });
   });
 
@@ -132,7 +136,7 @@ describe('CalendarScreen', () => {
 
     const { getByText } = render(<CalendarScreen onDayPress={() => {}} />);
     await waitFor(() => {
-      expect(getByText('Partial Booked Days')).toBeTruthy();
+      expect(getByText('Partially Booked')).toBeTruthy();
     });
   });
 
@@ -145,7 +149,7 @@ describe('CalendarScreen', () => {
 
     const { getByText } = render(<CalendarScreen onDayPress={() => {}} />);
     await waitFor(() => {
-      expect(getByText('Fully Booked Days')).toBeTruthy();
+      expect(getByText('Fully Booked')).toBeTruthy();
     });
   });
 

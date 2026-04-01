@@ -2,6 +2,10 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import HomeScreen from '../src/screens/HomeScreen';
 
+jest.mock('react-native-wheel-color-picker', () => {
+  return () => null;
+});
+
 jest.mock('react-native-paper', () => {
   const mockReact = require('react');
   const { Text, View } = require('react-native');

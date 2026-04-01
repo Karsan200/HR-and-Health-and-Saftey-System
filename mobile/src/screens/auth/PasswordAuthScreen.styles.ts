@@ -1,15 +1,20 @@
 import { StyleSheet } from 'react-native';
-import { FontSize, Spacing, TextStyles } from "../../theme/theme.ts";
+import { Fonts, FontSize, Spacing, TextStyles } from '../../theme/theme.ts';
 
 /** Styles for the Password Authentication Screen, defining layout and visual properties for the screen components. */
-export const passwordAuthScreenStyles = (theme: any) =>
-    StyleSheet.create({
+export const passwordAuthScreenStyles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
+
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
+
+  return StyleSheet.create({
       /** Root container for the screen scroll content.
    * Applies horizontal padding and top offset.
    */
   container: {
     paddingHorizontal: Spacing.largePadding,
-    paddingTop: 100,
+    paddingTop: 40,
+    paddingBottom: 40
   },
 
   /** Logo image styling: fixed dimensions and aspect ratio preservation. */
@@ -40,16 +45,17 @@ export const passwordAuthScreenStyles = (theme: any) =>
     marginTop: -10,
     alignSelf: 'center',
     color: theme.greyPrimaryMainText,
-    fontSize: FontSize.xs14,
-    fontFamily: TextStyles.regular.fontFamily,
-    fontWeight: TextStyles.regular.fontWeight
+    fontSize: FontSize.xs14 * fontScale,
+    fontFamily: fontFamilies.regular,
+    fontWeight: TextStyles.medium.fontWeight,
   },
 
   /** Style for error message text in the dialog. */
   dialogText: {
-    fontSize: FontSize.s16,
-    fontFamily: TextStyles.regular.fontFamily,
-    fontWeight: TextStyles.regular.fontWeight,
+    fontSize: FontSize.s16 * fontScale,
+    fontFamily: fontFamilies.regular,
+    fontWeight: TextStyles.medium.fontWeight,
     color: theme.black
   }
-});
+  });
+};
