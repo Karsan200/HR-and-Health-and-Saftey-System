@@ -6,7 +6,6 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     Alert,
-    Dimensions,
 } from 'react-native';
 import Pdf from 'react-native-pdf';
 import { Button, Checkbox, Icon } from 'react-native-paper';
