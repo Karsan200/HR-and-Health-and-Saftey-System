@@ -155,6 +155,13 @@ export default function DocumentsScreen() {
         return matchesCategory && matchesStatus;
     });
 
+    /**
+     * Strips the "SOP: " prefix from a title for display purposes.
+     */
+    const getDisplayTitle = (title: string): string => {
+        return title.replace(/^SOP:\s*/i, '');
+    };
+
     // List of Documents
     return (
         <View style={styles.screen}>
@@ -243,7 +250,7 @@ export default function DocumentsScreen() {
 
                             <View style={styles.cardTextContainer}>
                                 <Text style={styles.cardTitle} numberOfLines={1}>
-                                    {item.title}
+                                    {getDisplayTitle(item.title)}
                                 </Text>
                                 <Text style={styles.cardSubtitle} numberOfLines={1}>
                                     {item.title.toLowerCase().includes('sop') ? 'SOP' : 'Safety'} • Version 1.0
