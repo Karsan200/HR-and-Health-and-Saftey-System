@@ -35,7 +35,7 @@ public class AdminDashboardController {
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Internal sever error"
+                    "Internal sever error " + e.getMessage()
             );
         }
     }

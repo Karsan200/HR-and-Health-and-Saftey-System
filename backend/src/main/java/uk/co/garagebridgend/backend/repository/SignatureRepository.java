@@ -28,4 +28,20 @@ public interface SignatureRepository extends JpaRepository<SignatureTable, Long>
      * @return true if a signature exists for the account and document, false otherwise
      */
     boolean existsByAccountAndDocument(AccountTable account, DocumentTable document);
+
+    /**
+     * Counts the number of signatures recorded for the given document id.
+     *
+     * @param documentId the document id to count signatures for
+     * @return the number of signatures linked to that document
+     */
+    long countByDocumentDocumentId(Long documentId);
+
+    /**
+     * Counts the number of signatures recorded for the given hazard id.
+     *
+     * @param hazardId the hazard id to count signatures for
+     * @return the number of signatures linked to that hazard
+     */
+    long countByHazardHazardId(Long hazardId);
 }

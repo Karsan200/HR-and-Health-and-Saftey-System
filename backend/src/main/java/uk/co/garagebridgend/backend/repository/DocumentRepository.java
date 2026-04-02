@@ -26,4 +26,11 @@ public interface DocumentRepository extends JpaRepository<DocumentTable, Long> {
      * @return list of documents ordered by creation date descending
      */
     List<DocumentTable> findAllByOrderByCreatedDesc();
+
+    /**
+     * Retrieves all documents that require a signature.
+     *
+     * @return a list of documents where signatureRequired is true
+     */
+    List<DocumentTable> findAllBySignatureRequiredTrue();
 }

@@ -10,7 +10,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class AdminDashboardSummaryResponse {
     /** Number of pending signatures for documents and hazards. */
-    private int pendingSignatures;
+    private long pendingSignatures;
 
     /** Number of occasions an employee has been late to work this week. */
     private int lateThisWeek;

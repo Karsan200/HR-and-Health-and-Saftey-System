@@ -1,9 +1,12 @@
 package uk.co.garagebridgend.backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.co.garagebridgend.backend.models.entity.HazardTable;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
+
+import java.util.List;
 
 /**
  * Repository for managing HazardTable entities.
@@ -22,5 +25,18 @@ public interface HazardRepository extends JpaRepository<HazardTable, Long> {
     /** Finding the number of hazards that are not resolved.
      * @return the number of open hazards.
      * **/
-    int countByActionCompleteIsNullAndDraftFalse();
+    @Query("""
+    SELECT COUNT(h)
+    FROM HazardTable h
+    WHERE h.actionComplete IS NULL
+      AND h.isDraft = false
+""")
+    int countOpenHazards();
+
+    /**
+     * Retrieves all hazards that require a signature.
+     *
+     * @return a list of hazards where signatureRequired is true and actionComplete is null.
+     */
+    List<HazardTable> findAllBySignatureRequiredTrueAndActionCompleteIsNull();
 }

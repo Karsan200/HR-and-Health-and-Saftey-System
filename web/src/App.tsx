@@ -6,6 +6,7 @@ import { muiTheme } from "./theme/muiTheme";
 import { IncompatibleScreen } from "./components/IncompatibleScreen";
 import { AuthProvider } from "./AuthContext";
 import { Navbar } from "./components/Navbar";
+import { Dashboard } from "./pages/Dashboard";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
@@ -51,7 +52,7 @@ function AppContent() {
         <BrowserRouter>
             <Navbar />
             <Routes>
-                <Route path="/" element={<></>} />
+                <Route path="/" element={<Dashboard />} />
                 <Route path="/calendar" element={<></>} />
                 <Route path="/employee-overview" element={<></>} />
                 <Route path="/health-and-safety" element={<></>} />
