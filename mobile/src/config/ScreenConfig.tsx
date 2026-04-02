@@ -6,6 +6,7 @@ import { View } from 'react-native';
 import HsOverview from '../screens/HsOverview.tsx';
 import SettingsScreen from '../screens/personal/SettingsScreen.tsx';
 import ProfileScreen from '../screens/personal/ProfileScreen.tsx';
+import EditProfileScreen from '../screens/personal/EditProfileScreen.tsx';
 import React from 'react';
 
 import { ScreenConfigStyles as styles } from './ScreenConfig.styles.ts';
@@ -45,7 +46,11 @@ export function ScreenConfig(body: ScreenConfigProps) {
       body.setSection(null);
       body.setCurrentScreen('profile');
       return;
-    }
+    } else if (screen === 'editProfile') {
+    body.setSection(null);
+    body.setCurrentScreen('editProfile');
+    return;
+  }
 
 
     body.setCurrentScreen(screen);
@@ -60,9 +65,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'calendar':
       return (
         <>
-          <TopNavBar
-            title="Calendar"
-          />
+          <TopNavBar title="Calendar" />
           <CalendarScreen onDayPress={handleOpenDateDetails} />
         </>
       );
@@ -106,9 +109,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'clockIn':
       return (
         <>
-          <TopNavBar
-            title="Clock-In"
-          />
+          <TopNavBar title="Clock-In" />
           <View style={styles.content} />
         </>
       );
@@ -116,9 +117,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'overview':
       return (
         <>
-          <TopNavBar
-            title="Overview"
-          />
+          <TopNavBar title="Overview" />
           <View style={styles.content}>
             <HsOverview />
           </View>
@@ -142,24 +141,26 @@ export function ScreenConfig(body: ScreenConfigProps) {
         <>
           <TopNavBar title="Risk" />
           <View style={styles.content}>
-            <RiskAssessments onStartAssessment={() => handleNavigate('hazardForm')} />
-        </View>
+            <RiskAssessments
+              onStartAssessment={() => handleNavigate('hazardForm')}
+            />
+          </View>
         </>
       );
 
-      case 'hazardForm':
-          return (
-              <>
-                  <TopNavBar
-                      title="Hazard Form"
-                      showBackButton={true}
-                      onBackPress={() => handleNavigate('risk')}
-                  />
-                  <View style={styles.content}>
-                      <HazardForm onDone={() => handleNavigate('risk')} />
-                  </View>
-              </>
-          );
+    case 'hazardForm':
+      return (
+        <>
+          <TopNavBar
+            title="Hazard Form"
+            showBackButton={true}
+            onBackPress={() => handleNavigate('risk')}
+          />
+          <View style={styles.content}>
+            <HazardForm onDone={() => handleNavigate('risk')} />
+          </View>
+        </>
+      );
 
     case 'personal':
       return (
@@ -196,7 +197,23 @@ export function ScreenConfig(body: ScreenConfigProps) {
             onBackPress={() => handleNavigate('home')}
           />
           <View style={styles.content}>
-            <ProfileScreen />
+            <ProfileScreen
+              onEditProfile={() => handleNavigate('editProfile')}
+            />
+          </View>
+        </>
+      );
+
+    case 'editProfile':
+      return (
+        <>
+          <TopNavBar
+            title="Edit Profile"
+            showBackButton={true}
+            onBackPress={() => handleNavigate('profile')}
+          />
+          <View style={styles.content}>
+            <EditProfileScreen />
           </View>
         </>
       );

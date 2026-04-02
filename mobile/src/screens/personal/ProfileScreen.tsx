@@ -1,5 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, ScrollView, Pressable, ActivityIndicator, } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  ActivityIndicator,
+} from 'react-native';
 import { Avatar, IconButton } from 'react-native-paper';
 
 import { ThemeContext } from '../../theme/colourController';
@@ -8,7 +14,11 @@ import { profileStyles as styles } from './ProfileScreen.styles';
 import ProfileService from '../../logic/ProfileService';
 import { ProfileModel } from '../../model/response/ProfileModel';
 
-const ProfileScreen = () => {
+interface ProfileScreenProps {
+  onEditProfile: () => void;
+}
+
+const ProfileScreen = ({ onEditProfile }: ProfileScreenProps) => {
   const { theme, accessibility } = useContext(ThemeContext);
   const themedStyles = styles(theme, accessibility);
 
@@ -62,7 +72,7 @@ const ProfileScreen = () => {
       </View>
 
       {/* Edit Button */}
-      <Pressable style={themedStyles.editButton}>
+      <Pressable style={themedStyles.editButton} onPress={onEditProfile}>
         <IconButton icon="pencil" size={16} iconColor={theme.white} />
         <Text style={themedStyles.editText}>Edit Profile</Text>
       </Pressable>
