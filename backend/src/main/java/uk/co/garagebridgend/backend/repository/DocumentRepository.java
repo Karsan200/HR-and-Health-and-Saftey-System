@@ -26,4 +26,7 @@ public interface DocumentRepository extends JpaRepository<DocumentTable, Long> {
      * @return list of documents ordered by creation date descending
      */
     List<DocumentTable> findAllByOrderByCreatedDesc();
+
+    List<DocumentTable> findByFileAccountAndTitleContainingIgnoreCaseOrderByCreatedDesc(
+            AccountTable account, String titleFragment);
 }

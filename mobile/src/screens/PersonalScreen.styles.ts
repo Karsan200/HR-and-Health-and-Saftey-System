@@ -183,5 +183,10 @@ export const styles = (theme: any, accessibility: { largeText: boolean; dyslexic
             backgroundColor: theme.white,
         },
 
+        licenceContainer: {
+            paddingHorizontal: Spacing.mediumPadding,
+            paddingTop: 4,
+        },
+
     });
 };

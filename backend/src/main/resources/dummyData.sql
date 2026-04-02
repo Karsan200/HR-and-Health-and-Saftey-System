@@ -161,6 +161,9 @@ INSERT INTO files_table (
       ('c1b2c3d4-e5f6-7890-dcba-ef1234567891', 1, 1,
        'sop_fire_safety', 'pdf', '2025-02-14 10:10:00'),
 
+      ('3cc58063-df14-4e45-bce0-15f30f5d08ff', 1, 2,
+       'driving_licence_mmay', 'pdf', '2026-01-15 10:00:00'),
+
       (UUID(), 1, 1,
        'sop_equipment_procedures', 'pdf', '2025-02-14 10:15:00'),
 
@@ -271,6 +274,9 @@ INSERT INTO document_table (
 
       ('b1c2d3e4-f5a6-7890-bcde-123456abcdef',
        'Employee Handbook', '2026-03-24 10:05:00'),
+
+      ('3cc58063-df14-4e45-bce0-15f30f5d08ff',
+       'Driving Licence', '2026-01-15 10:05:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'sop_fire_safety'),
        'SOP: Fire Safety Procedures v5', '2025-02-14 10:10:00'),
