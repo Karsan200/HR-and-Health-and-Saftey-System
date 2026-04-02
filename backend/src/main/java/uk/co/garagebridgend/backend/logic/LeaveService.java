@@ -104,8 +104,6 @@ public class LeaveService {
             LocalDate current = leave.getStartDate().toLocalDate();
             LocalDate end = leave.getEndDate().toLocalDate();
 
-            System.out.println("Start: " + leave.getStartDate() + " End: " + leave.getEndDate());
-
             while (!current.isAfter(end)) {
                 // Only include days within the requested month and skip weekends
                 if (current.getYear() == year
