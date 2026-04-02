@@ -1,7 +1,13 @@
 import { StyleSheet } from 'react-native';
 import { BorderRadius, Fonts, FontSize, Spacing, TextStyles } from '../theme/theme';
 
-export const styles = (theme: any, accessibility: { largeText: boolean; dyslexicFont: boolean }) => {
+export const styles = (
+    theme: any,
+    accessibility: { largeText: boolean; dyslexicFont: boolean } = {
+        largeText: false,
+        dyslexicFont: false,
+    }
+) => {
 
     const fontScale = accessibility.largeText ? 1.3 : 1;
     const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
