@@ -167,8 +167,9 @@ export function ScreenConfig(body: ScreenConfigProps) {
           <TopNavBar
             title="Personal"
           />
-          <View style={styles.content} />
+          <View style={styles.content}>
             <PersonalScreen />
+            </View>
         </>
       );
 
