@@ -62,6 +62,23 @@ export const calendarPageStyles = {
         textAlign: "center" as const,
     },
 
+    // Centred container shown while the calendar data is loading
+    loadingContainer: {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "60px 0",
+    },
+
+    // Error message shown when the calendar data request fails
+    errorLabel: {
+        ...TextStyles.regular,
+        fontSize: FontSize.s16,
+        color: DefaultColours.redTextDark,
+        textAlign: "center" as const,
+        padding: "60px 0",
+    },
+
     // Outer container for the full calendar grid
     calendarGrid: {
         display: "flex",
@@ -180,7 +197,7 @@ export const calendarPageStyles = {
         width: "100%",
     },
 
-    // Full width event chip with coloured background, icon and label
+    // Full-width event chip with coloured background, chip colour passed as a param
     eventChip: (bg: string) => ({
         display: "flex",
         flexDirection: "row" as const,

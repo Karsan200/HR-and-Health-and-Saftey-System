@@ -1,9 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
     Box,
     Typography,
     IconButton,
     Tooltip,
+    CircularProgress,
 } from "@mui/material";
 import {
     ChevronLeft,
@@ -17,6 +18,8 @@ import {
 import { calendarPageStyles as styles } from "./CalendarPage.styles";
 import { SectionNavBar, type SectionNavTab } from "../components/SectionNavbar";
 import { DefaultColours } from "../theme/colours.ts";
+import { fetchCalendarEvents } from "../logic/LeaveCalendarService";
+import { useAuth } from "../AuthContext";
 
 // Tabs shown at the top of the calendar section
 const CALENDAR_TABS: SectionNavTab[] = [
@@ -139,11 +142,7 @@ function TooltipContent({ label, notes }: { label: string; notes?: string }) {
 }
 
 // Renders a single full-width coloured event chip inside a calendar day cell
-interface EventChipProps {
-    event: CalendarEvent;
-}
-
-function EventChip({ event }: EventChipProps) {
+function EventChip({ event, onEventClick }: { event: CalendarEvent; onEventClick?: (e: CalendarEvent) => void }) {
     const { chipBg, iconCircleBg, textColor, Icon } = eventConfig(event.type);
     return (
         <Tooltip
@@ -151,7 +150,10 @@ function EventChip({ event }: EventChipProps) {
             placement="top"
             arrow
         >
-            <Box sx={styles.eventChip(chipBg)}>
+            <Box
+                sx={styles.eventChip(chipBg)}
+                onClick={e => { e.stopPropagation(); onEventClick?.(event); }}
+            >
                 <Box sx={styles.eventIconCircle(iconCircleBg)}>
                     <Icon sx={{ fontSize: "14px", color: DefaultColours.white }} />
                 </Box>
@@ -186,21 +188,40 @@ function CalendarKey() {
 
 // Props for the main calendar page
 interface CalendarPageProps {
-    events?: CalendarEvent[];
     onDayClick?: (date: string) => void;
     onEventClick?: (event: CalendarEvent) => void;
 }
 
-export function CalendarPage({
-                                 events = SAMPLE_EVENTS,
-                                 onDayClick,
-                                 onEventClick,
-                             }: CalendarPageProps) {
+export function CalendarPage({ onDayClick, onEventClick }: CalendarPageProps) {
+    const auth = useAuth();
+
     const today = new Date();
     const [viewYear, setViewYear] = useState(today.getFullYear());
     const [viewMonth, setViewMonth] = useState(today.getMonth());
 
+    const [events, setEvents] = useState<CalendarEvent[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
     const weeks = useMemo(() => buildCalendarGrid(viewYear, viewMonth), [viewYear, viewMonth]);
+
+    // Fetch events from the backend whenever the viewed month changes
+    const loadEvents = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await fetchCalendarEvents(viewYear, viewMonth + 1, auth.authenticationService);
+            setEvents(data);
+        } catch {
+            setError("Failed to load calendar data. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    }, [viewYear, viewMonth, auth.authenticationService]);
+
+    useEffect(() => {
+        loadEvents();
+    }, [loadEvents]);
 
     // Index events by date string for fast lookup per day cell
     const eventsByDate = useMemo(() => {
@@ -256,77 +277,90 @@ export function CalendarPage({
                     </IconButton>
                 </Box>
 
-                {/* Grid of day cells organised into weeks */}
-                <Box sx={styles.calendarGrid}>
+                {/* Loading spinner shown while calendar data is being fetched */}
+                {loading && (
+                    <Box sx={styles.loadingContainer}>
+                        <CircularProgress size={32} sx={{ color: DefaultColours.redTextDark }} />
+                    </Box>
+                )}
 
-                    {/* Day of week header row */}
-                    <Box sx={styles.dayHeaderRow}>
-                        {DAYS.map(d => (
-                            <Box key={d} sx={styles.dayHeaderCell}>
-                                <Typography sx={styles.dayHeaderLabel}>
-                                    {d}
-                                </Typography>
+                {/* Error message shown when the calendar data request fails */}
+                {!loading && error && (
+                    <Typography sx={styles.errorLabel}>{error}</Typography>
+                )}
+
+                {/* Grid of day cells organised into weeks */}
+                {!loading && !error && (
+                    <Box sx={styles.calendarGrid}>
+
+                        {/* Day of week header row */}
+                        <Box sx={styles.dayHeaderRow}>
+                            {DAYS.map(d => (
+                                <Box key={d} sx={styles.dayHeaderCell}>
+                                    <Typography sx={styles.dayHeaderLabel}>
+                                        {d}
+                                    </Typography>
+                                </Box>
+                            ))}
+                        </Box>
+
+                        {/* One row per week, seven cells per row */}
+                        {weeks.map((week, wi) => (
+                            <Box key={wi} sx={styles.weekRow}>
+                                {week.map((date, di) => {
+                                    const isCurrentMonth = date.getMonth() === viewMonth;
+                                    const iso = toISODate(date.getFullYear(), date.getMonth(), date.getDate());
+                                    const isToday = iso === todayISO;
+                                    const dayEvents = eventsByDate.get(iso) ?? [];
+                                    const MAX_VISIBLE = 2;
+                                    const visibleEvents = dayEvents.slice(0, MAX_VISIBLE);
+                                    const overflow = dayEvents.length - MAX_VISIBLE;
+
+                                    const cellSx = !isCurrentMonth
+                                        ? styles.dayCellOutsideMonth
+                                        : isToday
+                                            ? styles.dayCellToday
+                                            : styles.dayCell;
+
+                                    const numSx = !isCurrentMonth
+                                        ? styles.dayNumberOutside
+                                        : isToday
+                                            ? styles.dayNumberToday
+                                            : styles.dayNumber;
+
+                                    return (
+                                        <Box
+                                            key={di}
+                                            sx={cellSx}
+                                            onClick={() => isCurrentMonth && onDayClick?.(iso)}
+                                        >
+                                            {/* Day number in the top left, styled for today and out-of-month days */}
+                                            <Box sx={numSx}>
+                                                {date.getDate()}
+                                            </Box>
+
+                                            {/* Event chips stacked below the day number */}
+                                            <Box sx={styles.eventsContainer}>
+                                                {visibleEvents.map(ev => (
+                                                    <EventChip
+                                                        key={ev.id}
+                                                        event={ev}
+                                                        onEventClick={onEventClick}
+                                                    />
+                                                ))}
+                                                {overflow > 0 && (
+                                                    <Typography sx={styles.moreEventsLabel}>
+                                                        +{overflow} more
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        </Box>
+                                    );
+                                })}
                             </Box>
                         ))}
                     </Box>
-
-                    {/* One row per week, seven cells per row */}
-                    {weeks.map((week, wi) => (
-                        <Box key={wi} sx={styles.weekRow}>
-                            {week.map((date, di) => {
-                                const isCurrentMonth = date.getMonth() === viewMonth;
-                                const iso = toISODate(date.getFullYear(), date.getMonth(), date.getDate());
-                                const isToday = iso === todayISO;
-                                const dayEvents = eventsByDate.get(iso) ?? [];
-                                const MAX_VISIBLE = 2;
-                                const visibleEvents = dayEvents.slice(0, MAX_VISIBLE);
-                                const overflow = dayEvents.length - MAX_VISIBLE;
-
-                                const cellSx = !isCurrentMonth
-                                    ? styles.dayCellOutsideMonth
-                                    : isToday
-                                        ? styles.dayCellToday
-                                        : styles.dayCell;
-
-                                const numSx = !isCurrentMonth
-                                    ? styles.dayNumberOutside
-                                    : isToday
-                                        ? styles.dayNumberToday
-                                        : styles.dayNumber;
-
-                                return (
-                                    <Box
-                                        key={di}
-                                        sx={cellSx}
-                                        onClick={() => isCurrentMonth && onDayClick?.(iso)}
-                                    >
-                                        {/* Day number in the top left, styled for today and out-of-month days */}
-                                        <Box sx={numSx}>
-                                            {date.getDate()}
-                                        </Box>
-
-                                        {/* Event chips stacked below the day number */}
-                                        <Box sx={styles.eventsContainer}>
-                                            {visibleEvents.map(ev => (
-                                                <Box
-                                                    key={ev.id}
-                                                    onClick={e => { e.stopPropagation(); onEventClick?.(ev); }}
-                                                >
-                                                    <EventChip event={ev} />
-                                                </Box>
-                                            ))}
-                                            {overflow > 0 && (
-                                                <Typography sx={styles.moreEventsLabel}>
-                                                    +{overflow} more
-                                                </Typography>
-                                            )}
-                                        </Box>
-                                    </Box>
-                                );
-                            })}
-                        </Box>
-                    ))}
-                </Box>
+                )}
 
                 {/* Colour key explaining each event type */}
                 <CalendarKey />
@@ -334,21 +368,3 @@ export function CalendarPage({
         </Box>
     );
 }
-
-// Sample events used during development, replace with real API data
-const now = new Date();
-const y = now.getFullYear();
-const m = String(now.getMonth() + 1).padStart(2, "0");
-
-const SAMPLE_EVENTS: CalendarEvent[] = [
-    { id: "1",  date: `${y}-${m}-01`, type: "nationalHoliday", label: "New Year's Day" },
-    { id: "2",  date: `${y}-${m}-04`, type: "sickLeave",       label: "Maggie M",  notes: "Flu symptoms and doctor advised rest." },
-    { id: "3",  date: `${y}-${m}-08`, type: "bookedLeave",     label: "Doug G",    notes: "Family holiday booked earlier this year." },
-    { id: "4",  date: `${y}-${m}-10`, type: "trainingLeave",   label: "Maggie M" },
-    { id: "5",  date: `${y}-${m}-10`, type: "sickLeave",       label: "Doug G",    notes: "Family emergency." },
-    { id: "6",  date: `${y}-${m}-14`, type: "bookedLeave",     label: "Maggie M",  notes: "Trip abroad planned." },
-    { id: "7",  date: `${y}-${m}-17`, type: "trainingLeave",   label: "Doug G" },
-    { id: "8",  date: `${y}-${m}-18`, type: "nationalHoliday", label: "Bank Holiday" },
-    { id: "9",  date: `${y}-${m}-21`, type: "sickLeave",       label: "Maggie M",  notes: "Personal time off requested." },
-    { id: "11", date: `${y}-${m}-29`, type: "trainingLeave",   label: "Maggie M" },
-];

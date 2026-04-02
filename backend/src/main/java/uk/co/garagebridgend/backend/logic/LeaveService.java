@@ -5,6 +5,8 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.request.LeaveRequest;
+import uk.co.garagebridgend.backend.models.response.LeaveCalendarAdminResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 import uk.co.garagebridgend.backend.models.entity.LeaveTable;
@@ -62,18 +65,79 @@ public class LeaveService {
     @Value("${leave.working-hours.friday.end}")
     private LocalTime fridayEndTime;
 
-    /**
-     * Repository used to access leave data from the database.
-     */
+    /** Repository used to access leave data from the database. */
     private final LeaveRepository leaveRepository;
 
-    /**
-     * Repository used to access leave type data from the database.
-     */
+    /** Repository used to access leave type data from the database. */
     private final LeaveTypeRepository leaveTypeRepository;
 
     /** Service for handling authentication and retrieving the current user. */
     private final AuthenticationService authenticationService;
+
+    /**
+     * Retrieves all approved leave entries for a given month and expands multi-day
+     * leave records into one {@link LeaveCalendarAdminResponse} per calendar day.
+     * Weekends are excluded from the expansion since the calendar only shows weekdays.
+     *
+     * @param year the calendar year to query
+     * @param month the calendar month to query (1 = January, 12 = December)
+     * @return a flat list of calendar items, one per employee per working day on leave
+     */
+    public List<LeaveCalendarAdminResponse> getCalendarItems(final int year, final int month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+
+        // Fetch all leave that overlaps the requested month
+        LocalDateTime rangeStart = yearMonth.atDay(1).atStartOfDay();
+        LocalDateTime rangeEnd = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
+
+        List<LeaveTable> leaveList = leaveRepository.findApprovedLeaveInRange(rangeStart, rangeEnd);
+
+        List<LeaveCalendarAdminResponse> items = new ArrayList<>();
+
+        for (LeaveTable leave : leaveList) {
+            String employeeName = leave.getAccount().getFirstName()
+                    + " " + leave.getAccount().getLastName();
+            String leaveType = mapLeaveTypeName(leave.getLeaveType().getName());
+            String notes = leave.getNotes();
+
+            // Expand each leave record into one item per calendar day it covers
+            LocalDate current = leave.getStartDate().toLocalDate();
+            LocalDate end = leave.getEndDate().toLocalDate();
+
+            System.out.println("Start: " + leave.getStartDate() + " End: " + leave.getEndDate());
+
+            while (!current.isAfter(end)) {
+                // Only include days within the requested month and skip weekends
+                if (current.getYear() == year
+                        && current.getMonthValue() == month
+                        && !isWeekend(current)) {
+                    items.add(new LeaveCalendarAdminResponse(current, employeeName, leaveType, notes));
+                }
+                current = current.plusDays(1);
+            }
+        }
+
+        return items;
+    }
+
+    /**
+     * Maps the leave type name stored in the database to the frontend CalendarEventType string.
+     * Falls back to "bookedLeave" for any unrecognised type name.
+     *
+     * @param dbName the leave type name as stored in the leave_type table
+     * @return the matching frontend event type string
+     */
+    private String mapLeaveTypeName(final String dbName) {
+        if (dbName == null) {
+            return "bookedLeave";
+        }
+        return switch (dbName.toLowerCase()) {
+            case "national holiday", "bank holiday" -> "nationalHoliday";
+            case "sick leave"                       -> "sickLeave";
+            case "training leave"                   -> "trainingLeave";
+            default                                 -> "bookedLeave";
+        };
+    }
 
     /**
      * Retrieves all approved leave entries for calendar display.
