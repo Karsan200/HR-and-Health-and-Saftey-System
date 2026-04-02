@@ -22,8 +22,13 @@ public class AttendanceController {
     /** Logger for logging attendance-related events and errors. */
     private static final Logger LOG = LoggerFactory.getLogger(AttendanceController.class);
 
+    /** Service for handling attendance-related business logic. */
     private final AttendanceService attendanceService;
 
+    /**
+     * Endpoint to retrieve the BLE signature for the authenticated user.
+     * @return BleSignatureResponse response containing the BLE signature.
+     */
     @GetMapping("/signature")
     public BleSignatureResponse getSignature() {
         try {
