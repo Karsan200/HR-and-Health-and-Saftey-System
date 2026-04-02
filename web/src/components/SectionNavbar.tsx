@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { sectionNavBarStyles as styles } from "./SectionNavbar.styles.tsx"
+import { sectionNavBarStyles as styles } from "./SectionNavbar.styles"
 
 // Describes a single tab in the navigation bar
 export interface SectionNavTab {

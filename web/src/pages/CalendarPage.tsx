@@ -17,7 +17,7 @@ import {
 
 import { calendarPageStyles as styles } from "./CalendarPage.styles";
 import { SectionNavBar, type SectionNavTab } from "../components/SectionNavbar";
-import { DefaultColours } from "../theme/colours.ts";
+import { DefaultColours } from "../theme/colours";
 import { fetchCalendarEvents } from "../logic/LeaveCalendarService";
 import { useAuth } from "../AuthContext";
 
