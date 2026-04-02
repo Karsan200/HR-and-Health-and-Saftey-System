@@ -9,8 +9,7 @@ jest.mock('../src/logic/AuthenticationService', () => ({
 }));
 
 jest.mock('react-native-pdf', () => {
-    const React = require('react');
-    return (props: any) => React.createElement('Pdf', props);
+    return 'Pdf';
 });
 
 jest.mock('react-native-wheel-color-picker', () => null);
