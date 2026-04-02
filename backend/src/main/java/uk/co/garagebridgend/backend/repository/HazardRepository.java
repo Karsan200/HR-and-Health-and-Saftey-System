@@ -18,4 +18,9 @@ public interface HazardRepository extends JpaRepository<HazardTable, Long> {
      * @return the number of hazards for the account
      */
     int countByAccount(AccountTable account);
+
+    /** Finding the number of hazards that are not resolved.
+     * @return the number of open hazards.
+     * **/
+    int countByActionCompleteIsNullAndDraftFalse();
 }
