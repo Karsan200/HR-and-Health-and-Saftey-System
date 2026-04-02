@@ -1,7 +1,11 @@
 import { StyleSheet } from 'react-native';
 import { BorderRadius, Fonts, FontSize, Spacing, TextStyles } from '../theme/theme';
 
-export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslexicFont: boolean }) => {
+export const styles = (theme: any, accessibility: { largeText: boolean; dyslexicFont: boolean }) => {
+
+    const fontScale = accessibility.largeText ? 1.3 : 1;
+    const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
+
     return StyleSheet.create({
 
         screen: {
@@ -32,7 +36,7 @@ export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslex
             borderWidth: 2,
             borderColor: 'transparent',
             backgroundColor: theme.white,
-            minHeight: 70,
+            minHeight: 90,
         },
 
         categoryButtonWrapperActive: {
@@ -40,8 +44,7 @@ export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslex
         },
 
         categoryButton: {
-            flex: 1,
-            paddingVertical: 12,
+            paddingVertical: 16,
             paddingHorizontal: 12,
             alignItems: 'center',
             justifyContent: 'center',
@@ -58,9 +61,9 @@ export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslex
         },
 
         categoryButtonText: {
-            fontFamily: Fonts.poppins.regular,
+            fontFamily: fontFamilies.regular,
             fontWeight: TextStyles.regular.fontWeight,
-            fontSize: FontSize.s16,
+            fontSize: FontSize.s16 * fontScale,
             color: theme.greyPrimaryMainText,
             textAlign: 'center',
             flexShrink: 1,
@@ -94,8 +97,9 @@ export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslex
         },
 
         statusPillText: {
-            fontFamily: Fonts.poppins.regular,
-            fontSize: FontSize.xxs12,
+            fontFamily: fontFamilies.regular,
+            fontWeight: TextStyles.regular.fontWeight,
+            fontSize: FontSize.xxs12 * fontScale,
             color: theme.greyPrimaryMainText,
         },
 
@@ -133,7 +137,7 @@ export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslex
             gap: 12,
         },
 
-        //icons
+        // Icons
 
         iconContainer: {
             width: 40,
@@ -145,12 +149,12 @@ export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslex
 
         iconContainerUnsigned: {
             backgroundColor: theme.redTrafficBackgroundLight,
-            borderRadius: BorderRadius.largeButtonsAndOutlines
+            borderRadius: BorderRadius.largeButtonsAndOutlines,
         },
 
         iconContainerSigned: {
             backgroundColor: theme.greenBackgroundLight,
-            borderRadius: BorderRadius.largeButtonsAndOutlines
+            borderRadius: BorderRadius.largeButtonsAndOutlines,
         },
 
         cardTextContainer: {
@@ -159,20 +163,20 @@ export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslex
         },
 
         cardTitle: {
-            fontFamily: Fonts.poppins.regular,
+            fontFamily: fontFamilies.regular,
             fontWeight: TextStyles.semiBold.fontWeight,
-            fontSize: FontSize.s16,
+            fontSize: FontSize.s16 * fontScale,
             color: theme.black,
         },
 
         cardSubtitle: {
-            fontFamily: Fonts.poppins.regular,
+            fontFamily: fontFamilies.regular,
             fontWeight: TextStyles.regular.fontWeight,
-            fontSize: FontSize.xxs12,
+            fontSize: FontSize.xxs12 * fontScale,
             color: theme.greyPrimaryMainText,
         },
 
-        // badges for signed/unsigned status
+        // Badges for signed/unsigned status
 
         signedBadge: {
             flexDirection: 'row',
@@ -186,9 +190,9 @@ export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslex
         },
 
         signedBadgeText: {
-            fontFamily: Fonts.poppins.regular,
+            fontFamily: fontFamilies.regular,
             fontWeight: TextStyles.semiBold.fontWeight,
-            fontSize: FontSize.xxs12,
+            fontSize: FontSize.xxs12 * fontScale,
             color: theme.greenPrimary,
         },
 
@@ -204,13 +208,13 @@ export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslex
         },
 
         unsignedBadgeText: {
-            fontFamily: Fonts.poppins.regular,
+            fontFamily: fontFamilies.regular,
             fontWeight: TextStyles.semiBold.fontWeight,
-            fontSize: FontSize.xxs12,
-            color: theme.redPrimary,
+            fontSize: FontSize.xxs12 * fontScale,
+            color: theme.redTrafficPrimary,
         },
 
-        // view buttons
+        // View buttons
 
         viewButtonUnsigned: {
             backgroundColor: theme.redPrimary,
@@ -223,9 +227,9 @@ export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslex
         },
 
         buttonLabel: {
-            fontFamily: Fonts.poppins.regular,
+            fontFamily: fontFamilies.regular,
             fontWeight: TextStyles.semiBold.fontWeight,
-            fontSize: FontSize.xs14,
+            fontSize: FontSize.xs14 * fontScale,
             color: theme.white,
         },
 
@@ -277,9 +281,9 @@ export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslex
         },
 
         acknowledgeText: {
-            fontFamily: Fonts.poppins.regular,
+            fontFamily: fontFamilies.regular,
             fontWeight: TextStyles.regular.fontWeight,
-            fontSize: FontSize.s16,
+            fontSize: FontSize.s16 * fontScale,
             color: theme.black,
             flex: 1,
         },
@@ -298,9 +302,9 @@ export const styles = (theme: any, _accessibility?: { largeText: boolean; dyslex
         },
 
         pdfHeaderTitle: {
-            fontFamily: Fonts.poppins.regular,
+            fontFamily: fontFamilies.regular,
             fontWeight: TextStyles.semiBold.fontWeight,
-            fontSize: FontSize.s16,
+            fontSize: FontSize.s16 * fontScale,
             color: theme.black,
             flex: 1,
         },

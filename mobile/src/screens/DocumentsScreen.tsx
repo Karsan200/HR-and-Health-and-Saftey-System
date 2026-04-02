@@ -270,7 +270,7 @@ export default function DocumentsScreen() {
                                 <Icon
                                     source="file-document-outline"
                                     size={22}
-                                    color={item.signed ? theme.greenPrimary : theme.redPrimary}
+                                    color={item.signed ? theme.greenPrimary : theme.redTrafficPrimary}
                                 />
                             </View>
 
@@ -289,7 +289,7 @@ export default function DocumentsScreen() {
                                     </View>
                                 ) : (
                                     <View style={styles.unsignedBadge}>
-                                        <Icon source="clock-outline" size={12} color={theme.redPrimary} />
+                                        <Icon source="clock-outline" size={12} color={theme.redTrafficPrimary} />
                                         <Text style={styles.unsignedBadgeText}>NEW • Signature Required</Text>
                                     </View>
                                 )}
