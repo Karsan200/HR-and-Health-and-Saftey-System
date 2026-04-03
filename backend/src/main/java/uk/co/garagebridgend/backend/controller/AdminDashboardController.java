@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.AdminDashboardService;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.AdminDashboardSummaryResponse;
+import uk.co.garagebridgend.backend.models.response.AdminLateArrivalsChartResponse;
 
 
 /** Controller for admin dashboard related endpoints. */
@@ -36,6 +38,31 @@ public class AdminDashboardController {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal sever error " + e.getMessage()
+            );
+        }
+    }
+
+    /**
+     * Endpoint to retrieve late arrivals chart data for the admin dashboard.
+     *
+     * @param range the selected range, e.g. this-week, last-week, this-month
+     * @return AdminLateArrivalsChartResponse containing chart data
+     */
+    @GetMapping("/admin/late-arrivals")
+    public AdminLateArrivalsChartResponse getLateArrivalsChart(
+            @RequestParam(defaultValue = "this-week") final String range
+    ) {
+        try {
+            return adminDashboardService.getLateArrivalsChart(range);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    e.getMessage()
+            );
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal server error"
             );
         }
     }

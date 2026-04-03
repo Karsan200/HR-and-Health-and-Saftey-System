@@ -9,6 +9,7 @@ import uk.co.garagebridgend.backend.models.entity.ClockInTable;
 import java.sql.Time;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.List;
 /**
  * Repository interface for finding late's to work for a specific week.
  */
@@ -34,5 +35,20 @@ public interface ClockInRepository extends JpaRepository<ClockInTable, UUID> {
             @Param("lateThreshold") Time lateThreshold,
             @Param("startOfWeek") LocalDateTime startOfWeek,
             @Param("endOfWeek") LocalDateTime endOfWeek
+    );
+
+    /**
+     * Retrieves all late clock-ins within a given date range.
+     * This allows us to reuse this component for different weeks, months and years.
+     *
+     * @param startDateTime the inclusive start of the range
+     * @param endDateTime the exclusive end of the range
+     * @param lateThreshold the time after which a clock-in is considered late
+     * @return a list of late clock-ins in the range
+     */
+    List<ClockInTable> findAllByCreatedGreaterThanEqualAndCreatedLessThanAndClockInTimeGreaterThan(
+            LocalDateTime startDateTime,
+            LocalDateTime endDateTime,
+            Time lateThreshold
     );
 }

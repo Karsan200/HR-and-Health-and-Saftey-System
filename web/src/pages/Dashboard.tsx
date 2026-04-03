@@ -5,7 +5,7 @@ import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import { getDashboardSummary } from "../logic/DashboardService";
+import { getDashboardSummary, getLateArrivals, type LateArrivalsResponse } from "../logic/DashboardService";
 import { useAuth } from "../AuthContext";
 import { dashboardStyles as styles } from "./Dashboard.style";
 
@@ -18,8 +18,8 @@ type DashboardSummary = {
 export function Dashboard() {
     const { authenticationService } = useAuth();
     const [data, setData] = useState<DashboardSummary | null>(null);
+    const [lateData, setLateData] = useState<LateArrivalsResponse | null>(null);
 
-    // Fetch the dashboard summary data, and defaulting to 0 for any missing values
     useEffect(() => {
         getDashboardSummary(authenticationService).then((response: DashboardSummary) => {
             setData({
@@ -30,13 +30,18 @@ export function Dashboard() {
         });
     }, [authenticationService]);
 
+    useEffect(() => {
+        getLateArrivals(authenticationService).then((response) => {
+            setLateData(response);
+        });
+    }, [authenticationService]);
+
     if (data === null) {
         return null;
     }
 
     return (
         <Box sx={styles.pageContainer}>
-            {/* The top 3 cards that show the key summary data */}
             <Box sx={styles.topCardsContainer}>
                 <Paper elevation={0} sx={styles.card}>
                     <Box sx={styles.cardTopRow}>
@@ -98,6 +103,26 @@ export function Dashboard() {
                     </Typography>
                 </Paper>
             </Box>
+
+            {lateData !== null && (
+                <Box sx={{ mt: 4 }}>
+                    <Typography variant="h6">
+                        Late Arrivals Chart Data
+                    </Typography>
+
+                    <Typography>
+                        Total: {lateData.total}
+                    </Typography>
+
+                    <Box sx={{ mt: 1 }}>
+                        {lateData.points.map((point) => (
+                            <Typography key={point.label}>
+                                {point.label}: {point.value}
+                            </Typography>
+                        ))}
+                    </Box>
+                </Box>
+            )}
         </Box>
     );
 }

@@ -10,12 +10,21 @@ import uk.co.garagebridgend.backend.models.entity.DocumentTable;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.DocumentRepository;
 import uk.co.garagebridgend.backend.repository.SignatureRepository;
+import uk.co.garagebridgend.backend.models.entity.ClockInTable;
+import uk.co.garagebridgend.backend.models.response.AdminDashboardChartPointResponse;
+import uk.co.garagebridgend.backend.models.response.AdminLateArrivalsChartResponse;
 
 import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.time.Month;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Service class for handling business logic related to the admin dashboard.
@@ -24,6 +33,15 @@ import java.util.List;
 public class AdminDashboardService {
     /** Number of days in a week. */
     private static final int NUMBER_OF_DAYS_IN_A_WEEK  = 7;
+
+    /** Number of working days in a week, used for weekly grouping. */
+    private static final int NUMBER_OF_WORKING_DAYS_IN_A_WEEK = 5;
+
+    /** Number of months for the last 3 months range. */
+    private static final int THREE_MONTHS = 3;
+
+    /** Number of months for the last 6 months range. */
+    private static final int SIX_MONTHS = 6;
 
     /** Repository to access clock-in data. */
     private final ClockInRepository clockInRepository;
@@ -41,7 +59,7 @@ public class AdminDashboardService {
     private final SignatureRepository signatureRepository;
 
     /**
-     * Constructs the HsOverviewService with the required repositories.
+     * Constructs the AdminDashboardService with the required repositories.
      *
      * @param hazardRepositoryImpl    repository for HazardTable
      * @param clockInRepositoryImpl  repository for ClockInTable
@@ -66,7 +84,8 @@ public class AdminDashboardService {
 
 
     /**
-     * Retrieves a summary of the .
+     * Retrieves a summary of the key metrics for the admin dashboard, including
+     * pending signatures, late arrivals this week, and open hazards.
      *
      * @return AdminDashboardSummaryResponse containing pending signatures,
      * late arrivals this week, and open hazards
@@ -143,5 +162,214 @@ public class AdminDashboardService {
         pendingSignatures += Math.toIntExact(Math.max(0, missingSignatures));
 
         return pendingSignatures;
+    }
+
+    /**
+     * Retrieves chart data for late arrivals for the selected range.
+     *
+     * @param range the selected range, e.g. this-week, last-week, this-month
+     * @return AdminLateArrivalsChartResponse containing chart data for the selected range
+     */
+    public AdminLateArrivalsChartResponse getLateArrivalsChart(final String range) {
+        String normalisedRange = normaliseRange(range);
+
+        return switch (normalisedRange) {
+            case "this-week" -> buildDailyLateArrivalsChart(normalisedRange, getStartOfCurrentWeek());
+            case "last-week" -> buildDailyLateArrivalsChart(normalisedRange, getStartOfCurrentWeek().minusWeeks(1));
+            case "this-month" -> buildWeeklyLateArrivalsChart(normalisedRange, LocalDate.now().withDayOfMonth(1));
+            case "last-month" -> buildWeeklyLateArrivalsChart(
+                    normalisedRange,
+                    LocalDate.now().minusMonths(1).withDayOfMonth(1)
+            );
+            case "last-3-months" -> buildMonthlyLateArrivalsChart(normalisedRange, THREE_MONTHS);
+            case "last-6-months" -> buildMonthlyLateArrivalsChart(normalisedRange, SIX_MONTHS);
+            case "this-year" -> buildThisYearLateArrivalsChart(normalisedRange);
+            default -> throw new IllegalArgumentException("Unsupported range: " + range);
+        };
+    }
+
+    /**
+     * Normalises the supplied range or defaults it to this-week.
+     *
+     * @param range the incoming range value
+     * @return a normalised range string
+     */
+    private String normaliseRange(final String range) {
+        return (range == null || range.isBlank()) ? "this-week" : range.toLowerCase();
+    }
+
+    /**
+     * Gets the Monday of the current week.
+     *
+     * @return the start of the current week
+     */
+    private LocalDate getStartOfCurrentWeek() {
+        return LocalDate.now().with(DayOfWeek.MONDAY);
+    }
+
+    /**
+     * Builds a late arrivals chart grouped by day.
+     *
+     * @param range the selected range
+     * @param startDate the start date of the week
+     * @return chart response grouped by day
+     */
+    private AdminLateArrivalsChartResponse buildDailyLateArrivalsChart(
+            final String range,
+            final LocalDate startDate
+    ) {
+        LocalDate endDate = startDate.plusDays(NUMBER_OF_WORKING_DAYS_IN_A_WEEK);
+        List<ClockInTable> lateClockIns = getLateClockInsBetween(startDate, endDate);
+
+        Map<LocalDate, Integer> counts = new LinkedHashMap<>();
+        for (int i = 0; i < NUMBER_OF_WORKING_DAYS_IN_A_WEEK; i++) {
+            counts.put(startDate.plusDays(i), 0);
+        }
+
+        for (ClockInTable clockIn : lateClockIns) {
+            LocalDate day = clockIn.getCreated().toLocalDate();
+            counts.computeIfPresent(day, (key, value) -> value + 1);
+        }
+
+        List<AdminDashboardChartPointResponse> points = new ArrayList<>();
+        for (Map.Entry<LocalDate, Integer> entry : counts.entrySet()) {
+            String label = entry.getKey().getDayOfWeek()
+                    .getDisplayName(TextStyle.SHORT, Locale.UK);
+            points.add(new AdminDashboardChartPointResponse(label, entry.getValue()));
+        }
+
+        return new AdminLateArrivalsChartResponse(range, lateClockIns.size(), points);
+    }
+
+    /**
+     * Builds a late arrivals chart grouped by week-of-month.
+     *
+     * @param range the selected range
+     * @param monthStart the first day of the target month
+     * @return chart response grouped by week
+     */
+    private AdminLateArrivalsChartResponse buildWeeklyLateArrivalsChart(
+            final String range,
+            final LocalDate monthStart
+    ) {
+        LocalDate monthEnd = monthStart.plusMonths(1);
+        List<ClockInTable> lateClockIns = getLateClockInsBetween(monthStart, monthEnd);
+
+        int numberOfWeeks = (int) Math.ceil((double) monthStart.lengthOfMonth() / NUMBER_OF_DAYS_IN_A_WEEK);
+        Map<Integer, Integer> counts = new LinkedHashMap<>();
+        for (int week = 1; week <= numberOfWeeks; week++) {
+            counts.put(week, 0);
+        }
+
+        for (ClockInTable clockIn : lateClockIns) {
+            if (clockIn.getCreated().getDayOfWeek() == DayOfWeek.SATURDAY
+                    || clockIn.getCreated().getDayOfWeek() == DayOfWeek.SUNDAY) {
+                continue;
+            }
+            int weekOfMonth = ((clockIn.getCreated().getDayOfMonth() - 1) / NUMBER_OF_DAYS_IN_A_WEEK) + 1;
+            counts.computeIfPresent(weekOfMonth, (key, value) -> value + 1);
+        }
+
+        List<AdminDashboardChartPointResponse> points = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> entry : counts.entrySet()) {
+            points.add(new AdminDashboardChartPointResponse("Week " + entry.getKey(), entry.getValue()));
+        }
+
+        return new AdminLateArrivalsChartResponse(range, lateClockIns.size(), points);
+    }
+
+    /**
+     * Builds a late arrivals chart grouped by month for the previous number of months.
+     *
+     * @param range the selected range
+     * @param numberOfMonths the number of months to include
+     * @return chart response grouped by month
+     */
+    private AdminLateArrivalsChartResponse buildMonthlyLateArrivalsChart(
+            final String range,
+            final int numberOfMonths
+    ) {
+        LocalDate currentMonthStart = LocalDate.now().withDayOfMonth(1);
+        LocalDate startDate = currentMonthStart.minusMonths(numberOfMonths - 1);
+        LocalDate endDate = currentMonthStart.plusMonths(1);
+
+        List<ClockInTable> lateClockIns = getLateClockInsBetween(startDate, endDate);
+
+        Map<Month, Integer> counts = new LinkedHashMap<>();
+        LocalDate cursor = startDate;
+        for (int i = 0; i < numberOfMonths; i++) {
+            counts.put(cursor.getMonth(), 0);
+            cursor = cursor.plusMonths(1);
+        }
+
+        for (ClockInTable clockIn : lateClockIns) {
+            if (clockIn.getCreated().getDayOfWeek() == DayOfWeek.SATURDAY
+                    || clockIn.getCreated().getDayOfWeek() == DayOfWeek.SUNDAY) {
+                continue;
+            }
+
+            Month month = clockIn.getCreated().getMonth();
+            counts.computeIfPresent(month, (key, value) -> value + 1);
+        }
+
+        List<AdminDashboardChartPointResponse> points = new ArrayList<>();
+        for (Map.Entry<Month, Integer> entry : counts.entrySet()) {
+            String label = entry.getKey().getDisplayName(TextStyle.SHORT, Locale.UK);
+            points.add(new AdminDashboardChartPointResponse(label, entry.getValue()));
+        }
+
+        return new AdminLateArrivalsChartResponse(range, lateClockIns.size(), points);
+    }
+
+    /**
+     * Builds a late arrivals chart grouped by month for the current year.
+     *
+     * @param range the selected range
+     * @return chart response grouped by month
+     */
+    private AdminLateArrivalsChartResponse buildThisYearLateArrivalsChart(final String range) {
+        LocalDate yearStart = LocalDate.now().withDayOfYear(1);
+        LocalDate yearEnd = yearStart.plusYears(1);
+
+        List<ClockInTable> lateClockIns = getLateClockInsBetween(yearStart, yearEnd);
+
+        Map<Month, Integer> counts = new LinkedHashMap<>();
+        for (Month month : Month.values()) {
+            counts.put(month, 0);
+        }
+
+        for (ClockInTable clockIn : lateClockIns) {
+            if (clockIn.getCreated().getDayOfWeek() == DayOfWeek.SATURDAY
+                    || clockIn.getCreated().getDayOfWeek() == DayOfWeek.SUNDAY) {
+                continue;
+            }
+
+            Month month = clockIn.getCreated().getMonth();
+            counts.computeIfPresent(month, (key, value) -> value + 1);
+        }
+        List<AdminDashboardChartPointResponse> points = new ArrayList<>();
+        for (Map.Entry<Month, Integer> entry : counts.entrySet()) {
+            String label = entry.getKey().getDisplayName(TextStyle.SHORT, Locale.UK);
+            points.add(new AdminDashboardChartPointResponse(label, entry.getValue()));
+        }
+
+        return new AdminLateArrivalsChartResponse(range, lateClockIns.size(), points);
+    }
+
+    /**
+     * Retrieves all late clock-ins between the given dates.
+     *
+     * @param startDate the inclusive start date
+     * @param endDate the exclusive end date
+     * @return a list of late clock-ins in the range
+     */
+    private List<ClockInTable> getLateClockInsBetween(final LocalDate startDate, final LocalDate endDate) {
+        Time lateThreshold = Time.valueOf("08:00:00");
+
+        return clockInRepository.findAllByCreatedGreaterThanEqualAndCreatedLessThanAndClockInTimeGreaterThan(
+                startDate.atStartOfDay(),
+                endDate.atStartOfDay(),
+                lateThreshold
+        );
     }
 }
