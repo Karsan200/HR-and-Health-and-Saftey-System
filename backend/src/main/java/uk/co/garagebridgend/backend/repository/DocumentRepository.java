@@ -26,4 +26,15 @@ public interface DocumentRepository extends JpaRepository<DocumentTable, Long> {
      * @return list of documents ordered by creation date descending
      */
     List<DocumentTable> findAllByOrderByCreatedDesc();
+
+    /**
+     * Finds all documents for a given account where the title contains the provided fragment,
+     * ordered by creation date in descending order.
+     *
+     * @param account the account to find documents for
+     * @param titleFragment the text fragment used to filter document titles
+     * @return list of documents for the account ordered by creation date descending
+     */
+    List<DocumentTable> findByFileAccountAndTitleContainingIgnoreCaseOrderByCreatedDesc(
+            AccountTable account, String titleFragment);
 }
