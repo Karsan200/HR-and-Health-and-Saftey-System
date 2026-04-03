@@ -25,7 +25,7 @@ export type LateArrivalsResponse = {
 
 export async function getLateArrivals(
     authenticationService: AuthenticationService,
-    range: string = "this-week"
+    range: string = "last-month"
 ): Promise<LateArrivalsResponse> {
     const response = await authenticationService.fetch(
         `/api/admin/late-arrivals?range=${range}`,
@@ -34,6 +34,27 @@ export async function getLateArrivals(
 
     if (!response.ok) {
         throw new Error("Failed to fetch late arrivals");
+    }
+
+    return response.json();
+}
+
+export type DocumentSignaturesResponse = {
+    signed: number;
+    pending: number;
+};
+
+export async function getDocumentSignatures(
+    authenticationService: AuthenticationService,
+    range: string = "this-week"
+): Promise<DocumentSignaturesResponse> {
+    const response = await authenticationService.fetch(
+        `/api/admin/document-signatures?range=${range}`,
+        { method: "GET" }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch document signatures");
     }
 
     return response.json();

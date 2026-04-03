@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.AdminDashboardService;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.AdminDashboardSummaryResponse;
+import uk.co.garagebridgend.backend.models.response.AdminDocumentSignaturesChartResponse;
 import uk.co.garagebridgend.backend.models.response.AdminLateArrivalsChartResponse;
 
 
@@ -54,6 +55,31 @@ public class AdminDashboardController {
     ) {
         try {
             return adminDashboardService.getLateArrivalsChart(range);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    e.getMessage()
+            );
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal server error"
+            );
+        }
+    }
+
+    /**
+     * Endpoint to retrieve document signature totals for the admin dashboard.
+     *
+     * @param range the selected range
+     * @return AdminDocumentSignaturesChartResponse containing signed and pending totals
+     */
+    @GetMapping("/admin/document-signatures")
+    public AdminDocumentSignaturesChartResponse getDocumentSignaturesChart(
+            @RequestParam(defaultValue = "this-week") final String range
+    ) {
+        try {
+            return adminDashboardService.getDocumentSignaturesChart(range);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,

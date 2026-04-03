@@ -5,7 +5,12 @@ import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import { getDashboardSummary, getLateArrivals, type LateArrivalsResponse } from "../logic/DashboardService";
+import { getDashboardSummary,
+         getLateArrivals,
+         type LateArrivalsResponse,
+         getDocumentSignatures,
+         type DocumentSignaturesResponse
+    } from "../logic/DashboardService";
 import { useAuth } from "../AuthContext";
 import { dashboardStyles as styles } from "./Dashboard.style";
 
@@ -19,6 +24,7 @@ export function Dashboard() {
     const { authenticationService } = useAuth();
     const [data, setData] = useState<DashboardSummary | null>(null);
     const [lateData, setLateData] = useState<LateArrivalsResponse | null>(null);
+    const [documentSignatureData, setDocumentSignatureData] = useState<DocumentSignaturesResponse | null>(null);
 
     useEffect(() => {
         getDashboardSummary(authenticationService).then((response: DashboardSummary) => {
@@ -33,6 +39,15 @@ export function Dashboard() {
     useEffect(() => {
         getLateArrivals(authenticationService).then((response) => {
             setLateData(response);
+        });
+    }, [authenticationService]);
+
+    useEffect(() => {
+        getDocumentSignatures(authenticationService).then((response) => {
+            setDocumentSignatureData({
+                signed: response?.signed ?? 0,
+                pending: response?.pending ?? 0,
+            });
         });
     }, [authenticationService]);
 
@@ -121,6 +136,22 @@ export function Dashboard() {
                             </Typography>
                         ))}
                     </Box>
+                </Box>
+            )}
+
+            {documentSignatureData !== null && (
+                <Box sx={{ mt: 4 }}>
+                    <Typography variant="h6">
+                        Document Signatures
+                    </Typography>
+
+                    <Typography>
+                        Signed: {documentSignatureData.signed}
+                    </Typography>
+
+                    <Typography>
+                        Pending: {documentSignatureData.pending}
+                    </Typography>
                 </Box>
             )}
         </Box>

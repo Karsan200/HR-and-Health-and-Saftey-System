@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.co.garagebridgend.backend.models.entity.HazardTable;
 import uk.co.garagebridgend.backend.models.response.AdminDashboardSummaryResponse;
+import uk.co.garagebridgend.backend.models.response.AdminDocumentSignaturesChartResponse;
 import uk.co.garagebridgend.backend.repository.ClockInRepository;
 import uk.co.garagebridgend.backend.repository.HazardRepository;
 import uk.co.garagebridgend.backend.models.entity.DocumentTable;
@@ -255,7 +256,7 @@ public class AdminDashboardService {
         LocalDate monthEnd = monthStart.plusMonths(1);
         List<ClockInTable> lateClockIns = getLateClockInsBetween(monthStart, monthEnd);
 
-        int numberOfWeeks = (int) Math.ceil((double) monthStart.lengthOfMonth() / NUMBER_OF_DAYS_IN_A_WEEK);
+        int numberOfWeeks = (int) Math.ceil((double) monthStart.lengthOfMonth() / NUMBER_OF_DAYS_IN_A_WEEK) - 1;
         Map<Integer, Integer> counts = new LinkedHashMap<>();
         for (int week = 1; week <= numberOfWeeks; week++) {
             counts.put(week, 0);
@@ -266,7 +267,7 @@ public class AdminDashboardService {
                     || clockIn.getCreated().getDayOfWeek() == DayOfWeek.SUNDAY) {
                 continue;
             }
-            int weekOfMonth = ((clockIn.getCreated().getDayOfMonth() - 1) / NUMBER_OF_DAYS_IN_A_WEEK) + 1;
+            int weekOfMonth = ((clockIn.getCreated().getDayOfMonth() - 1) / NUMBER_OF_DAYS_IN_A_WEEK ) + 1;
             counts.computeIfPresent(weekOfMonth, (key, value) -> value + 1);
         }
 
@@ -370,6 +371,73 @@ public class AdminDashboardService {
                 startDate.atStartOfDay(),
                 endDate.atStartOfDay(),
                 lateThreshold
+        );
+    }
+
+    /**
+     * Retrieves document signature totals for the admin dashboard for the given range.
+     *
+     * @param range the selected range, e.g. this week, last week, this month...
+     * @return AdminDocumentSignaturesChartResponse containing signed and pending totals
+     */
+    public AdminDocumentSignaturesChartResponse getDocumentSignaturesChart(final String range) {
+        String normalisedRange = normaliseRange(range);
+
+        LocalDate startDate;
+        LocalDate endDate;
+
+        switch (normalisedRange) {
+            case "this-week" -> {
+                startDate = getStartOfCurrentWeek();
+                endDate = startDate.plusDays(NUMBER_OF_DAYS_IN_A_WEEK);
+            }
+            case "last-week" -> {
+                startDate = getStartOfCurrentWeek().minusWeeks(1);
+                endDate = startDate.plusDays(NUMBER_OF_DAYS_IN_A_WEEK);
+            }
+            case "this-month" -> {
+                startDate = LocalDate.now().withDayOfMonth(1);
+                endDate = startDate.plusMonths(1);
+            }
+            case "last-month" -> {
+                startDate = LocalDate.now().minusMonths(1).withDayOfMonth(1);
+                endDate = startDate.plusMonths(1);
+            }
+            case "last-3-months" -> {
+                endDate = LocalDate.now().withDayOfMonth(1).plusMonths(1);
+                startDate = endDate.minusMonths(THREE_MONTHS);
+            }
+            case "last-6-months" -> {
+                endDate = LocalDate.now().withDayOfMonth(1).plusMonths(1);
+                startDate = endDate.minusMonths(SIX_MONTHS);
+            }
+            case "this-year" -> {
+                startDate = LocalDate.now().withDayOfYear(1);
+                endDate = startDate.plusYears(1);
+            }
+            default -> throw new IllegalArgumentException("Unsupported range: " + range);
+        }
+
+        long totalAccounts = accountRepository.count();
+
+        List<DocumentTable> documentsRequiringSignatures =
+                documentRepository.findAllBySignatureRequiredTrueAndCreatedGreaterThanEqualAndCreatedLessThan(
+                        startDate.atStartOfDay(),
+                        endDate.atStartOfDay()
+                );
+
+        long totalExpectedSignatures = totalAccounts * documentsRequiringSignatures.size();
+        long totalRecordedSignatures = 0;
+
+        for (DocumentTable document : documentsRequiringSignatures) {
+            totalRecordedSignatures += signatureRepository.countByDocumentDocumentId(document.getDocumentId());
+        }
+
+        long totalPendingSignatures = Math.max(0, totalExpectedSignatures - totalRecordedSignatures);
+
+        return new AdminDocumentSignaturesChartResponse(
+                totalRecordedSignatures,
+                totalPendingSignatures
         );
     }
 }
