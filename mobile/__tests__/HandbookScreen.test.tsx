@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react-native';
 import HandbookScreen from '../src/screens/HandbookScreen';
 import AuthenticationService from '../src/logic/AuthenticationService';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 
 jest.mock('../src/logic/AuthenticationService', () => ({
     fetch: jest.fn(),
@@ -14,6 +14,27 @@ jest.mock('react-native-pdf', () => {
 
 
 jest.mock('react-native-wheel-color-picker', () => null);
+
+
+jest.mock('react-native-blob-util', () => ({
+    __esModule: true,
+    default: {
+        config: jest.fn(() => ({
+            fetch: jest.fn(() =>
+                Promise.resolve({ path: () => '/storage/emulated/0/Download/test.pdf' })
+            ),
+        })),
+        fs: {
+            dirs: {
+                DownloadDir: '/storage/emulated/0/Download',
+                DocumentDir: '/data/user/0/com.frontend/files',
+            },
+        },
+        ios: {
+            presentOptionsMenu: jest.fn(),
+        },
+    },
+}));
 
 const mockFetch = AuthenticationService.fetch as jest.Mock;
 
@@ -224,6 +245,102 @@ describe('HandbookScreen', () => {
 
         await waitFor(() => {
             expect(screen.queryByTestId('loading-indicator')).toBeNull();
+        });
+    });
+
+    /**
+     * Ensures the download button is present for each handbook card.
+     */
+    it('renders a download button for each handbook', async () => {
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockHandbooks,
+        });
+
+        render(<HandbookScreen />);
+
+        await waitFor(() => {
+            const downloadButtons = screen.getAllByTestId('download-button');
+            expect(downloadButtons).toHaveLength(mockHandbooks.length);
+        });
+    });
+
+    /**
+     * Ensures pressing the download button triggers the download and shows a success alert.
+     */
+    it('shows downloaded alert when download button is pressed', async () => {
+        const alertSpy = jest.spyOn(Alert, 'alert');
+        jest.replaceProperty(Platform, 'OS', 'android');
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockHandbooks,
+        });
+
+        render(<HandbookScreen />);
+
+        const downloadButtons = await screen.findAllByTestId('download-button');
+        fireEvent.press(downloadButtons[0]);
+
+        await waitFor(() => {
+            expect(alertSpy).toHaveBeenCalledWith(
+                'Downloaded',
+                'Employee Handbook 2026 saved to Downloads.'
+            );
+        });
+    });
+
+    /**
+     * Ensures pressing the download button on the second card uses the correct filename.
+     */
+    it('downloads second handbook with correct filename', async () => {
+        const alertSpy = jest.spyOn(Alert, 'alert');
+        jest.replaceProperty(Platform, 'OS', 'android');
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockHandbooks,
+        });
+
+        render(<HandbookScreen />);
+
+        const downloadButtons = await screen.findAllByTestId('download-button');
+        fireEvent.press(downloadButtons[1]);
+
+        await waitFor(() => {
+            expect(alertSpy).toHaveBeenCalledWith(
+                'Downloaded',
+                'Health  Safety Handbook saved to Downloads.'
+            );
+        });
+    });
+
+    /**
+     * Ensures an error alert is shown if the download fails.
+     */
+    it('shows error alert when download fails', async () => {
+        const alertSpy = jest.spyOn(Alert, 'alert');
+
+        const ReactNativeBlobUtil = require('react-native-blob-util').default;
+        ReactNativeBlobUtil.config.mockReturnValueOnce({
+            fetch: jest.fn(() => Promise.reject(new Error('Download failed'))),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockHandbooks,
+        });
+
+        render(<HandbookScreen />);
+
+        const downloadButtons = await screen.findAllByTestId('download-button');
+        fireEvent.press(downloadButtons[0]);
+
+        await waitFor(() => {
+            expect(alertSpy).toHaveBeenCalledWith(
+                'Error',
+                'Failed to download the file.'
+            );
         });
     });
 });
