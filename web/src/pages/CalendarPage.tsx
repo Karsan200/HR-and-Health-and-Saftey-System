@@ -9,10 +9,6 @@ import {
 import {
     ChevronLeft,
     ChevronRight,
-    BeachAccessOutlined,
-    SickOutlined,
-    EventAvailableOutlined,
-    SchoolOutlined,
 } from "@mui/icons-material";
 
 import { calendarPageStyles as styles } from "./CalendarPage.styles";
@@ -20,6 +16,8 @@ import { SectionNavBar, type SectionNavTab } from "../components/SectionNavbar";
 import { DefaultColours } from "../theme/colours";
 import { fetchCalendarEvents } from "../logic/LeaveCalendarService";
 import { useAuth } from "../AuthContext";
+import { DayDetailOverlay } from "../components/DayDetailOverlay";
+import { type CalendarEventType, type CalendarEvent, eventConfig } from "../models/CalendarTypes";
 
 // Tabs shown at the top of the calendar section
 const CALENDAR_TABS: SectionNavTab[] = [
@@ -27,17 +25,6 @@ const CALENDAR_TABS: SectionNavTab[] = [
     { label: "Pending Requests", route: "/calendar/requests" },
     { label: "Clock Overrides", route: "/calendar/overrides" },
 ];
-
-// Types for calendar events
-export type CalendarEventType = "nationalHoliday" | "sickLeave" | "bookedLeave" | "trainingLeave";
-
-export interface CalendarEvent {
-    id: string;
-    date: string;
-    type: CalendarEventType;
-    label: string;
-    notes?: string;
-}
 
 const DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
@@ -90,46 +77,6 @@ function buildCalendarGrid(year: number, month: number): Date[][] {
     return weeks;
 }
 
-// Returns icon, chip background, icon circle background and text colour for each event type
-function eventConfig(type: CalendarEventType): {
-    chipBg: string;
-    iconCircleBg: string;
-    textColor: string;
-    Icon: React.ElementType;
-} {
-    switch (type) {
-        case "nationalHoliday":
-            return {
-                chipBg: DefaultColours.blueLight,
-                iconCircleBg: DefaultColours.bluePrimary,
-                textColor: DefaultColours.blueDark,
-                Icon: BeachAccessOutlined,
-            };
-        case "sickLeave":
-            return {
-                chipBg: DefaultColours.redBackgroundLight,
-                iconCircleBg: DefaultColours.redPrimary,
-                textColor: DefaultColours.redTextDark,
-                Icon: SickOutlined,
-            };
-        case "bookedLeave":
-            return {
-                chipBg: DefaultColours.amberBackgroundLight,
-                iconCircleBg: DefaultColours.amberPrimary,
-                textColor: DefaultColours.amberTextDark,
-                Icon: EventAvailableOutlined,
-            };
-        case "trainingLeave":
-            return {
-                chipBg: DefaultColours.greenBackgroundLight,
-                iconCircleBg: DefaultColours.greenPrimary,
-                textColor: DefaultColours.greenTextDark,
-                Icon: SchoolOutlined,
-            };
-    }
-}
-
-// Builds the tooltip content showing the name and optional notes
 function TooltipContent({ label, notes }: { label: string; notes?: string }) {
     return (
         <Box sx={styles.tooltipContent}>
@@ -188,11 +135,10 @@ function CalendarKey() {
 
 // Props for the main calendar page
 interface CalendarPageProps {
-    onDayClick?: (date: string) => void;
     onEventClick?: (event: CalendarEvent) => void;
 }
 
-export function CalendarPage({ onDayClick, onEventClick }: CalendarPageProps) {
+export function CalendarPage({ onEventClick }: CalendarPageProps) {
     const auth = useAuth();
 
     const today = new Date();
@@ -202,6 +148,9 @@ export function CalendarPage({ onDayClick, onEventClick }: CalendarPageProps) {
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const [overlayDate, setOverlayDate] = useState<string | null>(null);
+    const [overlayOpen, setOverlayOpen] = useState(false);
 
     const weeks = useMemo(() => buildCalendarGrid(viewYear, viewMonth), [viewYear, viewMonth]);
 
@@ -234,6 +183,16 @@ export function CalendarPage({ onDayClick, onEventClick }: CalendarPageProps) {
         return map;
     }, [events]);
 
+    const overlayEvents = useMemo(
+        () => (overlayDate ? (eventsByDate.get(overlayDate) ?? []) : []),
+        [overlayDate, eventsByDate],
+    );
+
+    function handleDayClick(iso: string) {
+        setOverlayDate(iso);
+        setOverlayOpen(true);
+    }
+
     function prevMonth() {
         if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11); }
         else setViewMonth(m => m - 1);
@@ -256,23 +215,14 @@ export function CalendarPage({ onDayClick, onEventClick }: CalendarPageProps) {
 
                 {/* Month navigation bar with prev/next buttons */}
                 <Box sx={styles.navBar}>
-                    <IconButton
-                        sx={styles.navButton}
-                        onClick={prevMonth}
-                        aria-label="Previous month"
-                    >
+                    <IconButton sx={styles.navButton} onClick={prevMonth} aria-label="Previous month">
                         <ChevronLeft sx={{ color: DefaultColours.white }} />
                     </IconButton>
 
                     <Typography sx={styles.navMonthLabel}>
                         {MONTH_NAMES[viewMonth]} {viewYear}
                     </Typography>
-
-                    <IconButton
-                        sx={styles.navButton}
-                        onClick={nextMonth}
-                        aria-label="Next month"
-                    >
+                    <IconButton sx={styles.navButton} onClick={nextMonth} aria-label="Next month">
                         <ChevronRight sx={{ color: DefaultColours.white }} />
                     </IconButton>
                 </Box>
@@ -297,9 +247,7 @@ export function CalendarPage({ onDayClick, onEventClick }: CalendarPageProps) {
                         <Box sx={styles.dayHeaderRow}>
                             {DAYS.map(d => (
                                 <Box key={d} sx={styles.dayHeaderCell}>
-                                    <Typography sx={styles.dayHeaderLabel}>
-                                        {d}
-                                    </Typography>
+                                    <Typography sx={styles.dayHeaderLabel}>{d}</Typography>
                                 </Box>
                             ))}
                         </Box>
@@ -332,14 +280,9 @@ export function CalendarPage({ onDayClick, onEventClick }: CalendarPageProps) {
                                         <Box
                                             key={di}
                                             sx={cellSx}
-                                            onClick={() => isCurrentMonth && onDayClick?.(iso)}
+                                            onClick={() => isCurrentMonth && handleDayClick(iso)}
                                         >
-                                            {/* Day number in the top left, styled for today and out-of-month days */}
-                                            <Box sx={numSx}>
-                                                {date.getDate()}
-                                            </Box>
-
-                                            {/* Event chips stacked below the day number */}
+                                            <Box sx={numSx}>{date.getDate()}</Box>
                                             <Box sx={styles.eventsContainer}>
                                                 {visibleEvents.map(ev => (
                                                     <EventChip
@@ -362,9 +305,15 @@ export function CalendarPage({ onDayClick, onEventClick }: CalendarPageProps) {
                     </Box>
                 )}
 
-                {/* Colour key explaining each event type */}
                 <CalendarKey />
             </Box>
+
+            <DayDetailOverlay
+                open={overlayOpen}
+                date={overlayDate}
+                events={overlayEvents}
+                onClose={() => setOverlayOpen(false)}
+            />
         </Box>
     );
 }
