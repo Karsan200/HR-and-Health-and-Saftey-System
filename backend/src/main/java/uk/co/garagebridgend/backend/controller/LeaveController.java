@@ -31,6 +31,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LeaveController {
 
+    /** Minimum valid month value (January). */
+    private static final int MIN_MONTH = 1;
+
+    /** Maximum valid month value (December). */
+    private static final int MAX_MONTH = 12;
+
     /** Service responsible for handling leave-related business logic. */
     private final LeaveService leaveService;
 
@@ -48,7 +54,7 @@ public class LeaveController {
             @RequestParam final int year,
             @RequestParam final int month
     ) {
-        if (month < 1 || month > 12) {
+        if (month < MIN_MONTH || month > MAX_MONTH) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Month must be between 1 and 12.");
         }
         try {

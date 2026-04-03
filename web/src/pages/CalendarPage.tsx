@@ -23,9 +23,9 @@ import { useAuth } from "../AuthContext";
 
 // Tabs shown at the top of the calendar section
 const CALENDAR_TABS: SectionNavTab[] = [
-    { label: "Calendar View",    route: "/calendar",           alert: true },
+    { label: "Calendar View", route: "/calendar", alert: true },
     { label: "Pending Requests", route: "/calendar/requests" },
-    { label: "Clock Overrides",  route: "/calendar/overrides" },
+    { label: "Clock Overrides", route: "/calendar/overrides" },
 ];
 
 // Types for calendar events
