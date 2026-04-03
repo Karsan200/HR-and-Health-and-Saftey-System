@@ -85,18 +85,24 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'payslips':
       return (
         <>
-          <TopNavBar title="Payslips" />
-          <View style={styles.content} />
+          <TopNavBar
+            title="Payslips"
+          />
+          <View style={styles.content} >
             <PayslipScreen />
+            </View>
         </>
       );
 
     case 'handbook':
       return (
         <>
-          <TopNavBar title="Handbook" />
-          <View style={styles.content} />
+          <TopNavBar
+            title="Handbook"
+          />
+          <View style={styles.content} >
             <HandbookScreen />
+            </View>
         </>
       );
 
@@ -121,9 +127,12 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'documents':
       return (
         <>
-          <TopNavBar title="Documents" />
-          <View style={styles.content} />
+          <TopNavBar
+            title="Documents"
+          />
+          <View style={styles.content}>
             <DocumentsScreen />
+            </View>
         </>
       );
 
@@ -156,9 +165,12 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'personal':
       return (
         <>
-          <TopNavBar title="Personal" />
-          <View style={styles.content} />
+          <TopNavBar
+            title="Personal"
+          />
+          <View style={styles.content}>
             <PersonalScreen />
+            </View>
         </>
       );
 
