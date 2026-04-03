@@ -343,4 +343,32 @@ describe('HandbookScreen', () => {
             );
         });
     });
+
+
+    /**
+     * Ensures iOS share sheet is opened instead of an alert on iOS.
+     */
+    it('opens iOS share sheet on download instead of alert on iOS', async () => {
+        const alertSpy = jest.spyOn(Alert, 'alert');
+        jest.replaceProperty(Platform, 'OS', 'ios');
+
+        const ReactNativeBlobUtil = require('react-native-blob-util').default;
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockHandbooks,
+        });
+
+        render(<HandbookScreen />);
+
+        const downloadButtons = await screen.findAllByTestId('download-button');
+        fireEvent.press(downloadButtons[0]);
+
+        await waitFor(() => {
+            expect(ReactNativeBlobUtil.ios.presentOptionsMenu).toHaveBeenCalledWith(
+                '/storage/emulated/0/Download/test.pdf'
+            );
+            expect(alertSpy).not.toHaveBeenCalledWith('Downloaded', expect.any(String));
+        });
+    });
 });
