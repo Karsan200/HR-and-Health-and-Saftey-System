@@ -4,7 +4,10 @@ import {
     ScrollView,
     ActivityIndicator,
     Alert,
+    Platform,
+    PermissionsAndroid,
 } from 'react-native';
+import ReactNativeBlobUtil from 'react-native-blob-util';
 import AuthenticationService from '../logic/AuthenticationService';
 import { ThemeContext } from '../theme/colourController';
 import { styles as screenStyles } from './PayslipScreen.styles';
@@ -94,6 +97,68 @@ export default function PayslipScreen() {
         setExpandedKey(prev => (prev === key ? null : key));
     };
 
+    // Downloading logic
+    const requestStoragePermission = async (): Promise<boolean> => {
+        if (Platform.OS === 'android' && Platform.Version < 33) {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+            );
+            return granted === PermissionsAndroid.RESULTS.GRANTED;
+        }
+        return true;
+    };
+
+    const handleDownload = async (url: string, filename: string) => {
+        const hasPermission = await requestStoragePermission();
+        if (!hasPermission) {
+            Alert.alert('Permission Denied', 'Storage permission is required to download files.');
+            return;
+        }
+
+        // Sanitise filename
+        const safeFilename = filename.replace(/[^a-zA-Z0-9 _-]/g, '').trim();
+
+        const { dirs } = ReactNativeBlobUtil.fs;
+        // This way works for the emulator
+        const downloadDir = Platform.OS === 'android'
+            ? '/storage/emulated/0/Download'
+            : dirs.DocumentDir;
+
+        //CHANGE TO THIS FOR PRODUCTION BUILD
+        // const downloadDir = Platform.OS === 'android'
+        //     ? ReactNativeBlobUtil.fs.dirs.DownloadDir ?? '/storage/emulated/0/Download'
+        //     : ReactNativeBlobUtil.fs.dirs.DocumentDir;
+        const filePath = `${downloadDir}/${safeFilename}.pdf`;
+
+        try {
+            const res = await ReactNativeBlobUtil.config({
+                fileCache: true,
+                path: filePath,
+                addAndroidDownloads: {
+                    useDownloadManager: true,
+                    notification: true,
+                    title: safeFilename,
+                    description: 'Downloading payslip...',
+                    mime: 'application/pdf',
+                    mediaScannable: true,
+                    path: filePath,
+                },
+            }).fetch('GET', url);
+
+            console.log('Saved to:', res.path());
+
+            if (Platform.OS === 'ios') {
+                await ReactNativeBlobUtil.ios.presentOptionsMenu(res.path());
+            } else {
+                Alert.alert('Downloaded', `${safeFilename} saved to Downloads.`);
+            }
+        } catch (err) {
+            Alert.alert('Error', 'Failed to download the file.');
+            console.error(err);
+        }
+    };
+
+
     // Loading
     if (loading) {
         return (
@@ -113,6 +178,9 @@ export default function PayslipScreen() {
             <ScrollView style={styles.scrollView} contentContainerStyle={styles.container}>
                 {payslips.map((item) => {
                     const key = `${item.name}-${item.year}-${item.month}`;
+                    const filename = item.isPSixty
+                        ? formatP60Title(item.year, item.month)
+                        : formatPayslipTitle(item.year, item.month);
                     return (
                         <View key={key} style={styles.cardWrapper}>
                             <HrPdfCard
@@ -122,9 +190,7 @@ export default function PayslipScreen() {
                                 pdfUrl={item.url}
                                 isExpanded={expandedKey === key}
                                 onPress={() => handleCardPress(key)}
-                                onDownload={() => {
-                                    // Wire up a share/download action here when ready
-                                }}
+                                onDownload={() => handleDownload(item.url, filename)}                                    // Wire up a share/download action here when ready
                             />
                         </View>
                     );
