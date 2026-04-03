@@ -286,7 +286,7 @@ INSERT INTO document_table (
        'HR Guidelines', True, '2025-04-18 15:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'hazard_report_template'),
-       'Hazard Report Template', True, '2025-05-29 12:00:00'),
+       'Hazard Report Template', True, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
 
       ((SELECT file_id FROM files_table WHERE name = 'equipment_safety'),
        'Equipment Safety Procedures', True, '2025-07-12 09:00:00'),
@@ -295,10 +295,10 @@ INSERT INTO document_table (
        'Workshop Rules', FALSE, '2025-08-20 17:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'health_policy'),
-       'Health and Safety Policy', True, '2025-09-15 14:00:00'),
+       'Health and Safety Policy', True, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
 
       ((SELECT file_id FROM files_table WHERE name = 'emergency_procedures'),
-       'Emergency Procedures', True, '2025-10-30 18:00:00');
+       'Emergency Procedures', True, CURRENT_TIMESTAMP);
 
 INSERT INTO hazard_table (
     account_id,

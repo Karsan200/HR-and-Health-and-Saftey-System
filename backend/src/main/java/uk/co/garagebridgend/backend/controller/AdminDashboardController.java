@@ -11,6 +11,7 @@ import uk.co.garagebridgend.backend.logic.AdminDashboardService;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.AdminDashboardSummaryResponse;
 import uk.co.garagebridgend.backend.models.response.AdminDocumentSignaturesChartResponse;
+import uk.co.garagebridgend.backend.models.response.AdminHazardsReportedChartResponse;
 import uk.co.garagebridgend.backend.models.response.AdminLateArrivalsChartResponse;
 
 
@@ -89,6 +90,31 @@ public class AdminDashboardController {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error"
+            );
+        }
+    }
+
+    /**
+     * Endpoint to retrieve hazards reported chart data for the admin dashboard.
+     *
+     * @param range the selected range, e.g. this-week, last-week, this-month
+     * @return AdminHazardsReportedChartResponse containing chart data
+     */
+    @GetMapping("/admin/hazards-reported")
+    public AdminHazardsReportedChartResponse getHazardsReportedChart(
+            @RequestParam(defaultValue = "this-week") final String range
+    ) {
+        try {
+            return adminDashboardService.getHazardsReportedChart(range);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    e.getMessage()
+            );
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal server error " + e.getMessage()
             );
         }
     }

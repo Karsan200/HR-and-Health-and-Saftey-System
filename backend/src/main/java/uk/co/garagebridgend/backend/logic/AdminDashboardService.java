@@ -3,8 +3,7 @@ package uk.co.garagebridgend.backend.logic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.co.garagebridgend.backend.models.entity.HazardTable;
-import uk.co.garagebridgend.backend.models.response.AdminDashboardSummaryResponse;
-import uk.co.garagebridgend.backend.models.response.AdminDocumentSignaturesChartResponse;
+import uk.co.garagebridgend.backend.models.response.*;
 import uk.co.garagebridgend.backend.repository.ClockInRepository;
 import uk.co.garagebridgend.backend.repository.HazardRepository;
 import uk.co.garagebridgend.backend.models.entity.DocumentTable;
@@ -12,8 +11,6 @@ import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.DocumentRepository;
 import uk.co.garagebridgend.backend.repository.SignatureRepository;
 import uk.co.garagebridgend.backend.models.entity.ClockInTable;
-import uk.co.garagebridgend.backend.models.response.AdminDashboardChartPointResponse;
-import uk.co.garagebridgend.backend.models.response.AdminLateArrivalsChartResponse;
 
 import java.sql.Time;
 import java.time.DayOfWeek;
@@ -267,7 +264,7 @@ public class AdminDashboardService {
                     || clockIn.getCreated().getDayOfWeek() == DayOfWeek.SUNDAY) {
                 continue;
             }
-            int weekOfMonth = ((clockIn.getCreated().getDayOfMonth() - 1) / NUMBER_OF_DAYS_IN_A_WEEK ) + 1;
+            int weekOfMonth = ((clockIn.getCreated().getDayOfMonth() - 1) / NUMBER_OF_DAYS_IN_A_WEEK) + 1;
             counts.computeIfPresent(weekOfMonth, (key, value) -> value + 1);
         }
 
@@ -438,6 +435,180 @@ public class AdminDashboardService {
         return new AdminDocumentSignaturesChartResponse(
                 totalRecordedSignatures,
                 totalPendingSignatures
+        );
+    }
+
+    /**
+     * Retrieves chart data for hazards reported for the selected range.
+     *
+     * @param range the selected range, e.g. this-week, last-week, this-month
+     * @return AdminHazardsReportedChartResponse containing chart data for the selected range
+     */
+    public AdminHazardsReportedChartResponse getHazardsReportedChart(final String range) {
+        String normalisedRange = normaliseRange(range);
+
+        return switch (normalisedRange) {
+            case "this-week" -> buildDailyHazardsReportedChart(normalisedRange, getStartOfCurrentWeek());
+            case "last-week" -> buildDailyHazardsReportedChart(normalisedRange, getStartOfCurrentWeek().minusWeeks(1));
+            case "this-month" -> buildWeeklyHazardsReportedChart(normalisedRange, LocalDate.now().withDayOfMonth(1));
+            case "last-month" -> buildWeeklyHazardsReportedChart(
+                    normalisedRange,
+                    LocalDate.now().minusMonths(1).withDayOfMonth(1)
+            );
+            case "last-3-months" -> buildMonthlyHazardsReportedChart(normalisedRange, THREE_MONTHS);
+            case "last-6-months" -> buildMonthlyHazardsReportedChart(normalisedRange, SIX_MONTHS);
+            case "-year" -> buildThisYearHazardsReportedChart(normalisedRange);
+            default -> throw new IllegalArgumentException("Unsupported range: " + range);
+        };
+    }
+
+    /**
+     * Builds a hazards reported chart grouped by day.
+     *
+     * @param range the selected range
+     * @param startDate the start date of the week
+     * @return chart response grouped by day
+     */
+    private AdminHazardsReportedChartResponse buildDailyHazardsReportedChart(
+            final String range,
+            final LocalDate startDate
+    ) {
+        LocalDate endDate = startDate.plusDays(NUMBER_OF_WORKING_DAYS_IN_A_WEEK);
+        List<HazardTable> hazards = getHazardsReportedBetween(startDate, endDate);
+
+        Map<LocalDate, Integer> counts = new LinkedHashMap<>();
+        for (int i = 0; i < NUMBER_OF_WORKING_DAYS_IN_A_WEEK; i++) {
+            counts.put(startDate.plusDays(i), 0);
+        }
+
+        for (HazardTable hazard : hazards) {
+            LocalDate day = hazard.getCreated().toLocalDate();
+            counts.computeIfPresent(day, (key, value) -> value + 1);
+        }
+
+        List<AdminDashboardChartPointResponse> points = new ArrayList<>();
+        for (Map.Entry<LocalDate, Integer> entry : counts.entrySet()) {
+            String label = entry.getKey().getDayOfWeek()
+                    .getDisplayName(TextStyle.SHORT, Locale.UK);
+            points.add(new AdminDashboardChartPointResponse(label, entry.getValue()));
+        }
+
+        return new AdminHazardsReportedChartResponse(range, hazards.size(), points);
+    }
+
+    /**
+     * Builds a hazards reported chart grouped by week-of-month.
+     *
+     * @param range the selected range
+     * @param monthStart the first day of the target month
+     * @return chart response grouped by week
+     */
+    private AdminHazardsReportedChartResponse buildWeeklyHazardsReportedChart(
+            final String range,
+            final LocalDate monthStart
+    ) {
+        LocalDate monthEnd = monthStart.plusMonths(1);
+        List<HazardTable> hazards = getHazardsReportedBetween(monthStart, monthEnd);
+
+        int numberOfWeeks = (int) Math.ceil((double) monthStart.lengthOfMonth() / NUMBER_OF_DAYS_IN_A_WEEK) - 1;
+        Map<Integer, Integer> counts = new LinkedHashMap<>();
+        for (int week = 1; week <= numberOfWeeks; week++) {
+            counts.put(week, 0);
+        }
+
+        for (HazardTable hazard : hazards) {
+            int weekOfMonth = ((hazard.getCreated().getDayOfMonth() - 1) / NUMBER_OF_DAYS_IN_A_WEEK) + 1;
+            counts.computeIfPresent(weekOfMonth, (key, value) -> value + 1);
+        }
+
+        List<AdminDashboardChartPointResponse> points = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> entry : counts.entrySet()) {
+            points.add(new AdminDashboardChartPointResponse("Week " + entry.getKey(), entry.getValue()));
+        }
+
+        return new AdminHazardsReportedChartResponse(range, hazards.size(), points);
+    }
+
+    /**
+     * Builds a hazards reported chart grouped by month for the previous number of months.
+     *
+     * @param range the selected range
+     * @param numberOfMonths the number of months to include
+     * @return chart response grouped by month
+     */
+    private AdminHazardsReportedChartResponse buildMonthlyHazardsReportedChart(
+            final String range,
+            final int numberOfMonths
+    ) {
+        LocalDate currentMonthStart = LocalDate.now().withDayOfMonth(1);
+        LocalDate startDate = currentMonthStart.minusMonths(numberOfMonths - 1);
+        LocalDate endDate = currentMonthStart.plusMonths(1);
+
+        List<HazardTable> hazards = getHazardsReportedBetween(startDate, endDate);
+
+        Map<Month, Integer> counts = new LinkedHashMap<>();
+        LocalDate cursor = startDate;
+        for (int i = 0; i < numberOfMonths; i++) {
+            counts.put(cursor.getMonth(), 0);
+            cursor = cursor.plusMonths(1);
+        }
+
+        for (HazardTable hazard : hazards) {
+            Month month = hazard.getCreated().getMonth();
+            counts.computeIfPresent(month, (key, value) -> value + 1);
+        }
+
+        List<AdminDashboardChartPointResponse> points = new ArrayList<>();
+        for (Map.Entry<Month, Integer> entry : counts.entrySet()) {
+            String label = entry.getKey().getDisplayName(TextStyle.SHORT, Locale.UK);
+            points.add(new AdminDashboardChartPointResponse(label, entry.getValue()));
+        }
+
+        return new AdminHazardsReportedChartResponse(range, hazards.size(), points);
+    }
+
+    /**
+     * Builds a hazards reported chart grouped by month for the current year.
+     *
+     * @param range the selected range
+     * @return chart response grouped by month
+     */
+    private AdminHazardsReportedChartResponse buildThisYearHazardsReportedChart(final String range) {
+        LocalDate yearStart = LocalDate.now().withDayOfYear(1);
+        LocalDate yearEnd = yearStart.plusYears(1);
+
+        List<HazardTable> hazards = getHazardsReportedBetween(yearStart, yearEnd);
+
+        Map<Month, Integer> counts = new LinkedHashMap<>();
+        for (Month month : Month.values()) {
+            counts.put(month, 0);
+        }
+
+        for (HazardTable hazard : hazards) {
+            Month month = hazard.getCreated().getMonth();
+            counts.computeIfPresent(month, (key, value) -> value + 1);
+        }
+
+        List<AdminDashboardChartPointResponse> points = new ArrayList<>();
+        for (Map.Entry<Month, Integer> entry : counts.entrySet()) {
+            String label = entry.getKey().getDisplayName(TextStyle.SHORT, Locale.UK);
+            points.add(new AdminDashboardChartPointResponse(label, entry.getValue()));
+        }
+
+        return new AdminHazardsReportedChartResponse(range, hazards.size(), points);
+    }
+
+    /**
+     * Retrieves all hazards reported between the given dates.
+     *
+     * @param startDate the inclusive start date
+     * @param endDate the exclusive end date
+     * @return a list of hazards reported in the range
+     */
+    private List<HazardTable> getHazardsReportedBetween(final LocalDate startDate, final LocalDate endDate) {
+        return hazardRepository.findAllNonDraftCreatedBetween(
+                startDate.atStartOfDay(),
+                endDate.atStartOfDay()
         );
     }
 }

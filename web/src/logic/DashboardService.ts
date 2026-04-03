@@ -46,7 +46,7 @@ export type DocumentSignaturesResponse = {
 
 export async function getDocumentSignatures(
     authenticationService: AuthenticationService,
-    range: string = "this-week"
+    range: string = "this-month"
 ): Promise<DocumentSignaturesResponse> {
     const response = await authenticationService.fetch(
         `/api/admin/document-signatures?range=${range}`,
@@ -55,6 +55,33 @@ export async function getDocumentSignatures(
 
     if (!response.ok) {
         throw new Error("Failed to fetch document signatures");
+    }
+
+    return response.json();
+}
+
+export type HazardsReportedPoint = {
+    label: string;
+    value: number;
+};
+
+export type HazardsReportedResponse = {
+    range: string;
+    total: number;
+    points: HazardsReportedPoint[];
+};
+
+export async function getHazardsReported(
+    authenticationService: AuthenticationService,
+    range: string = "this-month"
+): Promise<HazardsReportedResponse> {
+    const response = await authenticationService.fetch(
+        `/api/admin/hazards-reported?range=${range}`,
+        { method: "GET" }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch hazards reported");
     }
 
     return response.json();

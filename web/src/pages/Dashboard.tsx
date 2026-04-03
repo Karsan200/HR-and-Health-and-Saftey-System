@@ -9,7 +9,9 @@ import { getDashboardSummary,
          getLateArrivals,
          type LateArrivalsResponse,
          getDocumentSignatures,
-         type DocumentSignaturesResponse
+         type DocumentSignaturesResponse,
+         getHazardsReported,
+         type HazardsReportedResponse
     } from "../logic/DashboardService";
 import { useAuth } from "../AuthContext";
 import { dashboardStyles as styles } from "./Dashboard.style";
@@ -24,7 +26,9 @@ export function Dashboard() {
     const { authenticationService } = useAuth();
     const [data, setData] = useState<DashboardSummary | null>(null);
     const [lateData, setLateData] = useState<LateArrivalsResponse | null>(null);
-    const [documentSignatureData, setDocumentSignatureData] = useState<DocumentSignaturesResponse | null>(null);
+    const [documentSignatureData, setDocumentSignatureData] =
+        useState<DocumentSignaturesResponse | null>(null);
+    const [hazardsReportedData, setHazardsReportedData] = useState<HazardsReportedResponse | null>(null);
 
     useEffect(() => {
         getDashboardSummary(authenticationService).then((response: DashboardSummary) => {
@@ -48,6 +52,12 @@ export function Dashboard() {
                 signed: response?.signed ?? 0,
                 pending: response?.pending ?? 0,
             });
+        });
+    }, [authenticationService]);
+
+    useEffect(() => {
+        getHazardsReported(authenticationService).then((response) => {
+            setHazardsReportedData(response);
         });
     }, [authenticationService]);
 
@@ -152,6 +162,26 @@ export function Dashboard() {
                     <Typography>
                         Pending: {documentSignatureData.pending}
                     </Typography>
+                </Box>
+            )}
+
+            {hazardsReportedData !== null && (
+                <Box sx={{ mt: 4 }}>
+                    <Typography variant="h6">
+                        Hazards Reported
+                    </Typography>
+
+                    <Typography>
+                        Total: {hazardsReportedData.total}
+                    </Typography>
+
+                    <Box sx={{ mt: 1 }}>
+                        {hazardsReportedData.points.map((point) => (
+                            <Typography key={point.label}>
+                                {point.label}: {point.value}
+                            </Typography>
+                        ))}
+                    </Box>
                 </Box>
             )}
         </Box>
