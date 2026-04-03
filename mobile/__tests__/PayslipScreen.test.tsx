@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react-native';
 import PayslipScreen from '../src/screens/PayslipScreen';
 import AuthenticationService from '../src/logic/AuthenticationService';
-import { Alert } from 'react-native';
+import {Alert, Platform} from 'react-native';
 
 jest.mock('../src/logic/AuthenticationService', () => ({
     fetch: jest.fn(),
@@ -14,6 +14,25 @@ jest.mock('react-native-pdf', () => {
 
 jest.mock('react-native-wheel-color-picker', () => null);
 
+jest.mock('react-native-blob-util', () => ({
+    __esModule: true,
+    default: {
+        config: jest.fn(() => ({
+            fetch: jest.fn(() =>
+                Promise.resolve({ path: () => '/storage/emulated/0/Download/test.pdf' })
+            ),
+        })),
+        fs: {
+            dirs: {
+                DownloadDir: '/storage/emulated/0/Download',
+                DocumentDir: '/data/user/0/com.frontend/files',
+            },
+        },
+        ios: {
+            presentOptionsMenu: jest.fn(),
+        },
+    },
+}));
 const mockFetch = AuthenticationService.fetch as jest.Mock;
 
 const mockPayslips = [
@@ -281,6 +300,102 @@ describe('PayslipScreen', () => {
 
         await waitFor(() => {
             expect(screen.queryByTestId('loading-indicator')).toBeNull();
+        });
+    });
+
+    /**
+     * Ensures the download button is present for each payslip card.
+     */
+    it('renders a download button for each payslip', async () => {
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockPayslips,
+        });
+
+        render(<PayslipScreen />);
+
+        await waitFor(() => {
+            const downloadButtons = screen.getAllByTestId('download-button');
+            expect(downloadButtons).toHaveLength(mockPayslips.length);
+        });
+    });
+
+    /**
+     * Ensures pressing the download button triggers the download and shows a success alert.
+     */
+    it('shows downloaded alert when download button is pressed', async () => {
+        const alertSpy = jest.spyOn(Alert, 'alert');
+        jest.replaceProperty(Platform, 'OS', 'android'); // ADD THIS
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockPayslips,
+        });
+
+        render(<PayslipScreen />);
+
+        const downloadButtons = await screen.findAllByTestId('download-button');
+        fireEvent.press(downloadButtons[0]);
+
+        await waitFor(() => {
+            expect(alertSpy).toHaveBeenCalledWith(
+                'Downloaded',
+                'January 2026 saved to Downloads.'
+            );
+        });
+    });
+
+    /**
+     * Ensures pressing the download button on a P60 card uses the correct filename.
+     */
+    it('downloads P60 with correct filename', async () => {
+        const alertSpy = jest.spyOn(Alert, 'alert');
+        jest.replaceProperty(Platform, 'OS', 'android'); // ADD THIS
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockPayslips,
+        });
+
+        render(<PayslipScreen />);
+
+        const downloadButtons = await screen.findAllByTestId('download-button');
+        fireEvent.press(downloadButtons[2]);
+
+        await waitFor(() => {
+            expect(alertSpy).toHaveBeenCalledWith(
+                'Downloaded',
+                'P60  Tax Year 202425 saved to Downloads.'
+            );
+        });
+    });
+
+    /**
+     * Ensures an error alert is shown if the download fails.
+     */
+    it('shows error alert when download fails', async () => {
+        const alertSpy = jest.spyOn(Alert, 'alert');
+
+        const ReactNativeBlobUtil = require('react-native-blob-util').default;
+        ReactNativeBlobUtil.config.mockReturnValueOnce({
+            fetch: jest.fn(() => Promise.reject(new Error('Download failed'))),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockPayslips,
+        });
+
+        render(<PayslipScreen />);
+
+        const downloadButtons = await screen.findAllByTestId('download-button');
+        fireEvent.press(downloadButtons[0]);
+
+        await waitFor(() => {
+            expect(alertSpy).toHaveBeenCalledWith(
+                'Error',
+                'Failed to download the file.'
+            );
         });
     });
 });
