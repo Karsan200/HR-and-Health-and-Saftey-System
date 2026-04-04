@@ -1,6 +1,6 @@
 import { AppSettings } from "../AppSettings";
 import type { AuthenticationService } from "./AuthenticationService";
-import type { CalendarEvent, CalendarEventType } from "../pages/CalendarPage";
+import type { CalendarEvent, CalendarEventType } from "../models/CalendarTypes";
 
 interface LeaveCalendarItemResponse {
     date: string;

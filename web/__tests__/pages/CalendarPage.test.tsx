@@ -5,9 +5,26 @@ import { MemoryRouter } from "react-router-dom";
 import { CalendarPage } from "../../src/pages/CalendarPage";
 import { useAuth } from "../../src/AuthContext";
 import { fetchCalendarEvents } from "../../src/logic/LeaveCalendarService";
+import type { CalendarEvent } from "../../src/models/CalendarTypes";
 
 jest.mock("../../src/AuthContext");
 jest.mock("../../src/logic/LeaveCalendarService");
+jest.mock("../../src/components/DayDetailOverlay", () => ({
+    DayDetailOverlay: ({ open, date, events, onClose }: {
+        open: boolean;
+        date: string | null;
+        events: { id: string; label: string }[];
+        onClose: () => void;
+    }) => open ? (
+        <div data-testid="day-detail-overlay">
+            <span data-testid="overlay-date">{date}</span>
+            {events.map(e => (
+                <span key={e.id} data-testid="overlay-event">{e.label}</span>
+            ))}
+            <button onClick={onClose}>Close</button>
+        </div>
+    ) : null,
+}));
 
 const mockUseAuth = useAuth as jest.Mock;
 const mockFetchCalendarEvents = fetchCalendarEvents as jest.Mock;
@@ -92,6 +109,14 @@ describe("CalendarPage", () => {
             await waitFor(() =>
                 expect(mockFetchCalendarEvents).toHaveBeenCalledTimes(1)
             );
+        });
+
+        it("does not show the overlay on initial render", async () => {
+            renderCalendarPage();
+            await waitFor(() =>
+                expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
+            );
+            expect(screen.queryByTestId("day-detail-overlay")).not.toBeInTheDocument();
         });
     });
 
@@ -235,9 +260,9 @@ describe("CalendarPage", () => {
 
         it("shows an overflow label when a day has more than two events", async () => {
             mockFetchCalendarEvents.mockResolvedValueOnce([
-                { id: "1", date: currentMonthDate(15), type: "bookedLeave",   label: "Person One" },
-                { id: "2", date: currentMonthDate(15), type: "bookedLeave",   label: "Person Two" },
-                { id: "3", date: currentMonthDate(15), type: "sickLeave",     label: "Person Three" },
+                { id: "1", date: currentMonthDate(15), type: "bookedLeave", label: "Person One" },
+                { id: "2", date: currentMonthDate(15), type: "bookedLeave", label: "Person Two" },
+                { id: "3", date: currentMonthDate(15), type: "sickLeave",   label: "Person Three" },
             ]);
             renderCalendarPage();
             expect(await screen.findByText("+1 more")).toBeInTheDocument();
@@ -265,25 +290,69 @@ describe("CalendarPage", () => {
         });
     });
 
-    describe("day click callback", () => {
-        it("calls onDayClick with the correct ISO date when a current month day is clicked", async () => {
-            const onDayClick = jest.fn();
-            renderCalendarPage({ onDayClick });
-
+    describe("day click — overlay", () => {
+        it("opens the overlay when a current month day is clicked", async () => {
+            renderCalendarPage();
             await waitFor(() => screen.getByText("15"));
+
             await userEvent.click(screen.getByText("15"));
 
-            expect(onDayClick).toHaveBeenCalledWith(currentMonthDate(15));
+            expect(screen.getByTestId("day-detail-overlay")).toBeInTheDocument();
+        });
+
+        it("passes the correct ISO date to the overlay", async () => {
+            renderCalendarPage();
+            await waitFor(() => screen.getByText("15"));
+
+            await userEvent.click(screen.getByText("15"));
+
+            expect(screen.getByTestId("overlay-date")).toHaveTextContent(currentMonthDate(15));
+        });
+
+        it("passes the correct events for the clicked date to the overlay", async () => {
+            mockFetchCalendarEvents.mockResolvedValueOnce([
+                { id: "1", date: currentMonthDate(15), type: "bookedLeave", label: "John Doe" },
+                { id: "2", date: currentMonthDate(15), type: "sickLeave",   label: "Jane Smith" },
+            ]);
+            renderCalendarPage();
+            await waitFor(() => screen.getByText("15"));
+
+            await userEvent.click(screen.getByText("15"));
+
+            const overlayEvents = screen.getAllByTestId("overlay-event");
+            expect(overlayEvents).toHaveLength(2);
+            expect(overlayEvents[0]).toHaveTextContent("John Doe");
+            expect(overlayEvents[1]).toHaveTextContent("Jane Smith");
+        });
+
+        it("passes an empty events array to the overlay when the day has no events", async () => {
+            renderCalendarPage();
+            await waitFor(() => screen.getByText("15"));
+
+            await userEvent.click(screen.getByText("15"));
+
+            expect(screen.queryAllByTestId("overlay-event")).toHaveLength(0);
+        });
+
+        it("closes the overlay when onClose is called", async () => {
+            renderCalendarPage();
+            await waitFor(() => screen.getByText("15"));
+
+            await userEvent.click(screen.getByText("15"));
+            expect(screen.getByTestId("day-detail-overlay")).toBeInTheDocument();
+
+            await userEvent.click(screen.getByRole("button", { name: /close/i }));
+            expect(screen.queryByTestId("day-detail-overlay")).not.toBeInTheDocument();
         });
     });
 
     describe("event chip click callback", () => {
         it("calls onEventClick with the correct event when a chip is clicked", async () => {
             const onEventClick = jest.fn();
-            const event = {
+            const event: CalendarEvent = {
                 id: "1",
                 date: currentMonthDate(15),
-                type: "bookedLeave" as const,
+                type: "bookedLeave",
                 label: "John Doe",
                 notes: "Holiday",
             };
