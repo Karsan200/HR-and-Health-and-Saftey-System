@@ -59,4 +59,17 @@ public interface HazardRepository extends JpaRepository<HazardTable, Long> {
             LocalDateTime startDateTime,
             LocalDateTime endDateTime
     );
+
+    /**
+     * Retrieves the most recent non-draft hazards.
+     *
+     * @return the latest non-draft hazards, ordered by created descending
+     */
+    @Query("""
+    SELECT h
+    FROM HazardTable h
+    WHERE h.isDraft = false
+    ORDER BY h.created DESC
+""")
+    List<HazardTable> findTop10RecentNonDraftHazards();
 }

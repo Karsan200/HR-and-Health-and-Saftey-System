@@ -86,3 +86,23 @@ export async function getHazardsReported(
 
     return response.json();
 }
+
+export type RecentActivityItemResponse = {
+    type: string;
+    message: string;
+    created: string;
+};
+
+export async function getRecentActivity(
+    authenticationService: AuthenticationService
+): Promise<RecentActivityItemResponse[]> {
+    const response = await authenticationService.fetch("/api/admin/recent-activity", {
+        method: "GET",
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch recent activity");
+    }
+
+    return response.json();
+}

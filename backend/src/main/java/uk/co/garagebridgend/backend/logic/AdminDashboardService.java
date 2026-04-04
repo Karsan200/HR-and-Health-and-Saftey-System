@@ -11,6 +11,9 @@ import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.DocumentRepository;
 import uk.co.garagebridgend.backend.repository.SignatureRepository;
 import uk.co.garagebridgend.backend.models.entity.ClockInTable;
+import uk.co.garagebridgend.backend.models.entity.LeaveTable;
+import uk.co.garagebridgend.backend.models.response.AdminRecentActivityItemResponse;
+import uk.co.garagebridgend.backend.repository.LeaveRepository;
 
 import java.sql.Time;
 import java.time.DayOfWeek;
@@ -23,6 +26,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 
 /**
  * Service class for handling business logic related to the admin dashboard.
@@ -41,6 +48,15 @@ public class AdminDashboardService {
     /** Number of months for the last 6 months range. */
     private static final int SIX_MONTHS = 6;
 
+    /** Maximum number of recent activity items to return. */
+    private static final int RECENT_ACTIVITY_LIMIT = 5;
+
+    /** Threshold after which a clock-in is considered late. */
+    private static final LocalTime LATE_CLOCK_IN_THRESHOLD = LocalTime.of(8, 0);
+
+    /** Formatter used for leave date display in recent activity messages. */
+    private static final DateTimeFormatter LEAVE_DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM");
+
     /** Repository to access clock-in data. */
     private final ClockInRepository clockInRepository;
 
@@ -56,6 +72,9 @@ public class AdminDashboardService {
     /** Repository to access signature data. */
     private final SignatureRepository signatureRepository;
 
+    /** Repository to access leave request data. */
+    private final LeaveRepository leaveRepository;
+
     /**
      * Constructs the AdminDashboardService with the required repositories.
      *
@@ -64,6 +83,7 @@ public class AdminDashboardService {
      * @param accountRepositoryImpl  repository for AccountTable
      * @param documentRepositoryImpl repository for DocumentTable
      * @param signatureRepositoryImpl repository for SignatureTable
+     * @param leaveRepositoryImpl repository for LeaveTable
      */
     @Autowired
     public AdminDashboardService(
@@ -71,13 +91,15 @@ public class AdminDashboardService {
             final HazardRepository hazardRepositoryImpl,
             final AccountRepository accountRepositoryImpl,
             final DocumentRepository documentRepositoryImpl,
-            final SignatureRepository signatureRepositoryImpl
+            final SignatureRepository signatureRepositoryImpl,
+            final LeaveRepository leaveRepositoryImpl
             ) {
         this.hazardRepository = hazardRepositoryImpl;
         this.clockInRepository = clockInRepositoryImpl;
         this.accountRepository = accountRepositoryImpl;
         this.documentRepository = documentRepositoryImpl;
         this.signatureRepository = signatureRepositoryImpl;
+        this.leaveRepository = leaveRepositoryImpl;
     }
 
 
@@ -610,5 +632,144 @@ public class AdminDashboardService {
                 startDate.atStartOfDay(),
                 endDate.atStartOfDay()
         );
+    }
+
+    /**
+     * Retrieves the most recent admin dashboard activity items across
+     * signatures, leave requests, hazard reports, and late clock-ins.
+     *
+     * @return a list of recent activity items ordered by newest first
+     */
+    public List<AdminRecentActivityItemResponse> getRecentActivity() {
+        List<AdminRecentActivityItemResponse> activityItems = new ArrayList<>();
+
+        activityItems.addAll(getRecentDocumentSignatureActivity());
+        activityItems.addAll(getRecentLeaveRequestActivity());
+        activityItems.addAll(getRecentHazardReportedActivity());
+        activityItems.addAll(getRecentLateClockInActivity());
+
+        return activityItems.stream()
+                .sorted(Comparator.comparing(AdminRecentActivityItemResponse::getCreated).reversed())
+                .limit(RECENT_ACTIVITY_LIMIT)
+                .toList();
+    }
+
+    /**
+     * Retrieves recent document signature activity.
+     *
+     * @return a list of recent activity items for signed documents
+     */
+    private List<AdminRecentActivityItemResponse> getRecentDocumentSignatureActivity() {
+        return signatureRepository.findTop10ByDocumentIsNotNullOrderByCreatedDesc()
+                .stream()
+                .map(signature -> new AdminRecentActivityItemResponse(
+                        "DOCUMENT_SIGNED",
+                        buildFullName(signature.getAccount().getFirstName(), signature.getAccount().getLastName())
+                                + " signed "
+                                + signature.getDocument().getTitle(),
+                        signature.getCreated()
+                ))
+                .toList();
+    }
+
+    /**
+     * Retrieves recent leave request activity.
+     *
+     * @return a list of recent activity items for leave requests
+     */
+    private List<AdminRecentActivityItemResponse> getRecentLeaveRequestActivity() {
+        return leaveRepository.findTop5ByOrderByCreatedDesc()
+                .stream()
+                .map(leave -> new AdminRecentActivityItemResponse(
+                        "LEAVE_REQUEST",
+                        buildFullName(leave.getAccount().getFirstName(), leave.getAccount().getLastName())
+                                + " has requested leave for "
+                                + formatLeaveDateRange(leave),
+                        leave.getCreated()
+                ))
+                .toList();
+    }
+
+    /**
+     * Retrieves recent hazard report activity.
+     *
+     * @return a list of recent activity items for hazard reports
+     */
+    private List<AdminRecentActivityItemResponse> getRecentHazardReportedActivity() {
+        return hazardRepository.findTop10RecentNonDraftHazards()
+                .stream()
+                .map(hazard -> new AdminRecentActivityItemResponse(
+                        "HAZARD_REPORTED",
+                        buildFullName(hazard.getAccount().getFirstName(), hazard.getAccount().getLastName())
+                                + " reported "
+                                + hazard.getTitle(),
+                        hazard.getCreated()
+                ))
+                .toList();
+    }
+
+    /**
+     * Retrieves recent late clock-in activity.
+     *
+     * @return a list of recent activity items for late clock-ins
+     */
+    private List<AdminRecentActivityItemResponse> getRecentLateClockInActivity() {
+        Time lateThreshold = Time.valueOf(LATE_CLOCK_IN_THRESHOLD);
+
+        return clockInRepository.findTop10LateClockIns(lateThreshold)
+                .stream()
+                .map(clockIn -> new AdminRecentActivityItemResponse(
+                        "LATE_CLOCK_IN",
+                        buildFullName(clockIn.getAccount().getFirstName(), clockIn.getAccount().getLastName())
+                                + " clocked in "
+                                + getMinutesLate(clockIn)
+                                + " minutes late",
+                        clockIn.getCreated()
+                ))
+                .toList();
+    }
+
+    /**
+     * Builds a full name from a first and last name.
+     *
+     * @param firstName the first name
+     * @param lastName the last name
+     * @return the combined full name
+     */
+    private String buildFullName(final String firstName, final String lastName) {
+        return firstName + " " + lastName;
+    }
+
+    /**
+     * Formats the leave booked.
+     *
+     * @param leave the leave request
+     * @return formatted leave date text
+     */
+    private String formatLeaveDateRange(final LeaveTable leave) {
+        String startDate = leave.getStartDate().toLocalDate().format(LEAVE_DATE_FORMATTER);
+        String endDate = leave.getEndDate().toLocalDate().format(LEAVE_DATE_FORMATTER);
+
+        if (leave.getStartDate().toLocalDate().equals(leave.getEndDate().toLocalDate())) {
+            return startDate;
+        }
+
+        return startDate + " - " + endDate;
+    }
+
+    /**
+     * Calculates how many minutes late a clock-in was.
+     *
+     * @param clockIn the clock-in record
+     * @return the number of minutes late
+     */
+    private long getMinutesLate(final ClockInTable clockIn) {
+        LocalTime actualClockIn = clockIn.getClockInTime().toLocalTime();
+
+        if (!actualClockIn.isAfter(LATE_CLOCK_IN_THRESHOLD)) {
+            return 0;
+        }
+
+        return Duration.between(LATE_CLOCK_IN_THRESHOLD, actualClockIn).toMinutes();
     }
 }

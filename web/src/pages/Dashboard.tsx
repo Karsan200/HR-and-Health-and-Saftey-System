@@ -27,6 +27,8 @@ import {
     type DocumentSignaturesResponse,
     getHazardsReported,
     type HazardsReportedResponse,
+    getRecentActivity,
+    type RecentActivityItemResponse,
 } from "../logic/DashboardService";
 import { useAuth } from "../AuthContext";
 import {
@@ -145,6 +147,7 @@ export function Dashboard() {
     const [hazardsReportedData, setHazardsReportedData] =
         useState<HazardsReportedResponse | null>(null);
     const [hazardsReportedRange, setHazardsReportedRange] = useState("this-week");
+    const [recentActivityData, setRecentActivityData] = useState<RecentActivityItemResponse[] | null>(null);
 
     useEffect(() => {
         getDashboardSummary(authenticationService).then((response: DashboardSummary) => {
@@ -184,6 +187,12 @@ export function Dashboard() {
             });
         });
     }, [authenticationService, hazardsReportedRange]);
+
+    useEffect(() => {
+        getRecentActivity(authenticationService).then((response) => {
+            setRecentActivityData(response ?? []);
+        });
+    }, [authenticationService]);
 
     const lateChartMaxValue = useMemo(() => {
         const values = lateData?.points.map((point) => point.value) ?? [];
@@ -710,6 +719,27 @@ export function Dashboard() {
                                 </Button>
                             </Box>
                         </Paper>
+                    </Box>
+                )}
+
+                {recentActivityData !== null && (
+                    <Box sx={{ mt: 4 }}>
+                        <Typography variant="h6">
+                            Recent Activity
+                        </Typography>
+
+                        <Box sx={{ mt: 1 }}>
+                            {recentActivityData.map((item, index) => (
+                                <Box key={`${item.type}-${item.created}-${index}`} sx={{ mb: 1.5 }}>
+                                    <Typography>
+                                        {item.message}
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        {item.type} - {item.created}
+                                    </Typography>
+                                </Box>
+                            ))}
+                        </Box>
                     </Box>
                 )}
             </Box>

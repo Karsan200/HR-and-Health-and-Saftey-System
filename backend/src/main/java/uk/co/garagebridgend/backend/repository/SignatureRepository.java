@@ -6,6 +6,8 @@ import uk.co.garagebridgend.backend.models.entity.SignatureTable;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.DocumentTable;
 
+import java.util.List;
+
 /**
  * Repository for managing SignatureTable entities.
  */
@@ -44,4 +46,11 @@ public interface SignatureRepository extends JpaRepository<SignatureTable, Long>
      * @return the number of signatures linked to that hazard
      */
     long countByHazardHazardId(Long hazardId);
+
+    /**
+     * Retrieves the most recent document signatures.
+     *
+     * @return the latest document signature records, ordered by created descending
+     */
+    List<SignatureTable> findTop10ByDocumentIsNotNullOrderByCreatedDesc();
 }

@@ -30,4 +30,11 @@ public interface LeaveRepository extends JpaRepository<LeaveTable, Long> {
     AND l.isApproved = true
     """)
     List<LeaveTable> findLeaveForDate(LocalDateTime startOfDay, LocalDateTime endOfDay);
+
+    /**
+     * Retrieves the most recent leave requests.
+     *
+     * @return the latest leave request records, ordered by created descending
+     */
+    List<LeaveTable> findTop5ByOrderByCreatedDesc();
 }

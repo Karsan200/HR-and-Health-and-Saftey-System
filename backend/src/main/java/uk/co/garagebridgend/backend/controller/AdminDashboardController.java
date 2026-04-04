@@ -9,10 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.AdminDashboardService;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
-import uk.co.garagebridgend.backend.models.response.AdminDashboardSummaryResponse;
-import uk.co.garagebridgend.backend.models.response.AdminDocumentSignaturesChartResponse;
-import uk.co.garagebridgend.backend.models.response.AdminHazardsReportedChartResponse;
-import uk.co.garagebridgend.backend.models.response.AdminLateArrivalsChartResponse;
+import uk.co.garagebridgend.backend.models.response.*;
+
+import java.util.List;
 
 
 /** Controller for admin dashboard related endpoints. */
@@ -111,6 +110,23 @@ public class AdminDashboardController {
                     HttpStatus.BAD_REQUEST,
                     e.getMessage()
             );
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal server error " + e.getMessage()
+            );
+        }
+    }
+
+    /**
+     * Endpoint to retrieve the most recent dashboard activity items.
+     *
+     * @return a list of recent activity items ordered by newest first
+     */
+    @GetMapping("/admin/recent-activity")
+    public List<AdminRecentActivityItemResponse> getRecentActivity() {
+        try {
+            return adminDashboardService.getRecentActivity();
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,

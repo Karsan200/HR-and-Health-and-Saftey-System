@@ -51,4 +51,18 @@ public interface ClockInRepository extends JpaRepository<ClockInTable, UUID> {
             LocalDateTime endDateTime,
             Time lateThreshold
     );
+
+    /**
+     * Retrieves the most recent late clock-ins.
+     *
+     * @param lateThreshold the time after which a clock-in is considered late
+     * @return the latest late clock-ins, ordered by created descending
+     */
+    @Query("""
+    SELECT c
+    FROM ClockInTable c
+    WHERE c.clockInTime > :lateThreshold
+    ORDER BY c.created DESC
+""")
+    List<ClockInTable> findTop10LateClockIns(@Param("lateThreshold") Time lateThreshold);
 }
