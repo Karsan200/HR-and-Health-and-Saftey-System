@@ -25,7 +25,16 @@ import {
     type HazardsReportedResponse,
 } from "../logic/DashboardService";
 import { useAuth } from "../AuthContext";
-import { dashboardStyles as styles } from "./Dashboard.style";
+import {
+    dashboardStyles as styles,
+    HAZARDS_CHART_BOTTOM_PADDING,
+    HAZARDS_CHART_HEIGHT,
+    HAZARDS_CHART_LEFT_PADDING,
+    HAZARDS_CHART_RIGHT_PADDING,
+    HAZARDS_CHART_TOP_PADDING,
+    HAZARDS_CHART_WIDTH,
+    HAZARDS_TICK_COUNT,
+} from "./Dashboard.style";
 
 type DashboardSummary = {
     pendingSignatures: number;
@@ -63,6 +72,61 @@ const dayLabelMap: Record<string, string> = {
     Sun: "Sunday",
 };
 
+const createSmoothPath = (points: Array<{ x: number; y: number }>) => {
+    if (points.length === 0) {
+        return "";
+    }
+
+    if (points.length === 1) {
+        return `M ${points[0].x} ${points[0].y}`;
+    }
+
+    let path = `M ${points[0].x} ${points[0].y}`;
+
+    for (let index = 0; index < points.length - 1; index += 1) {
+        const current = points[index];
+        const next = points[index + 1];
+
+        const controlPointOffset = (next.x - current.x) / 2;
+
+        path += ` C ${current.x + controlPointOffset} ${current.y}, ${next.x - controlPointOffset} ${next.y}, ${next.x} ${next.y}`;
+    }
+
+    return path;
+};
+
+const formatChartTick = (value: number) => {
+    if (Number.isInteger(value)) {
+        return value.toString();
+    }
+
+    return value.toFixed(1).replace(/\.0$/, "");
+};
+
+const getNiceHazardsStep = (maxValue: number, segmentCount: number) => {
+    if (maxValue <= 0) {
+        return 1;
+    }
+
+    const roughStep = maxValue / segmentCount;
+    const magnitude = 10 ** Math.floor(Math.log10(roughStep));
+    const normalized = roughStep / magnitude;
+
+    if (normalized <= 1) {
+        return magnitude;
+    }
+
+    if (normalized <= 2) {
+        return 2 * magnitude;
+    }
+
+    if (normalized <= 5) {
+        return 5 * magnitude;
+    }
+
+    return 10 * magnitude;
+};
+
 export function Dashboard() {
     const { authenticationService } = useAuth();
 
@@ -75,6 +139,7 @@ export function Dashboard() {
         useState<DocumentSignaturesResponse | null>(null);
     const [hazardsReportedData, setHazardsReportedData] =
         useState<HazardsReportedResponse | null>(null);
+    const [hazardsReportedRange, setHazardsReportedRange] = useState("this-week");
 
     useEffect(() => {
         getDashboardSummary(authenticationService).then((response: DashboardSummary) => {
@@ -106,14 +171,14 @@ export function Dashboard() {
     }, [authenticationService, documentSignaturesRange]);
 
     useEffect(() => {
-        getHazardsReported(authenticationService).then((response) => {
+        getHazardsReported(authenticationService, hazardsReportedRange).then((response) => {
             setHazardsReportedData({
-                range: response?.range ?? "this-week",
+                range: response?.range ?? hazardsReportedRange,
                 total: response?.total ?? 0,
                 points: response?.points ?? [],
             });
         });
-    }, [authenticationService]);
+    }, [authenticationService, hazardsReportedRange]);
 
     const lateChartMaxValue = useMemo(() => {
         const values = lateData?.points.map((point) => point.value) ?? [];
@@ -165,6 +230,78 @@ export function Dashboard() {
         ${styles.documentSignaturePendingColour} ${signedDegrees}deg 360deg
     )`;
     }, [documentSignatureSignedPercentage, documentSignatureTotal]);
+
+    const hazardsReportedValues = useMemo(() => {
+        return hazardsReportedData?.points.map((point) => point.value) ?? [];
+    }, [hazardsReportedData]);
+
+    const hazardsReportedMaxValue = useMemo(() => {
+        if (hazardsReportedValues.length === 0) {
+            return 0;
+        }
+
+        return Math.max(...hazardsReportedValues);
+    }, [hazardsReportedValues]);
+
+    const hazardsReportedAxisMinValue = 0;
+
+    const hazardsReportedStepValue = useMemo(() => {
+        return getNiceHazardsStep(hazardsReportedMaxValue, HAZARDS_TICK_COUNT - 1);
+    }, [hazardsReportedMaxValue]);
+
+    const hazardsReportedAxisMaxValue = useMemo(() => {
+        const minimumAxisMax = hazardsReportedStepValue * (HAZARDS_TICK_COUNT - 1);
+
+        if (hazardsReportedMaxValue <= 0) {
+            return minimumAxisMax;
+        }
+
+        return Math.max(
+            minimumAxisMax,
+            Math.ceil(hazardsReportedMaxValue / hazardsReportedStepValue) * hazardsReportedStepValue,
+        );
+    }, [hazardsReportedMaxValue, hazardsReportedStepValue]);
+
+    const hazardsReportedTicks = useMemo(() => {
+        return Array.from({ length: HAZARDS_TICK_COUNT }, (_, index) => {
+            return hazardsReportedAxisMaxValue - hazardsReportedStepValue * index;
+        });
+    }, [hazardsReportedAxisMaxValue, hazardsReportedStepValue]);
+
+    const hazardsReportedChartPoints = useMemo(() => {
+        const usableWidth =
+            HAZARDS_CHART_WIDTH - HAZARDS_CHART_LEFT_PADDING - HAZARDS_CHART_RIGHT_PADDING;
+        const usableHeight =
+            HAZARDS_CHART_HEIGHT - HAZARDS_CHART_TOP_PADDING - HAZARDS_CHART_BOTTOM_PADDING;
+
+        const points = hazardsReportedData?.points ?? [];
+        const axisRange = hazardsReportedAxisMaxValue - hazardsReportedAxisMinValue || 1;
+
+        return points.map((point, index) => {
+            const x =
+                points.length <= 1
+                    ? HAZARDS_CHART_LEFT_PADDING + usableWidth / 2
+                    : HAZARDS_CHART_LEFT_PADDING +
+                    (index * usableWidth) / (points.length - 1);
+
+            const clampedValue = Math.max(hazardsReportedAxisMinValue, point.value);
+
+            const y =
+                HAZARDS_CHART_TOP_PADDING +
+                ((hazardsReportedAxisMaxValue - clampedValue) / axisRange) * usableHeight;
+
+            return {
+                x,
+                y,
+                label: point.label,
+                value: point.value,
+            };
+        });
+    }, [hazardsReportedData, hazardsReportedAxisMaxValue]);
+
+    const hazardsReportedPath = useMemo(() => {
+        return createSmoothPath(hazardsReportedChartPoints);
+    }, [hazardsReportedChartPoints]);
 
     if (data === null) {
         return null;
@@ -410,23 +547,110 @@ export function Dashboard() {
                 )}
 
                 {hazardsReportedData !== null && (
-                    <Box sx={{ mt: 4 }}>
-                        <Typography variant="h6">
-                            Hazards Reported
-                        </Typography>
-
-                        <Typography>
-                            Total: {hazardsReportedData.total}
-                        </Typography>
-
-                        <Box sx={{ mt: 1 }}>
-                            {hazardsReportedData.points.map((point) => (
-                                <Typography key={point.label}>
-                                    {point.label}: {point.value}
+                    <Paper elevation={0} sx={styles.hazardsReportedCard}>
+                        <Box sx={styles.hazardsReportedHeader}>
+                            <Box sx={styles.hazardsReportedHeaderText}>
+                                <Typography sx={styles.hazardsReportedTitle}>
+                                    Hazards Reported
                                 </Typography>
-                            ))}
+                                <Typography sx={styles.hazardsReportedSubtitle}>
+                                    Monthly Hazard Reports
+                                </Typography>
+                            </Box>
+
+                            <FormControl size="small" sx={styles.hazardsReportedSelectControl}>
+                                <Select
+                                    value={hazardsReportedRange}
+                                    onChange={(event: SelectChangeEvent) =>
+                                        setHazardsReportedRange(event.target.value)
+                                    }
+                                    IconComponent={KeyboardArrowDownRoundedIcon}
+                                    sx={styles.hazardsReportedSelect}
+                                    MenuProps={{
+                                        PaperProps: {
+                                            sx: styles.hazardsReportedSelectMenuPaper,
+                                        },
+                                    }}
+                                >
+                                    {lateArrivalRangeOptions.map((option) => (
+                                        <MenuItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                         </Box>
-                    </Box>
+
+                        <Box sx={styles.hazardsReportedBody}>
+                            <Box sx={styles.hazardsReportedYAxis}>
+                                {hazardsReportedTicks.map((tick, index) => (
+                                    <Box key={`${tick}-${index}`} sx={styles.hazardsReportedYAxisRow}>
+                                        <Typography sx={styles.hazardsReportedYAxisLabel}>
+                                            {formatChartTick(tick)}
+                                        </Typography>
+                                    </Box>
+                                ))}
+                            </Box>
+
+                            <Box sx={styles.hazardsReportedPlotArea}>
+                                <Box sx={styles.hazardsReportedGrid}>
+                                    {hazardsReportedTicks.map((tick, index) => (
+                                        <Box key={`${tick}-${index}`} sx={styles.hazardsReportedGridRow} />
+                                    ))}
+                                </Box>
+
+                                <Box sx={styles.hazardsReportedSvgWrapper}>
+                                    <svg
+                                        viewBox={`0 0 ${HAZARDS_CHART_WIDTH} ${HAZARDS_CHART_HEIGHT}`}
+                                        preserveAspectRatio="none"
+                                        style={{ width: "100%", height: "100%" }}
+                                    >
+                                        {hazardsReportedChartPoints.map((point) => (
+                                            <line
+                                                key={`vertical-${point.label}`}
+                                                x1={point.x}
+                                                y1={0}
+                                                x2={point.x}
+                                                y2={HAZARDS_CHART_HEIGHT}
+                                                stroke={styles.hazardsReportedVerticalGridColour}
+                                                strokeWidth="1"
+                                                strokeDasharray="3 4"
+                                            />
+                                        ))}
+
+                                        <path
+                                            d={hazardsReportedPath}
+                                            fill="none"
+                                            stroke={styles.hazardsReportedLineColour}
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+
+                                        {hazardsReportedChartPoints.map((point) => (
+                                            <circle
+                                                key={point.label}
+                                                cx={point.x}
+                                                cy={point.y}
+                                                r="4.5"
+                                                fill={styles.hazardsReportedLineColour}
+                                            />
+                                        ))}
+                                    </svg>
+                                </Box>
+
+                                <Box sx={styles.hazardsReportedXAxisLabelsRow}>
+                                    {(hazardsReportedData.points ?? []).map((point) => (
+                                        <Box key={point.label} sx={styles.hazardsReportedXAxisLabelColumn}>
+                                            <Typography sx={styles.hazardsReportedXAxisLabel}>
+                                                {point.label}
+                                            </Typography>
+                                        </Box>
+                                    ))}
+                                </Box>
+                            </Box>
+                        </Box>
+                    </Paper>
                 )}
             </Box>
         </Box>

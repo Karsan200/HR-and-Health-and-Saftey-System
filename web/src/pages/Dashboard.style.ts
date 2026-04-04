@@ -1,6 +1,16 @@
 import { BorderRadius, FontSize, TextStyles } from "../theme/theme";
 import { DefaultColours } from "../theme/colours";
 
+export const LATE_CHART_DRAW_HEIGHT = 220;
+
+export const HAZARDS_CHART_WIDTH = 520;
+export const HAZARDS_CHART_HEIGHT = 350;
+export const HAZARDS_CHART_LEFT_PADDING = 14;
+export const HAZARDS_CHART_RIGHT_PADDING = 14;
+export const HAZARDS_CHART_TOP_PADDING = 8;
+export const HAZARDS_CHART_BOTTOM_PADDING = 10;
+export const HAZARDS_TICK_COUNT = 5;
+
 export const dashboardStyles = {
     pageContainer: {
         paddingTop: 3,
@@ -241,21 +251,23 @@ export const dashboardStyles = {
         display: "flex",
         gap: 1.75,
         flex: 1,
-        minHeight: 350,
+        minHeight: 250,
         alignItems: "stretch",
     },
 
     lateChartYAxis: {
         width: 32,
+        height: LATE_CHART_DRAW_HEIGHT,
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        paddingTop: 2,
-        paddingBottom: 3.5,
+        paddingTop: 0,
+        paddingBottom: 0,
+        flexShrink: 0,
     },
 
     lateChartYAxisRow: {
-        flex: 0.1,
+        flex: 1,
         display: "flex",
         alignItems: "center",
         justifyContent: "flex-end",
@@ -274,10 +286,10 @@ export const dashboardStyles = {
         position: "relative",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "flex-end",
-        paddingTop: 2,
-        paddingBottom: 0.5,
-        maxWidth:600,
+        justifyContent: "flex-start",
+        paddingTop: 0,
+        paddingBottom: 0,
+        maxWidth: 600,
     },
 
     lateChartBarsRow: {
@@ -287,12 +299,12 @@ export const dashboardStyles = {
         justifyContent: "space-between",
         alignItems: "flex-end",
         gap: 3,
-        height: "100%",
+        height: LATE_CHART_DRAW_HEIGHT,
         borderLeft: `1px solid ${DefaultColours.greyIconLight}66`,
         borderBottom: `1px solid ${DefaultColours.greyIconLight}66`,
         paddingLeft: 2,
         paddingRight: 0.5,
-        paddingTop: 1,
+        paddingTop: 0,
         paddingBottom: 0,
     },
 
@@ -337,6 +349,7 @@ export const dashboardStyles = {
         textOverflow: "ellipsis",
         maxWidth: "100%",
     },
+
     lateChartXAxisLabelsRow: {
         display: "flex",
         justifyContent: "space-between",
@@ -468,8 +481,8 @@ export const dashboardStyles = {
     },
 
     documentSignatureDonut: {
-        width: 300,
-        height: 300,
+        width: 275,
+        height: 275,
         borderRadius: "50%",
         position: "relative",
         display: "flex",
@@ -479,8 +492,8 @@ export const dashboardStyles = {
     },
 
     documentSignatureDonutInner: {
-        width: 220,
-        height: 220,
+        width: 200,
+        height: 200,
         borderRadius: "50%",
         backgroundColor: DefaultColours.white,
         transform: "rotate(90deg)",
@@ -541,5 +554,197 @@ export const dashboardStyles = {
         marginTop: 4,
         width: "100%",
         alignItems: "stretch",
+    },
+
+    hazardsReportedLineColour: DefaultColours.greenPrimary,
+    hazardsReportedVerticalGridColour: `${DefaultColours.greyIconLight}30`,
+
+    hazardsReportedCard: {
+        backgroundColor: DefaultColours.white,
+        borderRadius: BorderRadius.largeButtonsAndOutlines / 2,
+        border: `1px solid ${DefaultColours.greyIconLight}40`,
+        boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.06)",
+        paddingTop: 3.25,
+        paddingLeft: 3.75,
+        paddingRight: 3.75,
+        paddingBottom: 3,
+        marginTop: 4,
+        minHeight: 500,
+        maxWidth: 900,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+    },
+
+    hazardsReportedHeader: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        gap: 2,
+        marginBottom: 2,
+    },
+
+    hazardsReportedHeaderText: {
+        minWidth: 0,
+        flex: 1,
+    },
+
+    hazardsReportedTitle: {
+        fontSize: FontSize.xl32,
+        fontFamily: TextStyles.semiBold.fontFamily,
+        fontWeight: TextStyles.semiBold.fontWeight,
+        color: DefaultColours.black,
+        lineHeight: 1.2,
+        marginBottom: 0.4,
+    },
+
+    hazardsReportedSubtitle: {
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular.fontFamily,
+        fontWeight: TextStyles.regular.fontWeight,
+        color: DefaultColours.greyPrimaryMainText,
+        lineHeight: 1.2,
+    },
+
+    hazardsReportedSelectControl: {
+        minWidth: 100,
+        flexShrink: 0,
+    },
+
+    hazardsReportedSelect: {
+        minHeight: "auto",
+        backgroundColor: "transparent",
+        fontSize: FontSize.xs14,
+        fontFamily: TextStyles.semiBold.fontFamily,
+        fontWeight: TextStyles.semiBold.fontWeight,
+        color: DefaultColours.black,
+        borderRadius: BorderRadius.smallTextBackground,
+        "& .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+        },
+        "&:hover .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+        },
+        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+        },
+        "& .MuiSelect-select": {
+            paddingTop: 0,
+            paddingBottom: 0,
+            paddingLeft: 0,
+            paddingRight: "22px !important",
+            lineHeight: 1.2,
+            minHeight: "unset !important",
+            display: "flex",
+            alignItems: "center",
+        },
+        "& .MuiSelect-icon": {
+            right: 0,
+            fontSize: 16,
+            color: DefaultColours.black,
+        },
+    },
+
+    hazardsReportedSelectMenuPaper: {
+        borderRadius: BorderRadius.mediumNotification,
+        boxShadow: "0px 6px 18px rgba(0, 0, 0, 0.12)",
+        border: `1px solid ${DefaultColours.greyIconLight}33`,
+    },
+
+    hazardsReportedBody: {
+        display: "flex",
+        gap: 2,
+        flex: 1,
+        minHeight: 380,
+        alignItems: "flex-start",
+    },
+
+    hazardsReportedYAxis: {
+        width: 44,
+        height: HAZARDS_CHART_HEIGHT,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        paddingTop: 0,
+        paddingBottom: 0,
+        flexShrink: 0,
+    },
+
+    hazardsReportedYAxisRow: {
+        flex: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-end",
+    },
+
+    hazardsReportedYAxisLabel: {
+        fontSize: FontSize.xs14,
+        fontFamily: TextStyles.regular.fontFamily,
+        fontWeight: TextStyles.regular.fontWeight,
+        color: DefaultColours.greyPrimaryMainText,
+        lineHeight: 1,
+    },
+
+    hazardsReportedPlotArea: {
+        flex: 1,
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        paddingTop: 0,
+        paddingBottom: 0,
+        maxWidth: 750,
+    },
+
+    hazardsReportedGrid: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: HAZARDS_CHART_HEIGHT,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        pointerEvents: "none",
+    },
+
+    hazardsReportedGridRow: {
+        width: "100%",
+        borderTop: `1px dashed ${DefaultColours.greyIconLight}33`,
+    },
+
+    hazardsReportedSvgWrapper: {
+        position: "relative",
+        zIndex: 1,
+        height: HAZARDS_CHART_HEIGHT,
+        width: "100%",
+    },
+
+    hazardsReportedXAxisLabelsRow: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        gap: 0,
+        marginTop: 1,
+    },
+
+    hazardsReportedXAxisLabelColumn: {
+        flex: 1,
+        minWidth: 0,
+        display: "flex",
+        justifyContent: "center",
+    },
+
+    hazardsReportedXAxisLabel: {
+        fontSize: FontSize.xs14,
+        fontFamily: TextStyles.regular.fontFamily,
+        fontWeight: TextStyles.regular.fontWeight,
+        color: DefaultColours.greyPrimaryMainText,
+        lineHeight: 1.2,
+        textAlign: "center",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        maxWidth: "100%",
     },
 } as const;
