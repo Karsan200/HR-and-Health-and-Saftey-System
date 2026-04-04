@@ -747,4 +747,109 @@ export const dashboardStyles = {
         textOverflow: "ellipsis",
         maxWidth: "100%",
     },
+
+    bottomRow: {
+        display: "grid",
+        gridTemplateColumns: "minmax(0, 1.35fr) minmax(280px, 0.9fr)",
+        gap: 8,
+        marginTop: 4,
+        width: "100%",
+        alignItems: "End",
+    },
+
+    quickActionsCard: {
+        backgroundColor: DefaultColours.white,
+        borderRadius: BorderRadius.largeButtonsAndOutlines / 2,
+        border: `1px solid ${DefaultColours.greyIconLight}40`,
+        boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.06)",
+        paddingTop: 3.25,
+        paddingLeft: 3.25,
+        paddingRight: 3.25,
+        paddingBottom: 3,
+        minHeight: 507,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+    },
+
+    quickActionsTitle: {
+        fontSize: FontSize.xl32,
+        fontFamily: TextStyles.semiBold.fontFamily,
+        fontWeight: TextStyles.semiBold.fontWeight,
+        color: DefaultColours.black,
+        lineHeight: 1.2,
+        marginBottom: 4,
+    },
+
+    quickActionsList: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 5,
+        marginTop: 1,
+    },
+
+    quickActionButton: {
+        justifyContent: "flex-start",
+        textTransform: "none",
+        backgroundColor: DefaultColours.white,
+        border: `1px solid ${DefaultColours.greyIconLight}55`,
+        borderRadius: BorderRadius.mediumNotification,
+        paddingTop: 2.25,
+        paddingBottom: 2.25,
+        paddingLeft: 2,
+        paddingRight: 2,
+        gap: 2,
+        boxShadow: "none",
+        "&:hover": {
+            backgroundColor: DefaultColours.white,
+            boxShadow: "none",
+        },
+    },
+
+    quickActionIconWrapper: {
+        width: 44,
+        height: 44,
+        borderRadius: BorderRadius.smallTextBackground / 2,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+    },
+
+    quickActionIcon: {
+        fontSize: FontSize.xxl36,
+    },
+
+    quickActionDocumentIconWrapper: {
+        backgroundColor: DefaultColours.greenBackgroundLight,
+    },
+
+    quickActionDocumentIcon: {
+        color: DefaultColours.greenPrimary,
+    },
+
+    quickActionHazardIconWrapper: {
+        backgroundColor: DefaultColours.amberBackgroundLight,
+    },
+
+    quickActionHazardIcon: {
+        color: DefaultColours.amberPrimary,
+    },
+
+    quickActionLeaveIconWrapper: {
+        backgroundColor: `${DefaultColours.greyIconLight}33`,
+    },
+
+    quickActionLeaveIcon: {
+        color: DefaultColours.greyPrimaryMainText,
+    },
+
+    quickActionText: {
+        fontSize: FontSize.m20,
+        fontFamily: TextStyles.medium.fontFamily,
+        fontWeight: TextStyles.medium.fontWeight,
+        color: DefaultColours.black,
+        lineHeight: 1.5,
+        textAlign: "left",
+    },
 } as const;

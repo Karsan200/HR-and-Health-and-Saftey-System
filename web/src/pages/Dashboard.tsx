@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     Box,
+    Button,
     FormControl,
     MenuItem,
     Paper,
@@ -14,6 +16,8 @@ import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
+import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
+import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 
 import {
     getDashboardSummary,
@@ -129,6 +133,7 @@ const getNiceHazardsStep = (maxValue: number, segmentCount: number) => {
 
 export function Dashboard() {
     const { authenticationService } = useAuth();
+    const navigate = useNavigate();
 
     const [data, setData] = useState<DashboardSummary | null>(null);
     const [lateData, setLateData] = useState<LateArrivalsResponse | null>(null);
@@ -547,110 +552,165 @@ export function Dashboard() {
                 )}
 
                 {hazardsReportedData !== null && (
-                    <Paper elevation={0} sx={styles.hazardsReportedCard}>
-                        <Box sx={styles.hazardsReportedHeader}>
-                            <Box sx={styles.hazardsReportedHeaderText}>
-                                <Typography sx={styles.hazardsReportedTitle}>
-                                    Hazards Reported
-                                </Typography>
-                                <Typography sx={styles.hazardsReportedSubtitle}>
-                                    Monthly Hazard Reports
-                                </Typography>
-                            </Box>
-
-                            <FormControl size="small" sx={styles.hazardsReportedSelectControl}>
-                                <Select
-                                    value={hazardsReportedRange}
-                                    onChange={(event: SelectChangeEvent) =>
-                                        setHazardsReportedRange(event.target.value)
-                                    }
-                                    IconComponent={KeyboardArrowDownRoundedIcon}
-                                    sx={styles.hazardsReportedSelect}
-                                    MenuProps={{
-                                        PaperProps: {
-                                            sx: styles.hazardsReportedSelectMenuPaper,
-                                        },
-                                    }}
-                                >
-                                    {lateArrivalRangeOptions.map((option) => (
-                                        <MenuItem key={option.value} value={option.value}>
-                                            {option.label}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Box>
-
-                        <Box sx={styles.hazardsReportedBody}>
-                            <Box sx={styles.hazardsReportedYAxis}>
-                                {hazardsReportedTicks.map((tick, index) => (
-                                    <Box key={`${tick}-${index}`} sx={styles.hazardsReportedYAxisRow}>
-                                        <Typography sx={styles.hazardsReportedYAxisLabel}>
-                                            {formatChartTick(tick)}
-                                        </Typography>
-                                    </Box>
-                                ))}
-                            </Box>
-
-                            <Box sx={styles.hazardsReportedPlotArea}>
-                                <Box sx={styles.hazardsReportedGrid}>
-                                    {hazardsReportedTicks.map((tick, index) => (
-                                        <Box key={`${tick}-${index}`} sx={styles.hazardsReportedGridRow} />
-                                    ))}
+                    <Box sx={styles.bottomRow}>
+                        <Paper elevation={0} sx={styles.hazardsReportedCard}>
+                            <Box sx={styles.hazardsReportedHeader}>
+                                <Box sx={styles.hazardsReportedHeaderText}>
+                                    <Typography sx={styles.hazardsReportedTitle}>
+                                        Hazards Reported
+                                    </Typography>
+                                    <Typography sx={styles.hazardsReportedSubtitle}>
+                                        Monthly Hazard Reports
+                                    </Typography>
                                 </Box>
 
-                                <Box sx={styles.hazardsReportedSvgWrapper}>
-                                    <svg
-                                        viewBox={`0 0 ${HAZARDS_CHART_WIDTH} ${HAZARDS_CHART_HEIGHT}`}
-                                        preserveAspectRatio="none"
-                                        style={{ width: "100%", height: "100%" }}
+                                <FormControl size="small" sx={styles.hazardsReportedSelectControl}>
+                                    <Select
+                                        value={hazardsReportedRange}
+                                        onChange={(event: SelectChangeEvent) =>
+                                            setHazardsReportedRange(event.target.value)
+                                        }
+                                        IconComponent={KeyboardArrowDownRoundedIcon}
+                                        sx={styles.hazardsReportedSelect}
+                                        MenuProps={{
+                                            PaperProps: {
+                                                sx: styles.hazardsReportedSelectMenuPaper,
+                                            },
+                                        }}
                                     >
-                                        {hazardsReportedChartPoints.map((point) => (
-                                            <line
-                                                key={`vertical-${point.label}`}
-                                                x1={point.x}
-                                                y1={0}
-                                                x2={point.x}
-                                                y2={HAZARDS_CHART_HEIGHT}
-                                                stroke={styles.hazardsReportedVerticalGridColour}
-                                                strokeWidth="1"
-                                                strokeDasharray="3 4"
-                                            />
+                                        {lateArrivalRangeOptions.map((option) => (
+                                            <MenuItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </MenuItem>
                                         ))}
+                                    </Select>
+                                </FormControl>
+                            </Box>
 
-                                        <path
-                                            d={hazardsReportedPath}
-                                            fill="none"
-                                            stroke={styles.hazardsReportedLineColour}
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        />
-
-                                        {hazardsReportedChartPoints.map((point) => (
-                                            <circle
-                                                key={point.label}
-                                                cx={point.x}
-                                                cy={point.y}
-                                                r="4.5"
-                                                fill={styles.hazardsReportedLineColour}
-                                            />
-                                        ))}
-                                    </svg>
-                                </Box>
-
-                                <Box sx={styles.hazardsReportedXAxisLabelsRow}>
-                                    {(hazardsReportedData.points ?? []).map((point) => (
-                                        <Box key={point.label} sx={styles.hazardsReportedXAxisLabelColumn}>
-                                            <Typography sx={styles.hazardsReportedXAxisLabel}>
-                                                {point.label}
+                            <Box sx={styles.hazardsReportedBody}>
+                                <Box sx={styles.hazardsReportedYAxis}>
+                                    {hazardsReportedTicks.map((tick, index) => (
+                                        <Box key={`${tick}-${index}`} sx={styles.hazardsReportedYAxisRow}>
+                                            <Typography sx={styles.hazardsReportedYAxisLabel}>
+                                                {formatChartTick(tick)}
                                             </Typography>
                                         </Box>
                                     ))}
                                 </Box>
+
+                                <Box sx={styles.hazardsReportedPlotArea}>
+                                    <Box sx={styles.hazardsReportedGrid}>
+                                        {hazardsReportedTicks.map((tick, index) => (
+                                            <Box key={`${tick}-${index}`} sx={styles.hazardsReportedGridRow} />
+                                        ))}
+                                    </Box>
+
+                                    <Box sx={styles.hazardsReportedSvgWrapper}>
+                                        <svg
+                                            viewBox={`0 0 ${HAZARDS_CHART_WIDTH} ${HAZARDS_CHART_HEIGHT}`}
+                                            preserveAspectRatio="none"
+                                            style={{ width: "100%", height: "100%" }}
+                                        >
+                                            {hazardsReportedChartPoints.map((point) => (
+                                                <line
+                                                    key={`vertical-${point.label}`}
+                                                    x1={point.x}
+                                                    y1={0}
+                                                    x2={point.x}
+                                                    y2={HAZARDS_CHART_HEIGHT}
+                                                    stroke={styles.hazardsReportedVerticalGridColour}
+                                                    strokeWidth="1"
+                                                    strokeDasharray="3 4"
+                                                />
+                                            ))}
+
+                                            <path
+                                                d={hazardsReportedPath}
+                                                fill="none"
+                                                stroke={styles.hazardsReportedLineColour}
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            />
+
+                                            {hazardsReportedChartPoints.map((point) => (
+                                                <circle
+                                                    key={point.label}
+                                                    cx={point.x}
+                                                    cy={point.y}
+                                                    r="4.5"
+                                                    fill={styles.hazardsReportedLineColour}
+                                                />
+                                            ))}
+                                        </svg>
+                                    </Box>
+
+                                    <Box sx={styles.hazardsReportedXAxisLabelsRow}>
+                                        {(hazardsReportedData.points ?? []).map((point) => (
+                                            <Box key={point.label} sx={styles.hazardsReportedXAxisLabelColumn}>
+                                                <Typography sx={styles.hazardsReportedXAxisLabel}>
+                                                    {point.label}
+                                                </Typography>
+                                            </Box>
+                                        ))}
+                                    </Box>
+                                </Box>
                             </Box>
-                        </Box>
-                    </Paper>
+                        </Paper>
+
+                        <Paper elevation={0} sx={styles.quickActionsCard}>
+                            <Typography sx={styles.quickActionsTitle}>
+                                Quick Actions
+                            </Typography>
+
+                            <Box sx={styles.quickActionsList}>
+                                <Button
+                                    fullWidth
+                                    disableRipple
+                                    onClick={() => navigate("/health-and-safety/send-out")}
+                                    sx={styles.quickActionButton}
+                                >
+                                    <Box sx={{ ...styles.quickActionIconWrapper, ...styles.quickActionDocumentIconWrapper }}>
+                                        <InsertDriveFileOutlinedIcon sx={{ ...styles.quickActionIcon, ...styles.quickActionDocumentIcon }} />
+                                    </Box>
+
+                                    <Typography sx={styles.quickActionText}>
+                                        Send Document
+                                    </Typography>
+                                </Button>
+
+                                <Button
+                                    fullWidth
+                                    disableRipple
+                                    onClick={() => navigate("/health-and-safety/send-out/safety-alert")}
+                                    sx={styles.quickActionButton}
+                                >
+                                    <Box sx={{ ...styles.quickActionIconWrapper, ...styles.quickActionHazardIconWrapper }}>
+                                        <WarningAmberRoundedIcon sx={{ ...styles.quickActionIcon, ...styles.quickActionHazardIcon }} />
+                                    </Box>
+
+                                    <Typography sx={styles.quickActionText}>
+                                        Safety Alert
+                                    </Typography>
+                                </Button>
+
+                                <Button
+                                    fullWidth
+                                    disableRipple
+                                    onClick={() => navigate("calendar/pending-requests")}
+                                    sx={styles.quickActionButton}
+                                >
+                                    <Box sx={{ ...styles.quickActionIconWrapper, ...styles.quickActionLeaveIconWrapper }}>
+                                        <CalendarTodayOutlinedIcon sx={{ ...styles.quickActionIcon, ...styles.quickActionLeaveIcon }} />
+                                    </Box>
+
+                                    <Typography sx={styles.quickActionText}>
+                                        Review Leaves
+                                    </Typography>
+                                </Button>
+                            </Box>
+                        </Paper>
+                    </Box>
                 )}
             </Box>
         </Box>
