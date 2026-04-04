@@ -70,6 +70,7 @@ export function Dashboard() {
     const [lateData, setLateData] = useState<LateArrivalsResponse | null>(null);
     const [lateArrivalsRange, setLateArrivalsRange] = useState("this-week");
 
+    const [documentSignaturesRange, setDocumentSignaturesRange] = useState("this-week");
     const [documentSignatureData, setDocumentSignatureData] =
         useState<DocumentSignaturesResponse | null>(null);
     const [hazardsReportedData, setHazardsReportedData] =
@@ -96,13 +97,13 @@ export function Dashboard() {
     }, [authenticationService, lateArrivalsRange]);
 
     useEffect(() => {
-        getDocumentSignatures(authenticationService).then((response) => {
+        getDocumentSignatures(authenticationService, documentSignaturesRange).then((response) => {
             setDocumentSignatureData({
                 signed: response?.signed ?? 0,
                 pending: response?.pending ?? 0,
             });
         });
-    }, [authenticationService]);
+    }, [authenticationService, documentSignaturesRange]);
 
     useEffect(() => {
         getHazardsReported(authenticationService).then((response) => {
@@ -135,6 +136,35 @@ export function Dashboard() {
             })) ?? []
         );
     }, [lateData]);
+
+    const documentSignaturesTitle = useMemo(() => {
+        return "Document Signatures";
+    }, []);
+
+    const documentSignatureTotal = useMemo(() => {
+        return (documentSignatureData?.signed ?? 0) + (documentSignatureData?.pending ?? 0);
+    }, [documentSignatureData]);
+
+    const documentSignatureSignedPercentage = useMemo(() => {
+        if (documentSignatureTotal === 0) {
+            return 0;
+        }
+
+        return ((documentSignatureData?.signed ?? 0) / documentSignatureTotal) * 100;
+    }, [documentSignatureData, documentSignatureTotal]);
+
+    const documentSignatureChartBackground = useMemo(() => {
+        if (documentSignatureTotal === 0) {
+            return `conic-gradient(${styles.documentSignatureEmptyRingColour} 0deg 360deg)`;
+        }
+
+        const signedDegrees = (documentSignatureSignedPercentage / 100) * 360;
+
+        return `conic-gradient(
+        ${styles.documentSignatureSignedColour} 0deg ${signedDegrees}deg,
+        ${styles.documentSignaturePendingColour} ${signedDegrees}deg 360deg
+    )`;
+    }, [documentSignatureSignedPercentage, documentSignatureTotal]);
 
     if (data === null) {
         return null;
@@ -205,105 +235,177 @@ export function Dashboard() {
                     </Paper>
                 </Box>
 
-                {lateData !== null && (
-                    <Paper elevation={0} sx={styles.lateChartCard}>
-                        <Box sx={styles.lateChartHeader}>
-                            <Box sx={styles.lateChartHeaderText}>
-                                <Typography sx={styles.lateChartTitle}>
-                                    {lateArrivalsTitle}
-                                </Typography>
-                                <Typography sx={styles.lateChartSubtitle}>
-                                    Employee Lateness
-                                </Typography>
-                            </Box>
-
-                            <FormControl size="small" sx={styles.lateChartSelectControl}>
-                                <Select
-                                    value={lateArrivalsRange}
-                                    onChange={(event: SelectChangeEvent) =>
-                                        setLateArrivalsRange(event.target.value)
-                                    }
-                                    IconComponent={KeyboardArrowDownRoundedIcon}
-                                    sx={styles.lateChartSelect}
-                                    MenuProps={{
-                                        PaperProps: {
-                                            sx: styles.lateChartSelectMenuPaper,
-                                        },
-                                    }}
-                                >
-                                    {lateArrivalRangeOptions.map((option) => (
-                                        <MenuItem key={option.value} value={option.value}>
-                                            {option.label}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Box>
-
-                        <Typography sx={styles.lateChartTotalText}>
-                            {lateData.total} Total
-                        </Typography>
-
-                        <Box sx={styles.lateChartBody}>
-                            <Box sx={styles.lateChartYAxis}>
-                                {lateChartTicks.map((tick) => (
-                                    <Box key={tick} sx={styles.lateChartYAxisRow}>
-                                        <Typography sx={styles.lateChartYAxisLabel}>
-                                            {tick}
-                                        </Typography>
-                                    </Box>
-                                ))}
-                            </Box>
-
-                            <Box sx={styles.lateChartPlotArea}>
-                                <Box sx={styles.lateChartBarsRow}>
-                                    {formattedLatePoints.map((point) => {
-                                        const heightPercent = lateChartMaxValue === 0
-                                            ? 0
-                                            : (point.value / lateChartMaxValue) * 100;
-
-                                        return (
-                                            <Box key={point.label} sx={styles.lateChartBarColumn}>
-                                                <Box sx={styles.lateChartBarTrack}>
-                                                    <Box
-                                                        sx={{
-                                                            ...styles.lateChartBarFill,
-                                                            height: `${heightPercent}%`,
-                                                        }}
-                                                    />
-                                                </Box>
-                                            </Box>
-                                        );
-                                    })}
+                {lateData !== null && documentSignatureData !== null && (
+                    <Box sx={styles.chartRow}>
+                        <Paper elevation={0} sx={styles.lateChartCard}>
+                            <Box sx={styles.lateChartHeader}>
+                                <Box sx={styles.lateChartHeaderText}>
+                                    <Typography sx={styles.lateChartTitle}>
+                                        {lateArrivalsTitle}
+                                    </Typography>
+                                    <Typography sx={styles.lateChartSubtitle}>
+                                        Employee Lateness
+                                    </Typography>
                                 </Box>
 
-                                <Box sx={styles.lateChartXAxisLabelsRow}>
-                                    {formattedLatePoints.map((point) => (
-                                        <Box key={point.label} sx={styles.lateChartXAxisLabelColumn}>
-                                            <Typography sx={styles.lateChartXAxisLabel}>
-                                                {point.displayLabel}
+                                <FormControl size="small" sx={styles.lateChartSelectControl}>
+                                    <Select
+                                        value={lateArrivalsRange}
+                                        onChange={(event: SelectChangeEvent) =>
+                                            setLateArrivalsRange(event.target.value)
+                                        }
+                                        IconComponent={KeyboardArrowDownRoundedIcon}
+                                        sx={styles.lateChartSelect}
+                                        MenuProps={{
+                                            PaperProps: {
+                                                sx: styles.lateChartSelectMenuPaper,
+                                            },
+                                        }}
+                                    >
+                                        {lateArrivalRangeOptions.map((option) => (
+                                            <MenuItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Box>
+
+                            <Typography sx={styles.lateChartTotalText}>
+                                {lateData.total} Total
+                            </Typography>
+
+                            <Box sx={styles.lateChartBody}>
+                                <Box sx={styles.lateChartYAxis}>
+                                    {lateChartTicks.map((tick) => (
+                                        <Box key={tick} sx={styles.lateChartYAxisRow}>
+                                            <Typography sx={styles.lateChartYAxisLabel}>
+                                                {tick}
                                             </Typography>
                                         </Box>
                                     ))}
                                 </Box>
+
+                                <Box sx={styles.lateChartPlotArea}>
+                                    <Box sx={styles.lateChartBarsRow}>
+                                        {formattedLatePoints.map((point) => {
+                                            const heightPercent = lateChartMaxValue === 0
+                                                ? 0
+                                                : (point.value / lateChartMaxValue) * 100;
+
+                                            return (
+                                                <Box key={point.label} sx={styles.lateChartBarColumn}>
+                                                    <Box sx={styles.lateChartBarTrack}>
+                                                        <Box
+                                                            sx={{
+                                                                ...styles.lateChartBarFill,
+                                                                height: `${heightPercent}%`,
+                                                            }}
+                                                        />
+                                                    </Box>
+                                                </Box>
+                                            );
+                                        })}
+                                    </Box>
+
+                                    <Box sx={styles.lateChartXAxisLabelsRow}>
+                                        {formattedLatePoints.map((point) => (
+                                            <Box key={point.label} sx={styles.lateChartXAxisLabelColumn}>
+                                                <Typography sx={styles.lateChartXAxisLabel}>
+                                                    {point.displayLabel}
+                                                </Typography>
+                                            </Box>
+                                        ))}
+                                    </Box>
+                                </Box>
                             </Box>
-                        </Box>
-                    </Paper>
-                )}
+                        </Paper>
 
-                {documentSignatureData !== null && (
-                    <Box sx={{ mt: 4 }}>
-                        <Typography variant="h6">
-                            Document Signatures
-                        </Typography>
+                        <Paper elevation={0} sx={styles.documentSignatureCard}>
+                            <Box sx={styles.documentSignatureHeader}>
+                                <Box sx={styles.documentSignatureHeaderText}>
+                                    <Typography sx={styles.documentSignatureTitle}>
+                                        {documentSignaturesTitle}
+                                    </Typography>
+                                    <Typography sx={styles.documentSignatureSubtitle}>
+                                        Signature Completion Status
+                                    </Typography>
+                                </Box>
 
-                        <Typography>
-                            Signed: {documentSignatureData.signed}
-                        </Typography>
+                                <FormControl size="small" sx={styles.documentSignatureSelectControl}>
+                                    <Select
+                                        value={documentSignaturesRange}
+                                        onChange={(event: SelectChangeEvent) =>
+                                            setDocumentSignaturesRange(event.target.value)
+                                        }
+                                        IconComponent={KeyboardArrowDownRoundedIcon}
+                                        sx={styles.documentSignatureSelect}
+                                        MenuProps={{
+                                            PaperProps: {
+                                                sx: styles.documentSignatureSelectMenuPaper,
+                                            },
+                                        }}
+                                    >
+                                        {lateArrivalRangeOptions.map((option) => (
+                                            <MenuItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Box>
 
-                        <Typography>
-                            Pending: {documentSignatureData.pending}
-                        </Typography>
+                            <Box sx={styles.documentSignatureBody}>
+                                <Box sx={styles.documentSignatureDonutWrapper}>
+                                    <Box
+                                        sx={{
+                                            ...styles.documentSignatureDonut,
+                                            background: documentSignatureChartBackground,
+                                        }}
+                                    >
+                                        <Box sx={styles.documentSignatureDonutInner} />
+                                    </Box>
+                                </Box>
+
+                                <Box sx={styles.documentSignatureLegend}>
+                                    <Box sx={styles.documentSignatureLegendRow}>
+                                        <Box sx={styles.documentSignatureLegendLeft}>
+                                            <Box
+                                                sx={{
+                                                    ...styles.documentSignatureLegendDot,
+                                                    backgroundColor: styles.documentSignatureSignedColour,
+                                                }}
+                                            />
+                                            <Typography sx={styles.documentSignatureLegendLabel}>
+                                                Signed
+                                            </Typography>
+                                        </Box>
+
+                                        <Typography sx={styles.documentSignatureLegendValue}>
+                                            {documentSignatureData.signed}
+                                        </Typography>
+                                    </Box>
+
+                                    <Box sx={styles.documentSignatureLegendRow}>
+                                        <Box sx={styles.documentSignatureLegendLeft}>
+                                            <Box
+                                                sx={{
+                                                    ...styles.documentSignatureLegendDot,
+                                                    backgroundColor: styles.documentSignaturePendingColour,
+                                                }}
+                                            />
+                                            <Typography sx={styles.documentSignatureLegendLabel}>
+                                                Pending
+                                            </Typography>
+                                        </Box>
+
+                                        <Typography sx={styles.documentSignatureLegendValue}>
+                                            {documentSignatureData.pending}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </Box>
+                        </Paper>
                     </Box>
                 )}
 

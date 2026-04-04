@@ -145,9 +145,9 @@ export const dashboardStyles = {
         paddingLeft: 3.75,
         paddingRight: 3.75,
         paddingBottom: 3,
-        marginTop: 4,
+        marginTop: 0,
         minHeight: 355,
-        maxWidth: 675,
+        maxWidth: 1000,
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
@@ -277,7 +277,7 @@ export const dashboardStyles = {
         justifyContent: "flex-end",
         paddingTop: 2,
         paddingBottom: 0.5,
-        maxWidth:500,
+        maxWidth:600,
     },
 
     lateChartBarsRow: {
@@ -286,7 +286,7 @@ export const dashboardStyles = {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "flex-end",
-        gap: 0.1,
+        gap: 3,
         height: "100%",
         borderLeft: `1px solid ${DefaultColours.greyIconLight}66`,
         borderBottom: `1px solid ${DefaultColours.greyIconLight}66`,
@@ -307,7 +307,7 @@ export const dashboardStyles = {
 
     lateChartBarTrack: {
         width: "100%",
-        maxWidth: 80,
+        maxWidth: 100,
         height: "100%",
         display: "flex",
         alignItems: "flex-end",
@@ -352,5 +352,194 @@ export const dashboardStyles = {
         minWidth: 0,
         display: "flex",
         justifyContent: "center",
+    },
+
+    documentSignatureSignedColour: DefaultColours.greenPrimary,
+    documentSignaturePendingColour: DefaultColours.amberPrimary,
+    documentSignatureEmptyRingColour: `${DefaultColours.greyIconLight}55`,
+
+    documentSignatureCard: {
+        backgroundColor: DefaultColours.white,
+        borderRadius: BorderRadius.largeButtonsAndOutlines / 2,
+        border: `1px solid ${DefaultColours.greyIconLight}40`,
+        boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.06)",
+        paddingTop: 3.25,
+        paddingLeft: 3.75,
+        paddingRight: 3.75,
+        paddingBottom: 3,
+        marginTop: 0,
+        minHeight: 355,
+        maxWidth: 690,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+    },
+
+    documentSignatureHeader: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        gap: 2,
+        marginBottom: 2,
+    },
+
+    documentSignatureHeaderText: {
+        minWidth: 0,
+        flex: 1,
+    },
+
+    documentSignatureTitle: {
+        fontSize: FontSize.xl32,
+        fontFamily: TextStyles.semiBold.fontFamily,
+        fontWeight: TextStyles.semiBold.fontWeight,
+        color: DefaultColours.black,
+        lineHeight: 1.2,
+        marginBottom: 0.4,
+    },
+
+    documentSignatureSubtitle: {
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular.fontFamily,
+        fontWeight: TextStyles.regular.fontWeight,
+        color: DefaultColours.greyPrimaryMainText,
+        lineHeight: 1.2,
+    },
+
+    documentSignatureSelectControl: {
+        minWidth: 100,
+        flexShrink: 0,
+    },
+
+    documentSignatureSelect: {
+        minHeight: "auto",
+        backgroundColor: "transparent",
+        fontSize: FontSize.xs14,
+        fontFamily: TextStyles.semiBold.fontFamily,
+        fontWeight: TextStyles.semiBold.fontWeight,
+        color: DefaultColours.black,
+        borderRadius: BorderRadius.smallTextBackground,
+        "& .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+        },
+        "&:hover .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+        },
+        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+        },
+        "& .MuiSelect-select": {
+            paddingTop: 0,
+            paddingBottom: 0,
+            paddingLeft: 0,
+            paddingRight: "22px !important",
+            lineHeight: 1.2,
+            minHeight: "unset !important",
+            display: "flex",
+            alignItems: "center",
+        },
+        "& .MuiSelect-icon": {
+            right: 0,
+            fontSize: 16,
+            color: DefaultColours.black,
+        },
+    },
+
+    documentSignatureSelectMenuPaper: {
+        borderRadius: BorderRadius.mediumNotification,
+        boxShadow: "0px 6px 18px rgba(0, 0, 0, 0.12)",
+        border: `1px solid ${DefaultColours.greyIconLight}33`,
+    },
+
+    documentSignatureBody: {
+        flex: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 5,
+        paddingTop: 1,
+    },
+
+    documentSignatureDonutWrapper: {
+        flex: "0 0 auto",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minWidth: 320,
+    },
+
+    documentSignatureDonut: {
+        width: 300,
+        height: 300,
+        borderRadius: "50%",
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        transform: "rotate(-90deg)",
+    },
+
+    documentSignatureDonutInner: {
+        width: 220,
+        height: 220,
+        borderRadius: "50%",
+        backgroundColor: DefaultColours.white,
+        transform: "rotate(90deg)",
+    },
+
+    documentSignatureLegend: {
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+        justifyContent: "center",
+        maxWidth: 180,
+    },
+
+    documentSignatureLegendRow: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 2,
+    },
+
+    documentSignatureLegendLeft: {
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        minWidth: 0,
+    },
+
+    documentSignatureLegendDot: {
+        width: 8,
+        height: 8,
+        borderRadius: "50%",
+        flexShrink: 0,
+    },
+
+    documentSignatureLegendLabel: {
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular.fontFamily,
+        fontWeight: TextStyles.regular.fontWeight,
+        color: DefaultColours.black,
+        lineHeight: 1.2,
+    },
+
+    documentSignatureLegendValue: {
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.medium.fontFamily,
+        fontWeight: TextStyles.medium.fontWeight,
+        color: DefaultColours.black,
+        lineHeight: 1.2,
+        minWidth: 18,
+        textAlign: "right",
+    },
+
+    chartRow: {
+        display: "grid",
+        gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+        gap: 15,
+        marginTop: 4,
+        width: "100%",
+        alignItems: "stretch",
     },
 } as const;
