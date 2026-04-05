@@ -1,4 +1,4 @@
-## [V0.0.1] - 2026-03-26
+## [V0.2.0] - 2026-03-31
 
 ### Added
 - Scanning functionality for Rasperry Pi Pico (Tested on Pico W 2, with mock bluetooth signal + payload from a Pico W)

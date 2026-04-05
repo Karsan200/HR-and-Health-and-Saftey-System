@@ -265,13 +265,16 @@ INSERT INTO document_table (
     created
 ) VALUES
       ((SELECT file_id FROM files_table WHERE name = 'safety_policy'),
-       'Company Safety Policy', FALSE, '2025-02-14 10:00:00'),
+       'Company Safety Policy v2.1', FALSE,'2025-02-14 10:00:00'),
 
       ('b1c2d3e4-f5a6-7890-bcde-123456abcdef',
        'Employee Handbook', FALSE, '2026-03-24 10:05:00'),
 
+      ('3cc58063-df14-4e45-bce0-15f30f5d08ff',
+       'Driving Licence', FALSE,'2026-01-15 10:05:00'),
+
       ((SELECT file_id FROM files_table WHERE name = 'sop_fire_safety'),
-       'SOP: Fire Safety Procedures', FALSE, '2025-02-14 10:10:00'),
+       'SOP: Fire Safety Procedures v5', FALSE, '2025-02-14 10:10:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'sop_equipment_procedures'),
        'SOP: Equipment Handling Instructions', FALSE, '2025-02-14 10:15:00'),
@@ -280,19 +283,19 @@ INSERT INTO document_table (
        'Fire Safety Guidelines', True, '2025-02-14 10:05:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'training_manual'),
-       'Employee Training Manual', True, '2025-03-02 11:00:00'),
+       'Employee Training Manual v3.0', True, '2025-03-02 11:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'hr_guidelines'),
        'HR Guidelines', True, '2025-04-18 15:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'hazard_report_template'),
-       'Hazard Report Template', True, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+       'Hazard Report Template v1',True, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
 
       ((SELECT file_id FROM files_table WHERE name = 'equipment_safety'),
        'Equipment Safety Procedures', True, '2025-07-12 09:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'workshop_rules'),
-       'Workshop Rules', FALSE, '2025-08-20 17:00:00'),
+       'Workshop Rules v4.3', FALSE, '2025-08-20 17:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'health_policy'),
        'Health and Safety Policy', True, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
@@ -986,6 +989,9 @@ INSERT INTO payslips_table (
 
       ((SELECT file_id FROM files_table WHERE name = 'payslip_feb_2026_mmay'),
        2026, 2, FALSE),
+
+      ((SELECT file_id FROM files_table WHERE name = 'p60_2025_mmay'),
+       2025, 4, TRUE),
 
       ((SELECT file_id FROM files_table WHERE name = 'payslip_jan_2026_droberts'),
        2026, 1, FALSE),

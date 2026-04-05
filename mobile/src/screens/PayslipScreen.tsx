@@ -1,7 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import Pdf from 'react-native-pdf';
+import React, { useContext, useEffect, useState } from 'react';
+import {
+    View,
+    ScrollView,
+    ActivityIndicator,
+    Alert,
+} from 'react-native';
 import AuthenticationService from '../logic/AuthenticationService';
+import { ThemeContext } from '../theme/colourController';
+import { styles as screenStyles } from './PayslipScreen.styles';
+import HrPdfCard from '../components/HrPdfCard.tsx';
 
 type Payslip = {
     name: string;
@@ -11,10 +18,54 @@ type Payslip = {
     url: string;
 };
 
+/**
+ * Returns the last day of the given month as a "Pay Date: DD/MM/YYYY" string.
+ */
+const formatPayDate = (year: number, month: number): string => {
+    const lastDay = new Date(year, month, 0).getDate();
+    const mm = String(month).padStart(2, '0');
+    return `Pay Date: ${lastDay}/${mm}/${year}`;
+};
+
+/**
+ * Returns a human-readable month + year title e.g. "January 2026".
+ */
+const formatPayslipTitle = (year: number, month: number): string => {
+    const date = new Date(year, month - 1, 1);
+    return date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+};
+
+/**
+ * Returns the standard UK P60 tax year title e.g. "P60 – Tax Year 2024/25".
+ * The UK tax year ends in April, so a P60 issued in April 2025
+ * covers the 2024/25 tax year.
+ */
+const formatP60Title = (year: number, month: number): string => {
+    const taxYearEnd = month >= 4 ? year : year - 1;
+    const taxYearStart = taxYearEnd - 1;
+    const shortEnd = String(taxYearEnd).slice(-2);
+    return `P60 – Tax Year ${taxYearStart}/${shortEnd}`;
+};
+
+/**
+ * Returns the subtitle for a P60 card e.g. "Tax Year 2024/25".
+ */
+const formatP60Subtitle = (year: number, month: number): string => {
+    const taxYearEnd = month >= 4 ? year : year - 1;
+    const taxYearStart = taxYearEnd - 1;
+    const shortEnd = String(taxYearEnd).slice(-2);
+    return `Tax Year ${taxYearStart}/${shortEnd}`;
+};
+
 export default function PayslipScreen() {
+    const { theme} = useContext(ThemeContext);
+    const styles = screenStyles(theme);
+
     const [payslips, setPayslips] = useState<Payslip[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
+
+    // Tracks which card is currently expanded
+    const [expandedKey, setExpandedKey] = useState<string | null>(null);
 
     useEffect(() => {
         fetchPayslips();
@@ -38,40 +89,47 @@ export default function PayslipScreen() {
         }
     };
 
-    if (selectedUrl) {
+    const handleCardPress = (key: string) => {
+        // Tapping an open card collapses it; tapping a closed card expands it
+        setExpandedKey(prev => (prev === key ? null : key));
+    };
+
+    // Loading
+    if (loading) {
         return (
-            <View style={{ flex: 1 }}>
-                <TouchableOpacity onPress={() => setSelectedUrl(null)}>
-                    <Text>Back</Text>
-                </TouchableOpacity>
-                <Pdf
-                    source={{ uri: selectedUrl, cache: false }}
-                    trustAllCerts={false}
-                    style={{ flex: 1 }}
-                    onError={(error) => {
-                        console.error('PDF error:', error);
-                        Alert.alert('Error', 'Failed to load PDF.');
-                    }}
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator
+                    testID="loading-indicator"
+                    size="large"
+                    color={theme.redPrimary}
                 />
             </View>
         );
     }
 
-    if (loading) {
-        return <ActivityIndicator testID="loading-indicator" />;
-    }
-
+    // List of Payslips
     return (
-        <FlatList
-            data={payslips}
-            keyExtractor={(item) => `${item.name}-${item.year}-${item.month}`}
-            renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => setSelectedUrl(item.url)}>
-                    <Text>{item.name}</Text>
-                    <Text>{item.month}/{item.year}</Text>
-                    {item.isPSixty && <Text>P60</Text>}
-                </TouchableOpacity>
-            )}
-        />
+        <View style={styles.screen}>
+            <ScrollView style={styles.scrollView} contentContainerStyle={styles.container}>
+                {payslips.map((item) => {
+                    const key = `${item.name}-${item.year}-${item.month}`;
+                    return (
+                        <View key={key} style={styles.cardWrapper}>
+                            <HrPdfCard
+                                title={item.isPSixty ? formatP60Title(item.year, item.month) : formatPayslipTitle(item.year, item.month)}
+                                subtitle={item.isPSixty ? formatP60Subtitle(item.year, item.month) : formatPayDate(item.year, item.month)}
+                                isPSixty={item.isPSixty}
+                                pdfUrl={item.url}
+                                isExpanded={expandedKey === key}
+                                onPress={() => handleCardPress(key)}
+                                onDownload={() => {
+                                    // Wire up a share/download action here when ready
+                                }}
+                            />
+                        </View>
+                    );
+                })}
+            </ScrollView>
+        </View>
     );
 }
