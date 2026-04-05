@@ -793,7 +793,7 @@ export const dashboardStyles = {
         textTransform: "none",
         backgroundColor: DefaultColours.white,
         border: `1px solid ${DefaultColours.greyIconLight}55`,
-        borderRadius: BorderRadius.mediumNotification,
+        borderRadius: BorderRadius.largeButtonsAndOutlines / 4,
         paddingTop: 2.25,
         paddingBottom: 2.25,
         paddingLeft: 2,
@@ -850,6 +850,94 @@ export const dashboardStyles = {
         fontWeight: TextStyles.medium.fontWeight,
         color: DefaultColours.black,
         lineHeight: 1.5,
+        textAlign: "left",
+    },
+
+    recentActivityCard: {
+        backgroundColor: DefaultColours.white,
+        borderRadius: BorderRadius.largeButtonsAndOutlines / 2,
+        border: `1px solid ${DefaultColours.greyIconLight}40`,
+        boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.06)",
+        paddingTop: 3.25,
+        paddingLeft: 3.25,
+        paddingRight: 3.25,
+        paddingBottom: 3,
+        marginTop: 4,
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+    },
+
+    recentActivityTitle: {
+        fontSize: FontSize.xl32,
+        fontFamily: TextStyles.semiBold.fontFamily,
+        fontWeight: TextStyles.semiBold.fontWeight,
+        color: DefaultColours.black,
+        lineHeight: 1.2,
+        marginBottom: 2.5,
+    },
+
+    recentActivityList: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+    },
+
+    recentActivityRow: {
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
+        minHeight: 64,
+        border: `1px solid ${DefaultColours.greyIconLight}55`,
+        borderRadius: BorderRadius.largeButtonsAndOutlines / 4,
+        paddingLeft: 1.5,
+        paddingRight: 2,
+        paddingTop: 1.25,
+        paddingBottom: 1.25,
+        backgroundColor: DefaultColours.white,
+    },
+
+    recentActivityIconWrapper: {
+        width: 38,
+        height: 38,
+        borderRadius: BorderRadius.largeButtonsAndOutlines / 4,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+    },
+
+    recentActivitySuccessIconWrapper: {
+        backgroundColor: DefaultColours.greenBackgroundLight,
+        color: DefaultColours.greenPrimary,
+    },
+
+    recentActivityNeutralIconWrapper: {
+        backgroundColor: `${DefaultColours.greyIconLight}22`,
+        color: DefaultColours.greyPrimaryMainText,
+    },
+
+    recentActivityWarningIconWrapper: {
+        backgroundColor: DefaultColours.amberBackgroundLight,
+        color: DefaultColours.amberPrimary,
+    },
+
+    recentActivityDangerIconWrapper: {
+        backgroundColor: DefaultColours.redTrafficBackgroundLight,
+        color: DefaultColours.redTrafficPrimary,
+    },
+
+    recentActivityIcon: {
+        fontSize: 28,
+    },
+
+    recentActivityMessage: {
+        fontSize: FontSize.m20,
+        fontFamily: TextStyles.medium.fontFamily,
+        fontWeight: TextStyles.medium.fontWeight,
+        color: DefaultColours.black,
+        lineHeight: 1.3,
         textAlign: "left",
     },
 } as const;

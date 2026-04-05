@@ -18,6 +18,9 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import ReportProblemOutlinedIcon from "@mui/icons-material/ReportProblemOutlined";
 
 import {
     getDashboardSummary,
@@ -131,6 +134,55 @@ const getNiceHazardsStep = (maxValue: number, segmentCount: number) => {
     }
 
     return 10 * magnitude;
+};
+
+const getRecentActivityDisplay = (type: string) => {
+    switch (type) {
+        case "DOCUMENT_SIGNED":
+            return {
+                icon: <CheckCircleOutlineRoundedIcon sx={styles.recentActivityIcon} />,
+                iconWrapperSx: {
+                    ...styles.recentActivityIconWrapper,
+                    ...styles.recentActivitySuccessIconWrapper,
+                },
+            };
+
+        case "LEAVE_REQUEST":
+            return {
+                icon: <AccessTimeRoundedIcon sx={styles.recentActivityIcon} />,
+                iconWrapperSx: {
+                    ...styles.recentActivityIconWrapper,
+                    ...styles.recentActivityNeutralIconWrapper,
+                },
+            };
+
+        case "HAZARD_REPORTED":
+            return {
+                icon: <ReportProblemOutlinedIcon sx={styles.recentActivityIcon} />,
+                iconWrapperSx: {
+                    ...styles.recentActivityIconWrapper,
+                    ...styles.recentActivityWarningIconWrapper,
+                },
+            };
+
+        case "LATE_CLOCK_IN":
+            return {
+                icon: <AccessTimeRoundedIcon sx={styles.recentActivityIcon} />,
+                iconWrapperSx: {
+                    ...styles.recentActivityIconWrapper,
+                    ...styles.recentActivityDangerIconWrapper,
+                },
+            };
+
+        default:
+            return {
+                icon: <AccessTimeRoundedIcon sx={styles.recentActivityIcon} />,
+                iconWrapperSx: {
+                    ...styles.recentActivityIconWrapper,
+                    ...styles.recentActivityNeutralIconWrapper,
+                },
+            };
+    }
 };
 
 export function Dashboard() {
@@ -723,24 +775,32 @@ export function Dashboard() {
                 )}
 
                 {recentActivityData !== null && (
-                    <Box sx={{ mt: 4 }}>
-                        <Typography variant="h6">
+                    <Paper elevation={0} sx={styles.recentActivityCard}>
+                        <Typography sx={styles.recentActivityTitle}>
                             Recent Activity
                         </Typography>
 
-                        <Box sx={{ mt: 1 }}>
-                            {recentActivityData.map((item, index) => (
-                                <Box key={`${item.type}-${item.created}-${index}`} sx={{ mb: 1.5 }}>
-                                    <Typography>
-                                        {item.message}
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        {item.type} - {item.created}
-                                    </Typography>
-                                </Box>
-                            ))}
+                        <Box sx={styles.recentActivityList}>
+                            {recentActivityData.map((item, index) => {
+                                const activityDisplay = getRecentActivityDisplay(item.type);
+
+                                return (
+                                    <Box
+                                        key={`${item.type}-${item.created}-${index}`}
+                                        sx={styles.recentActivityRow}
+                                    >
+                                        <Box sx={activityDisplay.iconWrapperSx}>
+                                            {activityDisplay.icon}
+                                        </Box>
+
+                                        <Typography sx={styles.recentActivityMessage}>
+                                            {item.message}
+                                        </Typography>
+                                    </Box>
+                                );
+                            })}
                         </Box>
-                    </Box>
+                    </Paper>
                 )}
             </Box>
         </Box>
