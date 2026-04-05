@@ -7,6 +7,7 @@ import { IncompatibleScreen } from "./components/IncompatibleScreen";
 import { AuthProvider } from "./AuthContext";
 import { Navbar } from "./components/Navbar";
 import { Dashboard } from "./pages/Dashboard";
+import {CalendarPage} from "./pages/CalendarPage";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
@@ -53,7 +54,7 @@ function AppContent() {
             <Navbar />
             <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="/calendar" element={<></>} />
+                <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/employee-overview" element={<></>} />
                 <Route path="/health-and-safety" element={<></>} />
                 <Route path="/notifications" element={<></>} />

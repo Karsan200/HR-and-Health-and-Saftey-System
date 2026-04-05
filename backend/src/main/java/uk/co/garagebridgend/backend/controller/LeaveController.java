@@ -6,11 +6,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import uk.co.garagebridgend.backend.logic.LeaveService;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
+import uk.co.garagebridgend.backend.models.response.LeaveCalendarAdminResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveSummaryResponse;
@@ -29,8 +31,51 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LeaveController {
 
+    /** Minimum valid month value (January). */
+    private static final int MIN_MONTH = 1;
+
+    /** Maximum valid month value (December). */
+    private static final int MAX_MONTH = 12;
+
     /** Service responsible for handling leave-related business logic. */
     private final LeaveService leaveService;
+
+    /**
+     * Retrieves all approved leave entries for a given month, expanded into one item
+     * per employee per working day on leave. Intended for populating the admin calendar view.
+     * Requires ROLE_ADMIN or ROLE_MANAGER authority (enforced in SecurityConfig).
+     *
+     * @param year the calendar year to query (e.g. 2025)
+     * @param month the calendar month to query (1 = January, 12 = December)
+     * @return a flat list of {@link LeaveCalendarAdminResponse} objects, one per day per employee
+     */
+    @GetMapping("/admin/calendar")
+    public List<LeaveCalendarAdminResponse> getAdminCalendarItems(
+            @RequestParam final int year,
+            @RequestParam final int month
+    ) {
+        if (month < MIN_MONTH || month > MAX_MONTH) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Month must be between 1 and 12.");
+        }
+        try {
+            return leaveService.getCalendarItems(year, month);
+        } catch (AuthenticatedAccountNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "User not authenticated"
+            );
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    e.getMessage()
+            );
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal server error"
+            );
+        }
+    }
 
     /**
      * Retrieves all leave entries formatted for calendar display.
@@ -76,7 +121,7 @@ public class LeaveController {
      * Retrieves a summary of leave for the currently authenticated user.
      *
      * @return a {@link LeaveSummaryResponse} object containing leave summary details
-     * @throws ResponseStatusException with {@link org.springframework.http.HttpStatus#INTERNAL_SERVER_ERROR}
+     * @throws ResponseStatusException with {@link HttpStatus#INTERNAL_SERVER_ERROR}
      * if the user is not authenticated or an unexpected error occurs
      */
     @GetMapping("/summary")
@@ -121,7 +166,6 @@ public class LeaveController {
     @PostMapping("/create")
     public void createLeave(@RequestBody final LeaveRequest request) {
         try {
-            System.out.println("Received leave request: " + request);
             leaveService.createLeave(request);
         } catch (AuthenticatedAccountNotFoundException e) {
             throw new ResponseStatusException(
@@ -141,4 +185,3 @@ public class LeaveController {
         }
     }
 }
-

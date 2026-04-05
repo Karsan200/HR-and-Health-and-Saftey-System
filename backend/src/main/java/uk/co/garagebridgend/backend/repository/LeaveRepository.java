@@ -2,6 +2,7 @@ package uk.co.garagebridgend.backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import uk.co.garagebridgend.backend.models.entity.LeaveTable;
@@ -30,6 +31,26 @@ public interface LeaveRepository extends JpaRepository<LeaveTable, Long> {
     AND l.isApproved = true
     """)
     List<LeaveTable> findLeaveForDate(LocalDateTime startOfDay, LocalDateTime endOfDay);
+
+    /**
+     * Retrieves all approved leave entries that overlap with a given date range.
+     * Used to fetch all leave visible within a calendar month view, including
+     * leave that starts before or ends after the range boundaries.
+     *
+     * @param rangeStart the start of the date range to query against
+     * @param rangeEnd the end of the date range to query against
+     * @return a list of approved {@link LeaveTable} entries overlapping the range
+     */
+    @Query("""
+    SELECT l FROM LeaveTable l
+    WHERE l.startDate <= :rangeEnd
+    AND l.endDate >= :rangeStart
+    AND l.isApproved = true
+    """)
+    List<LeaveTable> findApprovedLeaveInRange(
+            @Param("rangeStart") LocalDateTime rangeStart,
+            @Param("rangeEnd") LocalDateTime rangeEnd
+    );
 
     /**
      * Retrieves the most recent leave requests.

@@ -3,7 +3,6 @@
  */
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import dayjs from 'dayjs';
 
 import BookLeaveModal from '../src/screens/BookLeaveModal';
 import LeaveService from '../src/logic/LeaveService';
@@ -216,7 +215,8 @@ jest.mock('../src/logic/LeaveBookingLogic', () => ({
 }));
 
 describe('BookLeaveModal', () => {
-  const futureDate = dayjs().add(20, 'day').format('YYYY-MM-DD');
+  // TODO: change this and other dates to mock dates relative to each-other.
+  const futureDate = '9999-04-20';
 
   const mockLeaveTypes = [
     {
