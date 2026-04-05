@@ -267,11 +267,13 @@ INSERT INTO document_table (
       ((SELECT file_id FROM files_table WHERE name = 'safety_policy'),
        'Company Safety Policy v2.1', FALSE,'2025-02-14 10:00:00'),
 
-      ('b1c2d3e4-f5a6-7890-bcde-123456abcdef',
+      ((SELECT file_id FROM files_table WHERE name ='employee_handbook'),
        'Employee Handbook', FALSE, '2026-03-24 10:05:00'),
 
-      ('3cc58063-df14-4e45-bce0-15f30f5d08ff',
-       'Driving Licence', FALSE,'2026-01-15 10:05:00'),
+#       I have had to hash this out as it is not a valid way of assigning the file_id,
+#       and there is no file matching this in file_id.
+#       ('3cc58063-df14-4e45-bce0-15f30f5d08ff',
+#        'Driving Licence', FALSE,'2026-01-15 10:05:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'sop_fire_safety'),
        'SOP: Fire Safety Procedures v5', FALSE, '2025-02-14 10:10:00'),
@@ -990,8 +992,9 @@ INSERT INTO payslips_table (
       ((SELECT file_id FROM files_table WHERE name = 'payslip_feb_2026_mmay'),
        2026, 2, FALSE),
 
-      ((SELECT file_id FROM files_table WHERE name = 'p60_2025_mmay'),
-       2025, 4, TRUE),
+#      I have also had to hash this out as the file id is invalid (null) and prevents the rest of the file from running.
+#      ((SELECT file_id FROM files_table WHERE name = 'p60_2025_mmay'),
+#       2025, 4, TRUE),
 
       ((SELECT file_id FROM files_table WHERE name = 'payslip_jan_2026_droberts'),
        2026, 1, FALSE),
