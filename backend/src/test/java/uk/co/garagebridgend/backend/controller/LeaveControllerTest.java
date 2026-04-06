@@ -18,14 +18,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import org.springframework.http.MediaType;
 
 import uk.co.garagebridgend.backend.models.request.LeaveRequest;
-import uk.co.garagebridgend.backend.models.response.LeaveTypeResponse;
+import uk.co.garagebridgend.backend.models.response.*;
 import uk.co.garagebridgend.backend.RentATechApplication;
 import uk.co.garagebridgend.backend.logic.LeaveService;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
-import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
-import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
-import uk.co.garagebridgend.backend.models.response.LeaveSummaryResponse;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -61,6 +59,74 @@ public class LeaveControllerTest {
     void setup() {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(leaveController).build();
+    }
+
+    @Test
+    void testGetAdminCalendarSuccess() throws Exception {
+        List<LeaveCalendarAdminResponse> mockData = List.of(
+                new LeaveCalendarAdminResponse(
+                        LocalDate.of(2026, 4, 1),
+                        "John Doe",
+                        "bookedLeave",
+                        "Annual leave"
+                )
+        );
+
+        when(leaveService.getCalendarItems(2026, 4)).thenReturn(mockData);
+
+        mockMvc.perform(get("/api/leave/admin/calendar")
+                        .param("year", "2026")
+                        .param("month", "4"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetAdminCalendarInvalidMonthTooLow() throws Exception {
+        mockMvc.perform(get("/api/leave/admin/calendar")
+                        .param("year", "2026")
+                        .param("month", "0"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGetAdminCalendarInvalidMonthTooHigh() throws Exception {
+        mockMvc.perform(get("/api/leave/admin/calendar")
+                        .param("year", "2026")
+                        .param("month", "13"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGetAdminCalendarUnauthorized() throws Exception {
+        when(leaveService.getCalendarItems(2026, 4))
+                .thenThrow(new AuthenticatedAccountNotFoundException());
+
+        mockMvc.perform(get("/api/leave/admin/calendar")
+                        .param("year", "2026")
+                        .param("month", "4"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testGetAdminCalendarBadRequest() throws Exception {
+        when(leaveService.getCalendarItems(2026, 4))
+                .thenThrow(new IllegalArgumentException("Invalid year."));
+
+        mockMvc.perform(get("/api/leave/admin/calendar")
+                        .param("year", "2026")
+                        .param("month", "4"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGetAdminCalendarThrowsException() throws Exception {
+        when(leaveService.getCalendarItems(2026, 4))
+                .thenThrow(new RuntimeException("Database error"));
+
+        mockMvc.perform(get("/api/leave/admin/calendar")
+                        .param("year", "2026")
+                        .param("month", "4"))
+                .andExpect(status().isInternalServerError());
     }
 
     @Test

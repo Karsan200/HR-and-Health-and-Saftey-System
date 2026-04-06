@@ -617,4 +617,161 @@ public class LeaveServiceTest {
         // Then the request should be rejected because the leave type id is invalid
         assertEquals("Invalid leave type id.", exception.getMessage());
     }
+
+    @Test
+    void testGetCalendarItemsSuccess() {
+
+        // Given an approved leave spanning a Monday and Tuesday within the requested month
+        AccountTable account = new AccountTable();
+        account.setFirstName("John");
+        account.setLastName("Doe");
+
+        LeaveTypeTable leaveType = new LeaveTypeTable();
+        leaveType.setName("Annual Leave");
+
+        LeaveTable leave = new LeaveTable();
+        leave.setAccount(account);
+        leave.setLeaveType(leaveType);
+        leave.setStartDate(LocalDateTime.of(2026, 4, 6, 8, 0));  // Monday
+        leave.setEndDate(LocalDateTime.of(2026, 4, 7, 17, 0));   // Tuesday
+        leave.setNotes("Spring break");
+
+        when(leaveRepository.findApprovedLeaveInRange(any(), any())).thenReturn(List.of(leave));
+
+        // When calendar items are requested for April 2026
+        var result = leaveService.getCalendarItems(2026, 4);
+
+        // Then one item per working day should be returned (Monday + Tuesday = 2)
+        assertEquals(2, result.size());
+        assertEquals("John Doe", result.get(0).getEmployeeName());
+        assertEquals("bookedLeave", result.get(0).getLeaveType());
+        assertEquals("Spring break", result.get(0).getNotes());
+    }
+
+    @Test
+    void testGetCalendarItemsSkipsWeekends() {
+
+        // Given an approved leave spanning Friday through Monday (includes a weekend)
+        AccountTable account = new AccountTable();
+        account.setFirstName("Jane");
+        account.setLastName("Smith");
+
+        LeaveTypeTable leaveType = new LeaveTypeTable();
+        leaveType.setName("sick leave");
+
+        LeaveTable leave = new LeaveTable();
+        leave.setAccount(account);
+        leave.setLeaveType(leaveType);
+        leave.setStartDate(LocalDateTime.of(2026, 4, 3, 8, 0));  // Friday
+        leave.setEndDate(LocalDateTime.of(2026, 4, 6, 17, 0));   // Monday
+        leave.setNotes(null);
+
+        when(leaveRepository.findApprovedLeaveInRange(any(), any())).thenReturn(List.of(leave));
+
+        // When calendar items are requested for April 2026
+        var result = leaveService.getCalendarItems(2026, 4);
+
+        // Then Saturday and Sunday should be excluded, leaving only Friday and Monday (2 items)
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void testGetCalendarItemsExcludesDaysOutsideRequestedMonth() {
+
+        // Given an approved leave that starts in March and ends in April
+        AccountTable account = new AccountTable();
+        account.setFirstName("Bob");
+        account.setLastName("Jones");
+
+        LeaveTypeTable leaveType = new LeaveTypeTable();
+        leaveType.setName("training leave");
+
+        LeaveTable leave = new LeaveTable();
+        leave.setAccount(account);
+        leave.setLeaveType(leaveType);
+        leave.setStartDate(LocalDateTime.of(2026, 3, 30, 8, 0));  // Monday in March
+        leave.setEndDate(LocalDateTime.of(2026, 4, 1, 17, 0));    // Wednesday in April
+        leave.setNotes(null);
+
+        when(leaveRepository.findApprovedLeaveInRange(any(), any())).thenReturn(List.of(leave));
+
+        // When calendar items are requested for April 2026 only
+        var result = leaveService.getCalendarItems(2026, 4);
+
+        // Then only the April day should be returned; the March days should be excluded
+        assertEquals(1, result.size());
+        assertEquals(LocalDate.of(2026, 4, 1), result.get(0).getDate());
+    }
+
+    @Test
+    void testGetCalendarItemsLeaveTypeMapping() {
+
+        // Given leaves with each mapped leave type name
+        AccountTable account = new AccountTable();
+        account.setFirstName("Alice");
+        account.setLastName("Brown");
+
+        LeaveTypeTable nationalHolidayType = new LeaveTypeTable();
+        nationalHolidayType.setName("national holiday");
+
+        LeaveTypeTable sickLeaveType = new LeaveTypeTable();
+        sickLeaveType.setName("sick leave");
+
+        LeaveTypeTable trainingLeaveType = new LeaveTypeTable();
+        trainingLeaveType.setName("training leave");
+
+        LeaveTypeTable unknownType = new LeaveTypeTable();
+        unknownType.setName("other type");
+
+        LeaveTypeTable nullType = new LeaveTypeTable();
+        nullType.setName(null);
+
+        LocalDate monday = LocalDate.of(2026, 4, 6);
+
+        LeaveTable leave1 = buildLeaveTableForDay(account, nationalHolidayType, monday);
+        LeaveTable leave2 = buildLeaveTableForDay(account, sickLeaveType, monday.plusDays(1));
+        LeaveTable leave3 = buildLeaveTableForDay(account, trainingLeaveType, monday.plusDays(2));
+        LeaveTable leave4 = buildLeaveTableForDay(account, unknownType, monday.plusDays(3));
+        LeaveTable leave5 = buildLeaveTableForDay(account, nullType, monday.plusDays(4));
+
+        when(leaveRepository.findApprovedLeaveInRange(any(), any()))
+                .thenReturn(List.of(leave1, leave2, leave3, leave4, leave5));
+
+        // When calendar items are requested
+        var result = leaveService.getCalendarItems(2026, 4);
+
+        // Then each leave type name should map to the correct frontend event type string
+        assertEquals("nationalHoliday", result.get(0).getLeaveType());
+        assertEquals("sickLeave",        result.get(1).getLeaveType());
+        assertEquals("trainingLeave",    result.get(2).getLeaveType());
+        assertEquals("bookedLeave",      result.get(3).getLeaveType());
+        assertEquals("bookedLeave",      result.get(4).getLeaveType());
+    }
+
+    @Test
+    void testGetCalendarItemsEmpty() {
+
+        // Given no approved leave exists in the requested month
+        when(leaveRepository.findApprovedLeaveInRange(any(), any())).thenReturn(List.of());
+
+        // When calendar items are requested for April 2026
+        var result = leaveService.getCalendarItems(2026, 4);
+
+        // Then the result should be empty
+        assertTrue(result.isEmpty());
+    }
+
+    // Helper to reduce boilerplate in the mapping test above
+    private LeaveTable buildLeaveTableForDay(
+            final AccountTable account,
+            final LeaveTypeTable leaveType,
+            final LocalDate date) {
+        LeaveTable leave = new LeaveTable();
+        leave.setAccount(account);
+        leave.setLeaveType(leaveType);
+        leave.setStartDate(date.atTime(8, 0));
+        leave.setEndDate(date.atTime(17, 0));
+        leave.setNotes(null);
+        return leave;
+    }
 }
