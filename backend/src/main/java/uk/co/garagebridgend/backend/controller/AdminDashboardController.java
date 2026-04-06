@@ -16,7 +16,7 @@ import java.util.List;
 
 /** Controller for admin dashboard related endpoints. */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/admin")
 @RequiredArgsConstructor
 public class AdminDashboardController {
 
@@ -26,7 +26,7 @@ public class AdminDashboardController {
     /** Endpoint to retrieve a summary of key stats for the admin dashboard.
      * @return AdminDashboardSummaryResponse containing the number of open hazards
      */
-    @GetMapping("/admin/summary")
+    @GetMapping("/summary")
     public AdminDashboardSummaryResponse getAdminDashboardSummary() {
         try {
             return adminDashboardService.getAdminDashboardSummary();
@@ -49,7 +49,7 @@ public class AdminDashboardController {
      * @param range the selected range, e.g. this-week, last-week, this-month
      * @return AdminLateArrivalsChartResponse containing chart data
      */
-    @GetMapping("/admin/late-arrivals")
+    @GetMapping("/late-arrivals")
     public AdminLateArrivalsChartResponse getLateArrivalsChart(
             @RequestParam(defaultValue = "this-week") final String range
     ) {
@@ -74,7 +74,7 @@ public class AdminDashboardController {
      * @param range the selected range
      * @return AdminDocumentSignaturesChartResponse containing signed and pending totals
      */
-    @GetMapping("/admin/document-signatures")
+    @GetMapping("/document-signatures")
     public AdminDocumentSignaturesChartResponse getDocumentSignaturesChart(
             @RequestParam(defaultValue = "this-week") final String range
     ) {
@@ -99,7 +99,7 @@ public class AdminDashboardController {
      * @param range the selected range, e.g. this-week, last-week, this-month
      * @return AdminHazardsReportedChartResponse containing chart data
      */
-    @GetMapping("/admin/hazards-reported")
+    @GetMapping("/hazards-reported")
     public AdminHazardsReportedChartResponse getHazardsReportedChart(
             @RequestParam(defaultValue = "this-week") final String range
     ) {
@@ -123,7 +123,7 @@ public class AdminDashboardController {
      *
      * @return a list of recent activity items ordered by newest first
      */
-    @GetMapping("/admin/recent-activity")
+    @GetMapping("/recent-activity")
     public List<AdminRecentActivityItemResponse> getRecentActivity() {
         try {
             return adminDashboardService.getRecentActivity();

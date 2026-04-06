@@ -9,6 +9,7 @@ import AuthenticationService from '../logic/AuthenticationService';
 import { ThemeContext } from '../theme/colourController';
 import { styles as screenStyles } from './PayslipScreen.styles';
 import HrPdfCard from '../components/HrPdfCard.tsx';
+import { useDownload } from '../logic/DownloadLogic.ts';
 
 type Payslip = {
     name: string;
@@ -63,6 +64,7 @@ export default function PayslipScreen() {
 
     const [payslips, setPayslips] = useState<Payslip[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const { handleDownload } = useDownload();
 
     // Tracks which card is currently expanded
     const [expandedKey, setExpandedKey] = useState<string | null>(null);
@@ -94,6 +96,7 @@ export default function PayslipScreen() {
         setExpandedKey(prev => (prev === key ? null : key));
     };
 
+
     // Loading
     if (loading) {
         return (
@@ -113,6 +116,9 @@ export default function PayslipScreen() {
             <ScrollView style={styles.scrollView} contentContainerStyle={styles.container}>
                 {payslips.map((item) => {
                     const key = `${item.name}-${item.year}-${item.month}`;
+                    const filename = item.isPSixty
+                        ? formatP60Title(item.year, item.month)
+                        : formatPayslipTitle(item.year, item.month);
                     return (
                         <View key={key} style={styles.cardWrapper}>
                             <HrPdfCard
@@ -122,9 +128,7 @@ export default function PayslipScreen() {
                                 pdfUrl={item.url}
                                 isExpanded={expandedKey === key}
                                 onPress={() => handleCardPress(key)}
-                                onDownload={() => {
-                                    // Wire up a share/download action here when ready
-                                }}
+                                onDownload={() => handleDownload(item.url, filename)}                                    // Wire up a share/download action here when ready
                             />
                         </View>
                     );
