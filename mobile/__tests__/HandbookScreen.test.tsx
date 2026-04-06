@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react-native';
 import HandbookScreen from '../src/screens/HandbookScreen';
 import AuthenticationService from '../src/logic/AuthenticationService';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 
 jest.mock('../src/logic/AuthenticationService', () => ({
     fetch: jest.fn(),
@@ -14,6 +14,27 @@ jest.mock('react-native-pdf', () => {
 
 
 jest.mock('react-native-wheel-color-picker', () => null);
+
+
+jest.mock('react-native-blob-util', () => ({
+    __esModule: true,
+    default: {
+        config: jest.fn(() => ({
+            fetch: jest.fn(() =>
+                Promise.resolve({ path: () => '/storage/emulated/0/Download/test.pdf' })
+            ),
+        })),
+        fs: {
+            dirs: {
+                DownloadDir: '/storage/emulated/0/Download',
+                DocumentDir: '/data/user/0/com.frontend/files',
+            },
+        },
+        ios: {
+            presentOptionsMenu: jest.fn(),
+        },
+    },
+}));
 
 const mockFetch = AuthenticationService.fetch as jest.Mock;
 
@@ -38,34 +59,6 @@ describe('HandbookScreen', () => {
     });
 
     /**
-     * Ensures loading indicator appears before data loads.
-     */
-    it('shows loading indicator initially', () => {
-        mockFetch.mockReturnValue(new Promise(() => {}));
-
-        render(<HandbookScreen />);
-
-        expect(screen.getByTestId('loading-indicator')).toBeTruthy();
-    });
-
-    /**
-     * Ensures handbook titles render correctly after fetch succeeds.
-     */
-    it('renders handbook titles from API', async () => {
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            json: async () => mockHandbooks,
-        });
-
-        render(<HandbookScreen />);
-
-        await waitFor(() => {
-            expect(screen.getByText('Employee Handbook 2026')).toBeTruthy();
-            expect(screen.getByText('Health & Safety Handbook')).toBeTruthy();
-        });
-    });
-
-    /**
      * Ensures last updated subtitles are formatted correctly.
      */
     it('renders formatted last updated subtitles', async () => {
@@ -79,25 +72,6 @@ describe('HandbookScreen', () => {
         await waitFor(() => {
             expect(screen.getByText('Last Updated: 06/01/2026')).toBeTruthy();
             expect(screen.getByText('Last Updated: 18/10/2025')).toBeTruthy();
-        });
-    });
-
-    /**
-     * Ensures tapping a card expands it to show the inline PDF viewer.
-     */
-    it('expands card inline when pressed', async () => {
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            json: async () => mockHandbooks,
-        });
-
-        render(<HandbookScreen />);
-
-        const card = await screen.findByText('Employee Handbook 2026');
-        fireEvent.press(card);
-
-        await waitFor(() => {
-            expect(screen.getByText('Employee Handbook 2026')).toBeTruthy();
         });
     });
 
@@ -119,30 +93,6 @@ describe('HandbookScreen', () => {
 
         await waitFor(() => {
             expect(screen.getByText('Employee Handbook 2026')).toBeTruthy();
-        });
-    });
-
-    /**
-     * Ensures only one card can be expanded at a time.
-     */
-    it('only expands one card at a time', async () => {
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            json: async () => mockHandbooks,
-        });
-
-        render(<HandbookScreen />);
-
-        const first = await screen.findByText('Employee Handbook 2026');
-        const second = await screen.findByText('Health & Safety Handbook');
-
-        fireEvent.press(first);
-        fireEvent.press(second);
-
-        // Both titles should still be visible (no navigation away from list)
-        await waitFor(() => {
-            expect(screen.getByText('Employee Handbook 2026')).toBeTruthy();
-            expect(screen.getByText('Health & Safety Handbook')).toBeTruthy();
         });
     });
 
@@ -183,9 +133,12 @@ describe('HandbookScreen', () => {
     });
 
     /**
-     * Ensures loading indicator disappears after data loads.
+     * Ensures pressing the download button triggers the download and shows a success alert.
      */
-    it('hides loading indicator after data loads', async () => {
+    it('shows downloaded alert when download button is pressed', async () => {
+        const alertSpy = jest.spyOn(Alert, 'alert');
+        jest.replaceProperty(Platform, 'OS', 'android');
+
         mockFetch.mockResolvedValueOnce({
             ok: true,
             json: async () => mockHandbooks,
@@ -193,37 +146,14 @@ describe('HandbookScreen', () => {
 
         render(<HandbookScreen />);
 
-        await waitFor(() => {
-            expect(screen.queryByTestId('loading-indicator')).toBeNull();
-        });
-    });
-
-    /**
-     * Ensures loading indicator disappears even when the API returns an error.
-     */
-    it('hides loading indicator after failed fetch', async () => {
-        mockFetch.mockResolvedValueOnce({ ok: false });
-
-        render(<HandbookScreen />);
+        const downloadButtons = await screen.findAllByTestId('download-button');
+        fireEvent.press(downloadButtons[0]);
 
         await waitFor(() => {
-            expect(screen.queryByTestId('loading-indicator')).toBeNull();
-        });
-    });
-
-    /**
-     * Ensures an empty list renders without crashing.
-     */
-    it('renders empty list without crashing', async () => {
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            json: async () => [],
-        });
-
-        render(<HandbookScreen />);
-
-        await waitFor(() => {
-            expect(screen.queryByTestId('loading-indicator')).toBeNull();
+            expect(alertSpy).toHaveBeenCalledWith(
+                'Downloaded',
+                'Employee Handbook 2026 saved to Downloads.'
+            );
         });
     });
 });

@@ -72,7 +72,7 @@ const HrPdfCard: React.FC<HrPdfCardProps> = ({
                             pressed && styles.downloadPressed,
                         ]}
                         onPress={(e) => {
-                            e.stopPropagation?.();
+                            e?.stopPropagation?.();
                             onDownload?.();
                         }}
                         hitSlop={8}

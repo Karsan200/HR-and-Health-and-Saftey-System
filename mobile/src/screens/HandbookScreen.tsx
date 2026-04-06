@@ -9,6 +9,7 @@ import AuthenticationService from '../logic/AuthenticationService';
 import { ThemeContext } from '../theme/colourController';
 import { styles as screenStyles } from './HandbookScreen.styles';
 import HrPdfCard from '../components/HrPdfCard.tsx';
+import { useDownload } from '../logic/DownloadLogic.ts';
 
 type Handbook = {
     documentId: number;
@@ -30,6 +31,7 @@ export default function HandbookScreen() {
 
     const [handbooks, setHandbooks] = useState<Handbook[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const { handleDownload } = useDownload();
 
     // Tracks which card is currently expanded
     const [expandedKey, setExpandedKey] = useState<string | null>(null);
@@ -87,9 +89,7 @@ export default function HandbookScreen() {
                                 pdfUrl={item.url}
                                 isExpanded={expandedKey === key}
                                 onPress={() => handleCardPress(key)}
-                                onDownload={() => {
-                                    // Wire up a share/download action here when ready
-                                }}
+                                onDownload={() => handleDownload(item.url, item.title)}
                             />
                         </View>
                     );
