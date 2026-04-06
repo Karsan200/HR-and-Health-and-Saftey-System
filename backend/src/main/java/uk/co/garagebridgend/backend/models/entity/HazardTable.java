@@ -79,6 +79,10 @@ public class HazardTable {
     @Column(name = "action_complete")
     private LocalDateTime actionComplete;
 
+    /** A boolean to indicate whether a signature is required for this hazard. Defaults to true. */
+    @Column(columnDefinition = "BOOLEAN DEFAULT TRUE", name = "signature_required", nullable = false)
+    private boolean signatureRequired;
+
     /** Creation timestamp (auto-populated, not updatable). */
     @CreationTimestamp
     @Column(name = "created", nullable = false, updatable = false)

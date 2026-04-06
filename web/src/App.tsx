@@ -5,6 +5,8 @@ import {CssBaseline, ThemeProvider} from "@mui/material";
 import { muiTheme } from "./theme/muiTheme";
 import { IncompatibleScreen } from "./components/IncompatibleScreen";
 import { AuthProvider } from "./AuthContext";
+import { Navbar } from "./components/Navbar";
+import { Dashboard } from "./pages/Dashboard";
 import {CalendarPage} from "./pages/CalendarPage";
 
 function App() {
@@ -48,11 +50,18 @@ function App() {
 function AppContent() {
     return (
         <>
-        {/** Admin top navbar goes here */}
         <BrowserRouter>
+            <Navbar />
             <Routes>
-                <Route path="/" element={<></>} />
+                <Route path="/" element={<Dashboard />} />
                 <Route path="/calendar" element={<CalendarPage />} />
+                <Route path="/employee-overview" element={<></>} />
+                <Route path="/health-and-safety" element={<></>} />
+                <Route path="/notifications" element={<></>} />
+                <Route path="/profile" element={<></>} />
+                <Route path="/health-and-safety/send-out" element={<></>} />
+                <Route path="/health-and-safety/send-out/safety-alert" element={<></>} />
+                <Route path="calendar/pending-requests" element={<></>} />
             </Routes>
         </BrowserRouter>
         </>
