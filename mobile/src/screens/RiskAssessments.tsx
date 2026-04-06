@@ -1,34 +1,78 @@
-import React, { useContext } from 'react';
-import { View, Text } from 'react-native';
-import { Button } from 'react-native-paper';
-import { passwordAuthScreenStyles as styles } from './auth/PasswordAuthScreen.styles.ts';
-import { ThemeContext } from '../theme/colourController.tsx';
-import { JSX } from 'react/jsx-runtime';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, Text, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import AuthenticationService from '../logic/AuthenticationService.ts';
 
-type RiskAssessmentsProps = {
+type RiskAssessmentSummary = {
+    riskAssessmentId: number;
+    title: string;
+    hazardCount: number;
+    created: string;
+};
+
+type Props = {
+    onViewHazards: (riskAssessmentId: number, title: string) => void;
     onStartAssessment: () => void;
 };
 
-export default function RiskAssessments({ onStartAssessment }: RiskAssessmentsProps): JSX.Element {
-    const { theme, accessibility } = useContext(ThemeContext);
-    const themedStyles = styles(theme, accessibility);
+export default function RiskAssessment({ onViewHazards, onStartAssessment }: Props) {
+    const [assessments, setAssessments] = useState<RiskAssessmentSummary[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    function handlePress() {
-        onStartAssessment();
+    const fetchAssessments = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await AuthenticationService.fetch('/api/risk-assessment/all');
+            if (!response.ok) {
+                setError('Failed to load risk assessments.');
+                return;
+            }
+            const data = await response.json();
+            setAssessments(data);
+        } catch {
+            setError('An unexpected error occurred.');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchAssessments();
+    }, [fetchAssessments]);
+
+    if (loading) return <ActivityIndicator />;
+
+    if (error) {
+        return (
+            <View>
+                <Text>{error}</Text>
+                <TouchableOpacity onPress={fetchAssessments}>
+                    <Text>Retry</Text>
+                </TouchableOpacity>
+            </View>
+        );
     }
 
     return (
-        <View style={themedStyles.container}>
-            <Text style={themedStyles.forgotPasswordText}>Risk Assessments</Text>
+        <View>
+            <Text>Risk Assessments</Text>
 
-            <Button
-                buttonColor={theme.redPrimary}
-                textColor={theme.white}
-                style={themedStyles.inputStyle}
-                onPress={handlePress}
-            >
-                Start Assessment
-            </Button>
+            <TouchableOpacity onPress={onStartAssessment}>
+                <Text>New</Text>
+            </TouchableOpacity>
+
+            <FlatList
+                data={assessments}
+                keyExtractor={(item) => item.riskAssessmentId.toString()}
+                renderItem={({ item }) => (
+                    <TouchableOpacity onPress={() => onViewHazards(item.riskAssessmentId, item.title)}>
+                        <Text>{item.title}</Text>
+                        <Text>{item.hazardCount} hazards</Text>
+                        <Text>{item.created}</Text>
+                    </TouchableOpacity>
+                )}
+            />
         </View>
     );
 }

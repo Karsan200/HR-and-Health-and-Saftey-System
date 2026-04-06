@@ -18,6 +18,8 @@ import PayslipScreen from '../screens/PayslipScreen.tsx';
 import DocumentsScreen from '../screens/DocumentsScreen.tsx';
 import HandbookScreen from "../screens/HandbookScreen.tsx";
 import PersonalScreen from "../screens/PersonalScreen.tsx";
+import HazardView from "../screens/HazardView.tsx";
+import HazardList from "../screens/HazardList.tsx";
 
 export function ScreenConfig(body: ScreenConfigProps) {
   // Defaulting to the calendar screen when the HR section is selected.
@@ -60,6 +62,21 @@ export function ScreenConfig(body: ScreenConfigProps) {
     body.setSelectedDate(date);
     body.setCurrentScreen('dateDetails');
   };
+
+    const [selectedRiskAssessmentId, setSelectedRiskAssessmentId] = React.useState<number | null>(null);
+    const [selectedRiskAssessmentTitle, setSelectedRiskAssessmentTitle] = React.useState<string>('');
+    const [selectedHazardId, setSelectedHazardId] = React.useState<number | null>(null);
+
+    const handleViewHazards = (riskAssessmentId: number, title: string) => {
+        setSelectedRiskAssessmentId(riskAssessmentId);
+        setSelectedRiskAssessmentTitle(title);
+        body.setCurrentScreen('hazardList');
+    };
+
+    const handleViewHazard = (hazardId: number) => {
+        setSelectedHazardId(hazardId);
+        body.setCurrentScreen('viewHazard');
+    };
 
   switch (body.currentScreen) {
     case 'calendar':
@@ -137,16 +154,61 @@ export function ScreenConfig(body: ScreenConfigProps) {
       );
 
       case 'risk':
-      return (
-        <>
-          <TopNavBar title="Risk" />
-          <View style={styles.content}>
-            <RiskAssessments
-              onStartAssessment={() => handleNavigate('hazardForm')}
-            />
-          </View>
-        </>
-      );
+          return (
+              <>
+                  <TopNavBar title="Risk" />
+                  <View style={styles.content}>
+                      <RiskAssessments
+                          onViewHazards={handleViewHazards}
+                          onStartAssessment={() => handleNavigate('hazardForm')}
+                      />
+                  </View>
+              </>
+          );
+
+      case 'hazardList':
+          return (
+              <>
+                  <TopNavBar
+                      title="Hazards"
+                      showBackButton={true}
+                      onBackPress={() => handleNavigate('risk')}
+                  />
+                  <View style={styles.content}>
+                      {selectedRiskAssessmentId && (
+                          <HazardList
+                              riskAssessmentId={selectedRiskAssessmentId}
+                              riskAssessmentTitle={selectedRiskAssessmentTitle}
+                              onViewHazard={handleViewHazard}
+                              onEditDraft={(id) => {
+                                  setSelectedHazardId(id);
+                                  handleNavigate('hazardForm');
+                              }}
+                              onBack={() => handleNavigate('risk')}
+                          />
+                      )}
+                  </View>
+              </>
+          );
+
+      case 'viewHazard':
+          return (
+              <>
+                  <TopNavBar
+                      title="Hazard"
+                      showBackButton={true}
+                      onBackPress={() => handleNavigate('hazardList')}
+                  />
+                  <View style={styles.content}>
+                      {selectedHazardId && (
+                          <HazardView
+                              hazardId={selectedHazardId}
+                              onBack={() => handleNavigate('hazardList')}
+                          />
+                      )}
+                  </View>
+              </>
+          );
 
     case 'hazardForm':
       return (
