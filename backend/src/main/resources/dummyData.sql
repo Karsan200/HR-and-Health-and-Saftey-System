@@ -152,8 +152,20 @@ INSERT INTO files_table (
     extension,
     created
 ) VALUES
-      (UUID(), 1, 1,
+      ('d1b2c3d4-e5f6-7890-dcba-ef1234567890', 1, 1,
        'safety_policy', 'pdf', '2025-02-14 10:00:00'),
+
+      ('b1c2d3e4-f5a6-7890-bcde-123456abcdef', 1, 1,
+       'employee_handbook', 'pdf', '2026-03-24 10:00:00'),
+
+      ('c1b2c3d4-e5f6-7890-dcba-ef1234567891', 1, 1,
+       'sop_fire_safety', 'pdf', '2025-02-14 10:10:00'),
+
+      ('3cc58063-df14-4e45-bce0-15f30f5d08ff', 1, 2,
+       'driving_licence_mmay', 'pdf', '2026-01-15 10:00:00'),
+
+      (UUID(), 1, 1,
+       'sop_equipment_procedures', 'pdf', '2025-02-14 10:15:00'),
 
       (UUID(), 1, 1,
        'fire_safety', 'pdf', '2025-02-14 10:05:00'),
@@ -203,11 +215,14 @@ INSERT INTO files_table (
       (UUID(), 3, 3,
        'missing_fire_extinguisher_photo', 'jpg', CURRENT_TIMESTAMP),
 
-      (UUID(), 1, 2,
+      ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 1, 2,
        'payslip_jan_2026_mmay', 'pdf', '2026-01-31 17:00:00'),
 
       (UUID(), 1, 2,
        'payslip_feb_2026_mmay', 'pdf', '2026-02-28 17:00:00'),
+
+      (UUID(), 1, 2,
+       'p60_2025_mmay', 'pdf', '2025-04-05 17:00:00'),
 
       (UUID(), 5, 2,
        'payslip_jan_2026_droberts', 'pdf', '2026-01-31 17:00:00'),
@@ -255,25 +270,37 @@ INSERT INTO document_table (
     created
 ) VALUES
       ((SELECT file_id FROM files_table WHERE name = 'safety_policy'),
-       'Company Safety Policy', '2025-02-14 10:00:00'),
+       'Company Safety Policy v2.1', '2025-02-14 10:00:00'),
+
+      ('b1c2d3e4-f5a6-7890-bcde-123456abcdef',
+       'Employee Handbook', '2026-03-24 10:05:00'),
+
+      ('3cc58063-df14-4e45-bce0-15f30f5d08ff',
+       'Driving Licence', '2026-01-15 10:05:00'),
+
+      ((SELECT file_id FROM files_table WHERE name = 'sop_fire_safety'),
+       'SOP: Fire Safety Procedures v5', '2025-02-14 10:10:00'),
+
+      ((SELECT file_id FROM files_table WHERE name = 'sop_equipment_procedures'),
+       'SOP: Equipment Handling Instructions', '2025-02-14 10:15:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'fire_safety'),
        'Fire Safety Guidelines', '2025-02-14 10:05:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'training_manual'),
-       'Employee Training Manual', '2025-03-02 11:00:00'),
+       'Employee Training Manual v3.0', '2025-03-02 11:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'hr_guidelines'),
        'HR Guidelines', '2025-04-18 15:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'hazard_report_template'),
-       'Hazard Report Template', '2025-05-29 12:00:00'),
+       'Hazard Report Template v1', '2025-05-29 12:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'equipment_safety'),
        'Equipment Safety Procedures', '2025-07-12 09:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'workshop_rules'),
-       'Workshop Rules', '2025-08-20 17:00:00'),
+       'Workshop Rules v4.3', '2025-08-20 17:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'health_policy'),
        'Health and Safety Policy', '2025-09-15 14:00:00'),
@@ -582,12 +609,6 @@ INSERT INTO signature_table (
     risk_assessment_id,
     created
 ) VALUES
-      (UUID(),1,
-       (SELECT document_id FROM document_table WHERE title = 'Company Safety Policy'),
-       NULL,
-       NULL,
-       '2025-02-14 10:30:00'),
-
       (UUID(), 1,
        (SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'),
        NULL,
@@ -777,7 +798,7 @@ INSERT INTO permissions_table (
     is_manager,
     created
 ) VALUES
-      (1, 2, FALSE, FALSE, CURRENT_TIMESTAMP),
+      (1, 2, TRUE, TRUE, CURRENT_TIMESTAMP),
       (2, NULL, TRUE, TRUE, CURRENT_TIMESTAMP),
       (3, 2, FALSE, TRUE, CURRENT_TIMESTAMP),
       (4, 2, FALSE, TRUE, CURRENT_TIMESTAMP),
@@ -974,6 +995,9 @@ INSERT INTO payslips_table (
       ((SELECT file_id FROM files_table WHERE name = 'payslip_feb_2026_mmay'),
        2026, 2, FALSE),
 
+      ((SELECT file_id FROM files_table WHERE name = 'p60_2025_mmay'),
+       2025, 4, TRUE),
+
       ((SELECT file_id FROM files_table WHERE name = 'payslip_jan_2026_droberts'),
        2026, 1, FALSE),
 
@@ -1005,6 +1029,11 @@ INSERT INTO qualifications_table (
     details,
     created
 ) VALUES
+        (1,
+        (SELECT file_id FROM files_table WHERE name = 'safety_policy'),
+         'Workshop Safety Training',
+         'Internal safety training covering workshop hazards and procedures.',
+         '2024-06-12 10:05:00'),
 
       (5,
       (SELECT file_id FROM files_table WHERE name = 'nvq_level3_motor_vehicle_droberts'),

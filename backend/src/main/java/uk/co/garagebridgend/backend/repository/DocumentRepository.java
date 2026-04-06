@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 import uk.co.garagebridgend.backend.models.entity.DocumentTable;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 
+import java.util.List;
+
 /**
  * Repository interface for DocumentTable entity.
  */
@@ -17,4 +19,22 @@ public interface DocumentRepository extends JpaRepository<DocumentTable, Long> {
      * @return the number of documents for the account
      */
     int countByFileAccount(AccountTable account);
+
+    /**
+     * Finds all documents ordered by creation date in descending order.
+     *
+     * @return list of documents ordered by creation date descending
+     */
+    List<DocumentTable> findAllByOrderByCreatedDesc();
+
+    /**
+     * Finds all documents for a given account where the title contains the provided fragment,
+     * ordered by creation date in descending order.
+     *
+     * @param account the account to find documents for
+     * @param titleFragment the text fragment used to filter document titles
+     * @return list of documents for the account ordered by creation date descending
+     */
+    List<DocumentTable> findByFileAccountAndTitleContainingIgnoreCaseOrderByCreatedDesc(
+            AccountTable account, String titleFragment);
 }

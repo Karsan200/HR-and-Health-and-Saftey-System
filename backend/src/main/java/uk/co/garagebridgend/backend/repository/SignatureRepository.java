@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import uk.co.garagebridgend.backend.models.entity.SignatureTable;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
+import uk.co.garagebridgend.backend.models.entity.DocumentTable;
 
 /**
  * Repository for managing SignatureTable entities.
@@ -18,4 +19,13 @@ public interface SignatureRepository extends JpaRepository<SignatureTable, Long>
      * @return the number of signatures for the account
      */
     int countByAccount(AccountTable account);
+
+    /**
+     * Checks if a signature exists for the given account and document.
+     *
+     * @param account  the account to check for
+     * @param document the document to check for
+     * @return true if a signature exists for the account and document, false otherwise
+     */
+    boolean existsByAccountAndDocument(AccountTable account, DocumentTable document);
 }

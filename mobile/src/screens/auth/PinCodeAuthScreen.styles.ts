@@ -9,10 +9,15 @@ export const PinCodeAuthScreen = (theme: any, accessibility: { largeText: boolea
     container: {
       paddingHorizontal: Spacing.largePadding,
       paddingTop: 40,
+      paddingBottom: 40,
+      backgroundColor: theme.white,
+    },
+
+    welcomeBackTextContainer: {
+      paddingTop: 40,
     },
 
     welcomeBackText: {
-      marginTop: -35,
       alignSelf: 'center',
       color: theme.black,
       fontSize: FontSize.m20 * fontScale,
@@ -49,6 +54,7 @@ export const PinCodeAuthScreen = (theme: any, accessibility: { largeText: boolea
       fontWeight: TextStyles.regular.fontWeight,
       textAlign: 'center',
       textAlignVertical: 'center',
+      color: theme.black,
     }
   });
 };

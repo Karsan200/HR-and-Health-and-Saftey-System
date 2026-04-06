@@ -16,6 +16,10 @@ function App() {
     useEffect(() => {
         const handleResize = () => {
             setScreenSize(window.innerWidth);
+            if (window.innerWidth < 768) {
+                setIsAuthenticated(null);
+                setIsMfaAuthenticated(null);
+            }
         };
 
         window.addEventListener("resize", handleResize);
