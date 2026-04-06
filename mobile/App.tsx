@@ -24,7 +24,7 @@ import PasswordAuthScreen from './src/screens/auth/PasswordAuthScreen.tsx';
 import { ScreenConfig } from './src/config/ScreenConfig.tsx';
 
 import { ScreenConfigStyles as styles } from './src/config/ScreenConfig.styles.ts';
-import {PinCodeAuthScreen} from "./src/screens/auth/PinCodeAuthScreen.tsx";
+import { PinCodeAuthScreen } from "./src/screens/auth/PinCodeAuthScreen.tsx";
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -32,11 +32,24 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [showPinCodeScreen, setShowPinCodeScreen] = useState(true);
 
+  const [BleUUID, setBleUUID] = useState<string | null>(null);
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
         await AuthenticationService.refresh();
         setIsAuthenticated(true);
+
+        // get the BLE UUID for the device and store it in state
+        const response = await AuthenticationService.fetch(
+          '/api/attendance/signature',
+          {
+            method: 'GET',
+          },
+        );
+
+        const data = await response.json();
+        setBleUUID(data.signature);
       } catch (error) {
         console.log(error);
         if (error instanceof HttpException && error.statusCode === 401) {
@@ -51,18 +64,22 @@ function App() {
   const theme = useContext(ThemeContext);
 
     return (
-        <ThemeProvider>
-            <PaperProvider theme={paperTheme(theme)}>
-                <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-                {isAuthenticated === null ? (
-                    <LogoActivityIndicator />
-                ) : isAuthenticated ? (
-                    showPinCodeScreen ? <PinCodeAuthScreen isAuth={setShowPinCodeScreen}/> : <AppContent />
-                ) : (
-                    <PasswordAuthScreen isAuth={setIsAuthenticated} />
-                )}
-            </PaperProvider>
-        </ThemeProvider>
+      <ThemeProvider>
+        <PaperProvider theme={paperTheme(theme)}>
+          <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+          {isAuthenticated === null ? (
+            <LogoActivityIndicator />
+          ) : isAuthenticated ? (
+            showPinCodeScreen ? (
+              <PinCodeAuthScreen isAuth={setShowPinCodeScreen} />
+            ) : (
+              <AppContent />
+            )
+          ) : (
+            <PasswordAuthScreen isAuth={setIsAuthenticated} />
+          )}
+        </PaperProvider>
+      </ThemeProvider>
     );
 }
 
