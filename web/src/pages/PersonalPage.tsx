@@ -1,67 +1,208 @@
-﻿import { useAuth } from "../AuthContext";
-import { useEffect, useState } from "react";
-
-type ProfileData = {
-    firstName: string;
-    lastName: string;
-    role: string;
-    email: string;
-    phone: string;
-    position: string;
-    joinDate: string;
-    silentStart: string;
-    silentEnd: string;
-    isAdmin: boolean;
-};
+﻿import { useState, useEffect, useCallback } from "react";
+import {
+    Box,
+    Typography,
+    CircularProgress,
+} from "@mui/material";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import EmailIcon from "@mui/icons-material/Email";
+import PhoneIcon from "@mui/icons-material/Phone";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
+import ShieldIcon from "@mui/icons-material/Shield";
+import { personalPageStyles as styles } from "./PersonalPage.styles";
+import { useAuth } from "../AuthContext";
+import { fetchProfile, type ProfileResponse } from "../logic/PersonalService";
 
 type Tab = "profile" | "settings" | "security";
 
-export function PersonalPage() {
-    const { authenticationService } = useAuth();
-    const [profile, setProfile] = useState<ProfileData | null>(null);
-    const [activeTab, setActiveTab] = useState<Tab>("profile");
+const TABS: { key: Tab; label: string }[] = [
+    { key: "profile",   label: "Profile Information" },
+    { key: "settings",  label: "Settings" },
+    { key: "security",  label: "Security" },
+];
 
-    useEffect(() => {
-        async function load() {
-            const response = await authenticationService.fetch("/api/profile/me", { method: "GET" });
-            if (response.ok) {
-                setProfile(await response.json());
-            }
-        }
-        load();
-    }, [authenticationService]);
+// Settup for the rows of information
 
-    if (!profile) return null;
+interface InfoRowProps {
+    icon: React.ReactNode;
+    iconBg: string;
+    label: string;
+    value: string;
+}
+
+function InfoRow({ icon, iconBg, label, value }: InfoRowProps) {
+    return (
+        <Box sx={styles.infoRow}>
+            <Box sx={styles.iconWrap(iconBg)}>
+                {icon}
+            </Box>
+            <Box>
+                <Typography sx={styles.infoLabel}>{label}</Typography>
+                <Typography sx={styles.infoValue}>{value}</Typography>
+            </Box>
+        </Box>
+    );
+}
+
+// First Tab of Personal Page (Profile)
+
+function ProfileTab({ profile }: { profile: ProfileResponse }) {
+    const hasSilentMode = profile.silentStart && profile.silentEnd;
 
     return (
-        <div className="page">
-            {/* Header */}
-            <div className="header-card">
-                <div className="avatar">...</div>
-                <div className="header-info">
-                    <div className="header-name">{profile.firstName} {profile.lastName}</div>
-                    <div className="header-role">{profile.role}</div>
-                </div>
-                {profile.isAdmin && <div className="admin-badge">Admin Access</div>}
-            </div>
+        <>
+            <Box sx={styles.sectionCard}>
+                <Typography sx={styles.sectionTitle}>Personal Details</Typography>
+                <InfoRow
+                    icon={<EmailIcon sx={{ fontSize: 16, color: "#A32D2D" }} />}
+                    iconBg="#FCEBEB"
+                    label="Email"
+                    value={profile.email}
+                />
+                <InfoRow
+                    icon={<PhoneIcon sx={{ fontSize: 16, color: "#A32D2D" }} />}
+                    iconBg="#FCEBEB"
+                    label="Phone"
+                    value={profile.phoneNumber}
+                />
+            </Box>
+
+            <Box sx={styles.sectionCard}>
+                <Typography sx={styles.sectionTitle}>Employee Details</Typography>
+                <InfoRow
+                    icon={<PersonOutlineIcon sx={{ fontSize: 16, color: "#3B6D11" }} />}
+                    iconBg="#EAF3DE"
+                    label="Position"
+                    value={profile.position}
+                />
+                <InfoRow
+                    icon={<CalendarTodayIcon sx={{ fontSize: 16, color: "#3B6D11" }} />}
+                    iconBg="#EAF3DE"
+                    label="Join Date"
+                    value={profile.joinDate}
+                />
+            </Box>
+
+            {hasSilentMode && (
+                <Box sx={styles.sectionCard}>
+                    <Typography sx={styles.sectionTitle}>Notifications</Typography>
+                    <Box sx={styles.infoRow}>
+                        <Box sx={styles.iconWrap("#FAEEDA")}>
+                            <NotificationsOffIcon sx={{ fontSize: 16, color: "#854F0B" }} />
+                        </Box>
+                        <Typography sx={styles.notifText}>
+                            Notifications silenced between {profile.silentStart} and {profile.silentEnd}
+                        </Typography>
+                    </Box>
+                </Box>
+            )}
+        </>
+    );
+}
+
+// Second Tab (Settings)
+// TODO: Complete the Settings Tab
+
+function SettingsTab({ label }: { label: string }) {
+    return (
+        <Box sx={{ ...styles.sectionCard, textAlign: "center", padding: "3rem" }}>
+            <Typography sx={styles.infoLabel}>{label} TBC </Typography>
+        </Box>
+    );
+}
+
+// Third Tab (Security)
+// TODO: Complete the Security Tab
+
+function SecurityTab({ label }: { label: string }) {
+    return (
+        <Box sx={{ ...styles.sectionCard, textAlign: "center", padding: "3rem"}}>
+            <Typography sx={styles.infoLabel}>{label} TBC </Typography>
+        </Box>
+    );
+}
+
+export function PersonalPage() {
+    const { authenticationService } = useAuth();
+
+    const [profile, setProfile] = useState<ProfileResponse | null>(null);
+    const [activeTab, setActiveTab] = useState<Tab>("profile");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const loadProfile = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await fetchProfile(authenticationService);
+            setProfile(data);
+        } catch {
+            setError("Failed to load profile. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    }, [authenticationService]);
+
+    useEffect(() => {
+        loadProfile();
+    }, [loadProfile]);
+
+    return (
+        <Box sx={styles.pageContainer}>
+
+            {profile && (
+                <Box sx={styles.headerCard}>
+                    <Box sx={styles.avatarCircle}>
+                        <PersonOutlineIcon sx={{ fontSize: 28, color: "white" }} />
+                    </Box>
+                    <Box sx={styles.headerInfo}>
+                        <Typography sx={styles.headerName}>
+                            {profile.firstName} {profile.lastName}
+                        </Typography>
+                        <Typography sx={styles.headerRole}>{profile.role}</Typography>
+                        <Typography sx={styles.headerEmail}>{profile.email}</Typography>
+                    </Box>
+                    {(profile.isAdmin || profile.isManager) && (
+                        <Box sx={styles.adminBadge}>
+                            <ShieldIcon sx={{ fontSize: 16 }} />
+                            {profile.isAdmin ? "Admin Access" : "Manager Access"}
+                        </Box>
+                    )}
+                </Box>
+            )}
 
             {/* Tabs */}
-            <div className="tabs">
-                {(["profile", "settings", "security"] as Tab[]).map(tab => (
-                    <div
-                        key={tab}
-                        className={`tab ${activeTab === tab ? "active" : ""}`}
-                        onClick={() => setActiveTab(tab)}
+            <Box sx={styles.tabsRow}>
+                {TABS.map(({ key, label }) => (
+                    <Box
+                        key={key}
+                        sx={styles.tab(activeTab === key)}
+                        onClick={() => setActiveTab(key)}
                     >
-                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    </div>
+                        {label}
+                    </Box>
                 ))}
-            </div>
+            </Box>
 
             {/* Content */}
-            {activeTab === "profile" && <ProfileTab profile={profile} />}
-            {activeTab === "settings" && <SettingsTab />}
-            {activeTab === "security" && <SecurityTab />}
-        </div>
+            {loading && (
+                <Box sx={styles.loadingContainer}>
+                    <CircularProgress size={32} sx={{ color: "#A32D2D" }} />
+                </Box>
+            )}
+
+            {!loading && error && (
+                <Typography sx={styles.errorText}>{error}</Typography>
+            )}
+
+            {!loading && !error && profile && (
+                <>
+                    {activeTab === "profile"  && <ProfileTab profile={profile} />}
+                    {activeTab === "settings" && <SettingsTab label="Settings" />}
+                    {activeTab === "security" && <SecurityTab label="Security" />}
+                </>
+            )}
+        </Box>
     );
 }

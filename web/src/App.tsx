@@ -6,6 +6,7 @@ import { muiTheme } from "./theme/muiTheme";
 import { IncompatibleScreen } from "./components/IncompatibleScreen";
 import { AuthProvider } from "./AuthContext";
 import {CalendarPage} from "./pages/CalendarPage";
+import { PersonalPage } from "./pages/PersonalPage";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
@@ -53,6 +54,7 @@ function AppContent() {
             <Routes>
                 <Route path="/" element={<></>} />
                 <Route path="/calendar" element={<CalendarPage />} />
+                <Route path="/personal" element={<PersonalPage />} />
             </Routes>
         </BrowserRouter>
         </>
