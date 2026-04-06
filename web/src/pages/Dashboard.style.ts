@@ -20,6 +20,7 @@ export const dashboardStyles = {
         display: "flex",
         justifyContent: "center",
         width: "100%",
+        backgroundColor: DefaultColours.greyBackground,
     },
 
     dashboardContent: {
