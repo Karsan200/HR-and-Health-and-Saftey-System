@@ -1,6 +1,7 @@
 package uk.co.garagebridgend.backend.logic;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.ClockInTable;
@@ -9,6 +10,7 @@ import uk.co.garagebridgend.backend.models.response.ClockInStatusResponse;
 import uk.co.garagebridgend.backend.repository.ClockInRepository;
 
 import java.time.Clock;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -22,14 +24,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClockInService {
 
-    /** The time that is considered the start of a working day. Clock-ins after this are considered late. */
-    private static final LocalTime WORK_START_TIME = LocalTime.of(9, 0);
-
     /** Formatter for outputting times in HH:mm format. */
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     /** Formatter for outputting dates in a readable format, e.g. "Monday, 6 April 2026". */
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("EEEE, d MMMM, yyyy");
+
+    /** Monday to Thursday work day start time. */
+    @Value("${leave.working-hours.monday-thursday.start}")
+    private LocalTime mondayToThursdayStartTime;
+
+    /** Monday to Thursday work day end time. */
+    @Value("${leave.working-hours.monday-thursday.end}")
+    private LocalTime mondayToThursdayEndTime;
+
+    /** Friday work day start time. */
+    @Value("${leave.working-hours.friday.start}")
+    private LocalTime fridayStartTime;
+
+    /** Friday work day end time. */
+    @Value("${leave.working-hours.friday.end}")
+    private LocalTime fridayEndTime;
 
     /** Service for retrieving the currently authenticated user. */
     private final AuthenticationService authenticationService;
@@ -38,9 +53,9 @@ public class ClockInService {
     private final ClockInRepository clockInRepository;
 
     /**
-     * Retrieves yesterday's clock-in activity and the current month's statistics
+     * Retrieves yesterday's clock-in activity and the current year's statistics
      * for the authenticated user.
-     * @return a ClockInStatusResponse containing yesterday's times and monthly stats
+     * @return a ClockInStatusResponse containing yesterday's times and yearly stats
      * @throws AuthenticatedAccountNotFoundException if no authenticated user is found
      */
     public ClockInStatusResponse getStatus() throws AuthenticatedAccountNotFoundException {
@@ -72,31 +87,39 @@ public class ClockInService {
             }
         }
 
-        // Fetch this month's records for stats
-        LocalDateTime startOfMonth = today.withDayOfMonth(1).atStartOfDay();
-        LocalDateTime endOfMonth = today.atTime(LocalTime.MAX);
+        // Fetch this year's records for stats (1st Jan to 31st Dec)
+        LocalDateTime startOfYear = today.withDayOfYear(1).atStartOfDay();
+        LocalDateTime endOfYear = today.withDayOfYear(today.lengthOfYear()).atTime(LocalTime.MAX);
 
-        List<ClockInTable> monthRecords = clockInRepository
+        List<ClockInTable> yearRecords = clockInRepository
                 .findByAccountAndCreatedBetweenOrderByCreatedDesc(
-                        account, startOfMonth, endOfMonth
+                        account, startOfYear, endOfYear
                 );
 
-        // Calculate stats from monthly records
-        int daysWorked = monthRecords.size();
+        // Calculate stats from yearly records
+        int daysWorked = yearRecords.size();
         int totalLates = 0;
         double totalHoursWorked = 0;
 
-        for (ClockInTable record : monthRecords) {
+        for (ClockInTable record : yearRecords) {
             LocalTime clockIn = record.getClockInTime();
             LocalTime clockOut = record.getClockOutTime();
 
+            // Use the expected start time for the day the record was created
+            LocalDate recordDate = record.getCreated().toLocalDate();
+            LocalTime expectedStart = getWorkDayStartTime(recordDate);
+            LocalTime expectedEnd = getWorkDayEndTime(recordDate);
+
             if (clockIn != null) {
-                if (clockIn.isAfter(WORK_START_TIME)) {
+                // Count as late if clock-in is after the expected start for that day
+                if (clockIn.isAfter(expectedStart)) {
                     totalLates++;
                 }
 
+                // Cap clock-out at the expected end time so overtime doesn't count towards average
                 if (clockOut != null) {
-                    double hoursWorked = (clockOut.toSecondOfDay() - clockIn.toSecondOfDay()) / 3600.0;
+                    LocalTime effectiveClockOut = clockOut.isAfter(expectedEnd) ? expectedEnd : clockOut;
+                    double hoursWorked = (effectiveClockOut.toSecondOfDay() - clockIn.toSecondOfDay()) / 3600.0;
                     if (hoursWorked > 0) {
                         totalHoursWorked += hoursWorked;
                     }
@@ -138,5 +161,29 @@ public class ClockInService {
         authenticationService.getCurrentUser();
 
         // TODO: Persist the report to a ClockInReportTable or notify a manager via email/notification
+    }
+
+    /**
+     * Returns the working-day start time for the supplied date.
+     * @param date the date being checked
+     * @return the expected working-day start time
+     */
+    private LocalTime getWorkDayStartTime(final LocalDate date) {
+        if (date.getDayOfWeek() == DayOfWeek.FRIDAY) {
+            return fridayStartTime;
+        }
+        return mondayToThursdayStartTime;
+    }
+
+    /**
+     * Returns the working-day end time for the supplied date.
+     * @param date the date being checked
+     * @return the expected working-day end time
+     */
+    private LocalTime getWorkDayEndTime(final LocalDate date) {
+        if (date.getDayOfWeek() == DayOfWeek.FRIDAY) {
+            return fridayEndTime;
+        }
+        return mondayToThursdayEndTime;
     }
 }
