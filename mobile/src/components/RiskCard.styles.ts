@@ -40,7 +40,7 @@ export const styles = (theme: any, accessibility: { largeText: boolean; dyslexic
         },
 
         badgeDraft: {
-            backgroundColor: theme.greyIconLight,
+            backgroundColor: theme.greyBackground,
         },
 
         badgeSubmitted: {
