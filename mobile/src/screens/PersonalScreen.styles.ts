@@ -119,23 +119,6 @@ export const styles = (theme: any, accessibility: { largeText: boolean; dyslexic
             color: theme.greyPrimaryMainText,
         },
 
-        // View button
-        viewButton: {
-            backgroundColor: theme.redPrimary,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-        },
-
-        buttonLabel: {
-            fontFamily: fontFamilies.regular,
-            fontWeight: TextStyles.semiBold.fontWeight,
-            fontSize: FontSize.xs14 * fontScale,
-            color: theme.white,
-        },
-
-        buttonContent: {
-            paddingVertical: 4,
-        },
-
         // PDF viewer
         pdfScreen: {
             flex: 1,

@@ -13,6 +13,7 @@ import AuthenticationService from '../logic/AuthenticationService';
 import { ThemeContext } from '../theme/colourController';
 import { styles as screenStyles } from './DocumentsScreen.styles';
 import FilterPills from "../components/FilterPills.tsx";
+import EyeButton from "../components/EyeButton.tsx";
 
 type Document = {
     documentId: number;
@@ -286,19 +287,14 @@ export default function DocumentsScreen() {
                         </View>
 
                         {/* Action Button */}
-                        <Button
-                            mode="contained"
-                            icon="eye"
+                        <EyeButton
+                            label={item.signed ? 'View' : 'Review & Sign'}
+                            active={!item.signed} // red if not signed, grey if signed
                             onPress={() => {
                                 setSelectedDocument(item);
                                 setChecked(item.signed);
                             }}
-                            style={item.signed ? styles.viewButtonSigned : styles.viewButtonUnsigned}
-                            labelStyle={styles.buttonLabel}
-                            contentStyle={styles.buttonContent}
-                        >
-                            {item.signed ? 'View' : 'Review & Sign'}
-                        </Button>
+                            />
                     </View>
                 )}
             />

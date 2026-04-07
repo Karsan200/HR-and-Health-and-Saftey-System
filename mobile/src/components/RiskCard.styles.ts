@@ -106,41 +106,5 @@ export const styles = (theme: any, accessibility: { largeText: boolean; dyslexic
             color: theme.greyPrimaryMainText,
             marginBottom: Spacing.mediumPadding,
         },
-
-        // Action Button
-
-        /**
-         * Grey "View Assessment" button — for submitted or closed items.
-         */
-        buttonView: {
-            backgroundColor: theme.greyPrimaryMainText,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-        },
-
-        /**
-         * Red "Continue Editing" button — for draft items.
-         */
-        buttonEdit: {
-            backgroundColor: theme.redPrimary,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-        },
-
-        /**
-         * Button label text — shared across both variants.
-         */
-        buttonText: {
-            fontFamily: fontFamilies.regular,
-            fontWeight: TextStyles.semiBold.fontWeight,
-            fontSize: FontSize.s16 * fontScale,
-            color: theme.white,
-        },
-
-        /**
-         * Inner content padding — mirrors DocumentsScreen button height.
-         */
-        buttonContent: {
-            paddingVertical: 4,
-        },
-
     });
 };

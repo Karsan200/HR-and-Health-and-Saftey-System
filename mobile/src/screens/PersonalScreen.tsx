@@ -13,6 +13,7 @@ import { Button, Icon } from 'react-native-paper';
 import AuthenticationService from '../logic/AuthenticationService';
 import { ThemeContext } from '../theme/colourController';
 import { styles as screenStyles } from './PersonalScreen.styles';
+import EyeButton from "../components/EyeButton.tsx";
 
 // Types
 
@@ -240,16 +241,11 @@ export default function PersonalScreen() {
                                     <Text style={styles.cardSubtitle}>{item.details}</Text>
                                 </View>
                             </View>
-                            <Button
-                                mode="contained"
-                                icon="eye"
+                            <EyeButton
+                                label="View"
+                                active={true} // always red here, or conditionally if needed
                                 onPress={() => setSelectedQualification(item)}
-                                style={styles.viewButton}
-                                labelStyle={styles.buttonLabel}
-                                contentStyle={styles.buttonContent}
-                            >
-                                View
-                            </Button>
+                            />
                         </View>
                     )}
                 />
@@ -275,16 +271,12 @@ export default function PersonalScreen() {
                                     <Text style={styles.cardTitle}>{drivingLicence.title}</Text>
                                 </View>
                             </View>
-                            <Button
-                                mode="contained"
-                                icon="eye"
+                            <EyeButton
+                                label="View"
+                                active={true} // Always red for driving licence view
                                 onPress={() => setSelectedLicence(drivingLicence)}
-                                style={styles.viewButton}
-                                labelStyle={styles.buttonLabel}
-                                contentStyle={styles.buttonContent}
-                            >
-                                View
-                            </Button>
+                                style={{ marginTop: 8 }}
+                            />
                         </View>
                     ) : (
                         <Text style={styles.cardSubtitle}>No driving licence on record.</Text>

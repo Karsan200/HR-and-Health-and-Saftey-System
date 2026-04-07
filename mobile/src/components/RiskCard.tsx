@@ -3,6 +3,7 @@ import { View, Text } from 'react-native';
 import { Button } from 'react-native-paper';
 import { ThemeContext } from '../theme/colourController';
 import { styles as cardStyles } from './RiskCard.styles';
+import EyeButton from "./EyeButton.tsx";
 
 type StatusBadge = 'draft' | 'submitted' | 'closed';
 
@@ -73,16 +74,11 @@ const RiskCard: React.FC<RiskCardProps> = ({
             <Text style={styles.date}>{date}</Text>
 
             {/* Action button */}
-            <Button
-                mode="contained"
-                icon="eye-outline"
+            <EyeButton
+                label={isDraft ? 'Continue Editing' : 'View Assessment'}
+                active={isDraft}
                 onPress={onPress}
-                style={isDraft ? styles.buttonEdit : styles.buttonView}
-                labelStyle={styles.buttonText}
-                contentStyle={styles.buttonContent}
-            >
-                {isDraft ? 'Continue Editing' : 'View Assessment'}
-            </Button>
+            />
         </View>
     );
 };

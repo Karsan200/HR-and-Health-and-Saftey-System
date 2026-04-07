@@ -195,29 +195,6 @@ export const styles = (
             color: theme.redTrafficPrimary,
         },
 
-        // View buttons
-
-        viewButtonUnsigned: {
-            backgroundColor: theme.redPrimary,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-        },
-
-        viewButtonSigned: {
-            backgroundColor: theme.greyPrimaryMainText,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-        },
-
-        buttonLabel: {
-            fontFamily: fontFamilies.regular,
-            fontWeight: TextStyles.semiBold.fontWeight,
-            fontSize: FontSize.xs14 * fontScale,
-            color: theme.white,
-        },
-
-        buttonContent: {
-            paddingVertical: 4,
-        },
-
         // PDF viewer
 
         pdfScreen: {
