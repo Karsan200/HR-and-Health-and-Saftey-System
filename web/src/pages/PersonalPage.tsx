@@ -12,7 +12,7 @@ import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
 import ShieldIcon from "@mui/icons-material/Shield";
 import { personalPageStyles as styles } from "./PersonalPage.styles";
 import { useAuth } from "../AuthContext";
-import { fetchProfile, type ProfileResponse } from "../logic/PersonalService";
+import { fetchPersonalData, type ProfileResponse, type SettingsResponse } from "../logic/PersonalService";
 
 type Tab = "profile" | "settings" | "security";
 
@@ -47,22 +47,22 @@ function InfoRow({ icon, iconBg, label, value }: InfoRowProps) {
 
 // First Tab of Personal Page (Profile)
 
-function ProfileTab({ profile }: { profile: ProfileResponse }) {
-    const hasSilentMode = profile.silentStart && profile.silentEnd;
+function ProfileTab({ profile, settings }: { profile: ProfileResponse, settings: SettingsResponse }) {
+    const hasSilentMode = settings.silentStart && settings.silentEnd;
 
     return (
         <>
             <Box sx={styles.sectionCard}>
                 <Typography sx={styles.sectionTitle}>Personal Details</Typography>
                 <InfoRow
-                    icon={<EmailIcon sx={{ fontSize: 16, color: "#A32D2D" }} />}
-                    iconBg="#FCEBEB"
+                    icon={<EmailIcon sx={{ fontSize: 16, color: "#AE010B" }} />}
+                    iconBg="#F6CDD0"
                     label="Email"
                     value={profile.email}
                 />
                 <InfoRow
-                    icon={<PhoneIcon sx={{ fontSize: 16, color: "#A32D2D" }} />}
-                    iconBg="#FCEBEB"
+                    icon={<PhoneIcon sx={{ fontSize: 16, color: "#AE010B" }} />}
+                    iconBg="#F6CDD0"
                     label="Phone"
                     value={profile.phoneNumber}
                 />
@@ -71,16 +71,16 @@ function ProfileTab({ profile }: { profile: ProfileResponse }) {
             <Box sx={styles.sectionCard}>
                 <Typography sx={styles.sectionTitle}>Employee Details</Typography>
                 <InfoRow
-                    icon={<PersonOutlineIcon sx={{ fontSize: 16, color: "#3B6D11" }} />}
-                    iconBg="#EAF3DE"
-                    label="Position"
-                    value={profile.position}
+                    icon={<PersonOutlineIcon sx={{ fontSize: 16, color: "#0D7B42" }} />}
+                    iconBg="#D0EDDE"
+                    label="Name"
+                    value={profile.firstName+" "+profile.lastName}
                 />
                 <InfoRow
-                    icon={<CalendarTodayIcon sx={{ fontSize: 16, color: "#3B6D11" }} />}
-                    iconBg="#EAF3DE"
+                    icon={<CalendarTodayIcon sx={{ fontSize: 16, color: "#0D7B42" }} />}
+                    iconBg="#D0EDDE"
                     label="Join Date"
-                    value={profile.joinDate}
+                    value={profile.created}
                 />
             </Box>
 
@@ -88,11 +88,11 @@ function ProfileTab({ profile }: { profile: ProfileResponse }) {
                 <Box sx={styles.sectionCard}>
                     <Typography sx={styles.sectionTitle}>Notifications</Typography>
                     <Box sx={styles.infoRow}>
-                        <Box sx={styles.iconWrap("#FAEEDA")}>
-                            <NotificationsOffIcon sx={{ fontSize: 16, color: "#854F0B" }} />
+                        <Box sx={styles.iconWrap("#FFECCD")}>
+                            <NotificationsOffIcon sx={{ fontSize: 16, color: "#E8960A" }} />
                         </Box>
                         <Typography sx={styles.notifText}>
-                            Notifications silenced between {profile.silentStart} and {profile.silentEnd}
+                            Notifications silenced between {settings.silentStart} and {settings.silentEnd}
                         </Typography>
                     </Box>
                 </Box>
@@ -127,6 +127,7 @@ export function PersonalPage() {
     const { authenticationService } = useAuth();
 
     const [profile, setProfile] = useState<ProfileResponse | null>(null);
+    const [settings, setSettings] = useState<SettingsResponse | null>(null);
     const [activeTab, setActiveTab] = useState<Tab>("profile");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -135,8 +136,9 @@ export function PersonalPage() {
         setLoading(true);
         setError(null);
         try {
-            const data = await fetchProfile(authenticationService);
-            setProfile(data);
+            const { profile, settings } = await fetchPersonalData(authenticationService);
+            setProfile(profile);
+            setSettings(settings);
         } catch {
             setError("Failed to load profile. Please try again.");
         } finally {
@@ -160,15 +162,11 @@ export function PersonalPage() {
                         <Typography sx={styles.headerName}>
                             {profile.firstName} {profile.lastName}
                         </Typography>
-                        <Typography sx={styles.headerRole}>{profile.role}</Typography>
                         <Typography sx={styles.headerEmail}>{profile.email}</Typography>
                     </Box>
-                    {(profile.isAdmin || profile.isManager) && (
-                        <Box sx={styles.adminBadge}>
-                            <ShieldIcon sx={{ fontSize: 16 }} />
-                            {profile.isAdmin ? "Admin Access" : "Manager Access"}
-                        </Box>
-                    )}
+                    <Box sx={styles.adminBadge}>
+                        <ShieldIcon sx={{ fontSize: 24 }} />
+                    </Box>
                 </Box>
             )}
 
@@ -188,7 +186,7 @@ export function PersonalPage() {
             {/* Content */}
             {loading && (
                 <Box sx={styles.loadingContainer}>
-                    <CircularProgress size={32} sx={{ color: "#A32D2D" }} />
+                    <CircularProgress size={32} sx={{ color: "#D20414" }} />
                 </Box>
             )}
 
@@ -196,9 +194,9 @@ export function PersonalPage() {
                 <Typography sx={styles.errorText}>{error}</Typography>
             )}
 
-            {!loading && !error && profile && (
+            {!loading && !error && profile && settings && (
                 <>
-                    {activeTab === "profile"  && <ProfileTab profile={profile} />}
+                    {activeTab === "profile"  && <ProfileTab profile={profile} settings={settings} />}
                     {activeTab === "settings" && <SettingsTab label="Settings" />}
                     {activeTab === "security" && <SecurityTab label="Security" />}
                 </>
