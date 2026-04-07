@@ -27,6 +27,15 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment }: Pro
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    // Helper to format a specific ISO date to "DD/MM/YYYY"
+    const formatAssessmentDate = (isoString: string): string => {
+        const date = new Date(isoString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+        const year = date.getFullYear();
+        return `Date: ${day}/${month}/${year}`;
+    };
+
     const fetchAssessments = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -91,7 +100,7 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment }: Pro
                     <RiskCard
                         title={item.title}
                         subheading={`Hazards: ${item.hazardCount}`}
-                        date={item.created}
+                        date={formatAssessmentDate(item.created)}
                         isDraft={item.hasDrafts}
                         onPress={() => onViewHazards(item.riskAssessmentId, item.title)}
                     />
