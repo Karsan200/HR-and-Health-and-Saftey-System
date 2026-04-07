@@ -237,6 +237,31 @@ export const clockInScreenStyles = (
       lineHeight: FontSize.s16 * fontScale * 1.5,
     },
 
+    // Picker
+    pickerWrapper: {
+      backgroundColor: theme.greyBackground,
+      borderRadius: BorderRadius.largeButtonsAndOutlines,
+      overflow: 'hidden',
+      justifyContent: 'center',
+    },
+
+    picker: {
+      color: theme.black,
+    },
+
+    pickerLoader: {
+      paddingVertical: Spacing.mediumPadding,
+    },
+
+    pickerEmptyText: {
+      fontFamily: fontFamilies.regular,
+      fontWeight: TextStyles.regular.fontWeight,
+      fontSize: FontSize.s16 * fontScale,
+      color: theme.greyPrimaryMainText,
+      textAlign: 'center',
+      paddingVertical: Spacing.mediumPadding,
+    },
+
     modalInput: {
       fontFamily: fontFamilies.regular,
       fontWeight: TextStyles.regular.fontWeight,

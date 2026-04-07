@@ -7,6 +7,7 @@ import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.ClockInReportTable;
 import uk.co.garagebridgend.backend.models.entity.ClockInTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
+import uk.co.garagebridgend.backend.models.response.ClockInRecordResponse;
 import uk.co.garagebridgend.backend.models.response.ClockInStatusResponse;
 import uk.co.garagebridgend.backend.repository.ClockInReportRepository;
 import uk.co.garagebridgend.backend.repository.ClockInRepository;
@@ -18,6 +19,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Service for handling clock-in related operations and statistics.
@@ -25,6 +28,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ClockInService {
+
+    /** Number of recent clock-in records to return for the report dropdown. */
+    private static final int RECENT_RECORDS_LIMIT = 10;
 
     /** Formatter for outputting times in HH:mm format. */
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
@@ -152,12 +158,38 @@ public class ClockInService {
     }
 
     /**
-     * Accepts a clock-in issue report submitted by the authenticated user.
+     * Returns the most recent clock-in records for the authenticated user,
+     * used to populate the report issue dropdown.
+     * @return a list of up to {@value RECENT_RECORDS_LIMIT} recent clock-in records
+     * @throws AuthenticatedAccountNotFoundException if no authenticated user is found
+     */
+    public List<ClockInRecordResponse> getRecentRecords() throws AuthenticatedAccountNotFoundException {
+        AccountTable account = authenticationService.getCurrentUser();
+
+        return clockInRepository
+                .findByAccountOrderByCreatedDesc(account)
+                .stream()
+                .limit(RECENT_RECORDS_LIMIT)
+                .map(record -> new ClockInRecordResponse(
+                        record.getClockInId(),
+                        record.getClockInTime() != null
+                                ? record.getClockInTime().format(TIME_FORMATTER) : null,
+                        record.getClockOutTime() != null
+                                ? record.getClockOutTime().format(TIME_FORMATTER) : null,
+                        record.getCreated().toLocalDate().format(DATE_FORMATTER)
+                ))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Persists a clock-in issue report submitted by the authenticated user,
+     * linked to the specific clock-in record being disputed.
+     * @param clockId the UUID of the clock-in record being disputed
      * @param issue the description of the issue to report
      * @throws AuthenticatedAccountNotFoundException if no authenticated user is found
-     * @throws IllegalArgumentException if the issue description is blank
+     * @throws IllegalArgumentException if the issue is blank or the clock ID is not found
      */
-    public void reportIssue(final String issue)
+    public void reportIssue(final UUID clockId, final String issue)
             throws AuthenticatedAccountNotFoundException, IllegalArgumentException {
         if (issue == null || issue.isBlank()) {
             throw new IllegalArgumentException("Issue description must not be blank.");
@@ -165,8 +197,17 @@ public class ClockInService {
 
         AccountTable account = authenticationService.getCurrentUser();
 
+        ClockInTable clockIn = clockInRepository.findById(clockId)
+                .orElseThrow(() -> new IllegalArgumentException("Clock-in record not found."));
+
+        // Ensure the record belongs to the authenticated user
+        if (!clockIn.getAccount().getAccountId().equals(account.getAccountId())) {
+            throw new IllegalArgumentException("Clock-in record does not belong to this account.");
+        }
+
         ClockInReportTable report = new ClockInReportTable();
         report.setAccount(account);
+        report.setClockIn(clockIn);
         report.setIssue(issue);
 
         clockInReportRepository.save(report);

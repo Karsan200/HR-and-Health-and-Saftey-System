@@ -17,8 +17,8 @@ import java.time.LocalDateTime;
 /**
  * Represents a clock-in issue report submitted by an employee.
  * <p>
- * Stores the reporting account, the issue description, and the timestamp
- * at which the report was submitted.
+ * Stores the reporting account, the specific clock-in record being disputed,
+ * the issue description, and the timestamp at which the report was submitted.
  */
 @Entity
 @Data
@@ -39,6 +39,14 @@ public class ClockInReportTable {
     @ManyToOne
     @JoinColumn(name = "account_id", referencedColumnName = "account_id", nullable = false)
     private AccountTable account;
+
+    /**
+     * The specific clock-in record being disputed. References {@code clock_id}
+     * in the clock_in_table.
+     */
+    @ManyToOne
+    @JoinColumn(name = "clock_id", referencedColumnName = "clock_id", nullable = false)
+    private ClockInTable clockIn;
 
     /** Description of the issue reported by the employee. */
     @Column(columnDefinition = "TEXT", name = "issue", nullable = false)
