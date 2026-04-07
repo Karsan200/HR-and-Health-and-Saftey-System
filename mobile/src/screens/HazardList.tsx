@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import AuthenticationService from '../logic/AuthenticationService.ts';
+import RiskCard from '../components/RiskCard';
 
 type HazardSummary = {
     hazardId: number;
@@ -26,7 +27,6 @@ export default function HazardList({
                                        onEditDraft,
                                        onBack,
                                    }: Props) {
-
     const [hazards, setHazards] = useState<HazardSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -57,12 +57,10 @@ export default function HazardList({
         fetchHazards();
     }, [fetchHazards]);
 
-    function handlePress(hazard: HazardSummary) {
-        if (hazard.isDraft) {
-            onEditDraft(hazard.hazardId);
-        } else {
-            onViewHazard(hazard.hazardId);
-        }
+    function getStatus(hazard: HazardSummary): 'draft' | 'submitted' | 'closed' {
+        if (hazard.isDraft) return 'draft';
+        if (hazard.isClosed) return 'closed';
+        return 'submitted';
     }
 
     if (loading) return <ActivityIndicator />;
@@ -80,21 +78,24 @@ export default function HazardList({
 
     return (
         <View>
-            <TouchableOpacity onPress={onBack}>
-                <Text>Back</Text>
-            </TouchableOpacity>
-
             <Text>{riskAssessmentTitle}</Text>
 
             <FlatList
                 data={hazards}
                 keyExtractor={(item) => item.hazardId.toString()}
                 renderItem={({ item }) => (
-                    <TouchableOpacity onPress={() => handlePress(item)}>
-                        <Text>{item.title}</Text>
-                        <Text>{item.createdBy}</Text>
-                        <Text>{item.created}</Text>
-                    </TouchableOpacity>
+                    <RiskCard
+                        title={item.title}
+                        subheading={`Assessor: ${item.createdBy}`}
+                        date={item.created}
+                        status={getStatus(item)}
+                        isDraft={item.isDraft}
+                        onPress={() =>
+                            item.isDraft
+                                ? onEditDraft(item.hazardId)
+                                : onViewHazard(item.hazardId)
+                        }
+                    />
                 )}
             />
         </View>

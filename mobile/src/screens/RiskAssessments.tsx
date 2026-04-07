@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import AuthenticationService from '../logic/AuthenticationService.ts';
+import RiskCard from '../components/RiskCard';
 
 type RiskAssessmentSummary = {
     riskAssessmentId: number;
@@ -56,7 +57,6 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment }: Pro
 
     return (
         <View>
-            <Text>Risk Assessments</Text>
 
             <TouchableOpacity onPress={onStartAssessment}>
                 <Text>New</Text>
@@ -66,11 +66,13 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment }: Pro
                 data={assessments}
                 keyExtractor={(item) => item.riskAssessmentId.toString()}
                 renderItem={({ item }) => (
-                    <TouchableOpacity onPress={() => onViewHazards(item.riskAssessmentId, item.title)}>
-                        <Text>{item.title}</Text>
-                        <Text>{item.hazardCount} hazards</Text>
-                        <Text>{item.created}</Text>
-                    </TouchableOpacity>
+                    <RiskCard
+                        title={item.title}
+                        subheading={`Hazards: ${item.hazardCount}`}
+                        date={item.created}
+                        // No status badge on the risk page
+                        onPress={() => onViewHazards(item.riskAssessmentId, item.title)}
+                    />
                 )}
             />
         </View>
