@@ -8,6 +8,7 @@ import { AuthProvider } from "./AuthContext";
 import { Navbar } from "./components/Navbar";
 import { Dashboard } from "./pages/Dashboard";
 import {CalendarPage} from "./pages/CalendarPage";
+import { PersonalPage } from "./pages/PersonalPage";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
@@ -50,15 +51,16 @@ function App() {
 function AppContent() {
     return (
         <>
+        {/** Admin top navbar goes here */}
         <BrowserRouter>
             <Navbar />
             <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/calendar" element={<CalendarPage />} />
+                <Route path="/personal" element={<PersonalPage />} />
                 <Route path="/employee-overview" element={<></>} />
                 <Route path="/health-and-safety" element={<></>} />
                 <Route path="/notifications" element={<></>} />
-                <Route path="/profile" element={<></>} />
                 <Route path="/health-and-safety/send-out" element={<></>} />
                 <Route path="/health-and-safety/send-out/safety-alert" element={<></>} />
                 <Route path="calendar/pending-requests" element={<></>} />
