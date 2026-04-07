@@ -6,6 +6,7 @@ import { ThemeContext } from '../theme/colourController';
 import { styles as screenStyles } from './HazardList.styles';
 import SummaryRow from "../components/summary/SummaryRow.tsx";
 import SummaryCard from "../components/summary/SummaryCard.tsx";
+import FilterPills from "../components/FilterPills.tsx";
 
 type HazardSummary = {
     hazardId: number;
@@ -122,27 +123,12 @@ export default function HazardList({
             </View>
 
             {/* Filter pills */}
-            <View style={styles.filterRow}>
-                {filters.map(({ key, label }) => (
-                    <TouchableOpacity
-                        key={key}
-                        style={[
-                            styles.filterPill,
-                            statusFilter === key && styles.filterPillActive,
-                        ]}
-                        onPress={() => setStatusFilter(key)}
-                    >
-                        <Text
-                            style={[
-                                styles.filterPillText,
-                                statusFilter === key && styles.filterPillTextActive,
-                            ]}
-                        >
-                            {label}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
+            <FilterPills
+                options={filters}
+                selected={statusFilter}
+                onSelect={setStatusFilter}
+                style={styles.filterContainer}
+            />
 
             {/* Counts */}
             <SummaryRow>

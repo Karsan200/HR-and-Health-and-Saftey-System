@@ -88,36 +88,9 @@ export const styles = (
         },
 
         // Filtering Pills
-        filterRow: {
-            flexDirection: 'row',
+        filterContainer: {
             paddingHorizontal: Spacing.mediumPadding,
-            gap: 8,
             marginBottom: 12,
-        },
-
-        filterPill: {
-            paddingHorizontal: 14,
-            paddingVertical: 6,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-            borderWidth: 1,
-            borderColor: theme.greyIconLight,
-        },
-
-        filterPillActive: {
-            borderColor: theme.redPrimary,
-            borderWidth: 1.5,
-        },
-
-        filterPillText: {
-            fontFamily: fontFamilies.regular,
-            fontWeight: TextStyles.regular.fontWeight,
-            fontSize: FontSize.xxs12 * fontScale,
-            color: theme.greyPrimaryMainText,
-        },
-
-        filterPillTextActive: {
-            fontWeight: TextStyles.semiBold.fontWeight,
-            color: theme.black,
         },
 
         // Summary Card

@@ -89,31 +89,6 @@ export const styles = (
             marginBottom: 12,
         },
 
-        statusPill: {
-            paddingHorizontal: 12,
-            paddingVertical: 6,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-            borderWidth: 1,
-            borderColor: theme.greyIconLight,
-        },
-
-        statusPillActive: {
-            borderColor: theme.redPrimary,
-            borderWidth: 1.5,
-        },
-
-        statusPillText: {
-            fontFamily: fontFamilies.regular,
-            fontWeight: TextStyles.regular.fontWeight,
-            fontSize: FontSize.xxs12 * fontScale,
-            color: theme.greyPrimaryMainText,
-        },
-
-        statusPillTextActive: {
-            fontWeight: TextStyles.semiBold.fontWeight,
-            color: theme.black,
-        },
-
         // List view
 
         listContent: {

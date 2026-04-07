@@ -12,6 +12,7 @@ import { Button, Checkbox, Icon } from 'react-native-paper';
 import AuthenticationService from '../logic/AuthenticationService';
 import { ThemeContext } from '../theme/colourController';
 import { styles as screenStyles } from './DocumentsScreen.styles';
+import FilterPills from "../components/FilterPills.tsx";
 
 type Document = {
     documentId: number;
@@ -230,28 +231,16 @@ export default function DocumentsScreen() {
             </View>
 
             {/* Status Filter Pills */}
-            <View style={styles.statusFilterContainer}>
-                {(['all', 'awaiting', 'signed'] as StatusFilter[]).map((s) => {
-                    const label = s === 'all' ? 'All' : s === 'awaiting' ? 'Awaiting Signature' : 'Signed';
-                    return (
-                        <TouchableOpacity
-                            key={s}
-                            style={[
-                                styles.statusPill,
-                                statusFilter === s && styles.statusPillActive,
-                            ]}
-                            onPress={() => setStatusFilter(s)}
-                        >
-                            <Text style={[
-                                styles.statusPillText,
-                                statusFilter === s && styles.statusPillTextActive,
-                            ]}>
-                                {label}
-                            </Text>
-                        </TouchableOpacity>
-                    );
-                })}
-            </View>
+            <FilterPills
+                options={[
+                    { key: 'all', label: 'All' },
+                    { key: 'awaiting', label: 'Awaiting Signature' },
+                    { key: 'signed', label: 'Signed' },
+                ]}
+                selected={statusFilter}
+                onSelect={setStatusFilter}
+                style={styles.statusFilterContainer}
+            />
 
             {/* Document List */}
             <FlatList
