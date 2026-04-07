@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
+import uk.co.garagebridgend.backend.models.entity.ClockInReportTable;
 import uk.co.garagebridgend.backend.models.entity.ClockInTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.ClockInStatusResponse;
+import uk.co.garagebridgend.backend.repository.ClockInReportRepository;
 import uk.co.garagebridgend.backend.repository.ClockInRepository;
 
 import java.time.Clock;
@@ -27,7 +29,7 @@ public class ClockInService {
     /** Formatter for outputting times in HH:mm format. */
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
-    /** Formatter for outputting dates in a readable format, e.g. "Monday, 6 April 2026". */
+    /** Formatter for outputting dates in a readable format, e.g. "Monday, 6 April, 2026". */
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("EEEE, d MMMM, yyyy");
 
     /** Monday to Thursday work day start time. */
@@ -51,6 +53,9 @@ public class ClockInService {
 
     /** Repository for accessing clock-in records. */
     private final ClockInRepository clockInRepository;
+
+    /** Repository for persisting clock-in issue reports. */
+    private final ClockInReportRepository clockInReportRepository;
 
     /**
      * Retrieves yesterday's clock-in activity and the current year's statistics
@@ -158,9 +163,13 @@ public class ClockInService {
             throw new IllegalArgumentException("Issue description must not be blank.");
         }
 
-        authenticationService.getCurrentUser();
+        AccountTable account = authenticationService.getCurrentUser();
 
-        // TODO: Persist the report to a ClockInReportTable or notify a manager via email/notification
+        ClockInReportTable report = new ClockInReportTable();
+        report.setAccount(account);
+        report.setIssue(issue);
+
+        clockInReportRepository.save(report);
     }
 
     /**
