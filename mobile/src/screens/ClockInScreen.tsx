@@ -9,21 +9,21 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Icon } from 'react-native-paper';
 
 import { clockInScreenStyles as styles } from './ClockInScreen.styles';
 import { ThemeContext } from '../theme/colourController';
+import AuthenticationService from '../logic/AuthenticationService';
 
 // Types
 
-type ClockEvent = {
-  time: string; // e.g. "09:00"
-  date: string; // e.g. "Friday, 30 January, 2026"
-};
-
-type ClockStats = {
+type ClockStatus = {
+  yesterdayClockIn: string | null;
+  yesterdayClockOut: string | null;
+  yesterdayDate: string;
   totalLates: number;
   onTimePercent: number;
   avgHoursPerDay: number;
@@ -36,55 +36,38 @@ const ClockInScreen: React.FC = () => {
   const { theme, accessibility } = useContext(ThemeContext);
   const themedStyles = styles(theme, accessibility);
 
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [reportText, setReportText] = useState('');
   const [reportSubmitting, setReportSubmitting] = useState(false);
 
-  const [lastClockIn, setLastClockIn] = useState<ClockEvent | null>(null);
-  const [lastClockOut, setLastClockOut] = useState<ClockEvent | null>(null);
-  const [stats] = useState<ClockStats>({
-    totalLates: 2,
-    onTimePercent: 95,
-    avgHoursPerDay: 8.2,
-    daysWorked: 5,
-  });
+  const [status, setStatus] = useState<ClockStatus | null>(null);
 
   useEffect(() => {
-    fetchClockStatus();
-    fetchStats();
+    fetchStatus();
   }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([fetchClockStatus(), fetchStats()]);
+    await fetchStatus();
     setRefreshing(false);
   };
 
-  // Placeholder API calls (wired up to Spring Boot in future)
+  // API calls
 
-  const fetchClockStatus = async () => {
+  const fetchStatus = async () => {
     try {
-      // const response = await AuthenticationService.fetch('/api/clock/status', {});
-      // const data = await response.json();
-      // setLastClockIn(data.lastClockIn);
-      // setLastClockOut(data.lastClockOut);
-
-      // Stub data
-      setLastClockIn({ time: '09:00', date: 'Friday, 30 January, 2026' });
-      setLastClockOut({ time: '17:30', date: 'Thursday, 29 January, 2026' });
+      const response = await AuthenticationService.fetch(
+        '/api/clock/status',
+        {},
+      );
+      const data: ClockStatus = await response.json();
+      setStatus(data);
     } catch (error) {
       console.error('Error fetching clock status', error);
-    }
-  };
-
-  const fetchStats = async () => {
-    try {
-      // const response = await AuthenticationService.fetch('/api/clock/stats', {});
-      // const data = await response.json();
-      // setStats(data);
-    } catch (error) {
-      console.error('Error fetching stats', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -92,10 +75,11 @@ const ClockInScreen: React.FC = () => {
     if (!reportText.trim()) return;
     setReportSubmitting(true);
     try {
-      // const response = await AuthenticationService.fetch('/api/clock/report', {
-      //   method: 'POST',
-      //   body: JSON.stringify({ issue: reportText }),
-      // });
+      await AuthenticationService.fetch('/api/clock/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ issue: reportText }),
+      });
       setReportText('');
       setReportModalVisible(false);
     } catch (error) {
@@ -106,6 +90,16 @@ const ClockInScreen: React.FC = () => {
   };
 
   // Render
+
+  if (loading) {
+    return (
+      <SafeAreaView style={themedStyles.container}>
+        <View style={themedStyles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.redPrimary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={themedStyles.container}>
@@ -131,13 +125,13 @@ const ClockInScreen: React.FC = () => {
             <Text style={themedStyles.activitySubLabel}>
               Yesterday Clock In
             </Text>
-            {lastClockIn ? (
+            {status?.yesterdayClockIn ? (
               <>
                 <Text style={themedStyles.activityTime}>
-                  {lastClockIn.time}
+                  {status.yesterdayClockIn}
                 </Text>
                 <Text style={themedStyles.activityDate}>
-                  {lastClockIn.date}
+                  {status.yesterdayDate}
                 </Text>
               </>
             ) : (
@@ -150,13 +144,13 @@ const ClockInScreen: React.FC = () => {
             <Text style={themedStyles.activitySubLabel}>
               Yesterday Clock Out
             </Text>
-            {lastClockOut ? (
+            {status?.yesterdayClockOut ? (
               <>
                 <Text style={themedStyles.activityTime}>
-                  {lastClockOut.time}
+                  {status.yesterdayClockOut}
                 </Text>
                 <Text style={themedStyles.activityDate}>
-                  {lastClockOut.date}
+                  {status.yesterdayDate}
                 </Text>
               </>
             ) : (
@@ -182,7 +176,7 @@ const ClockInScreen: React.FC = () => {
               <Text style={themedStyles.statLabel}>Total Lates</Text>
             </View>
             <Text style={[themedStyles.statValue, themedStyles.statValueRed]}>
-              {stats.totalLates}
+              {status?.totalLates ?? '-'}
             </Text>
           </View>
 
@@ -201,7 +195,7 @@ const ClockInScreen: React.FC = () => {
               <Text style={themedStyles.statLabel}>On Time</Text>
             </View>
             <Text style={[themedStyles.statValue, themedStyles.statValueGreen]}>
-              {stats.onTimePercent}%
+              {status != null ? `${status.onTimePercent}%` : '-'}
             </Text>
           </View>
 
@@ -222,7 +216,7 @@ const ClockInScreen: React.FC = () => {
             <Text
               style={[themedStyles.statValue, themedStyles.statValueDefault]}
             >
-              {stats.daysWorked}
+              {status?.daysWorked ?? '-'}
             </Text>
           </View>
 
@@ -243,7 +237,7 @@ const ClockInScreen: React.FC = () => {
             <Text
               style={[themedStyles.statValue, themedStyles.statValueDefault]}
             >
-              {stats.avgHoursPerDay}
+              {status?.avgHoursPerDay ?? '-'}
             </Text>
           </View>
         </View>

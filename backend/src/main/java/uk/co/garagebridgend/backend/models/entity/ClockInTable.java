@@ -12,8 +12,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.sql.Time;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 /** Represents a clock-in record for an account.
@@ -43,11 +43,11 @@ public class ClockInTable {
 
     /** Clock in time. */
     @Column(name = "clock_in", nullable = false)
-    private Time clockInTime;
+    private LocalTime clockInTime;
 
     /** Clock out time. */
     @Column(name = "clock_out")
-    private Time clockOutTime;
+    private LocalTime clockOutTime;
 
     /** Creation timestamp (auto-populated, not updatable). */
     @CreationTimestamp

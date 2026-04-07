@@ -29,6 +29,12 @@ export const clockInScreenStyles = (
       paddingBottom: Spacing.largePadding,
     },
 
+    loadingContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
     // Yesterday's Activity Card
     activityCard: {
       backgroundColor: theme.white,
@@ -196,7 +202,7 @@ export const clockInScreenStyles = (
     // Report Issue Modal
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.4)', //Darkens background
+      backgroundColor: 'rgba(0,0,0,0.4)',
       justifyContent: 'center',
       padding: Spacing.largePadding,
     },
