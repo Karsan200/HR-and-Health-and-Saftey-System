@@ -132,36 +132,6 @@ export const styles = (
             marginBottom: 14,
         },
 
-        /**
-         * Individual count box — white card with number + label.
-         */
-        countBox: {
-            flex: 1,
-            backgroundColor: theme.white,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-            paddingVertical: 12,
-            alignItems: 'center',
-            justifyContent: 'center',
-            shadowColor: theme.greyIconLight,
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 1,
-            shadowRadius: 4,
-            elevation: 4,
-        },
-
-        countNumber: {
-            fontFamily: fontFamilies.regular,
-            fontWeight: TextStyles.semiBold.fontWeight,
-            fontSize: FontSize.m20 * fontScale,
-            color: theme.black,
-        },
-
-        countLabel: {
-            fontFamily: fontFamilies.regular,
-            fontWeight: TextStyles.regular.fontWeight,
-            fontSize: FontSize.xxs12 * fontScale,
-            color: theme.greyPrimaryMainText,
-        },
 
         // List
 
