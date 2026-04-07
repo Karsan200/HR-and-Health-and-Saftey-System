@@ -11,6 +11,7 @@ type RiskAssessmentSummary = {
     title: string;
     hazardCount: number;
     created: string;
+    hasDrafts: boolean;
 };
 
 type Props = {
@@ -91,6 +92,7 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment }: Pro
                         title={item.title}
                         subheading={`Hazards: ${item.hazardCount}`}
                         date={item.created}
+                        isDraft={item.hasDrafts}
                         onPress={() => onViewHazards(item.riskAssessmentId, item.title)}
                     />
                 )}

@@ -329,7 +329,7 @@ INSERT INTO hazard_table (
        'The machine needs to be checked over and repaired',
        'Maintenance Technician',
        '2026-04-02 09:00:00',
-       TRUE, 3, NULL, CURRENT_TIMESTAMP),
+       FALSE, 3, NULL, CURRENT_TIMESTAMP),
 
       (1,'Tyre fitting Machine Fault',
        'Tyre not spinning when the machine is being operated',
@@ -347,7 +347,7 @@ INSERT INTO hazard_table (
        'Clean spill and restock spill kits',
        'Workshop Supervisor',
        '2026-04-02 10:00:00',
-       TRUE, 2, '2026-04-02 11:00:00', CURRENT_TIMESTAMP),
+       FALSE, 2, '2026-04-02 11:00:00', CURRENT_TIMESTAMP),
 
       (3, 'Damaged Air Hose',
        'Compressed air hose showing cracks',
@@ -356,7 +356,7 @@ INSERT INTO hazard_table (
        'Replace damaged hose and inspect others',
        'Maintenance Technician',
        '2026-04-02 11:30:00',
-       TRUE, 4, NULL, CURRENT_TIMESTAMP),
+       FALSE, 4, NULL, CURRENT_TIMESTAMP),
 
       (4, 'Loose Wheel Nuts',
        'Wheel nuts not torqued correctly after service',
@@ -393,7 +393,7 @@ INSERT INTO hazard_table (
        'Repair lift alarm system',
        'Maintenance Engineer',
        '2026-04-03 11:00:00',
-       TRUE, 5, NULL, CURRENT_TIMESTAMP),
+       FALSE, 5, NULL, CURRENT_TIMESTAMP),
 
       (3,
        'Coolant Leak',
@@ -457,7 +457,7 @@ INSERT INTO hazard_table (
        'Recalibrate equipment',
        'Workshop Technician',
        '2026-04-06 08:00:00',
-       TRUE, 3, NULL, CURRENT_TIMESTAMP),
+       FALSE, 3, NULL, CURRENT_TIMESTAMP),
 
       (4, 'Fuel Spill',
        'Fuel spilled during vehicle inspection',
@@ -511,7 +511,7 @@ INSERT INTO hazard_table (
        'Replace missing unit',
        'Health and Safety Officer',
        '2026-04-08 08:15:00',
-       TRUE, 5, NULL, CURRENT_TIMESTAMP),
+       FALSE, 5, NULL, CURRENT_TIMESTAMP),
 
       (4, 'Computer Diagnostic Fault',
        'Diagnostic PC freezing during use',
@@ -565,7 +565,7 @@ INSERT INTO hazard_table (
        'Add correct labeling',
        'Safety Officer',
        '2026-04-09 10:00:00',
-       TRUE, 2, '2026-04-09 10:40:00', CURRENT_TIMESTAMP),
+       FALSE, 2, '2026-04-09 10:40:00', CURRENT_TIMESTAMP),
 
       (4, 'Trip Hazard From Tools',
        'Tools left scattered on floor',

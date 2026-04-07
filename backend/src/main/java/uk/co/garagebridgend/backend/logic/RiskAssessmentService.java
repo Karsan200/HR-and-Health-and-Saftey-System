@@ -2,6 +2,7 @@ package uk.co.garagebridgend.backend.logic;
 
 import org.springframework.stereotype.Service;
 import uk.co.garagebridgend.backend.models.entity.HazardTable;
+import uk.co.garagebridgend.backend.models.entity.RiskAssessmentHazardTable;
 import uk.co.garagebridgend.backend.models.response.HazardReportResponse;
 import uk.co.garagebridgend.backend.models.response.HazardResponse;
 import uk.co.garagebridgend.backend.models.response.RiskAssessmentResponse;
@@ -46,15 +47,20 @@ public class RiskAssessmentService {
      */
     public List<RiskAssessmentResponse> getAllRiskAssessments() {
         return riskAssessmentRepository.findAll().stream()
-                .map(ra -> new RiskAssessmentResponse(
-                        ra.getRiskAssessmentId(),
-                        ra.getTitle(),
-                        riskAssessmentHazardRepository.countByRiskAssessment(ra),
-                        ra.getCreated()
-                ))
+                .map(ra -> {
+                    List<RiskAssessmentHazardTable> joins = riskAssessmentHazardRepository.findByRiskAssessment(ra);
+                    boolean hasDrafts = joins.stream()
+                            .anyMatch(j -> j.getHazard().isDraft());
+                    return new RiskAssessmentResponse(
+                            ra.getRiskAssessmentId(),
+                            ra.getTitle(),
+                            joins.size(),
+                            ra.getCreated(),
+                            hasDrafts
+                    );
+                })
                 .collect(Collectors.toList());
     }
-
     /**
      * Returns a list of hazard summaries linked to a given risk assessment.
      *
