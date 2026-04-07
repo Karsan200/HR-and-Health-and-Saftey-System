@@ -12,8 +12,8 @@ type HazardSummary = {
     hazardId: number;
     title: string;
     createdBy: string;
-    isDraft: boolean;
-    isClosed: boolean;
+    draft: boolean;
+    closed: boolean;
     created: string;
 };
 
@@ -88,9 +88,9 @@ export default function HazardList({
         );
     }
 
-    const draftCount = hazards.filter(h => h.isDraft).length;
-    const submittedCount = hazards.filter(h => !h.isDraft && !h.isClosed).length;
-    const closedCount = hazards.filter(h => h.isClosed).length;
+    const draftCount = hazards.filter(h => h.draft).length;
+    const submittedCount = hazards.filter(h => !h.draft && !h.closed).length;
+    const closedCount = hazards.filter(h => h.closed).length;
 
     const filters: { key: StatusFilter; label: string }[] = [
         { key: 'all', label: 'All' },
@@ -102,11 +102,11 @@ export default function HazardList({
     const filteredHazards = hazards.filter(h => {
         if (statusFilter === 'all') return true;
 
-        if (statusFilter === 'draft') return h.isDraft;
+        if (statusFilter === 'draft') return h.draft;
 
-        if (statusFilter === 'closed') return h.isClosed;
+        if (statusFilter === 'closed') return h.closed;
 
-        if (statusFilter === 'submitted') return !h.isDraft && !h.isClosed;
+        if (statusFilter === 'submitted') return !h.draft && !h.closed;
 
         return true;
     });
@@ -161,10 +161,10 @@ export default function HazardList({
                         title={item.title}
                         subheading={`Assessor: ${item.createdBy}`}
                         date={item.created}
-                        status={item.isDraft ? 'draft' : item.isClosed ? 'closed' : 'submitted'}
-                        isDraft={item.isDraft}
+                        status={item.draft ? 'draft' : item.closed ? 'closed' : 'submitted'}
+                        isDraft={item.draft}
                         onPress={() =>
-                            item.isDraft
+                            item.draft
                                 ? onEditDraft(item.hazardId)
                                 : onViewHazard(item.hazardId)
                         }

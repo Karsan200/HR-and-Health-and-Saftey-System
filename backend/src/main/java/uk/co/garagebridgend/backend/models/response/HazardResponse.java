@@ -24,10 +24,10 @@ public class HazardResponse {
     private String createdBy;
 
     /** Whether the hazard is saved as a draft. */
-    private boolean isDraft;
+    private boolean draft;
 
     /** Whether the hazard action has been completed (closed). */
-    private boolean isClosed;
+    private boolean closed;
 
     /** The creation timestamp of the hazard. */
     private LocalDateTime created;

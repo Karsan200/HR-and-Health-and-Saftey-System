@@ -329,7 +329,7 @@ INSERT INTO hazard_table (
        'The machine needs to be checked over and repaired',
        'Maintenance Technician',
        '2026-04-02 09:00:00',
-       FALSE, 3, NULL, CURRENT_TIMESTAMP),
+       TRUE, 3, NULL, CURRENT_TIMESTAMP),
 
       (1,'Tyre fitting Machine Fault',
        'Tyre not spinning when the machine is being operated',
@@ -347,7 +347,7 @@ INSERT INTO hazard_table (
        'Clean spill and restock spill kits',
        'Workshop Supervisor',
        '2026-04-02 10:00:00',
-       FALSE, 2, '2026-04-02 11:00:00', CURRENT_TIMESTAMP),
+       TRUE, 2, '2026-04-02 11:00:00', CURRENT_TIMESTAMP),
 
       (3, 'Damaged Air Hose',
        'Compressed air hose showing cracks',
@@ -355,7 +355,8 @@ INSERT INTO hazard_table (
        'Hose removed from service',
        'Replace damaged hose and inspect others',
        'Maintenance Technician',
-       '2026-04-02 11:30:00', FALSE, 4, NULL, CURRENT_TIMESTAMP),
+       '2026-04-02 11:30:00',
+       TRUE, 4, NULL, CURRENT_TIMESTAMP),
 
       (4, 'Loose Wheel Nuts',
        'Wheel nuts not torqued correctly after service',
@@ -392,7 +393,7 @@ INSERT INTO hazard_table (
        'Repair lift alarm system',
        'Maintenance Engineer',
        '2026-04-03 11:00:00',
-       FALSE, 5, NULL, CURRENT_TIMESTAMP),
+       TRUE, 5, NULL, CURRENT_TIMESTAMP),
 
       (3,
        'Coolant Leak',
@@ -402,7 +403,7 @@ INSERT INTO hazard_table (
        'Clean area and repair leak',
        'Workshop Technician',
        '2026-04-04 08:00:00',
-       FALSE, 2, '2026-04-04 09:00:00', CURRENT_TIMESTAMP),
+       TRUE, 2, '2026-04-04 09:00:00', CURRENT_TIMESTAMP),
 
       (4, 'Battery Acid Leak',
        'Vehicle battery leaking acid',
@@ -456,7 +457,7 @@ INSERT INTO hazard_table (
        'Recalibrate equipment',
        'Workshop Technician',
        '2026-04-06 08:00:00',
-       FALSE, 3, NULL, CURRENT_TIMESTAMP),
+       TRUE, 3, NULL, CURRENT_TIMESTAMP),
 
       (4, 'Fuel Spill',
        'Fuel spilled during vehicle inspection',
@@ -510,7 +511,7 @@ INSERT INTO hazard_table (
        'Replace missing unit',
        'Health and Safety Officer',
        '2026-04-08 08:15:00',
-       FALSE, 5, NULL, CURRENT_TIMESTAMP),
+       TRUE, 5, NULL, CURRENT_TIMESTAMP),
 
       (4, 'Computer Diagnostic Fault',
        'Diagnostic PC freezing during use',
@@ -519,7 +520,7 @@ INSERT INTO hazard_table (
        'IT inspection required',
        'IT Support',
        '2026-04-08 09:00:00',
-       TRUE, 1, NULL, CURRENT_TIMESTAMP),
+       FALSE, 1, NULL, CURRENT_TIMESTAMP),
 
       (5, 'Oil Filter Disposal Overflow',
        'Waste oil filter bin overflowing',
@@ -536,7 +537,8 @@ INSERT INTO hazard_table (
        'Vehicle secured',
        'Replace windshield safely',
        'Technician',
-       '2026-04-08 10:30:00', FALSE, 3, NULL, CURRENT_TIMESTAMP),
+       '2026-04-08 10:30:00',
+       FALSE, 3, NULL, CURRENT_TIMESTAMP),
 
       (1, 'Glove Shortage',
        'Protective gloves running low',
@@ -563,7 +565,7 @@ INSERT INTO hazard_table (
        'Add correct labeling',
        'Safety Officer',
        '2026-04-09 10:00:00',
-       FALSE, 2, '2026-04-09 10:40:00', CURRENT_TIMESTAMP),
+       TRUE, 2, '2026-04-09 10:40:00', CURRENT_TIMESTAMP),
 
       (4, 'Trip Hazard From Tools',
        'Tools left scattered on floor',
@@ -599,7 +601,7 @@ INSERT INTO hazard_table (
        'Repair door mechanism',
        'Facilities Manager',
        '2026-04-10 11:00:00',
-       FALSE, 3, NULL, CURRENT_TIMESTAMP);
+       TRUE, 3, NULL, CURRENT_TIMESTAMP);
 
 INSERT INTO signature_table (
     signature_id,
