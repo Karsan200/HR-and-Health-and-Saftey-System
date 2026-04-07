@@ -16,6 +16,8 @@ type HazardSummary = {
     created: string;
 };
 
+type StatusFilter = 'all' | 'draft' | 'submitted' | 'closed';
+
 type Props = {
     riskAssessmentId: number;
     riskAssessmentTitle: string;
@@ -29,7 +31,6 @@ export default function HazardList({
                                        riskAssessmentTitle,
                                        onViewHazard,
                                        onEditDraft,
-                                       onBack,
                                    }: Props) {
 
     const { theme, accessibility } = useContext(ThemeContext);
@@ -38,6 +39,8 @@ export default function HazardList({
     const [hazards, setHazards] = useState<HazardSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
     const fetchHazards = useCallback(async () => {
         setLoading(true);
@@ -88,7 +91,24 @@ export default function HazardList({
     const submittedCount = hazards.filter(h => !h.isDraft && !h.isClosed).length;
     const closedCount = hazards.filter(h => h.isClosed).length;
 
-    const filters = ['All', 'Draft', 'Submitted', 'Closed'];
+    const filters: { key: StatusFilter; label: string }[] = [
+        { key: 'all', label: 'All' },
+        { key: 'draft', label: 'Draft' },
+        { key: 'submitted', label: 'Submitted' },
+        { key: 'closed', label: 'Closed' },
+    ];
+
+    const filteredHazards = hazards.filter(h => {
+        if (statusFilter === 'all') return true;
+
+        if (statusFilter === 'draft') return h.isDraft;
+
+        if (statusFilter === 'closed') return h.isClosed;
+
+        if (statusFilter === 'submitted') return !h.isDraft && !h.isClosed;
+
+        return true;
+    });
 
     return (
         <View style={styles.screen}>
@@ -103,13 +123,21 @@ export default function HazardList({
 
             {/* Filter pills */}
             <View style={styles.filterRow}>
-                {filters.map((label) => (
+                {filters.map(({ key, label }) => (
                     <TouchableOpacity
-                        key={label}
-                        style={styles.filterPill}
-                        onPress={() => {}}
+                        key={key}
+                        style={[
+                            styles.filterPill,
+                            statusFilter === key && styles.filterPillActive,
+                        ]}
+                        onPress={() => setStatusFilter(key)}
                     >
-                        <Text style={styles.filterPillText}>
+                        <Text
+                            style={[
+                                styles.filterPillText,
+                                statusFilter === key && styles.filterPillTextActive,
+                            ]}
+                        >
                             {label}
                         </Text>
                     </TouchableOpacity>
@@ -139,7 +167,7 @@ export default function HazardList({
 
             {/* Hazard list */}
             <FlatList
-                data={hazards}
+                data={filteredHazards}
                 keyExtractor={(item) => item.hazardId.toString()}
                 contentContainerStyle={styles.listContent}
                 renderItem={({ item }) => (
