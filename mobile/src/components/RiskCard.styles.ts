@@ -131,7 +131,7 @@ export const styles = (theme: any, accessibility: { largeText: boolean; dyslexic
         buttonText: {
             fontFamily: fontFamilies.regular,
             fontWeight: TextStyles.semiBold.fontWeight,
-            fontSize: FontSize.xs14 * fontScale,
+            fontSize: FontSize.s16 * fontScale,
             color: theme.white,
         },
 

@@ -1,7 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { Button } from 'react-native-paper';
 import AuthenticationService from '../logic/AuthenticationService.ts';
 import RiskCard from '../components/RiskCard';
+import { ThemeContext } from '../theme/colourController';
+import { styles as screenStyles } from './RiskAssessments.styles';
 
 type RiskAssessmentSummary = {
     riskAssessmentId: number;
@@ -16,6 +19,9 @@ type Props = {
 };
 
 export default function RiskAssessment({ onViewHazards, onStartAssessment }: Props) {
+    const { theme, accessibility } = useContext(ThemeContext);
+    const styles = screenStyles(theme, accessibility);
+
     const [assessments, setAssessments] = useState<RiskAssessmentSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -42,35 +48,49 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment }: Pro
         fetchAssessments();
     }, [fetchAssessments]);
 
-    if (loading) return <ActivityIndicator />;
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={theme.redPrimary} />
+            </View>
+        );
+    }
 
     if (error) {
         return (
-            <View>
-                <Text>{error}</Text>
+            <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{error}</Text>
                 <TouchableOpacity onPress={fetchAssessments}>
-                    <Text>Retry</Text>
+                    <Text style={styles.retryText}>Retry</Text>
                 </TouchableOpacity>
             </View>
         );
     }
 
     return (
-        <View>
-
-            <TouchableOpacity onPress={onStartAssessment}>
-                <Text>New</Text>
-            </TouchableOpacity>
-
+        <View style={styles.screen}>
             <FlatList
                 data={assessments}
                 keyExtractor={(item) => item.riskAssessmentId.toString()}
+                contentContainerStyle={styles.listContent}
+
+                ListHeaderComponent={
+                    <Button
+                        mode="contained"
+                        onPress={onStartAssessment}
+                        style={styles.newAssessmentButton}
+                        labelStyle={styles.newAssessmentButtonLabel}
+                        contentStyle={styles.newAssessmentButtonContent}
+                    >
+                        Start New Assessment
+                    </Button>
+                }
+
                 renderItem={({ item }) => (
                     <RiskCard
                         title={item.title}
                         subheading={`Hazards: ${item.hazardCount}`}
                         date={item.created}
-                        // No status badge on the risk page
                         onPress={() => onViewHazards(item.riskAssessmentId, item.title)}
                     />
                 )}
