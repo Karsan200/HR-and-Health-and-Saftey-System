@@ -58,7 +58,7 @@ function ProfileTab({ profile, settings }: { profile: ProfileResponse, settings:
                     icon={<EmailIcon sx={{ fontSize: 16, color: "#AE010B" }} />}
                     iconBg="#F6CDD0"
                     label="Email"
-                    value={profile.email}
+                    value={"​"+profile.email}
                 />
                 <InfoRow
                     icon={<PhoneIcon sx={{ fontSize: 16, color: "#AE010B" }} />}
@@ -74,7 +74,7 @@ function ProfileTab({ profile, settings }: { profile: ProfileResponse, settings:
                     icon={<PersonOutlineIcon sx={{ fontSize: 16, color: "#0D7B42" }} />}
                     iconBg="#D0EDDE"
                     label="Name"
-                    value={profile.firstName+" "+profile.lastName}
+                    value={profile.firstName+" ​"+profile.lastName}
                 />
                 <InfoRow
                     icon={<CalendarTodayIcon sx={{ fontSize: 16, color: "#0D7B42" }} />}
