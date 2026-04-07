@@ -51,4 +51,11 @@ public interface LeaveRepository extends JpaRepository<LeaveTable, Long> {
             @Param("rangeStart") LocalDateTime rangeStart,
             @Param("rangeEnd") LocalDateTime rangeEnd
     );
+
+    /**
+     * Retrieves the most recent leave requests.
+     *
+     * @return the latest leave request records, ordered by created descending
+     */
+    List<LeaveTable> findTop5ByOrderByCreatedDesc();
 }

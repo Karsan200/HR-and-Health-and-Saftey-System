@@ -6,6 +6,15 @@ jest.mock("../src/AuthContext", () => ({
     AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+// Mock child components used by AppContent so this test stays focused on App sizing logic
+jest.mock("../src/components/Navbar", () => ({
+    Navbar: () => <div data-testid="navbar" />,
+}));
+
+jest.mock("../src/pages/Dashboard", () => ({
+    Dashboard: () => <div data-testid="dashboard" />,
+}));
+
 function setWindowWidth(width: number) {
     Object.defineProperty(window, "innerWidth", { writable: true, configurable: true, value: width });
     act(() => { window.dispatchEvent(new Event("resize")); });
