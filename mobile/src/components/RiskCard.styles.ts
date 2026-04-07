@@ -26,7 +26,7 @@ export const styles = (theme: any, accessibility: { largeText: boolean; dyslexic
             elevation: 4,
         },
 
-        // ─── Status badge ───────────────────────────────────────────────────────
+        // Status Badge
 
         /**
          * Pill container. Sits above the title when a status is provided.
@@ -72,7 +72,7 @@ export const styles = (theme: any, accessibility: { largeText: boolean; dyslexic
             color: theme.greenTextDark,
         },
 
-        // ─── Text layers ────────────────────────────────────────────────────────
+        // Text Layer
 
         /**
          * Primary heading — assessment or hazard title.
@@ -107,7 +107,7 @@ export const styles = (theme: any, accessibility: { largeText: boolean; dyslexic
             marginBottom: Spacing.mediumPadding,
         },
 
-        // ─── Action button ───────────────────────────────────────────────────────
+        // Action Button
 
         /**
          * Grey "View Assessment" button — for submitted or closed items.

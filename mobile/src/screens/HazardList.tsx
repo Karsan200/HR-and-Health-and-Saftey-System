@@ -1,7 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import AuthenticationService from '../logic/AuthenticationService.ts';
 import RiskCard from '../components/RiskCard';
+import { ThemeContext } from '../theme/colourController';
+import { styles as screenStyles } from './HazardList.styles';
 
 type HazardSummary = {
     hazardId: number;
@@ -27,6 +29,10 @@ export default function HazardList({
                                        onEditDraft,
                                        onBack,
                                    }: Props) {
+
+    const { theme, accessibility } = useContext(ThemeContext);
+    const styles = screenStyles(theme, accessibility);
+
     const [hazards, setHazards] = useState<HazardSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -57,38 +63,86 @@ export default function HazardList({
         fetchHazards();
     }, [fetchHazards]);
 
-    function getStatus(hazard: HazardSummary): 'draft' | 'submitted' | 'closed' {
-        if (hazard.isDraft) return 'draft';
-        if (hazard.isClosed) return 'closed';
-        return 'submitted';
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={theme.redPrimary} />
+            </View>
+        );
     }
-
-    if (loading) return <ActivityIndicator />;
 
     if (error) {
         return (
-            <View>
-                <Text>{error}</Text>
+            <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{error}</Text>
                 <TouchableOpacity onPress={fetchHazards}>
-                    <Text>Retry</Text>
+                    <Text style={styles.retryText}>Retry</Text>
                 </TouchableOpacity>
             </View>
         );
     }
 
-    return (
-        <View>
-            <Text>{riskAssessmentTitle}</Text>
+    const draftCount = hazards.filter(h => h.isDraft).length;
+    const submittedCount = hazards.filter(h => !h.isDraft && !h.isClosed).length;
+    const closedCount = hazards.filter(h => h.isClosed).length;
 
+    const filters = ['All', 'Draft', 'Submitted', 'Closed'];
+
+    return (
+        <View style={styles.screen}>
+
+            {/* Header */}
+            <View style={styles.header}>
+
+                <Text style={styles.headerTitle} numberOfLines={2}>
+                    {riskAssessmentTitle}
+                </Text>
+            </View>
+
+            {/* Filter pills */}
+            <View style={styles.filterRow}>
+                {filters.map((label) => (
+                    <TouchableOpacity
+                        key={label}
+                        style={styles.filterPill}
+                        onPress={() => {}}
+                    >
+                        <Text style={styles.filterPillText}>
+                            {label}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
+
+            {/* Counts */}
+            <View style={styles.countsRow}>
+                <View style={styles.countBox}>
+                    <Text style={styles.countNumber}>{draftCount}</Text>
+                    <Text style={styles.countLabel}>Draft</Text>
+                </View>
+
+                <View style={styles.countBox}>
+                    <Text style={styles.countNumber}>{submittedCount}</Text>
+                    <Text style={styles.countLabel}>Submitted</Text>
+                </View>
+
+                <View style={styles.countBox}>
+                    <Text style={styles.countNumber}>{closedCount}</Text>
+                    <Text style={styles.countLabel}>Closed</Text>
+                </View>
+            </View>
+
+            {/* Hazard list */}
             <FlatList
                 data={hazards}
                 keyExtractor={(item) => item.hazardId.toString()}
+                contentContainerStyle={styles.listContent}
                 renderItem={({ item }) => (
                     <RiskCard
                         title={item.title}
                         subheading={`Assessor: ${item.createdBy}`}
                         date={item.created}
-                        status={getStatus(item)}
+                        status={item.isDraft ? 'draft' : item.isClosed ? 'closed' : 'submitted'}
                         isDraft={item.isDraft}
                         onPress={() =>
                             item.isDraft
