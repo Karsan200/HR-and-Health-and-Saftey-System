@@ -7,8 +7,8 @@ import org.springframework.stereotype.Repository;
 import uk.co.garagebridgend.backend.models.entity.ClockInTable;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 
-import java.sql.Time;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -61,7 +61,7 @@ public interface ClockInRepository extends JpaRepository<ClockInTable, UUID> {
           AND c.created < :endOfWeek
     """)
     int countLateClockInsThisWeek(
-            @Param("lateThreshold") Time lateThreshold,
+            @Param("lateThreshold") LocalTime lateThreshold,
             @Param("startOfWeek") LocalDateTime startOfWeek,
             @Param("endOfWeek") LocalDateTime endOfWeek
     );
@@ -78,7 +78,7 @@ public interface ClockInRepository extends JpaRepository<ClockInTable, UUID> {
     List<ClockInTable> findAllByCreatedGreaterThanEqualAndCreatedLessThanAndClockInTimeGreaterThan(
             LocalDateTime startDateTime,
             LocalDateTime endDateTime,
-            Time lateThreshold
+            LocalTime lateThreshold
     );
 
     /**
@@ -93,7 +93,5 @@ public interface ClockInRepository extends JpaRepository<ClockInTable, UUID> {
     WHERE c.clockInTime > :lateThreshold
     ORDER BY c.created DESC
 """)
-    List<ClockInTable> findTop10LateClockIns(@Param("lateThreshold") Time lateThreshold);
+    List<ClockInTable> findTop10LateClockIns(@Param("lateThreshold") LocalTime lateThreshold);
 }
-
-
