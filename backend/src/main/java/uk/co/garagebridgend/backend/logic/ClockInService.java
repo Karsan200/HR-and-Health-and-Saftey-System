@@ -32,6 +32,24 @@ public class ClockInService {
     /** Number of recent clock-in records to return for the report dropdown. */
     private static final int RECENT_RECORDS_LIMIT = 10;
 
+    /** Number of seconds in one hour, used to convert seconds to hours. */
+    private static final double SECONDS_PER_HOUR = 3600.0;
+
+    /** Multiplier used to shift three decimal places before rounding on-time percent. */
+    private static final double PERCENT_ROUNDING_FACTOR = 1000.0;
+
+    /** Divisor used to shift one decimal place back after rounding on-time percent. */
+    private static final double PERCENT_ROUNDING_DIVISOR = 10.0;
+
+    /** Multiplier used to shift one decimal place before rounding average hours. */
+    private static final double HOURS_ROUNDING_FACTOR = 10.0;
+
+    /** Divisor used to shift one decimal place back after rounding average hours. */
+    private static final double HOURS_ROUNDING_DIVISOR = 10.0;
+
+    /** Default on-time percentage returned when no records exist for the period. */
+    private static final double DEFAULT_ON_TIME_PERCENT = 100.0;
+
     /** Formatter for outputting times in HH:mm format. */
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
@@ -130,7 +148,8 @@ public class ClockInService {
                 // Cap clock-out at the expected end time so overtime doesn't count towards average
                 if (clockOut != null) {
                     LocalTime effectiveClockOut = clockOut.isAfter(expectedEnd) ? expectedEnd : clockOut;
-                    double hoursWorked = (effectiveClockOut.toSecondOfDay() - clockIn.toSecondOfDay()) / 3600.0;
+                    double hoursWorked =
+                            (effectiveClockOut.toSecondOfDay() - clockIn.toSecondOfDay()) / SECONDS_PER_HOUR;
                     if (hoursWorked > 0) {
                         totalHoursWorked += hoursWorked;
                     }
@@ -139,11 +158,13 @@ public class ClockInService {
         }
 
         double onTimePercent = daysWorked > 0
-                ? Math.round(((daysWorked - totalLates) / (double) daysWorked) * 1000.0) / 10.0
-                : 100.0;
+                ? Math.round(((daysWorked - totalLates) / (double) daysWorked)
+                * PERCENT_ROUNDING_FACTOR) / PERCENT_ROUNDING_DIVISOR
+                : DEFAULT_ON_TIME_PERCENT;
 
         double avgHoursPerDay = daysWorked > 0
-                ? Math.round((totalHoursWorked / daysWorked) * 10.0) / 10.0
+                ? Math.round((totalHoursWorked / daysWorked)
+                * HOURS_ROUNDING_FACTOR) / HOURS_ROUNDING_DIVISOR
                 : 0.0;
 
         return new ClockInStatusResponse(
