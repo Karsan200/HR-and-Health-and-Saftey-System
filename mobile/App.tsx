@@ -8,6 +8,7 @@
 import React, {useContext, useEffect, useState} from 'react';
 import { StatusBar, useColorScheme, View } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
+import BackgroundService from 'react-native-background-actions';
 
 import AuthenticationService from './src/logic/AuthenticationService.ts';
 import { AppSection, ScreenKey } from "./src/logic/NavigationConfiguration.ts";
@@ -25,6 +26,10 @@ import { ScreenConfig } from './src/config/ScreenConfig.tsx';
 
 import { ScreenConfigStyles as styles } from './src/config/ScreenConfig.styles.ts';
 import { PinCodeAuthScreen } from "./src/screens/auth/PinCodeAuthScreen.tsx";
+import {
+  BleBroadcastHook,
+  BleBroadcastTaskArgs,
+} from './src/hook/BleBroadcastHook.ts';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -50,6 +55,23 @@ function App() {
 
         const data = await response.json();
         setBleUUID(data.signature);
+
+        // load the background service for BLE attendance tracking
+        const options = {
+          taskName: 'Example',
+          taskTitle: 'ExampleTask title',
+          taskDesc: 'ExampleTask description',
+          taskIcon: {
+            name: 'ic_launcher',
+            type: 'mipmap',
+          },
+          color: '#ff00ff',
+          linkingURI: 'yourSchemeHere://chat/jane', // See Deep Linking for more info
+          parameters: {
+            broadcastId: BleUUID,
+          } satisfies BleBroadcastTaskArgs,
+        };
+        await BackgroundService.start(BleBroadcastHook, options);
       } catch (error) {
         console.log(error);
         if (error instanceof HttpException && error.statusCode === 401) {
@@ -59,7 +81,7 @@ function App() {
     };
 
     checkAuth();
-  }, []);
+  }, [BleUUID, isAuthenticated]);
 
   const theme = useContext(ThemeContext);
 
