@@ -65,4 +65,50 @@ public interface ClockInRepository extends JpaRepository<ClockInTable, UUID> {
     ORDER BY c.created DESC
 """)
     List<ClockInTable> findTop10LateClockIns(@Param("lateThreshold") Time lateThreshold);
+
+    /**
+     * Retrieves all clock-ins for an employee within a given date range.
+     *
+     * @param accountId the employee account id
+     * @param startDateTime inclusive start of the range
+     * @param endDateTime exclusive end of the range
+     * @return matching clock-ins
+     */
+    @Query("""
+        SELECT c
+        FROM ClockInTable c
+        WHERE c.account.accountId = :accountId
+          AND c.created >= :startDateTime
+          AND c.created < :endDateTime
+        ORDER BY c.created ASC
+    """)
+    List<ClockInTable> findAllForEmployeeWithinDateRange(
+            @Param("accountId") Long accountId,
+            @Param("startDateTime") LocalDateTime startDateTime,
+            @Param("endDateTime") LocalDateTime endDateTime
+    );
+
+    /**
+     * Counts late clock-ins for an employee within a given date range.
+     *
+     * @param accountId the employee account id
+     * @param lateThreshold the time after which a clock-in is considered late
+     * @param startDateTime inclusive start of the range
+     * @param endDateTime exclusive end of the range
+     * @return the number of late clock-ins
+     */
+    @Query("""
+        SELECT COUNT(c)
+        FROM ClockInTable c
+        WHERE c.account.accountId = :accountId
+          AND c.clockInTime > :lateThreshold
+          AND c.created >= :startDateTime
+          AND c.created < :endDateTime
+    """)
+    int countLateClockInsForEmployeeWithinDateRange(
+            @Param("accountId") Long accountId,
+            @Param("lateThreshold") Time lateThreshold,
+            @Param("startDateTime") LocalDateTime startDateTime,
+            @Param("endDateTime") LocalDateTime endDateTime
+    );
 }

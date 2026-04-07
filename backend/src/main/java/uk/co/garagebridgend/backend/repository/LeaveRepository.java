@@ -58,4 +58,24 @@ public interface LeaveRepository extends JpaRepository<LeaveTable, Long> {
      * @return the latest leave request records, ordered by created descending
      */
     List<LeaveTable> findTop5ByOrderByCreatedDesc();
+
+    /**
+     * Retrieves upcoming approved leave entries for an employee, ordered by soonest start date.
+     *
+     * @param accountId the employee account id
+     * @param currentDateTime the current date and time
+     * @return upcoming approved leave entries
+     */
+    @Query("""
+        SELECT l
+        FROM LeaveTable l
+        WHERE l.account.accountId = :accountId
+          AND l.isApproved = true
+          AND l.endDate >= :currentDateTime
+        ORDER BY l.startDate ASC
+    """)
+    List<LeaveTable> findUpcomingApprovedLeaveForEmployee(
+            @Param("accountId") Long accountId,
+            @Param("currentDateTime") LocalDateTime currentDateTime
+    );
 }
