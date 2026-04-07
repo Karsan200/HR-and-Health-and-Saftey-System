@@ -396,6 +396,9 @@ describe('ClockInScreen', () => {
         '/api/clock/report',
         expect.objectContaining({ method: 'POST' }),
       );
+    });
+
+    await waitFor(() => {
       expect(queryByText('Report an Issue')).toBeNull();
     });
   });
