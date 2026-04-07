@@ -4,6 +4,8 @@ import AuthenticationService from '../logic/AuthenticationService.ts';
 import RiskCard from '../components/RiskCard';
 import { ThemeContext } from '../theme/colourController';
 import { styles as screenStyles } from './HazardList.styles';
+import SummaryRow from "../components/summary/SummaryRow.tsx";
+import SummaryCard from "../components/summary/SummaryCard.tsx";
 
 type HazardSummary = {
     hazardId: number;
@@ -115,22 +117,25 @@ export default function HazardList({
             </View>
 
             {/* Counts */}
-            <View style={styles.countsRow}>
-                <View style={styles.countBox}>
-                    <Text style={styles.countNumber}>{draftCount}</Text>
-                    <Text style={styles.countLabel}>Draft</Text>
-                </View>
+            <SummaryRow>
+                <SummaryCard
+                    label="Draft"
+                    value={draftCount}
+                    colour="amber"
+                />
 
-                <View style={styles.countBox}>
-                    <Text style={styles.countNumber}>{submittedCount}</Text>
-                    <Text style={styles.countLabel}>Submitted</Text>
-                </View>
+                <SummaryCard
+                    label="Submitted"
+                    value={submittedCount}
+                    colour="neutral"
+                />
 
-                <View style={styles.countBox}>
-                    <Text style={styles.countNumber}>{closedCount}</Text>
-                    <Text style={styles.countLabel}>Closed</Text>
-                </View>
-            </View>
+                <SummaryCard
+                    label="Closed"
+                    value={closedCount}
+                    colour="green"
+                />
+            </SummaryRow>
 
             {/* Hazard list */}
             <FlatList
