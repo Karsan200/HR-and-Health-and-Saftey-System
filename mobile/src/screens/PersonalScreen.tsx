@@ -14,6 +14,7 @@ import AuthenticationService from '../logic/AuthenticationService';
 import { ThemeContext } from '../theme/colourController';
 import { styles as screenStyles } from './PersonalScreen.styles';
 import EyeButton from "../components/EyeButton.tsx";
+import CategoryToggle from '../components/CategoryToggle';
 
 // Types
 
@@ -184,41 +185,21 @@ export default function PersonalScreen() {
         <View style={styles.screen}>
 
             {/* Category Toggle */}
-            <View style={styles.categoryToggleContainer}>
-                <View style={[
-                    styles.categoryButtonWrapper,
-                    activeTab === 'qualifications' && styles.categoryButtonWrapperActive,
-                ]}>
-                    <TouchableOpacity
-                        style={styles.categoryButton}
-                        onPress={() => setActiveTab('qualifications')}
-                    >
-                        <Text style={[
-                            styles.categoryButtonText,
-                            activeTab === 'qualifications' && styles.categoryButtonTextActive,
-                        ]}>
-                            Qualifications
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-                <View style={[
-                    styles.categoryButtonWrapper,
-                    activeTab === 'drivingLicense' && styles.categoryButtonWrapperActive,
-                ]}>
-                    <TouchableOpacity
-                        style={styles.categoryButton}
-                        onPress={handleDrivingLicenceTabPress}
-                    >
-                        <Text style={[
-                            styles.categoryButtonText,
-                            activeTab === 'drivingLicense' && styles.categoryButtonTextActive,
-                        ]}>
-                            Driving License
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+            <CategoryToggle
+                options={[
+                    { key: 'qualifications', label: 'Qualifications' },
+                    { key: 'drivingLicense', label: 'Driving License' },
+                ]}
+                selected={activeTab}
+                compact
+                onSelect={(value) => {
+                    if (value === 'drivingLicense') {
+                        handleDrivingLicenceTabPress();
+                    } else {
+                        setActiveTab('qualifications');
+                    }
+                }}
+            />
 
             {/* Qualifications List */}
             {activeTab === 'qualifications' ? (

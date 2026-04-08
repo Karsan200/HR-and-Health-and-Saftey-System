@@ -14,6 +14,7 @@ import { ThemeContext } from '../theme/colourController';
 import { styles as screenStyles } from './DocumentsScreen.styles';
 import FilterPills from "../components/FilterPills.tsx";
 import EyeButton from "../components/EyeButton.tsx";
+import CategoryToggle from '../components/CategoryToggle';
 
 type Document = {
     documentId: number;
@@ -195,41 +196,14 @@ export default function DocumentsScreen() {
         <View style={styles.screen}>
 
             {/* Category Toggle */}
-            <View style={styles.categoryToggleContainer}>
-                <View style={[
-                    styles.categoryButtonWrapper,
-                    categoryFilter === 'policies' && styles.categoryButtonWrapperActive,
-                ]}>
-                    <TouchableOpacity
-                        style={styles.categoryButton}
-                        onPress={() => setCategoryFilter('policies')}
-                    >
-                        <Text style={[
-                            styles.categoryButtonText,
-                            categoryFilter === 'policies' && styles.categoryButtonTextActive,
-                        ]}>
-                            {'Health and Safety\nPolicies'}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-                <View style={[
-                    styles.categoryButtonWrapper,
-                    categoryFilter === 'sop' && styles.categoryButtonWrapperActive,
-                ]}>
-                    <TouchableOpacity
-                        style={styles.categoryButton}
-                        onPress={() => setCategoryFilter('sop')}
-                    >
-                        <Text style={[
-                            styles.categoryButtonText,
-                            categoryFilter === 'sop' && styles.categoryButtonTextActive,
-                        ]}>
-                            {'SOPs/\nInstructions'}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+            <CategoryToggle
+                options={[
+                    { key: 'policies', label: 'Health and Safety\nPolicies' },
+                    { key: 'sop', label: 'SOPs/\nInstructions' },
+                ]}
+                selected={categoryFilter}
+                onSelect={(value) => setCategoryFilter(value as CategoryFilter)}
+            />
 
             {/* Status Filter Pills */}
             <FilterPills

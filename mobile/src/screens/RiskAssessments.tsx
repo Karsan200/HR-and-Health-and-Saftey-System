@@ -5,6 +5,7 @@ import AuthenticationService from '../logic/AuthenticationService.ts';
 import RiskCard from '../components/RiskCard';
 import { ThemeContext } from '../theme/colourController';
 import { styles as screenStyles } from './RiskAssessments.styles';
+import CategoryToggle from "../components/CategoryToggle.tsx";
 
 type RiskAssessmentSummary = {
     riskAssessmentId: number;
@@ -26,6 +27,8 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment }: Pro
     const [assessments, setAssessments] = useState<RiskAssessmentSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const [assessmentFilter, setAssessmentFilter] = useState<'assessments' | 'drafts'>('assessments');
 
     // Helper to format a specific ISO date to "DD/MM/YYYY"
     const formatAssessmentDate = (isoString: string): string => {
@@ -79,6 +82,19 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment }: Pro
 
     return (
         <View style={styles.screen}>
+
+            <CategoryToggle
+                options={[
+                    { key: 'assessments', label: 'Risk Assessments' },
+                    { key: 'drafts', label: 'Drafts' },
+                ]}
+                selected={assessmentFilter}
+                compact
+                onSelect={(value) =>
+                    setAssessmentFilter(value as 'assessments' | 'drafts')
+                }
+            />
+
             <FlatList
                 data={assessments}
                 keyExtractor={(item) => item.riskAssessmentId.toString()}

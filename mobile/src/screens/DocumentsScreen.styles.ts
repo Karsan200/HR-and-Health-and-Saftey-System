@@ -26,60 +26,6 @@ export const styles = (
             backgroundColor: theme.greyBackground,
         },
 
-        // Category buttons
-
-        categoryToggleContainer: {
-            flexDirection: 'row',
-            marginHorizontal: Spacing.mediumPadding,
-            marginTop: 16,
-            marginBottom: 12,
-            gap: 10,
-        },
-
-        categoryButtonWrapper: {
-            flex: 1,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-            borderWidth: 2,
-            borderColor: 'transparent',
-            backgroundColor: theme.white,
-            minHeight: 90,
-        },
-
-        categoryButtonWrapperActive: {
-            borderColor: theme.redPrimary,
-        },
-
-        categoryButton: {
-            paddingVertical: 16,
-            paddingHorizontal: 12,
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-
-        categoryButtonLeft: {},
-
-        categoryButtonRight: {},
-
-        categoryButtonActive: {
-            borderColor: theme.redPrimary,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-            zIndex: 1,
-        },
-
-        categoryButtonText: {
-            fontFamily: fontFamilies.regular,
-            fontWeight: TextStyles.regular.fontWeight,
-            fontSize: FontSize.s16 * fontScale,
-            color: theme.greyPrimaryMainText,
-            textAlign: 'center',
-            flexShrink: 1,
-        },
-
-        categoryButtonTextActive: {
-            fontWeight: TextStyles.semiBold.fontWeight,
-            color: theme.black,
-        },
-
         // Filtering Pills
 
         statusFilterContainer: {
@@ -266,5 +212,14 @@ export const styles = (
             color: theme.black,
             flex: 1,
         },
+
+        buttonWrapperCompact: {
+            minHeight: 55,
+        },
+
+        buttonCompact: {
+            paddingVertical: 10,
+        },
+
     });
 };
