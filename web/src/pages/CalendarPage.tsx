@@ -15,16 +15,10 @@ import { calendarPageStyles as styles } from "./CalendarPage.styles";
 import { SectionNavBar, type SectionNavTab } from "../components/SectionNavbar";
 import { DefaultColours } from "../theme/colours";
 import { fetchCalendarEvents } from "../logic/LeaveCalendarService";
+import { fetchPendingLeaveCount } from "../logic/PendingRequestsService";
 import { useAuth } from "../AuthContext";
 import { DayDetailOverlay } from "../components/DayDetailOverlay";
 import { type CalendarEventType, type CalendarEvent, eventConfig } from "../models/CalendarTypes";
-
-// Tabs shown at the top of the calendar section
-const CALENDAR_TABS: SectionNavTab[] = [
-    { label: "Calendar View", route: "/calendar", alert: true },
-    { label: "Pending Requests", route: "/calendar/requests" },
-    { label: "Clock Overrides", route: "/calendar/overrides" },
-];
 
 const DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
@@ -149,6 +143,8 @@ export function CalendarPage({ onEventClick }: CalendarPageProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const [pendingCount, setPendingCount] = useState<number>(0);
+
     const [overlayDate, setOverlayDate] = useState<string | null>(null);
     const [overlayOpen, setOverlayOpen] = useState(false);
 
@@ -171,6 +167,20 @@ export function CalendarPage({ onEventClick }: CalendarPageProps) {
     useEffect(() => {
         loadEvents();
     }, [loadEvents]);
+
+    // Fetch the pending request count once on mount for the nav badge
+    const loadPendingCount = useCallback(async () => {
+        try {
+            const count = await fetchPendingLeaveCount(auth.authenticationService);
+            setPendingCount(count);
+        } catch {
+            // Non-critical — badge stays at 0 if the request fails
+        }
+    }, [auth.authenticationService]);
+
+    useEffect(() => {
+        loadPendingCount();
+    }, [loadPendingCount]);
 
     // Index events by date string for fast lookup per day cell
     const eventsByDate = useMemo(() => {
@@ -205,10 +215,17 @@ export function CalendarPage({ onEventClick }: CalendarPageProps) {
 
     const todayISO = toISODate(today.getFullYear(), today.getMonth(), today.getDate());
 
+    // Built inside the component so pendingCount stays live
+    const calendarTabs: SectionNavTab[] = [
+        { label: "Calendar View",    route: "/calendar", alert: true },
+        { label: "Pending Requests", route: "/calendar/requests", count: pendingCount },
+        { label: "Clock Overrides",  route: "/calendar/overrides" },
+    ];
+
     return (
         <Box sx={styles.pageContainer}>
             {/* Section navigation shared across all calendar sub-pages */}
-            <SectionNavBar tabs={CALENDAR_TABS} />
+            <SectionNavBar tabs={calendarTabs} />
 
             {/* Main calendar card containing navigation and the day grid */}
             <Box sx={styles.calendarCard}>

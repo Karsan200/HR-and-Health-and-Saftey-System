@@ -3,8 +3,6 @@ import { FontSize, TextStyles, BorderRadius } from "../theme/theme";
 
 export const pendingRequestsPageStyles = {
 
-    // ── Page ────────────────────────────────────────────────────────────────
-
     pageContainer: {
         display: "flex",
         flexDirection: "column" as const,
@@ -13,8 +11,6 @@ export const pendingRequestsPageStyles = {
         minHeight: "100vh",
         backgroundColor: DefaultColours.greyBackground,
     },
-
-    // ── Stat cards row ───────────────────────────────────────────────────────
 
     statCardsRow: {
         display: "flex",
@@ -63,7 +59,12 @@ export const pendingRequestsPageStyles = {
         verticalAlign: "middle",
     },
 
-    // ── Empty state ──────────────────────────────────────────────────────────
+    loadingContainer: {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "60px 0",
+    },
 
     emptyState: {
         display: "flex",
@@ -82,7 +83,11 @@ export const pendingRequestsPageStyles = {
         color: DefaultColours.greyPrimaryMainText,
     },
 
-    // ── Request card ─────────────────────────────────────────────────────────
+    errorText: {
+        ...TextStyles.regular,
+        fontSize: FontSize.s16,
+        color: DefaultColours.redTextDark,
+    },
 
     requestCard: {
         display: "flex",
@@ -171,7 +176,7 @@ export const pendingRequestsPageStyles = {
     },
 
     reasonLabel: {
-        ...TextStyles.regular,
+        ...TextStyles.medium,
         fontSize: FontSize.s16,
         color: DefaultColours.black,
         lineHeight: "143%",
@@ -228,6 +233,9 @@ export const pendingRequestsPageStyles = {
             backgroundColor: DefaultColours.greenTextDark,
             boxShadow: `0px 0px 4px ${DefaultColours.greyIconLight}`,
         },
+        "&.Mui-disabled": {
+            backgroundColor: DefaultColours.greyIconLight,
+        },
     },
 
     declineButton: {
@@ -244,6 +252,9 @@ export const pendingRequestsPageStyles = {
         "&:hover": {
             backgroundColor: DefaultColours.redTextDark,
             boxShadow: `0px 0px 4px ${DefaultColours.greyIconLight}`,
+        },
+        "&.Mui-disabled": {
+            backgroundColor: DefaultColours.greyIconLight,
         },
     },
 
