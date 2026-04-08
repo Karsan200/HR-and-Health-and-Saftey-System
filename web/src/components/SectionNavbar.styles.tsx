@@ -16,7 +16,7 @@ export const sectionNavBarStyles = {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        padding: "16px 0",
+        padding: "24px 0",
         backgroundColor: DefaultColours.white,
         borderRadius: "24px",
         boxShadow: `0px 0px 4px ${DefaultColours.greyIconLight}`,
