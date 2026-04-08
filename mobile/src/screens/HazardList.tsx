@@ -17,6 +17,7 @@ type HazardSummary = {
     draft: boolean;
     closed: boolean;
     created: string;
+    ownedByCurrentUser: boolean;
 };
 
 // Full data structure for a hazard report, used when editing a draft
@@ -121,7 +122,7 @@ export default function HazardList({
         );
     }
 
-    const draftCount = hazards.filter(h => h.draft).length;
+    const draftCount = hazards.filter(h => h.draft && h.ownedByCurrentUser).length;
     const submittedCount = hazards.filter(h => !h.draft && !h.closed).length;
     const closedCount = hazards.filter(h => h.closed).length;
 
@@ -135,7 +136,7 @@ export default function HazardList({
     const filteredHazards = hazards.filter(h => {
         if (statusFilter === 'all') return true;
 
-        if (statusFilter === 'draft') return h.draft;
+        if (statusFilter === 'draft') return h.draft && h.ownedByCurrentUser;
 
         if (statusFilter === 'closed') return h.closed;
 
@@ -218,7 +219,7 @@ export default function HazardList({
                         isDraft={item.draft}
                         viewLabel="View Hazard"
                         onPress={() =>
-                            item.draft
+                            item.draft && item.ownedByCurrentUser
                                 ? handleEditDraft(item.hazardId)
                                 : onViewHazard(item.hazardId)
                         }

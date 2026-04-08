@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.RiskAssessmentService;
+import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.HazardReportResponse;
 import uk.co.garagebridgend.backend.models.response.HazardResponse;
 import uk.co.garagebridgend.backend.models.response.RiskAssessmentResponse;
@@ -51,6 +52,8 @@ public class RiskAssessmentController {
             return riskAssessmentViewService.getHazardsForRiskAssessment(id);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (AuthenticatedAccountNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve hazards");
         }

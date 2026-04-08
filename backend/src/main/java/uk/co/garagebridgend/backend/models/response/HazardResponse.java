@@ -31,4 +31,6 @@ public class HazardResponse {
 
     /** The creation timestamp of the hazard. */
     private LocalDateTime created;
+
+    private boolean ownedByCurrentUser;
 }

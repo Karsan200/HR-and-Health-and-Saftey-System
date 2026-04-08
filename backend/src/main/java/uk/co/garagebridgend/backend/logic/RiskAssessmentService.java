@@ -26,18 +26,21 @@ public class RiskAssessmentService {
     private final HazardRepository hazardRepository;
     private final HazardFilesRepository hazardFilesRepository;
     private final StorageService storageService;
+    private final AuthenticationService authenticationService;
 
     public RiskAssessmentService(
             final RiskAssessmentRepository riskAssessmentRepository,
             final RiskAssessmentHazardRepository riskAssessmentHazardRepository,
             final HazardRepository hazardRepository,
             final HazardFilesRepository hazardFilesRepository,
-            final StorageService storageService) {
+            final StorageService storageService,
+            final AuthenticationService authenticationService) {
         this.riskAssessmentRepository = riskAssessmentRepository;
         this.riskAssessmentHazardRepository = riskAssessmentHazardRepository;
         this.hazardRepository = hazardRepository;
         this.hazardFilesRepository = hazardFilesRepository;
         this.storageService = storageService;
+        this.authenticationService = authenticationService;
     }
 
     /**
@@ -72,12 +75,15 @@ public class RiskAssessmentService {
         var riskAssessment = riskAssessmentRepository.findById(riskAssessmentId)
                 .orElseThrow(() -> new NoSuchElementException("Risk assessment not found"));
 
+        var currentUser = authenticationService.getCurrentUser();
+
         return riskAssessmentHazardRepository.findByRiskAssessment(riskAssessment).stream()
                 .map(join -> {
                     HazardTable hazard = join.getHazard();
                     var account = hazard.getAccount();
                     String createdBy = account.getFirstName() + " " + account.getLastName();
                     boolean isClosed = hazard.getActionComplete() != null;
+                    boolean isOwned = account.getAccountId().equals(currentUser.getAccountId());
 
                     return new HazardResponse(
                             hazard.getHazardId(),
@@ -85,7 +91,8 @@ public class RiskAssessmentService {
                             createdBy,
                             hazard.isDraft(),
                             isClosed,
-                            hazard.getCreated()
+                            hazard.getCreated(),
+                            isOwned
                     );
                 })
                 .collect(Collectors.toList());
