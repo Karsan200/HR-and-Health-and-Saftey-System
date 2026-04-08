@@ -99,7 +99,7 @@ public class LeaveService {
         for (LeaveTable leave : leaveList) {
             String employeeName = leave.getAccount().getFirstName()
                     + " " + leave.getAccount().getLastName();
-            String leaveType = mapLeaveTypeName(leave.getLeaveType().getName());
+            String leaveType = leave.getLeaveType().getName();
             String notes = leave.getNotes();
 
             // Expand each leave record into one item per calendar day it covers
@@ -118,44 +118,6 @@ public class LeaveService {
         }
 
         return items;
-    }
-
-    /**
-     * Maps the leave type name stored in the database to the frontend CalendarEventType string.
-     * Falls back to "bookedLeave" for any unrecognised type name.
-     *
-     * @param dbName the leave type name as stored in the leave_type table
-     * @return the matching frontend event type string
-     */
-    private String mapLeaveTypeName(final String dbName) {
-        if (dbName == null) {
-            return "bookedLeave";
-        }
-        return switch (dbName.toLowerCase()) {
-            case "national holiday", "bank holiday" -> "nationalHoliday";
-            case "sick leave"                       -> "sickLeave";
-            case "training leave"                   -> "trainingLeave";
-            default                                 -> "bookedLeave";
-        };
-    }
-
-    /**
-     * Maps the leave type name stored in the database to a human-readable display
-     * label used on the pending requests page.
-     * Falls back to "Holiday" for any unrecognised type name.
-     *
-     * @param dbName the leave type name as stored in the leave_type table
-     * @return the display label shown on the frontend tag chip
-     */
-    private String mapLeaveTypeDisplayName(final String dbName) {
-        if (dbName == null) {
-            return "Holiday";
-        }
-        return switch (dbName.toLowerCase()) {
-            case "sick leave"      -> "Sick";
-            case "training leave"  -> "Training";
-            default                -> "Holiday";
-        };
     }
 
     /**
@@ -321,7 +283,7 @@ public class LeaveService {
                 .map(leave -> new PendingLeaveResponse(
                         leave.getLeaveId(),
                         leave.getAccount().getFirstName() + " " + leave.getAccount().getLastName(),
-                        mapLeaveTypeDisplayName(leave.getLeaveType().getName()),
+                        leave.getLeaveType().getName(),
                         leave.getStartDate(),
                         leave.getEndDate(),
                         leave.getNotes(),

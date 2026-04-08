@@ -12,34 +12,31 @@ import {
     formatRequestedOn,
     type PendingLeaveRequest,
 } from "../logic/PendingRequestsService";
-import { eventConfig, type CalendarEventType } from "../models/CalendarTypes";
+import {
+    fetchLeaveTypes,
+    findLeaveTypeByName,
+    toHex,
+    type ResolvedLeaveType,
+} from "../logic/LeaveTypeService";
 import { pendingRequestsPageStyles as styles } from "./PendingRequestsPage.styles";
-
-// Maps the display label returned by the backend to the CalendarEventType
-const leaveTypeToEventType: Record<string, CalendarEventType> = {
-    Holiday:  "bookedLeave",
-    Sick:     "sickLeave",
-    Training: "trainingLeave",
-};
-
-function getLeaveTypeColours(leaveType: string): { bg: string; textColor: string } {
-    const eventType = leaveTypeToEventType[leaveType] ?? "bookedLeave";
-    const { chipBg, textColor } = eventConfig(eventType);
-    return { bg: chipBg, textColor };
-}
+import {DefaultColours} from "../theme/colours.ts";
 
 interface LeaveRequestCardProps {
     request: PendingLeaveRequest;
+    leaveTypes: ResolvedLeaveType[];
     onApprove: (leaveId: number, reason: string) => Promise<void>;
     onDecline: (leaveId: number, reason: string) => Promise<void>;
 }
 
-function LeaveRequestCard({ request, onApprove, onDecline }: LeaveRequestCardProps) {
+function LeaveRequestCard({ request, leaveTypes, onApprove, onDecline }: LeaveRequestCardProps) {
     const [reason, setReason] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const { bg, textColor } = getLeaveTypeColours(request.leaveType);
+    const leaveType = findLeaveTypeByName(leaveTypes, request.leaveType);
+    const bg        = leaveType ? toHex(leaveType.colourBg)   : DefaultColours.greenBackgroundLight;
+    const textColor = leaveType ? toHex(leaveType.colourIcon) : DefaultColours.greyPrimaryMainText;
+    const Icon      = leaveType?.Icon;
 
     async function handleAction(action: "approve" | "decline") {
         setSubmitting(true);
@@ -68,6 +65,9 @@ function LeaveRequestCard({ request, onApprove, onDecline }: LeaveRequestCardPro
 
                     <Box sx={styles.tagRow}>
                         <Box sx={styles.leaveTypeTag(bg)}>
+                            {Icon && (
+                                <Icon sx={{ fontSize: "18px", color: textColor, mr: "6px" }} />
+                            )}
                             <Typography sx={styles.leaveTypeTagText(textColor)}>
                                 {request.leaveType}
                             </Typography>
@@ -108,7 +108,7 @@ function LeaveRequestCard({ request, onApprove, onDecline }: LeaveRequestCardPro
                         variant="contained"
                         startIcon={
                             submitting
-                                ? <CircularProgress size={20} sx={{ color: "#FFFFFF" }} />
+                                ? <CircularProgress size={20} sx={{ color: DefaultColours.white }} />
                                 : <CheckIcon sx={styles.buttonIcon} />
                         }
                         onClick={() => handleAction("approve")}
@@ -122,7 +122,7 @@ function LeaveRequestCard({ request, onApprove, onDecline }: LeaveRequestCardPro
                         variant="contained"
                         startIcon={
                             submitting
-                                ? <CircularProgress size={20} sx={{ color: "#FFFFFF" }} />
+                                ? <CircularProgress size={20} sx={{ color: DefaultColours.white }} />
                                 : <CloseIcon sx={styles.buttonIcon} />
                         }
                         onClick={() => handleAction("decline")}
@@ -141,9 +141,24 @@ function LeaveRequestCard({ request, onApprove, onDecline }: LeaveRequestCardPro
 export function PendingRequestsPage() {
     const { authenticationService } = useAuth();
 
-    const [requests, setRequests] = useState<PendingLeaveRequest[]>([]);
-    const [loading, setLoading]   = useState(false);
-    const [error, setError]       = useState<string | null>(null);
+    const [requests, setRequests]     = useState<PendingLeaveRequest[]>([]);
+    const [leaveTypes, setLeaveTypes] = useState<ResolvedLeaveType[]>([]);
+    const [loading, setLoading]       = useState(false);
+    const [error, setError]           = useState<string | null>(null);
+
+    // Fetch leave types once on mount for colours and icons
+    const loadLeaveTypes = useCallback(async () => {
+        try {
+            const data = await fetchLeaveTypes(authenticationService);
+            setLeaveTypes(data);
+        } catch {
+            // Non-critical — tags fall back to grey if this fails
+        }
+    }, [authenticationService]);
+
+    useEffect(() => {
+        loadLeaveTypes();
+    }, [loadLeaveTypes]);
 
     const loadRequests = useCallback(async () => {
         setLoading(true);
@@ -184,7 +199,7 @@ export function PendingRequestsPage() {
 
             {loading && (
                 <Box sx={styles.loadingContainer}>
-                    <CircularProgress size={32} sx={{ color: "#AE010B" }} />
+                    <CircularProgress size={32} sx={{ color: DefaultColours.redPrimary }} />
                 </Box>
             )}
 
@@ -206,6 +221,7 @@ export function PendingRequestsPage() {
                         <LeaveRequestCard
                             key={request.leaveId}
                             request={request}
+                            leaveTypes={leaveTypes}
                             onApprove={handleApprove}
                             onDecline={handleDecline}
                         />
