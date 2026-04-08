@@ -69,6 +69,15 @@ export default function HazardList({
     const [editingDraftId, setEditingDraftId] = useState<number | null>(null);
     const [draftData, setDraftData] = useState<HazardReport | null>(null);
 
+    // Helper to format a specific ISO date to "DD/MM/YYYY"
+    const formatAssessmentDate = (isoString: string): string => {
+        const date = new Date(isoString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+        const year = date.getFullYear();
+        return `Date: ${day}/${month}/${year}`;
+    };
+
     // When the user taps on a draft hazard, we need to fetch its full details and show the edit form
     const handleEditDraft = async (hazardId: number) => {
         const response = await AuthenticationService.fetch(`/api/risk-assessment/hazard/${hazardId}`);
@@ -214,7 +223,7 @@ export default function HazardList({
                     <RiskCard
                         title={item.title}
                         subheading={`Assessor: ${item.createdBy}`}
-                        date={item.created}
+                        date={formatAssessmentDate(item.created)}
                         status={item.draft ? 'draft' : item.closed ? 'closed' : 'submitted'}
                         isDraft={item.draft}
                         viewLabel="View Hazard"

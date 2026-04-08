@@ -158,7 +158,7 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment }: Pro
                         <RiskCard
                             title={item.title}
                             subheading={`Assessor: ${item.createdBy}`}
-                            date={item.created}
+                            date={formatAssessmentDate(item.created)}
                             status="draft"
                             isDraft
                             viewLabel="Edit Draft"
