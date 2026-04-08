@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class RiskAssessmentController {
 
-    private final RiskAssessmentService riskAssessmentViewService;
+    private final RiskAssessmentService riskAssessmentService;
 
     /**
      * Returns a summary list of all risk assessments.
@@ -34,7 +34,7 @@ public class RiskAssessmentController {
     @GetMapping("/all")
     public List<RiskAssessmentResponse> getAllRiskAssessments() {
         try {
-            return riskAssessmentViewService.getAllRiskAssessments();
+            return riskAssessmentService.getAllRiskAssessments();
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve risk assessments");
         }
@@ -49,7 +49,7 @@ public class RiskAssessmentController {
     @GetMapping("/{id}/hazards")
     public List<HazardResponse> getHazardsForRiskAssessment(@PathVariable final Long id) {
         try {
-            return riskAssessmentViewService.getHazardsForRiskAssessment(id);
+            return riskAssessmentService.getHazardsForRiskAssessment(id);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (AuthenticatedAccountNotFoundException e) {
@@ -68,11 +68,16 @@ public class RiskAssessmentController {
     @GetMapping("/hazard/{id}")
     public HazardReportResponse getHazardById(@PathVariable final Long id) {
         try {
-            return riskAssessmentViewService.getHazardById(id);
+            return riskAssessmentService.getHazardById(id);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve hazard");
         }
+    }
+
+    @GetMapping("/hazards/drafts")
+    public List<HazardResponse> getMyDraftHazards() {
+        return riskAssessmentService.getMyDraftHazards();
     }
 }

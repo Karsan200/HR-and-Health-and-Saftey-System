@@ -156,4 +156,31 @@ public class RiskAssessmentService {
                 fileUrls
         );
     }
+
+    public List<HazardResponse> getMyDraftHazards() {
+
+        var currentUser = authenticationService.getCurrentUser();
+
+        return hazardRepository.findAll().stream()
+                .filter(hazard ->
+                        hazard.isDraft() &&
+                                hazard.getAccount().getAccountId().equals(currentUser.getAccountId())
+                )
+                .map(hazard -> {
+                    var account = hazard.getAccount();
+                    String createdBy = account.getFirstName() + " " + account.getLastName();
+                    boolean isClosed = hazard.getActionComplete() != null;
+
+                    return new HazardResponse(
+                            hazard.getHazardId(),
+                            hazard.getTitle(),
+                            createdBy,
+                            hazard.isDraft(),
+                            isClosed,
+                            hazard.getCreated(),
+                            true
+                    );
+                })
+                .collect(Collectors.toList());
+    }
 }

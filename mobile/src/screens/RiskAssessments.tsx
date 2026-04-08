@@ -29,6 +29,7 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment }: Pro
     const [error, setError] = useState<string | null>(null);
 
     const [assessmentFilter, setAssessmentFilter] = useState<'assessments' | 'drafts'>('assessments');
+    const [draftHazards, setDraftHazards] = useState<any[]>([]);
 
     // Helper to format a specific ISO date to "DD/MM/YYYY"
     const formatAssessmentDate = (isoString: string): string => {
@@ -58,8 +59,12 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment }: Pro
     }, []);
 
     useEffect(() => {
-        fetchAssessments();
-    }, [fetchAssessments]);
+        if (assessmentFilter === 'assessments') {
+            fetchAssessments();
+        } else {
+            fetchDrafts();
+        }
+    }, [assessmentFilter]);
 
     if (loading) {
         return (
@@ -80,6 +85,30 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment }: Pro
         );
     }
 
+    const fetchDrafts = async () => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const response = await AuthenticationService.fetch(
+                '/api/risk-assessment/hazards/drafts'
+            );
+
+            if (!response.ok) {
+                setError('Failed to load drafts.');
+                return;
+            }
+
+            const data = await response.json();
+            setDraftHazards(data);
+
+        } catch {
+            setError('An unexpected error occurred.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <View style={styles.screen}>
 
@@ -96,8 +125,12 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment }: Pro
             />
 
             <FlatList
-                data={assessments}
-                keyExtractor={(item) => item.riskAssessmentId.toString()}
+                data={assessmentFilter === 'assessments' ? assessments : draftHazards}
+                keyExtractor={(item) =>
+                    assessmentFilter === 'assessments'
+                        ? item.riskAssessmentId.toString()
+                        : item.hazardId.toString()
+                }
                 contentContainerStyle={styles.listContent}
 
                 ListHeaderComponent={
@@ -112,15 +145,27 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment }: Pro
                     </Button>
                 }
 
-                renderItem={({ item }) => (
-                    <RiskCard
-                        title={item.title}
-                        subheading={`Hazards: ${item.hazardCount}`}
-                        date={formatAssessmentDate(item.created)}
-                        isDraft={item.hasDrafts}
-                        onPress={() => onViewHazards(item.riskAssessmentId, item.title)}
-                    />
-                )}
+                renderItem={({ item }) =>
+                    assessmentFilter === 'assessments' ? (
+                        <RiskCard
+                            title={item.title}
+                            subheading={`Hazards: ${item.hazardCount}`}
+                            date={formatAssessmentDate(item.created)}
+                            isDraft={item.hasDrafts}
+                            onPress={() => onViewHazards(item.riskAssessmentId, item.title)}
+                        />
+                    ) : (
+                        <RiskCard
+                            title={item.title}
+                            subheading={`Assessor: ${item.createdBy}`}
+                            date={item.created}
+                            status="draft"
+                            isDraft
+                            viewLabel="Edit Draft"
+                            onPress={() => onViewHazards(item.hazardId, item.title)}
+                        />
+                    )
+                }
             />
         </View>
     );
