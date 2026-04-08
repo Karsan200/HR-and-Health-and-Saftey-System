@@ -78,8 +78,20 @@ public class RiskAssessmentService {
         var currentUser = authenticationService.getCurrentUser();
 
         return riskAssessmentHazardRepository.findByRiskAssessment(riskAssessment).stream()
-                .map(join -> {
-                    HazardTable hazard = join.getHazard();
+                .map(RiskAssessmentHazardTable::getHazard)
+
+                .filter(hazard -> {
+                    var account = hazard.getAccount();
+                    boolean isOwned = account.getAccountId().equals(currentUser.getAccountId());
+
+                    if (hazard.isDraft() && !isOwned) {
+                        return false; // hide drafts from other users
+                    }
+
+                    return true;
+                })
+
+                .map(hazard -> {
                     var account = hazard.getAccount();
                     String createdBy = account.getFirstName() + " " + account.getLastName();
                     boolean isClosed = hazard.getActionComplete() != null;
