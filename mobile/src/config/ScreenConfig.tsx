@@ -161,6 +161,10 @@ export function ScreenConfig(body: ScreenConfigProps) {
                       <RiskAssessments
                           onViewHazards={handleViewHazards}
                           onStartAssessment={() => handleNavigate('hazardForm')}
+                          onEditDraftHazard={(hazardId) => {
+                              setSelectedHazardId(hazardId);
+                              handleNavigate('hazardForm');
+                          }}
                       />
                   </View>
               </>
@@ -219,7 +223,10 @@ export function ScreenConfig(body: ScreenConfigProps) {
             onBackPress={() => handleNavigate('risk')}
           />
           <View style={styles.content}>
-            <HazardForm onDone={() => handleNavigate('risk')} />
+            <HazardForm
+                hazardId={selectedHazardId ?? undefined}
+                onDone={() => handleNavigate('risk')}
+            />
           </View>
         </>
       );

@@ -1,4 +1,4 @@
-import React, {useContext, useMemo, useState} from 'react';
+import React, {useContext, useEffect, useMemo, useState} from 'react';
 import {ScrollView, View, Text, Alert,} from 'react-native';
 
 import {TextInput, Checkbox, Button} from 'react-native-paper';
@@ -63,6 +63,25 @@ export default function HazardForm({ onDone, hazardId, initialData }: Props): JS
         d.setHours(0, 0, 0, 0);
         return d;
     }, []);
+
+    useEffect(() => {
+        if (!hazardId) return; // New form, nothing to fetch
+
+        const fetchDraft = async () => {
+            const response = await AuthenticationService.fetch(`/api/risk-assessment/hazard/${hazardId}`);
+            const data = await response.json();
+            setTitle(data.title);
+            setHazardDesc(data.questionOne);
+            setWhoHarmed(data.questionTwo);
+            setControlMeasures(data.questionThree);
+            setFurtherActions(data.questionFour);
+            setWhoAction(data.questionFive);
+            setInputDate(data.questionSix ? new Date(data.questionSix) : undefined);
+            setActionCompleted(data.isCompleted);
+        };
+
+        fetchDraft();
+    }, [hazardId]);
 
     //Submit function which builds payload and POSTs to backend. Deals with regular submissions and drafts
     async function handleSubmit(draft?: boolean) {

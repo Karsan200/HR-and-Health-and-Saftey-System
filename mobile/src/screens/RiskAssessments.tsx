@@ -18,9 +18,10 @@ type RiskAssessmentSummary = {
 type Props = {
     onViewHazards: (riskAssessmentId: number, title: string) => void;
     onStartAssessment: () => void;
+    onEditDraftHazard: (hazardId: number) => void;
 };
 
-export default function RiskAssessment({ onViewHazards, onStartAssessment }: Props) {
+export default function RiskAssessment({ onViewHazards, onStartAssessment, onEditDraftHazard }: Props) {
     const { theme, accessibility } = useContext(ThemeContext);
     const styles = screenStyles(theme, accessibility);
 
@@ -162,7 +163,7 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment }: Pro
                             status="draft"
                             isDraft
                             viewLabel="Edit Draft"
-                            onPress={() => onViewHazards(item.hazardId, item.title)}
+                            onPress={() => onEditDraftHazard(item.hazardId)}
                         />
                     )
                 }

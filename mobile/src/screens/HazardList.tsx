@@ -109,8 +109,12 @@ export default function HazardList({
     }, [riskAssessmentId]);
 
     useEffect(() => {
-        fetchHazards();
-    }, [fetchHazards]);
+        if (editingDraftId) {
+            handleEditDraft(editingDraftId); // open the draft automatically
+        } else {
+            fetchHazards();
+        }
+    }, [editingDraftId]);
 
     if (loading) {
         return (
