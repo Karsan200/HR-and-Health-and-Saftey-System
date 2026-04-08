@@ -1,4 +1,5 @@
 import { startAdvertising, setServices } from 'munim-bluetooth';
+import { AppSettings } from '../AppSettings.ts';
 
 export interface BleBroadcastTaskArgs {
   broadcastId: string | null; // the Service UUID to advertise
@@ -6,18 +7,18 @@ export interface BleBroadcastTaskArgs {
 
 async function startBleAdvertising(broadcastId: string) {
   startAdvertising({
-    serviceUUIDs: ['FFFF'],
+    serviceUUIDs: [AppSettings.BLE_SERVICE_UUID],
     localName: 'Rent-A-Tech Utility',
   });
 
   setServices([
     {
-      uuid: 'FFFF',
+      uuid: AppSettings.BLE_SERVICE_UUID,
       characteristics: [
         {
           uuid: broadcastId,
           properties: ['read', 'notify'],
-          value: 'Rent-A-Tech',
+          value: 'RAT',
         },
       ],
     },

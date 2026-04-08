@@ -9,4 +9,7 @@ export const AppSettings = {
 
   // CDN URL for static assets
   CDN_URL: 'https://cdn-ltp.tomsw.uk',
+
+  // BLE Service ID for advertising
+  BLE_SERVICE_UUID: 'FFFF',
 };
