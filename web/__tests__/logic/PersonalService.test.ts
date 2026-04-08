@@ -1,12 +1,19 @@
 import { fetchProfileData, fetchPersonalData, } from "../../src/logic/PersonalService";
+import type { AuthenticationService } from "../../src/logic/AuthenticationService.ts";
 
 const mockFetch = jest.fn();
 
-const mockAuthService = { fetch: mockFetch, } as any;
+const mockAuthService: jest.Mocked<AuthenticationService> = {
+    fetch: mockFetch,
+    auth: {} as never,
+    refresh: jest.fn(),
+    mfaTotp: jest.fn(),
+    login: jest.fn(),
+};
 
 beforeEach(() => { jest.clearAllMocks(); });
 
-function makeMockResponse(ok: boolean, data: any) {
+function makeMockResponse<T>(ok: boolean, data: T) {
     return {
         ok,
         json: jest.fn().mockResolvedValue(data),
