@@ -15,7 +15,6 @@ import uk.co.garagebridgend.backend.models.entity.LeaveTable;
 import uk.co.garagebridgend.backend.models.response.AdminRecentActivityItemResponse;
 import uk.co.garagebridgend.backend.repository.LeaveRepository;
 
-import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -93,7 +92,7 @@ public class AdminDashboardService {
             final DocumentRepository documentRepositoryImpl,
             final SignatureRepository signatureRepositoryImpl,
             final LeaveRepository leaveRepositoryImpl
-            ) {
+    ) {
         this.hazardRepository = hazardRepositoryImpl;
         this.clockInRepository = clockInRepositoryImpl;
         this.accountRepository = accountRepositoryImpl;
@@ -118,10 +117,8 @@ public class AdminDashboardService {
         LocalDateTime startOfWeek = startOfWeekDate.atStartOfDay();
         LocalDateTime endOfWeek = endOfWeekDate.atStartOfDay();
 
-        Time lateThreshold = Time.valueOf("08:00:00");
-
         int lateThisWeek = clockInRepository.countLateClockInsThisWeek(
-                lateThreshold,
+                LATE_CLOCK_IN_THRESHOLD,
                 startOfWeek,
                 endOfWeek
         );
@@ -384,12 +381,10 @@ public class AdminDashboardService {
      * @return a list of late clock-ins in the range
      */
     private List<ClockInTable> getLateClockInsBetween(final LocalDate startDate, final LocalDate endDate) {
-        Time lateThreshold = Time.valueOf("08:00:00");
-
         return clockInRepository.findAllByCreatedGreaterThanEqualAndCreatedLessThanAndClockInTimeGreaterThan(
                 startDate.atStartOfDay(),
                 endDate.atStartOfDay(),
-                lateThreshold
+                LATE_CLOCK_IN_THRESHOLD
         );
     }
 
@@ -714,9 +709,7 @@ public class AdminDashboardService {
      * @return a list of recent activity items for late clock-ins
      */
     private List<AdminRecentActivityItemResponse> getRecentLateClockInActivity() {
-        Time lateThreshold = Time.valueOf(LATE_CLOCK_IN_THRESHOLD);
-
-        return clockInRepository.findTop10LateClockIns(lateThreshold)
+        return clockInRepository.findTop10LateClockIns(LATE_CLOCK_IN_THRESHOLD)
                 .stream()
                 .map(clockIn -> new AdminRecentActivityItemResponse(
                         "LATE_CLOCK_IN",
@@ -764,7 +757,7 @@ public class AdminDashboardService {
      * @return the number of minutes late
      */
     private long getMinutesLate(final ClockInTable clockIn) {
-        LocalTime actualClockIn = clockIn.getClockInTime().toLocalTime();
+        LocalTime actualClockIn = clockIn.getClockInTime();
 
         if (!actualClockIn.isAfter(LATE_CLOCK_IN_THRESHOLD)) {
             return 0;

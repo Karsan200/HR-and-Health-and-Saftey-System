@@ -21,7 +21,6 @@ import uk.co.garagebridgend.backend.repository.HazardRepository;
 import uk.co.garagebridgend.backend.repository.LeaveRepository;
 import uk.co.garagebridgend.backend.repository.SignatureRepository;
 
-import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -132,11 +131,11 @@ class AdminDashboardServiceTest {
 
         ClockInTable mondayLate = new ClockInTable();
         mondayLate.setCreated(monday.atTime(9, 0));
-        mondayLate.setClockInTime(Time.valueOf("09:00:00"));
+        mondayLate.setClockInTime(LocalTime.of(9, 0));
 
         ClockInTable wednesdayLate = new ClockInTable();
         wednesdayLate.setCreated(monday.plusDays(2).atTime(8, 30));
-        wednesdayLate.setClockInTime(Time.valueOf("08:30:00"));
+        wednesdayLate.setClockInTime(LocalTime.of(8, 30));
 
         when(clockInRepository
                 .findAllByCreatedGreaterThanEqualAndCreatedLessThanAndClockInTimeGreaterThan(any(), any(), any()))
@@ -163,7 +162,7 @@ class AdminDashboardServiceTest {
 
         ClockInTable weekdayLate = new ClockInTable();
         weekdayLate.setCreated(monthStart.plusDays(1).atTime(8, 45));
-        weekdayLate.setClockInTime(Time.valueOf("08:45:00"));
+        weekdayLate.setClockInTime(LocalTime.of(8, 45));
 
         LocalDate saturday = monthStart;
         while (saturday.getDayOfWeek() != DayOfWeek.SATURDAY) {
@@ -172,7 +171,7 @@ class AdminDashboardServiceTest {
 
         ClockInTable weekendLate = new ClockInTable();
         weekendLate.setCreated(saturday.atTime(9, 0));
-        weekendLate.setClockInTime(Time.valueOf("09:00:00"));
+        weekendLate.setClockInTime(LocalTime.of(9, 0));
 
         when(clockInRepository
                 .findAllByCreatedGreaterThanEqualAndCreatedLessThanAndClockInTimeGreaterThan(any(), any(), any()))
@@ -202,11 +201,11 @@ class AdminDashboardServiceTest {
 
         ClockInTable januaryLate = new ClockInTable();
         januaryLate.setCreated(yearStart.plusDays(1).atTime(8, 20));
-        januaryLate.setClockInTime(Time.valueOf("08:20:00"));
+        januaryLate.setClockInTime(LocalTime.of(8, 20));
 
         ClockInTable februaryLate = new ClockInTable();
         februaryLate.setCreated(yearStart.plusMonths(1).plusDays(1).atTime(8, 50));
-        februaryLate.setClockInTime(Time.valueOf("08:50:00"));
+        februaryLate.setClockInTime(LocalTime.of(8, 50));
 
         when(clockInRepository
                 .findAllByCreatedGreaterThanEqualAndCreatedLessThanAndClockInTimeGreaterThan(any(), any(), any()))
@@ -432,12 +431,12 @@ class AdminDashboardServiceTest {
 
         ClockInTable lateClockInOne = new ClockInTable();
         lateClockInOne.setAccount(janeSmith);
-        lateClockInOne.setClockInTime(Time.valueOf(LocalTime.of(8, 15)));
+        lateClockInOne.setClockInTime(LocalTime.of(8, 15));
         lateClockInOne.setCreated(LocalDateTime.now().minusMinutes(15));
 
         ClockInTable lateClockInTwo = new ClockInTable();
         lateClockInTwo.setAccount(johnDoe);
-        lateClockInTwo.setClockInTime(Time.valueOf(LocalTime.of(8, 45)));
+        lateClockInTwo.setClockInTime(LocalTime.of(8, 45));
         lateClockInTwo.setCreated(LocalDateTime.now().minusMinutes(25));
 
         when(signatureRepository.findTop10ByDocumentIsNotNullOrderByCreatedDesc())
@@ -482,7 +481,7 @@ class AdminDashboardServiceTest {
 
         ClockInTable onTimeClockIn = new ClockInTable();
         onTimeClockIn.setAccount(account);
-        onTimeClockIn.setClockInTime(Time.valueOf(LocalTime.of(8, 0)));
+        onTimeClockIn.setClockInTime(LocalTime.of(8, 0));
         onTimeClockIn.setCreated(LocalDateTime.now());
 
         when(signatureRepository.findTop10ByDocumentIsNotNullOrderByCreatedDesc())
@@ -659,15 +658,12 @@ class AdminDashboardServiceTest {
         LocalDate currentMonthStart = LocalDate.now().withDayOfMonth(1);
 
         ClockInTable firstLate = new ClockInTable();
-        firstLate.setCreated(
-                currentMonthStart.minusMonths(5).plusDays(1).atTime(8, 20));
-        firstLate.setClockInTime(
-                Time.valueOf("08:20:00"));
+        firstLate.setCreated(currentMonthStart.minusMonths(5).plusDays(1).atTime(8, 20));
+        firstLate.setClockInTime(LocalTime.of(8, 20));
 
         ClockInTable secondLate = new ClockInTable();
-        secondLate.setCreated(
-                currentMonthStart.minusMonths(2).plusDays(1).atTime(8, 40));
-        secondLate.setClockInTime(Time.valueOf("08:40:00"));
+        secondLate.setCreated(currentMonthStart.minusMonths(2).plusDays(1).atTime(8, 40));
+        secondLate.setClockInTime(LocalTime.of(8, 40));
 
         LocalDate saturday = currentMonthStart.minusMonths(1);
         while (saturday.getDayOfWeek() != DayOfWeek.SATURDAY) {
@@ -676,7 +672,7 @@ class AdminDashboardServiceTest {
 
         ClockInTable weekendLate = new ClockInTable();
         weekendLate.setCreated(saturday.atTime(9, 0));
-        weekendLate.setClockInTime(Time.valueOf("09:00:00"));
+        weekendLate.setClockInTime(LocalTime.of(9, 0));
 
         when(clockInRepository
                 .findAllByCreatedGreaterThanEqualAndCreatedLessThanAndClockInTimeGreaterThan(any(), any(), any()))
@@ -745,6 +741,4 @@ class AdminDashboardServiceTest {
         assertEquals(1, result.getSigned());
         assertEquals(3, result.getPending());
     }
-
-
 }
