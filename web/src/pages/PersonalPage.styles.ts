@@ -1,4 +1,5 @@
 ﻿import { DefaultColours } from "../theme/colours";
+import {BorderRadius, FontSize, TextStyles} from "../theme/theme.ts";
 
 export const personalPageStyles = {
     pageContainer: {
@@ -9,7 +10,7 @@ export const personalPageStyles = {
 
     headerCard: {
         background: DefaultColours.redPrimary,
-        borderRadius: "12px",
+        borderRadius: BorderRadius.largeButtonsAndOutlines,
         padding: "1.25rem 1.5rem",
         display: "flex",
         alignItems: "center",
@@ -21,7 +22,7 @@ export const personalPageStyles = {
         width: 52,
         height: 52,
         borderRadius: "50%",
-        background: "rgba(255,255,255,0.2)",
+        background: DefaultColours.greyPrimaryMainText,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -33,20 +34,23 @@ export const personalPageStyles = {
     },
 
     headerName: {
-        fontSize: "20px",
+        fontSize: FontSize.m20,
+        fontFamily: TextStyles.semiBold,
         fontWeight: 500,
         color: DefaultColours.white,
         lineHeight: 1.3,
     },
 
     headerRole: {
-        fontSize: "13px",
-        color: "rgba(255,255,255,0.85)",
+        fontSize: FontSize.xs14,
+        fontFamily: TextStyles.regular,
+        color: DefaultColours.greyBackground,
     },
 
     headerEmail: {
-        fontSize: "13px",
-        color: "rgba(255,255,255,0.75)",
+        fontSize: FontSize.xs14,
+        fontFamily: TextStyles.regular,
+        color: DefaultColours.greyBackground,
     },
 
     adminBadge: {
@@ -58,7 +62,8 @@ export const personalPageStyles = {
         borderRadius: "8px",
         padding: "8px 14px",
         color: DefaultColours.white,
-        fontSize: "13px",
+        fontSize: FontSize.xs14,
+        fontFamily: TextStyles.regular,
         fontWeight: 500,
         whiteSpace: "nowrap",
         flexShrink: 0,
@@ -72,7 +77,8 @@ export const personalPageStyles = {
 
     tab: (active: boolean) => ({
         padding: "10px 24px",
-        fontSize: "14px",
+        fontSize: FontSize.xs14,
+        fontFamily: TextStyles.regular,
         color: active ? DefaultColours.redPrimary : DefaultColours.greyPrimaryMainText,
         cursor: "pointer",
         borderBottom: active ? `2px solid ${DefaultColours.redPrimary}` : "2px solid transparent",
@@ -93,7 +99,8 @@ export const personalPageStyles = {
     },
 
     sectionTitle: {
-        fontSize: "15px",
+        fontSize: FontSize.xs14,
+        fontFamily: TextStyles.regular,
         fontWeight: 500,
         color: DefaultColours.black,
         marginBottom: "1rem",
@@ -126,18 +133,21 @@ export const personalPageStyles = {
     }),
 
     infoLabel: {
-        fontSize: "11px",
+        fontSize: FontSize.xxs12,
+        fontFamily: TextStyles.regular,
         color: DefaultColours.greyPrimaryMainText,
         marginBottom: "1px",
     },
 
     infoValue: {
-        fontSize: "14px",
+        fontSize: FontSize.xxs12,
+        fontFamily: TextStyles.regular,
         color: DefaultColours.black,
     },
 
     notifText: {
-        fontSize: "14px",
+        fontSize: FontSize.xs14,
+        fontFamily: TextStyles.regular,
         color: DefaultColours.greyPrimaryMainText,
     },
 
@@ -148,7 +158,8 @@ export const personalPageStyles = {
     },
 
     errorText: {
-        fontSize: "14px",
+        fontSize: FontSize.xs14,
+        fontFamily: TextStyles.regular,
         color: DefaultColours.redPrimary,
         textAlign: "center",
         padding: "2rem",
