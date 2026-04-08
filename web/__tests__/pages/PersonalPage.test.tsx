@@ -99,9 +99,7 @@ describe("PersonalPage", () => {
         });
     });
 
-    // -------------------------------------------------------------------------
     // Loading state
-    // -------------------------------------------------------------------------
 
     describe("loading state", () => {
         it("shows a loading spinner while data is being fetched", () => {
@@ -124,9 +122,7 @@ describe("PersonalPage", () => {
         });
     });
 
-    // -------------------------------------------------------------------------
     // Error state
-    // -------------------------------------------------------------------------
 
     describe("error state", () => {
         it("shows an error message when the fetch fails", async () => {
@@ -154,9 +150,7 @@ describe("PersonalPage", () => {
         });
     });
 
-    // -------------------------------------------------------------------------
     // Profile tab content
-    // -------------------------------------------------------------------------
 
     describe("profile tab", () => {
         it("renders the user's email in the personal details section", async () => {
@@ -209,9 +203,8 @@ describe("PersonalPage", () => {
         });
     });
 
-    // -------------------------------------------------------------------------
     // Tab navigation
-    // -------------------------------------------------------------------------
+    // TODO: THESE TESTS WILL NEED TO BE REMOVED WHEN THE OTHER TABS ARE FILLED OUT!
 
     describe("tab navigation", () => {
         it("shows the settings placeholder when the Settings tab is clicked", async () => {
