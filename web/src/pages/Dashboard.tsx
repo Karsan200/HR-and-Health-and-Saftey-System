@@ -758,7 +758,7 @@ export function Dashboard() {
                                 <Button
                                     fullWidth
                                     disableRipple
-                                    onClick={() => navigate("calendar/pending-requests")}
+                                    onClick={() => navigate("calendar/requests")}
                                     sx={styles.quickActionButton}
                                 >
                                     <Box sx={{ ...styles.quickActionIconWrapper, ...styles.quickActionLeaveIconWrapper }}>

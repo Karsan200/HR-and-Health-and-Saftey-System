@@ -863,7 +863,7 @@ INSERT INTO leave_type_table (
       ('Holiday', '14A45A', 'D0EDDE', 'beach_access'),
       ('Sick Leave', 'D20414', 'F6CDD0', 'sick'),
       ('Emergency Leave', 'E8960A', 'FFECCD', 'priority_high'),
-      ('Maternity/Paternity Leave', 'D20414', 'F6CDD0', 'child_care'),
+      ('Maternity/Paternity Leave', 'ad32a7', 'edd1ec', 'child_care'),
       ('Unpaid Leave', '588FFF', 'E6ECF9', 'money_off');
 
 INSERT INTO leave_table (
