@@ -10,10 +10,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Icon } from 'react-native-paper';
-import { Picker } from '@react-native-picker/picker';
 
 import { clockInScreenStyles as styles } from './ClockInScreen.styles';
 import { ThemeContext } from '../theme/colourController';
@@ -40,6 +40,8 @@ type ClockRecord = {
 
 // Component
 
+const DropdownSeparator = () => <View/>;
+
 const ClockInScreen: React.FC = () => {
   const { theme, accessibility } = useContext(ThemeContext);
   const themedStyles = styles(theme, accessibility);
@@ -52,7 +54,10 @@ const ClockInScreen: React.FC = () => {
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [reportRecords, setReportRecords] = useState<ClockRecord[]>([]);
   const [reportRecordsLoading, setReportRecordsLoading] = useState(false);
-  const [selectedClockId, setSelectedClockId] = useState<string | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<ClockRecord | null>(
+    null,
+  );
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [reportText, setReportText] = useState('');
   const [reportSubmitting, setReportSubmitting] = useState(false);
 
@@ -93,7 +98,7 @@ const ClockInScreen: React.FC = () => {
       const data: ClockRecord[] = await response.json();
       setReportRecords(data);
       if (data.length > 0) {
-        setSelectedClockId(data[0].clockId);
+        setSelectedRecord(data[0]);
       }
     } catch (error) {
       console.error('Error fetching recent records', error);
@@ -110,18 +115,22 @@ const ClockInScreen: React.FC = () => {
   const handleCloseReportModal = () => {
     setReportModalVisible(false);
     setReportText('');
-    setSelectedClockId(null);
+    setSelectedRecord(null);
+    setDropdownOpen(false);
     setReportRecords([]);
   };
 
   const handleSubmitReport = async () => {
-    if (!reportText.trim() || !selectedClockId) return;
+    if (!reportText.trim() || !selectedRecord) return;
     setReportSubmitting(true);
     try {
       await AuthenticationService.fetch('/api/clock/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clockId: selectedClockId, issue: reportText }),
+        body: JSON.stringify({
+          clockId: selectedRecord.clockId,
+          issue: reportText,
+        }),
       });
       handleCloseReportModal();
     } catch (error) {
@@ -345,20 +354,69 @@ const ClockInScreen: React.FC = () => {
                   No records found.
                 </Text>
               ) : (
-                <Picker
-                  selectedValue={selectedClockId}
-                  onValueChange={value => setSelectedClockId(value)}
-                  style={themedStyles.picker}
-                  dropdownIconColor={theme.greyPrimaryMainText}
-                >
-                  {reportRecords.map(record => (
-                    <Picker.Item
-                      key={record.clockId}
-                      label={formatRecordLabel(record)}
-                      value={record.clockId}
+                <View>
+                  <TouchableOpacity
+                    style={themedStyles.dropdownTrigger}
+                    onPress={() => setDropdownOpen(prev => !prev)}
+                    activeOpacity={0.8}
+                  >
+                    <Text
+                      style={themedStyles.dropdownTriggerText}
+                      numberOfLines={1}
+                    >
+                      {selectedRecord
+                        ? formatRecordLabel(selectedRecord)
+                        : 'Select a record...'}
+                    </Text>
+                    <Icon
+                      source={dropdownOpen ? 'chevron-up' : 'chevron-down'}
+                      size={20}
+                      color={theme.greyPrimaryMainText}
                     />
-                  ))}
-                </Picker>
+                  </TouchableOpacity>
+
+                  {dropdownOpen && (
+                    <View style={themedStyles.dropdownList}>
+                      <FlatList
+                        data={reportRecords}
+                        keyExtractor={item => item.clockId}
+                        ItemSeparatorComponent={DropdownSeparator}
+                        renderItem={({ item }) => (
+                          <TouchableOpacity
+                            style={[
+                              themedStyles.dropdownItem,
+                              selectedRecord?.clockId === item.clockId &&
+                                themedStyles.dropdownItemSelected,
+                            ]}
+                            onPress={() => {
+                              setSelectedRecord(item);
+                              setDropdownOpen(false);
+                            }}
+                            activeOpacity={0.7}
+                          >
+                            <Text
+                              style={[
+                                themedStyles.dropdownItemText,
+                                selectedRecord?.clockId === item.clockId &&
+                                  themedStyles.dropdownItemTextSelected,
+                              ]}
+                              numberOfLines={1}
+                            >
+                              {formatRecordLabel(item)}
+                            </Text>
+                            {selectedRecord?.clockId === item.clockId && (
+                              <Icon
+                                source="check"
+                                size={16}
+                                color={theme.redPrimary}
+                              />
+                            )}
+                          </TouchableOpacity>
+                        )}
+                      />
+                    </View>
+                  )}
+                </View>
               )}
             </View>
 
@@ -376,13 +434,13 @@ const ClockInScreen: React.FC = () => {
             <TouchableOpacity
               style={[
                 themedStyles.modalSubmitButton,
-                (!reportText.trim() || !selectedClockId) &&
+                (!reportText.trim() || !selectedRecord) &&
                   themedStyles.modalSubmitButtonDisabled,
               ]}
               onPress={handleSubmitReport}
               activeOpacity={0.8}
               disabled={
-                !reportText.trim() || !selectedClockId || reportSubmitting
+                !reportText.trim() || !selectedRecord || reportSubmitting
               }
             >
               <Text style={themedStyles.modalSubmitText}>

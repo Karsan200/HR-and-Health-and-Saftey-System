@@ -334,7 +334,6 @@ describe('ClockInScreen', () => {
     });
   });
 
-
   it('closes the modal when the close button is pressed', async () => {
     fetchMock
       .mockResolvedValueOnce({ json: async () => mockStatus })
@@ -503,5 +502,235 @@ describe('ClockInScreen', () => {
       'e.g. I was clocked in late but I arrived on time...',
     );
     expect(input.props.value).toBe('');
+  });
+
+  // Dropdown
+
+  it('shows the first record label in the trigger by default when records load', async () => {
+    fetchMock
+      .mockResolvedValueOnce({ json: async () => mockStatus })
+      .mockResolvedValueOnce({ json: async () => mockRecords });
+
+    const { getByText } = render(<ClockInScreen />);
+
+    await waitFor(() => fireEvent.press(getByText('Report a Clock-In Issue')));
+
+    await waitFor(() => {
+      expect(getByText('Monday, 7 April, 2026  08:00 – 17:00')).toBeTruthy();
+    });
+  });
+
+  it('opens the dropdown list when the trigger is pressed', async () => {
+    fetchMock
+      .mockResolvedValueOnce({ json: async () => mockStatus })
+      .mockResolvedValueOnce({ json: async () => mockRecords });
+
+    const { getByText } = render(<ClockInScreen />);
+
+    await waitFor(() => fireEvent.press(getByText('Report a Clock-In Issue')));
+
+    // Press the trigger to open the list
+    await waitFor(() =>
+      fireEvent.press(getByText('Monday, 7 April, 2026  08:00 – 17:00')),
+    );
+
+    // Both records should now be visible in the list
+    await waitFor(() => {
+      expect(getByText('Tuesday, 8 April, 2026  09:15 – 17:30')).toBeTruthy();
+    });
+  });
+
+  it('closes the dropdown list and updates the trigger after selecting an item', async () => {
+    fetchMock
+      .mockResolvedValueOnce({ json: async () => mockStatus })
+      .mockResolvedValueOnce({ json: async () => mockRecords });
+
+    const { getByText, queryByText } = render(<ClockInScreen />);
+
+    await waitFor(() => fireEvent.press(getByText('Report a Clock-In Issue')));
+
+    // Open the dropdown
+    await waitFor(() =>
+      fireEvent.press(getByText('Monday, 7 April, 2026  08:00 – 17:00')),
+    );
+
+    await waitFor(() => {
+      expect(getByText('Tuesday, 8 April, 2026  09:15 – 17:30')).toBeTruthy();
+    });
+
+    // Select the second record
+    fireEvent.press(getByText('Tuesday, 8 April, 2026  09:15 – 17:30'));
+
+    // List should close and trigger should now show the selected record
+    await waitFor(() => {
+      expect(queryByText('Monday, 7 April, 2026  08:00 – 17:00')).toBeNull();
+      expect(getByText('Tuesday, 8 April, 2026  09:15 – 17:30')).toBeTruthy();
+    });
+  });
+
+
+  it('shows a check icon next to the selected record in the dropdown list', async () => {
+    fetchMock
+      .mockResolvedValueOnce({ json: async () => mockStatus })
+      .mockResolvedValueOnce({ json: async () => mockRecords });
+
+    const { getByText, getByTestId } = render(<ClockInScreen />);
+
+    await waitFor(() => fireEvent.press(getByText('Report a Clock-In Issue')));
+
+    // Open dropdown
+    await waitFor(() =>
+      fireEvent.press(getByText('Monday, 7 April, 2026  08:00 – 17:00')),
+    );
+
+    // The check icon should be visible for the first (default selected) record
+    await waitFor(() => {
+      expect(getByTestId('icon-check')).toBeTruthy();
+    });
+  });
+
+  it('submits the correct clockId when a non-default record is selected', async () => {
+    fetchMock
+      .mockResolvedValueOnce({ json: async () => mockStatus })
+      .mockResolvedValueOnce({ json: async () => mockRecords })
+      .mockResolvedValueOnce({ json: async () => ({}) });
+
+    const { getByText, getByPlaceholderText } = render(<ClockInScreen />);
+
+    await waitFor(() => fireEvent.press(getByText('Report a Clock-In Issue')));
+
+    // Open dropdown and select the second record
+    await waitFor(() =>
+      fireEvent.press(getByText('Monday, 7 April, 2026  08:00 – 17:00')),
+    );
+    await waitFor(() => {
+      expect(getByText('Tuesday, 8 April, 2026  09:15 – 17:30')).toBeTruthy();
+    });
+    fireEvent.press(getByText('Tuesday, 8 April, 2026  09:15 – 17:30'));
+
+    fireEvent.changeText(
+      getByPlaceholderText(
+        'e.g. I was clocked in late but I arrived on time...',
+      ),
+      'Wrong time recorded.',
+    );
+
+    fireEvent.press(getByText('Submit Report'));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/clock/report',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            clockId: 'uuid-2',
+            issue: 'Wrong time recorded.',
+          }),
+        }),
+      );
+    });
+  });
+
+  it('dropdown is reset when modal is closed and reopened', async () => {
+    fetchMock
+      .mockResolvedValueOnce({ json: async () => mockStatus })
+      .mockResolvedValueOnce({ json: async () => mockRecords })
+      .mockResolvedValueOnce({ json: async () => mockRecords });
+
+    const { getByText, queryByText } = render(<ClockInScreen />);
+
+    await waitFor(() => fireEvent.press(getByText('Report a Clock-In Issue')));
+
+    // Open dropdown
+    await waitFor(() =>
+      fireEvent.press(getByText('Monday, 7 April, 2026  08:00 – 17:00')),
+    );
+    await waitFor(() => {
+      expect(getByText('Tuesday, 8 April, 2026  09:15 – 17:30')).toBeTruthy();
+    });
+
+    // Close modal without selecting
+    fireEvent.press(getByText('close'));
+    await waitFor(() => expect(queryByText('Report an Issue')).toBeNull());
+
+    // Reopen modal — dropdown list should be closed
+    fireEvent.press(getByText('Report a Clock-In Issue'));
+    await waitFor(() => expect(getByText('Report an Issue')).toBeTruthy());
+
+    // Second record should not be visible since dropdown is closed
+    await waitFor(() => {
+      expect(queryByText('Tuesday, 8 April, 2026  09:15 – 17:30')).toBeNull();
+    });
+  });
+
+  // formatRecordLabel edge cases
+
+  it('displays dashes for null clockInTime and clockOutTime in dropdown label', async () => {
+    fetchMock
+      .mockResolvedValueOnce({ json: async () => mockStatus })
+      .mockResolvedValueOnce({
+        json: async () => [
+          {
+            clockId: 'uuid-3',
+            clockInTime: null,
+            clockOutTime: null,
+            date: 'Wednesday, 9 April, 2026',
+          },
+        ],
+      });
+
+    const { getByText } = render(<ClockInScreen />);
+
+    await waitFor(() => fireEvent.press(getByText('Report a Clock-In Issue')));
+
+    await waitFor(() => {
+      expect(getByText('Wednesday, 9 April, 2026  - – -')).toBeTruthy();
+    });
+  });
+
+  it('displays dash only for null clockInTime when clockOutTime is present', async () => {
+    fetchMock
+      .mockResolvedValueOnce({ json: async () => mockStatus })
+      .mockResolvedValueOnce({
+        json: async () => [
+          {
+            clockId: 'uuid-4',
+            clockInTime: null,
+            clockOutTime: '17:00',
+            date: 'Thursday, 10 April, 2026',
+          },
+        ],
+      });
+
+    const { getByText } = render(<ClockInScreen />);
+
+    await waitFor(() => fireEvent.press(getByText('Report a Clock-In Issue')));
+
+    await waitFor(() => {
+      expect(getByText('Thursday, 10 April, 2026  - – 17:00')).toBeTruthy();
+    });
+  });
+
+  it('displays dash only for null clockOutTime when clockInTime is present', async () => {
+    fetchMock
+      .mockResolvedValueOnce({ json: async () => mockStatus })
+      .mockResolvedValueOnce({
+        json: async () => [
+          {
+            clockId: 'uuid-5',
+            clockInTime: '08:00',
+            clockOutTime: null,
+            date: 'Friday, 11 April, 2026',
+          },
+        ],
+      });
+
+    const { getByText } = render(<ClockInScreen />);
+
+    await waitFor(() => fireEvent.press(getByText('Report a Clock-In Issue')));
+
+    await waitFor(() => {
+      expect(getByText('Friday, 11 April, 2026  08:00 – -')).toBeTruthy();
+    });
   });
 });

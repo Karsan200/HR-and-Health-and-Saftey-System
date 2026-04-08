@@ -237,16 +237,11 @@ export const clockInScreenStyles = (
       lineHeight: FontSize.s16 * fontScale * 1.5,
     },
 
-    // Picker
+    // Dropdown
     pickerWrapper: {
-      backgroundColor: theme.greyBackground,
       borderRadius: BorderRadius.largeButtonsAndOutlines,
       overflow: 'hidden',
       justifyContent: 'center',
-    },
-
-    picker: {
-      color: theme.black,
     },
 
     pickerLoader: {
@@ -260,6 +255,74 @@ export const clockInScreenStyles = (
       color: theme.greyPrimaryMainText,
       textAlign: 'center',
       paddingVertical: Spacing.mediumPadding,
+    },
+
+    dropdownTrigger: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: theme.greyBackground,
+      borderRadius: BorderRadius.largeButtonsAndOutlines,
+      paddingHorizontal: Spacing.mediumPadding,
+      paddingVertical: Spacing.smallPadding + 4,
+    },
+
+    dropdownTriggerText: {
+      flex: 1,
+      fontFamily: fontFamilies.regular,
+      fontWeight: TextStyles.regular.fontWeight,
+      fontSize: FontSize.s16 * fontScale,
+      color: theme.black,
+      letterSpacing: 0.17,
+      marginRight: 8,
+    },
+
+    dropdownList: {
+      backgroundColor: theme.white,
+      borderRadius: BorderRadius.largeButtonsAndOutlines,
+      borderWidth: 1,
+      borderColor: theme.greyBackground,
+      marginTop: 4,
+      maxHeight: 200,
+      shadowColor: theme.greyIconLight,
+      shadowOpacity: 1,
+      shadowRadius: 4,
+      shadowOffset: { width: 0, height: 0 },
+      elevation: 3,
+      overflow: 'hidden',
+    },
+
+    dropdownItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: Spacing.mediumPadding,
+      paddingVertical: Spacing.smallPadding + 4,
+    },
+
+    dropdownItemSelected: {
+      backgroundColor: theme.redBackgroundLight,
+    },
+
+    dropdownItemText: {
+      flex: 1,
+      fontFamily: fontFamilies.regular,
+      fontWeight: TextStyles.regular.fontWeight,
+      fontSize: FontSize.s16 * fontScale,
+      color: theme.black,
+      letterSpacing: 0.17,
+      marginRight: 8,
+    },
+
+    dropdownItemTextSelected: {
+      color: theme.redPrimary,
+      fontFamily: fontFamilies.medium,
+      fontWeight: TextStyles.medium.fontWeight,
+    },
+
+    dropdownSeparator: {
+      height: 1,
+      backgroundColor: theme.greyBackground,
     },
 
     modalInput: {
