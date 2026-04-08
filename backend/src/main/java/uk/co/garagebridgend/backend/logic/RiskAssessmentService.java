@@ -49,11 +49,21 @@ public class RiskAssessmentService {
      * @return list of risk assessment summaries
      */
     public List<RiskAssessmentResponse> getAllRiskAssessments() {
+
+        var currentUser = authenticationService.getCurrentUser();
+
         return riskAssessmentRepository.findAll().stream()
                 .map(ra -> {
-                    List<RiskAssessmentHazardTable> joins = riskAssessmentHazardRepository.findByRiskAssessment(ra);
+                    List<RiskAssessmentHazardTable> joins =
+                            riskAssessmentHazardRepository.findByRiskAssessment(ra);
+
                     boolean hasDrafts = joins.stream()
-                            .anyMatch(j -> j.getHazard().isDraft());
+                            .anyMatch(j ->
+                                    j.getHazard().isDraft() &&
+                                            j.getHazard().getAccount().getAccountId()
+                                                    .equals(currentUser.getAccountId())
+                            );
+
                     return new RiskAssessmentResponse(
                             ra.getRiskAssessmentId(),
                             ra.getTitle(),
