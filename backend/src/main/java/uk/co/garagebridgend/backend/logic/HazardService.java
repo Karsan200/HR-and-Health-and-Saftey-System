@@ -13,6 +13,7 @@ import uk.co.garagebridgend.backend.repository.HazardRepository;
 import java.io.ByteArrayInputStream;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 
 /**
  * Service class for handling hazard-related operations, including reporting hazards and managing associated files.
@@ -118,6 +119,60 @@ public class HazardService {
                 hazardFilesRepository.save(hazardFile);
 
                 // Upload the file to object storage and get the URL
+                storageService.uploadFile(
+                        fileObj.getFileId().toString(),
+                        new ByteArrayInputStream(decodedFile),
+                        file.getExtension()
+                );
+            }
+        }
+    }
+    public void update(final Long hazardId, final HazardReportRequest body)
+            throws AuthenticatedAccountNotFoundException, IllegalArgumentException {
+
+        var hazard = hazardRepository.findById(hazardId)
+                .orElseThrow(() -> new NoSuchElementException("Hazard not found"));
+
+        var account = authenticationService.getCurrentUser();
+        if (!body.getFiles().isEmpty()) {
+            for (var file : body.getFiles()) {
+                var decodedFile = storageService.decodeBase64(file.getContent());
+                if ((decodedFile.length / BYTES_TO_KB) > storageService.getMaxFileSize()) {
+                    throw new IllegalArgumentException("File size exceeds the maximum limit.");
+                }
+            }
+        }
+
+        hazard.setTitle(body.getTitle());
+        hazard.setQuestionOne(body.getQuestionOne());
+        hazard.setQuestionTwo(body.getQuestionTwo());
+        hazard.setQuestionThree(body.getQuestionThree());
+        hazard.setQuestionFour(body.getQuestionFour());
+        hazard.setQuestionFive(body.getQuestionFive());
+        hazard.setQuestionSix(body.getQuestionSix());
+        hazard.setDraft(body.isDraft());
+        if (body.isCompleted()) {
+            hazard.setActionComplete(LocalDateTime.now(Clock.systemUTC()));
+        } else {
+            hazard.setActionComplete(null);
+        }
+        hazardRepository.save(hazard);
+
+        // Handle new file uploads
+        if (!body.getFiles().isEmpty()) {
+            for (var file : body.getFiles()) {
+                var decodedFile = storageService.decodeBase64(file.getContent());
+                var fileObj = new FilesTable();
+                fileObj.setCreatedBy(account);
+                fileObj.setName(file.getName());
+                fileObj.setExtension(file.getExtension().toLowerCase());
+                filesRepository.save(fileObj);
+
+                var hazardFile = new HazardFilesTable();
+                hazardFile.setHazard(hazard);
+                hazardFile.setFile(fileObj);
+                hazardFilesRepository.save(hazardFile);
+
                 storageService.uploadFile(
                         fileObj.getFileId().toString(),
                         new ByteArrayInputStream(decodedFile),

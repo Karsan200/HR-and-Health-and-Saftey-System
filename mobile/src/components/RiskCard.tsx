@@ -20,6 +20,7 @@ interface RiskCardProps {
     isDraft?: boolean;
     /** Called when the action button is pressed */
     onPress: () => void;
+    viewLabel?: string;
 }
 
 /**
@@ -35,6 +36,7 @@ const RiskCard: React.FC<RiskCardProps> = ({
                                                            status,
                                                            isDraft = false,
                                                            onPress,
+                                               viewLabel = 'View Assessment',
                                                        }) => {
     const { theme, accessibility } = useContext(ThemeContext);
     const styles = cardStyles(theme, accessibility);
@@ -75,7 +77,7 @@ const RiskCard: React.FC<RiskCardProps> = ({
 
             {/* Action button */}
             <EyeButton
-                label={isDraft ? 'Continue Editing' : 'View Assessment'}
+                label={isDraft ? 'Continue Editing' : viewLabel}
                 active={isDraft}
                 onPress={onPress}
             />

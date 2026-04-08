@@ -7,7 +7,9 @@ import { styles as screenStyles } from './HazardList.styles';
 import SummaryRow from "../components/summary/SummaryRow.tsx";
 import SummaryCard from "../components/summary/SummaryCard.tsx";
 import FilterPills from "../components/FilterPills.tsx";
+import HazardForm from "./HazardForm.tsx";
 
+// Summary data structure for a hazard report, used in the list view
 type HazardSummary = {
     hazardId: number;
     title: string;
@@ -15,6 +17,23 @@ type HazardSummary = {
     draft: boolean;
     closed: boolean;
     created: string;
+};
+
+// Full data structure for a hazard report, used when editing a draft
+type HazardReport = {
+    hazardId: number;
+    title: string;
+    questionOne: string;
+    questionTwo: string;
+    questionThree: string;
+    questionFour: string;
+    questionFive: string;
+    questionSix: string | null;
+    isDraft: boolean;
+    isClosed: boolean;
+    createdBy: string;
+    created: string;
+    fileUrls: string[];
 };
 
 type StatusFilter = 'all' | 'draft' | 'submitted' | 'closed';
@@ -37,11 +56,25 @@ export default function HazardList({
     const { theme, accessibility } = useContext(ThemeContext);
     const styles = screenStyles(theme, accessibility);
 
+    // State for the list of hazards, loading status, and any error message
     const [hazards, setHazards] = useState<HazardSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    // State for the current status filter (all, draft, submitted, closed)
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+
+    // State for tracking which draft is currently being edited (if any)
+    const [editingDraftId, setEditingDraftId] = useState<number | null>(null);
+    const [draftData, setDraftData] = useState<HazardReport | null>(null);
+
+    // When the user taps on a draft hazard, we need to fetch its full details and show the edit form
+    const handleEditDraft = async (hazardId: number) => {
+        const response = await AuthenticationService.fetch(`/api/risk-assessment/hazard/${hazardId}`);
+        const data = await response.json();
+        setDraftData(data);
+        setEditingDraftId(hazardId);
+    };
 
     const fetchHazards = useCallback(async () => {
         setLoading(true);
@@ -111,6 +144,26 @@ export default function HazardList({
         return true;
     });
 
+    // If we're editing a draft, show the form instead of the list
+    if (editingDraftId && draftData) {
+        return (
+            <HazardForm
+                hazardId={editingDraftId}
+                initialData={{
+                    title: draftData.title,
+                    questionOne: draftData.questionOne,
+                    questionTwo: draftData.questionTwo,
+                    questionThree: draftData.questionThree,
+                    questionFour: draftData.questionFour,
+                    questionFive: draftData.questionFive,
+                    questionSix: draftData.questionSix,
+                    isCompleted: draftData.isClosed,
+                }}
+                onDone={() => { setEditingDraftId(null); setDraftData(null); }}
+            />
+        );
+    }
+
     return (
         <View style={styles.screen}>
 
@@ -163,9 +216,10 @@ export default function HazardList({
                         date={item.created}
                         status={item.draft ? 'draft' : item.closed ? 'closed' : 'submitted'}
                         isDraft={item.draft}
+                        viewLabel="View Hazard"
                         onPress={() =>
                             item.draft
-                                ? onEditDraft(item.hazardId)
+                                ? handleEditDraft(item.hazardId)
                                 : onViewHazard(item.hazardId)
                         }
                     />
