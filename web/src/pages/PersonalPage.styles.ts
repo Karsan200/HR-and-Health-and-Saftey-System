@@ -1,5 +1,5 @@
 ﻿import { DefaultColours } from "../theme/colours";
-import {BorderRadius, FontSize, TextStyles} from "../theme/theme.ts";
+import {BorderRadius, FontSize, TextStyles} from "../theme/theme";
 
 export const personalPageStyles = {
     pageContainer: {
