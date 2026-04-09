@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
 import { View, Text } from 'react-native';
-import { Button } from 'react-native-paper';
 import { ThemeContext } from '../theme/colourController';
 import { styles as cardStyles } from './RiskCard.styles';
 import EyeButton from "./EyeButton.tsx";

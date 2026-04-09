@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { BorderRadius, Fonts, FontSize, Spacing, TextStyles } from '../theme/theme';
+import { Fonts, FontSize, Spacing, TextStyles } from '../theme/theme';
 
 export const styles = (
     theme: any,

@@ -39,7 +39,7 @@ function ReadOnlyField({ label, value, styles }: { label: string; value: string;
     );
 }
 
-export default function HazardView({ hazardId, onBack }: Props) {
+export default function HazardView({ hazardId }: Props) {
     const { theme, accessibility } = useContext(ThemeContext);
     const styles = viewStyles(theme, accessibility);
 

@@ -46,12 +46,22 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment, onEdi
         setError(null);
         try {
             const response = await AuthenticationService.fetch('/api/risk-assessment/all');
-            if (!response.ok) {
-                setError('Failed to load risk assessments.');
-                return;
-            }
-            const data = await response.json();
-            setAssessments(data);
+            if (!response.ok) setError('Failed to load risk assessments.');
+            else setAssessments(await response.json());
+        } catch {
+            setError('An unexpected error occurred.');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchDrafts = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await AuthenticationService.fetch('/api/risk-assessment/hazards/drafts');
+            if (!response.ok) setError('Failed to load drafts.');
+            else setDraftHazards(await response.json());
         } catch {
             setError('An unexpected error occurred.');
         } finally {
@@ -65,7 +75,7 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment, onEdi
         } else {
             fetchDrafts();
         }
-    }, [assessmentFilter]);
+    }, [assessmentFilter, fetchAssessments, fetchDrafts]);
 
     if (loading) {
         return (
@@ -89,30 +99,6 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment, onEdi
             </View>
         );
     }
-
-    const fetchDrafts = async () => {
-        setLoading(true);
-        setError(null);
-
-        try {
-            const response = await AuthenticationService.fetch(
-                '/api/risk-assessment/hazards/drafts'
-            );
-
-            if (!response.ok) {
-                setError('Failed to load drafts.');
-                return;
-            }
-
-            const data = await response.json();
-            setDraftHazards(data);
-
-        } catch {
-            setError('An unexpected error occurred.');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     return (
         <View style={styles.screen}>

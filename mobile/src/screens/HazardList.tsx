@@ -51,7 +51,6 @@ export default function HazardList({
                                        riskAssessmentId,
                                        riskAssessmentTitle,
                                        onViewHazard,
-                                       onEditDraft,
                                    }: Props) {
 
     const { theme, accessibility } = useContext(ThemeContext);
@@ -79,12 +78,16 @@ export default function HazardList({
     };
 
     // When the user taps on a draft hazard, we need to fetch its full details and show the edit form
-    const handleEditDraft = async (hazardId: number) => {
-        const response = await AuthenticationService.fetch(`/api/risk-assessment/hazard/${hazardId}`);
-        const data = await response.json();
-        setDraftData(data);
-        setEditingDraftId(hazardId);
-    };
+    const handleEditDraft = useCallback(async (hazardId: number) => {
+        try {
+            const response = await AuthenticationService.fetch(`/api/risk-assessment/hazard/${hazardId}`);
+            const data = await response.json();
+            setDraftData(data);
+            setEditingDraftId(hazardId);
+        } catch {
+            setError('An unexpected error occurred.');
+        }
+    }, []);
 
     const fetchHazards = useCallback(async () => {
         setLoading(true);
@@ -110,11 +113,11 @@ export default function HazardList({
 
     useEffect(() => {
         if (editingDraftId) {
-            handleEditDraft(editingDraftId); // open the draft automatically
+            handleEditDraft(editingDraftId);
         } else {
             fetchHazards();
         }
-    }, [editingDraftId]);
+    }, [editingDraftId, fetchHazards, handleEditDraft]);
 
     if (loading) {
         return (

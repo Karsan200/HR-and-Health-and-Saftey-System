@@ -9,7 +9,7 @@ import {
     Image,
 } from 'react-native';
 import Pdf from 'react-native-pdf';
-import { Button, Icon } from 'react-native-paper';
+import { Icon } from 'react-native-paper';
 import AuthenticationService from '../logic/AuthenticationService';
 import { ThemeContext } from '../theme/colourController';
 import { styles as screenStyles } from './PersonalScreen.styles';
@@ -256,7 +256,6 @@ export default function PersonalScreen() {
                                 label="View"
                                 active={true} // Always red for driving licence view
                                 onPress={() => setSelectedLicence(drivingLicence)}
-                                style={{ marginTop: 8 }}
                             />
                         </View>
                     ) : (

@@ -8,7 +8,7 @@ import {
     Alert,
 } from 'react-native';
 import Pdf from 'react-native-pdf';
-import { Button, Checkbox, Icon } from 'react-native-paper';
+import { Checkbox, Icon } from 'react-native-paper';
 import AuthenticationService from '../logic/AuthenticationService';
 import { ThemeContext } from '../theme/colourController';
 import { styles as screenStyles } from './DocumentsScreen.styles';
