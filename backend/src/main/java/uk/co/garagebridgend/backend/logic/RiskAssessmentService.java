@@ -11,6 +11,7 @@ import uk.co.garagebridgend.backend.repository.HazardRepository;
 import uk.co.garagebridgend.backend.repository.RiskAssessmentHazardRepository;
 import uk.co.garagebridgend.backend.repository.RiskAssessmentRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -182,5 +183,20 @@ public class RiskAssessmentService {
                     );
                 })
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Sets the actionComplete timestamp on a hazard to the current date/time,
+     * marking the action as completed and closing the hazard.
+     *
+     * @param hazardId the ID of the hazard to mark complete
+     * @throws NoSuchElementException if the hazard does not exist
+     */
+    public void markActionComplete(final Long hazardId) {
+        var hazard = hazardRepository.findById(hazardId)
+                .orElseThrow(() -> new NoSuchElementException("Hazard not found"));
+
+        hazard.setActionComplete(LocalDateTime.now());
+        hazardRepository.save(hazard);
     }
 }

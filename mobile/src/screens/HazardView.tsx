@@ -108,8 +108,25 @@ export default function HazardView({ hazardId, onBack }: Props) {
         );
     }
 
-    // Closed = locked checkbox, ticked
-    const canToggle = !isCompleted;
+    // Calls the backend to stamp actionComplete with the current timestamp.
+    const handleCompleteAction = async () => {
+        if (!hazard) return;
+        try {
+            const response = await AuthenticationService.fetch(
+                `/api/risk-assessment/hazard/${hazard.hazardId}/complete`,
+                { method: 'PATCH' }
+            );
+            if (!response.ok) {
+                console.error('Failed to complete hazard action:', response.status);
+                return;
+            }
+            // Lock the checkbox — from this point it behaves like a closed hazard
+            setActionCompleted(true);
+            setIsCompleted(true);
+        } catch (error) {
+            console.error('Error completing hazard action:', error);
+        }
+    };
 
     return (
         <ScrollView
@@ -160,20 +177,18 @@ export default function HazardView({ hazardId, onBack }: Props) {
                     styles={styles}
                 />
 
-                {/*
-                  Checkbox behaviour: greyed out if closed, interactive when submitted
-                */}
+                {/* Checkbox behaviour: greyed out if closed, interactive when submitted */}
                 <View style={styles.checkboxRow}>
                     <TouchableOpacity
-                        onPress={canToggle ? () => setActionCompleted(prev => !prev) : undefined}
-                        activeOpacity={canToggle ? 0.7 : 1}
+                        onPress={!isCompleted ? handleCompleteAction : undefined}
+                        activeOpacity={!isCompleted ? 0.7 : 1}
                     >
                         <Checkbox
                             status={actionCompleted ? 'checked' : 'unchecked'}
-                            color={canToggle ? theme.redPrimary : theme.greyIconLight}
+                            color={!isCompleted ? theme.redPrimary : theme.greyIconLight}
                         />
                     </TouchableOpacity>
-                    <Text style={[styles.checkboxLabel, !canToggle && styles.checkboxLabelDisabled]}>
+                    <Text style={[styles.checkboxLabel, isCompleted && styles.checkboxLabelDisabled]}>
                         Action completed
                     </Text>
                 </View>

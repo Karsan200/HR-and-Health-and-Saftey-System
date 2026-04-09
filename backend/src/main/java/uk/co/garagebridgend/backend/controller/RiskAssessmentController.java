@@ -2,10 +2,8 @@ package uk.co.garagebridgend.backend.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.RiskAssessmentService;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
@@ -79,5 +77,17 @@ public class RiskAssessmentController {
     @GetMapping("/hazards/drafts")
     public List<HazardResponse> getMyDraftHazards() {
         return riskAssessmentService.getMyDraftHazards();
+    }
+
+    @PatchMapping("/hazard/{id}/complete")
+    public ResponseEntity<Void> markActionComplete(@PathVariable final Long id) {
+        try {
+            riskAssessmentService.markActionComplete(id);
+            return ResponseEntity.noContent().build(); 
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to mark action complete");
+        }
     }
 }
