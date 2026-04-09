@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import HomeScreen from '../src/screens/HomeScreen';
+import AuthenticationService from '../src/logic/AuthenticationService.ts';
 
 jest.mock('react-native-wheel-color-picker', () => {
   return () => null;
@@ -9,6 +10,10 @@ jest.mock('react-native-wheel-color-picker', () => {
 jest.mock('react-native-paper', () => {
   const mockReact = require('react');
   const { Text, View } = require('react-native');
+
+  jest.mock('../src/logic/AuthenticationService.ts', () => ({
+    fetch: jest.fn(),
+  }));
 
   return {
     Avatar: {
@@ -20,20 +25,31 @@ jest.mock('react-native-paper', () => {
 });
 
 describe('HomeScreen', () => {
-  it('renders all main headings', () => {
-    const { getByText } = render(
-      <HomeScreen
-        onSelectHr={() => {}}
-        onSelectHealthSafety={() => {}}
-        onSelectSettings={() => {}}
-        onSelectProfile={() => {}}
-        onSelectNotifications={() => {}}
-        onSelectLogout={() => {}}
-      />,
+  it('renders welcome text and fetched user name', async () => {
+    (AuthenticationService.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        firstName: 'Maggie',
+        lastName: 'May',
+      }),
+    });
+
+    const { getByText, findByText } = render(
+        <HomeScreen
+            onSelectHr={() => {}}
+            onSelectHealthSafety={() => {}}
+            onSelectSettings={() => {}}
+            onSelectProfile={() => {}}
+            onSelectNotifications={() => {}}
+            onSelectLogout={() => {}}
+        />,
     );
 
     expect(getByText('Welcome Back')).toBeTruthy();
-    expect(getByText('Maggie May')).toBeTruthy();
+
+    // wait for async profile fetch
+    expect(await findByText('Maggie May')).toBeTruthy();
+
     expect(getByText('CHOOSE A SECTION')).toBeTruthy();
     expect(getByText('QUICK ACCESS')).toBeTruthy();
   });

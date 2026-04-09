@@ -2,17 +2,39 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react-native';
 import HandbookScreen from '../src/screens/HandbookScreen';
 import AuthenticationService from '../src/logic/AuthenticationService';
-import { Alert } from 'react-native';
-import Pdf from 'react-native-pdf';
+import { Alert, Platform } from 'react-native';
 
 jest.mock('../src/logic/AuthenticationService', () => ({
     fetch: jest.fn(),
 }));
 
 jest.mock('react-native-pdf', () => {
-    const React = require('react');
-    return (props: any) => React.createElement('Pdf', props);
+    return 'Pdf';
 });
+
+
+jest.mock('react-native-wheel-color-picker', () => null);
+
+
+jest.mock('react-native-blob-util', () => ({
+    __esModule: true,
+    default: {
+        config: jest.fn(() => ({
+            fetch: jest.fn(() =>
+                Promise.resolve({ path: () => '/storage/emulated/0/Download/test.pdf' })
+            ),
+        })),
+        fs: {
+            dirs: {
+                DownloadDir: '/storage/emulated/0/Download',
+                DocumentDir: '/data/user/0/com.frontend/files',
+            },
+        },
+        ios: {
+            presentOptionsMenu: jest.fn(),
+        },
+    },
+}));
 
 const mockFetch = AuthenticationService.fetch as jest.Mock;
 
@@ -20,11 +42,13 @@ const mockHandbooks = [
     {
         documentId: 1,
         title: 'Employee Handbook 2026',
+        lastUpdated: '06/01/2026',
         url: 'https://test/handbook.pdf',
     },
     {
         documentId: 2,
         title: 'Health & Safety Handbook',
+        lastUpdated: '18/10/2025',
         url: 'https://test/hs-handbook.pdf',
     },
 ];
@@ -34,13 +58,10 @@ describe('HandbookScreen', () => {
         jest.clearAllMocks();
     });
 
-    it('shows loading indicator initially', () => {
-        mockFetch.mockReturnValue(new Promise(() => {}));
-        render(<HandbookScreen />);
-        expect(screen.getByTestId('loading-indicator')).toBeTruthy();
-    });
-
-    it('renders handbooks after fetch', async () => {
+    /**
+     * Ensures last updated subtitles are formatted correctly.
+     */
+    it('renders formatted last updated subtitles', async () => {
         mockFetch.mockResolvedValueOnce({
             ok: true,
             json: async () => mockHandbooks,
@@ -49,12 +70,15 @@ describe('HandbookScreen', () => {
         render(<HandbookScreen />);
 
         await waitFor(() => {
-            expect(screen.getByText('Employee Handbook 2026')).toBeTruthy();
-            expect(screen.getByText('Health & Safety Handbook')).toBeTruthy();
+            expect(screen.getByText('Last Updated: 06/01/2026')).toBeTruthy();
+            expect(screen.getByText('Last Updated: 18/10/2025')).toBeTruthy();
         });
     });
 
-    it('opens PDF when a handbook is pressed', async () => {
+    /**
+     * Ensures pressing the same card again collapses it.
+     */
+    it('collapses card when pressed again', async () => {
         mockFetch.mockResolvedValueOnce({
             ok: true,
             json: async () => mockHandbooks,
@@ -62,45 +86,37 @@ describe('HandbookScreen', () => {
 
         render(<HandbookScreen />);
 
-        const handbookItem = await screen.findByText('Employee Handbook 2026');
-        fireEvent.press(handbookItem);
+        const card = await screen.findByText('Employee Handbook 2026');
 
-        expect(await screen.findByText('Back')).toBeTruthy();
-    });
-
-    it('returns to list when Back is pressed', async () => {
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            json: async () => mockHandbooks,
-        });
-
-        render(<HandbookScreen />);
-
-        const handbookItem = await screen.findByText('Employee Handbook 2026');
-        fireEvent.press(handbookItem);
-
-        const backButton = await screen.findByText('Back');
-        fireEvent.press(backButton);
+        fireEvent.press(card);
+        fireEvent.press(card);
 
         await waitFor(() => {
             expect(screen.getByText('Employee Handbook 2026')).toBeTruthy();
         });
     });
 
-    it('shows alert if fetch fails', async () => {
+    /**
+     * Handles API response not ok.
+     */
+    it('shows alert if API response not ok', async () => {
         const alertSpy = jest.spyOn(Alert, 'alert');
 
-        mockFetch.mockResolvedValueOnce({
-            ok: false,
-        });
+        mockFetch.mockResolvedValueOnce({ ok: false });
 
         render(<HandbookScreen />);
 
         await waitFor(() => {
-            expect(alertSpy).toHaveBeenCalledWith('Error', 'Failed to load handbooks.');
+            expect(alertSpy).toHaveBeenCalledWith(
+                'Error',
+                'Failed to load handbooks.'
+            );
         });
     });
 
+    /**
+     * Handles fetch throwing an error.
+     */
     it('shows alert on fetch error', async () => {
         const alertSpy = jest.spyOn(Alert, 'alert');
 
@@ -109,30 +125,35 @@ describe('HandbookScreen', () => {
         render(<HandbookScreen />);
 
         await waitFor(() => {
-            expect(alertSpy).toHaveBeenCalledWith('Error', 'An unexpected error occurred.');
+            expect(alertSpy).toHaveBeenCalledWith(
+                'Error',
+                'An unexpected error occurred.'
+            );
         });
     });
 
-    it('handles PDF load error', async () => {
+    /**
+     * Ensures pressing the download button triggers the download and shows a success alert.
+     */
+    it('shows downloaded alert when download button is pressed', async () => {
         const alertSpy = jest.spyOn(Alert, 'alert');
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+        jest.replaceProperty(Platform, 'OS', 'android');
 
         mockFetch.mockResolvedValueOnce({
             ok: true,
             json: async () => mockHandbooks,
         });
 
-        const { UNSAFE_getByType } = render(<HandbookScreen />);
+        render(<HandbookScreen />);
 
-        const handbookItem = await screen.findByText('Employee Handbook 2026');
-        fireEvent.press(handbookItem);
+        const downloadButtons = await screen.findAllByTestId('download-button');
+        fireEvent.press(downloadButtons[0]);
 
-        const PdfComponent: any = UNSAFE_getByType(Pdf);
-        PdfComponent.props.onError('PDF failed');
-
-        expect(consoleSpy).toHaveBeenCalled();
-        expect(alertSpy).toHaveBeenCalledWith('Error', 'Failed to load PDF.');
-
-        consoleSpy.mockRestore();
+        await waitFor(() => {
+            expect(alertSpy).toHaveBeenCalledWith(
+                'Downloaded',
+                'Employee Handbook 2026 saved to Downloads.'
+            );
+        });
     });
 });

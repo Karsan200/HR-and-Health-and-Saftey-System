@@ -2,34 +2,58 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react-native';
 import PayslipScreen from '../src/screens/PayslipScreen';
 import AuthenticationService from '../src/logic/AuthenticationService';
-import { Alert } from 'react-native';
-import Pdf from 'react-native-pdf';
+import {Alert, Platform} from 'react-native';
 
 jest.mock('../src/logic/AuthenticationService', () => ({
     fetch: jest.fn(),
 }));
 
 jest.mock('react-native-pdf', () => {
-    const React = require('react');
-    return (props: any) => {
-        return React.createElement('Pdf', props);
-    };
+    return 'Pdf';
 });
 
+jest.mock('react-native-wheel-color-picker', () => null);
+
+jest.mock('react-native-blob-util', () => ({
+    __esModule: true,
+    default: {
+        config: jest.fn(() => ({
+            fetch: jest.fn(() =>
+                Promise.resolve({ path: () => '/storage/emulated/0/Download/test.pdf' })
+            ),
+        })),
+        fs: {
+            dirs: {
+                DownloadDir: '/storage/emulated/0/Download',
+                DocumentDir: '/data/user/0/com.frontend/files',
+            },
+        },
+        ios: {
+            presentOptionsMenu: jest.fn(),
+        },
+    },
+}));
 const mockFetch = AuthenticationService.fetch as jest.Mock;
 
 const mockPayslips = [
     {
-        name: 'January Payslip',
+        name: 'payslip_jan_2026',
         year: 2026,
         month: 1,
         isPSixty: false,
         url: 'https://test/jan.pdf',
     },
     {
-        name: 'P60 Document',
+        name: 'payslip_feb_2026',
+        year: 2026,
+        month: 2,
+        isPSixty: false,
+        url: 'https://test/feb.pdf',
+    },
+    {
+        name: 'p60_2025',
         year: 2025,
-        month: 12,
+        month: 4,
         isPSixty: true,
         url: 'https://test/p60.pdf',
     },
@@ -42,91 +66,23 @@ describe('PayslipScreen', () => {
     });
 
     /**
-     * Ensures loading indicator appears before data loads.
+     * Ensures pressing the same card again collapses it.
      */
-    it('shows loading indicator initially', () => {
-
-        mockFetch.mockReturnValue(new Promise(() => {}));
-
-        render(<PayslipScreen />);
-
-        expect(screen.getByTestId('loading-indicator')).toBeTruthy();
-    });
-
-    /**
-     * Ensures payslips render when fetch succeeds.
-     */
-    it('renders payslips from API', async () => {
-
+    it('collapses card when pressed again', async () => {
         mockFetch.mockResolvedValueOnce({
             ok: true,
             json: async () => mockPayslips,
         });
 
         render(<PayslipScreen />);
+
+        const card = await screen.findByText('January 2026');
+
+        fireEvent.press(card);
+        fireEvent.press(card);
 
         await waitFor(() => {
-            expect(screen.getByText('January Payslip')).toBeTruthy();
-            expect(screen.getByText('1/2026')).toBeTruthy();
-        });
-    });
-
-    /**
-     * Ensures P60 label renders when isPSixty = true.
-     */
-    it('renders P60 label when applicable', async () => {
-
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            json: async () => mockPayslips,
-        });
-
-        render(<PayslipScreen />);
-
-        await waitFor(() => {
-            expect(screen.getByText('P60')).toBeTruthy();
-        });
-    });
-
-    /**
-     * Ensures pressing a payslip opens the PDF viewer.
-     */
-    it('opens PDF when payslip pressed', async () => {
-
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            json: async () => mockPayslips,
-        });
-
-        render(<PayslipScreen />);
-
-        const item = await screen.findByText('January Payslip');
-
-        fireEvent.press(item);
-
-        expect(await screen.findByText('Back')).toBeTruthy();
-    });
-
-    /**
-     * Ensures back button returns to the list.
-     */
-    it('returns to list when Back pressed', async () => {
-
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            json: async () => mockPayslips,
-        });
-
-        render(<PayslipScreen />);
-
-        const item = await screen.findByText('January Payslip');
-        fireEvent.press(item);
-
-        const backButton = await screen.findByText('Back');
-        fireEvent.press(backButton);
-
-        await waitFor(() => {
-            expect(screen.getByText('January Payslip')).toBeTruthy();
+            expect(screen.getByText('January 2026')).toBeTruthy();
         });
     });
 
@@ -134,12 +90,9 @@ describe('PayslipScreen', () => {
      * Handles API response not ok.
      */
     it('shows alert if API response not ok', async () => {
-
         const alertSpy = jest.spyOn(Alert, 'alert');
 
-        mockFetch.mockResolvedValueOnce({
-            ok: false,
-        });
+        mockFetch.mockResolvedValueOnce({ ok: false });
 
         render(<PayslipScreen />);
 
@@ -155,7 +108,6 @@ describe('PayslipScreen', () => {
      * Handles fetch throwing an error.
      */
     it('shows alert on fetch error', async () => {
-
         const alertSpy = jest.spyOn(Alert, 'alert');
 
         mockFetch.mockRejectedValueOnce(new Error('Network error'));
@@ -171,34 +123,46 @@ describe('PayslipScreen', () => {
     });
 
     /**
-     * Handles PDF load error.
+     * Ensures pressing the download button triggers the download and shows a success alert.
      */
-    it('handles PDF loading error', async () => {
-
+    it('shows downloaded alert when download button is pressed', async () => {
         const alertSpy = jest.spyOn(Alert, 'alert');
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+        jest.replaceProperty(Platform, 'OS', 'android'); // ADD THIS
 
         mockFetch.mockResolvedValueOnce({
             ok: true,
             json: async () => mockPayslips,
         });
 
-        const { UNSAFE_getByType } = render(<PayslipScreen />);
+        render(<PayslipScreen />);
 
-        const item = await screen.findByText('January Payslip');
-        fireEvent.press(item);
+        const downloadButtons = await screen.findAllByTestId('download-button');
+        fireEvent.press(downloadButtons[0]);
 
-        const PdfComponent: any = UNSAFE_getByType(Pdf);
-
-        PdfComponent.props.onError('PDF failed');
-
-        expect(consoleSpy).toHaveBeenCalled();
-        expect(alertSpy).toHaveBeenCalledWith(
-            'Error',
-            'Failed to load PDF.'
-        );
-
-        consoleSpy.mockRestore();
+        await waitFor(() => {
+            expect(alertSpy).toHaveBeenCalledWith(
+                'Downloaded',
+                'January 2026 saved to Downloads.'
+            );
+        });
     });
 
+    /**
+     * Ensures P60 title uses the previous year's tax year when month is before April (month < 4).
+     */
+    it('renders correct P60 title when month is before April', async () => {
+        const marchP60 = [{ name: 'p60_march', year: 2025, month: 3, isPSixty: true, url: 'https://test/p60.pdf' }];
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => marchP60,
+        });
+
+        render(<PayslipScreen />);
+
+        await waitFor(() => {
+            // Month is March (< 4), so tax year-end is 2025 - 1 = 2024, giving 2023/24
+            expect(screen.getByText('P60 – Tax Year 2023/24')).toBeTruthy();
+        });
+    });
 });

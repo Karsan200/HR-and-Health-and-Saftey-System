@@ -17,7 +17,8 @@ import RiskAssessments from "../screens/RiskAssessments.tsx";
 import PayslipScreen from '../screens/PayslipScreen.tsx';
 import DocumentsScreen from '../screens/DocumentsScreen.tsx';
 import HandbookScreen from "../screens/HandbookScreen.tsx";
-import PersonalScreen from "../screens/PersonalScreen.tsx";
+import PersonalScreen from '../screens/PersonalScreen.tsx';
+import ClockInScreen from '../screens/ClockInScreen.tsx';
 
 export function ScreenConfig(body: ScreenConfigProps) {
   // Defaulting to the calendar screen when the HR section is selected.
@@ -85,18 +86,24 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'payslips':
       return (
         <>
-          <TopNavBar title="Payslips" />
-          <View style={styles.content} />
+          <TopNavBar
+            title="Payslips"
+          />
+          <View style={styles.content} >
             <PayslipScreen />
+            </View>
         </>
       );
 
     case 'handbook':
       return (
         <>
-          <TopNavBar title="Handbook" />
-          <View style={styles.content} />
+          <TopNavBar
+            title="Handbook"
+          />
+          <View style={styles.content} >
             <HandbookScreen />
+            </View>
         </>
       );
 
@@ -104,7 +111,9 @@ export function ScreenConfig(body: ScreenConfigProps) {
       return (
         <>
           <TopNavBar title="Clock-In" />
-          <View style={styles.content} />
+          <View style={styles.content}>
+            <ClockInScreen/>
+          </View>
         </>
       );
 
@@ -121,9 +130,12 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'documents':
       return (
         <>
-          <TopNavBar title="Documents" />
-          <View style={styles.content} />
+          <TopNavBar
+            title="Documents"
+          />
+          <View style={styles.content}>
             <DocumentsScreen />
+            </View>
         </>
       );
 
@@ -156,9 +168,12 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'personal':
       return (
         <>
-          <TopNavBar title="Personal" />
-          <View style={styles.content} />
+          <TopNavBar
+            title="Personal"
+          />
+          <View style={styles.content}>
             <PersonalScreen />
+            </View>
         </>
       );
 

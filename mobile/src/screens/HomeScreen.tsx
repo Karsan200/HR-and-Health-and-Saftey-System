@@ -1,8 +1,9 @@
-import React, { useContext } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { ScrollView, Text, View, Pressable } from 'react-native';
 import { Avatar, IconButton } from 'react-native-paper';
 import { homeStyles as styles } from './HomeScreen.styles';
 import { ThemeContext } from '../theme/colourController';
+import AuthenticationService from "../logic/AuthenticationService.ts";
 
 type HomeScreenProps = {
   onSelectHr: () => void;
@@ -11,6 +12,11 @@ type HomeScreenProps = {
   onSelectProfile: () => void;
   onSelectLogout: () => void;
   onSelectNotifications: () => void;
+};
+
+type Profile = {
+    firstName: string;
+    lastName: string;
 };
 
 export default function HomeScreen({
@@ -24,8 +30,30 @@ export default function HomeScreen({
   // Pull the current theme from the ThemeContext
   const { theme, accessibility } = useContext(ThemeContext);
   const themedStyles = styles(theme, accessibility);
+    const [profile, setProfile] = useState<Profile | null>(null);
 
-  return (
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const response = await AuthenticationService.fetch('/api/profile/me');
+                if (response.ok) {
+                    const data = await response.json();
+                    setProfile({ firstName: data.firstName, lastName: data.lastName });
+                }
+            } catch {
+            }
+        };
+
+        fetchProfile();
+    }, []);
+
+
+    const displayName = profile
+        ? `${profile.firstName} ${profile.lastName}`
+        : '';
+
+    return (
     <ScrollView contentContainerStyle={themedStyles.container}>
       {/* Profile Icon */}
       <Avatar.Icon
@@ -37,7 +65,7 @@ export default function HomeScreen({
 
       {/* Welcome Text */}
       <Text style={themedStyles.welcomeText}>Welcome Back</Text>
-      <Text style={themedStyles.userName}>Maggie May</Text>
+      <Text style={themedStyles.userName}>{displayName}</Text>
 
       {/* Section Selection */}
       <Text style={themedStyles.sectionTitle}>CHOOSE A SECTION</Text>

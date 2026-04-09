@@ -42,6 +42,10 @@ public class DocumentTable {
     @Column(columnDefinition = "TEXT", name = "title", nullable = false)
     private String title;
 
+    /** Boolean to indicate whether a signature is required for this document. */
+    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE", name = "signature_required", nullable = false)
+    private boolean signatureRequired;
+
     /** Creation timestamp (auto-populated, not updatable). */
     @CreationTimestamp
     @Column(name = "created", nullable = false, updatable = false)

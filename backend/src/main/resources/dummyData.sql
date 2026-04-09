@@ -164,6 +164,9 @@ INSERT INTO files_table (
       ('d1b2c3d4-e5f6-7890-dcba-ef1234567890', 1, 1,
        'safety_policy', 'pdf', '2025-02-14 10:00:00'),
 
+      ('3cc58063-df14-4e45-bce0-15f30f5d08ff', 1, 2,
+       'driving_licence_mmay', 'pdf', '2026-01-15 10:00:00'),
+
       ('b1c2d3e4-f5a6-7890-bcde-123456abcdef', 1, 1,
        'employee_handbook', 'pdf', '2026-03-24 10:00:00'),
 
@@ -233,6 +236,8 @@ INSERT INTO files_table (
       (UUID(), 5, 2,
        'payslip_feb_2026_droberts', 'pdf', '2026-02-28 17:00:00'),
 
+      (UUID(), 1, 2,
+       'p60_2025_mmay', 'pdf', '2025-04-05 17:00:00'),
 
       (UUID(), 6, 2,
        'payslip_jan_2026_lwilliams', 'pdf', '2026-01-31 17:00:00'),
@@ -270,43 +275,48 @@ INSERT INTO files_table (
 INSERT INTO document_table (
     file_id,
     title,
+    signature_required,
     created
 ) VALUES
       ((SELECT file_id FROM files_table WHERE name = 'safety_policy'),
-       'Company Safety Policy', '2025-02-14 10:00:00'),
+       'Company Safety Policy v2.1', FALSE,'2025-02-14 10:00:00'),
 
-      ('b1c2d3e4-f5a6-7890-bcde-123456abcdef',
-       'Employee Handbook', '2026-03-24 10:05:00'),
+      ((SELECT file_id FROM files_table WHERE name ='employee_handbook'),
+       'Employee Handbook', FALSE, '2026-03-24 10:05:00'),
+
+
+      ('3cc58063-df14-4e45-bce0-15f30f5d08ff',
+       'Driving Licence', FALSE,'2026-01-15 10:05:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'sop_fire_safety'),
-       'SOP: Fire Safety Procedures', '2025-02-14 10:10:00'),
+       'SOP: Fire Safety Procedures v5', FALSE, '2025-02-14 10:10:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'sop_equipment_procedures'),
-       'SOP: Equipment Handling Instructions', '2025-02-14 10:15:00'),
+       'SOP: Equipment Handling Instructions', FALSE, '2025-02-14 10:15:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'fire_safety'),
-       'Fire Safety Guidelines', '2025-02-14 10:05:00'),
+       'Fire Safety Guidelines', True, '2025-02-14 10:05:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'training_manual'),
-       'Employee Training Manual', '2025-03-02 11:00:00'),
+       'Employee Training Manual v3.0', True, '2025-03-02 11:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'hr_guidelines'),
-       'HR Guidelines', '2025-04-18 15:00:00'),
+       'HR Guidelines', True, '2025-04-18 15:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'hazard_report_template'),
-       'Hazard Report Template', '2025-05-29 12:00:00'),
+       'Hazard Report Template v1',True, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
 
       ((SELECT file_id FROM files_table WHERE name = 'equipment_safety'),
-       'Equipment Safety Procedures', '2025-07-12 09:00:00'),
+       'Equipment Safety Procedures', True, '2025-07-12 09:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'workshop_rules'),
-       'Workshop Rules', '2025-08-20 17:00:00'),
+       'Workshop Rules v4.3', FALSE, '2025-08-20 17:00:00'),
 
       ((SELECT file_id FROM files_table WHERE name = 'health_policy'),
-       'Health and Safety Policy', '2025-09-15 14:00:00'),
+       'Health and Safety Policy', True, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
 
       ((SELECT file_id FROM files_table WHERE name = 'emergency_procedures'),
-       'Emergency Procedures', '2025-10-30 18:00:00');
+       'Emergency Procedures', True, CURRENT_TIMESTAMP);
 
 INSERT INTO hazard_table (
     account_id,
@@ -819,7 +829,7 @@ INSERT INTO settings_table (
     silent_end
 ) VALUES
       (1, FALSE, FALSE, FALSE,
-       FALSE, FALSE, NULL, NULL),
+       FALSE, FALSE, '22:00:00', '07:00:00'),
 
       (2, FALSE, FALSE,
        FALSE, FALSE, FALSE, '22:00:00', '07:00:00'),
@@ -859,11 +869,11 @@ INSERT INTO leave_type_table (
     colour_bg,
     icon_type
 ) VALUES
-      ('Holiday', '14A45A', 'D0EDDE', 'sunbed'),
-      ('Sick Leave', 'D20414', 'F6CDD0', 'medical'),
-      ('Emergency Leave', 'E8960A', 'FFECCD', 'warning'),
-      ('Maternity/Paternity Leave', 'D20414', 'F6CDD0', 'medical'),
-      ('Unpaid Leave', '588FFF', 'E6ECF9', 'cross');
+      ('Holiday', '14A45A', 'D0EDDE', 'beach_access'),
+      ('Sick Leave', 'D20414', 'F6CDD0', 'sick'),
+      ('Emergency Leave', 'E8960A', 'FFECCD', 'priority_high'),
+      ('Maternity/Paternity Leave', 'ad32a7', 'edd1ec', 'child_care'),
+      ('Unpaid Leave', '588FFF', 'E6ECF9', 'money_off');
 
 INSERT INTO leave_table (
     account_id,
@@ -905,6 +915,14 @@ INSERT INTO leave_table (
        TRUE,
        'Family emergency.',
        'Approved immediately.',
+       CURRENT_TIMESTAMP),
+
+      (1,3,
+       '2026-05-10 00:00:00',
+       '2026-05-14 00:00:00',
+       FALSE,
+       'Family emergency.',
+       NULL,
        CURRENT_TIMESTAMP),
 
       (6,4,
@@ -994,6 +1012,9 @@ INSERT INTO payslips_table (
 
       ((SELECT file_id FROM files_table WHERE name = 'payslip_feb_2026_mmay'),
        2026, 2, FALSE),
+
+      ((SELECT file_id FROM files_table WHERE name = 'p60_2025_mmay'),
+       2025, 4, TRUE),
 
       ((SELECT file_id FROM files_table WHERE name = 'payslip_jan_2026_droberts'),
        2026, 1, FALSE),
