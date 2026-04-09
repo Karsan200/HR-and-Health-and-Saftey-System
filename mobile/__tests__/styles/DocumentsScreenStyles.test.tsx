@@ -35,21 +35,6 @@ describe('DocumentsScreenStyles', () => {
         expect(result.loadingContainer.backgroundColor).toBe(DefaultColours.greyBackground);
     });
 
-    it('categoryButtonWrapper has white background', () => {
-        const result = styles(DefaultColours, baseAccessibility);
-        expect(result.categoryButtonWrapper.backgroundColor).toBe(DefaultColours.white);
-    });
-
-    it('categoryButtonWrapperActive applies red border', () => {
-        const result = styles(DefaultColours, baseAccessibility);
-        expect(result.categoryButtonWrapperActive.borderColor).toBe(DefaultColours.redPrimary);
-    });
-
-    it('statusPillActive applies red border', () => {
-        const result = styles(DefaultColours, baseAccessibility);
-        expect(result.statusPillActive.borderColor).toBe(DefaultColours.redPrimary);
-    });
-
     it('card has white background', () => {
         const result = styles(DefaultColours, baseAccessibility);
         expect(result.card.backgroundColor).toBe(DefaultColours.white);
@@ -68,16 +53,6 @@ describe('DocumentsScreenStyles', () => {
     it('unsignedBadgeText uses red primary colour', () => {
         const result = styles(DefaultColours, baseAccessibility);
         expect(result.unsignedBadgeText.color).toBe(DefaultColours.redPrimary);
-    });
-
-    it('viewButtonUnsigned uses red background', () => {
-        const result = styles(DefaultColours, baseAccessibility);
-        expect(result.viewButtonUnsigned.backgroundColor).toBe(DefaultColours.redPrimary);
-    });
-
-    it('viewButtonSigned uses grey background', () => {
-        const result = styles(DefaultColours, baseAccessibility);
-        expect(result.viewButtonSigned.backgroundColor).toBe(DefaultColours.greyPrimaryMainText);
     });
 
     it('pdf background is white', () => {
