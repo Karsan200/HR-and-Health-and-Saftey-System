@@ -11,5 +11,5 @@ export const AppSettings = {
   CDN_URL: 'https://cdn-ltp.tomsw.uk',
 
   // BLE Service ID for advertising
-  BLE_SERVICE_UUID: 'FFFF',
+  BLE_SERVICE_UUID: '0000FFFF-0000-1000-8000-00805F9B34FB',
 };

@@ -8,7 +8,7 @@ export interface BleBroadcastTaskArgs {
 async function startBleAdvertising(broadcastId: string) {
   startAdvertising({
     serviceUUIDs: [AppSettings.BLE_SERVICE_UUID],
-    localName: 'Rent-A-Tech Utility',
+    localName: `R.A.T ${broadcastId}`,
   });
 
   setServices([
