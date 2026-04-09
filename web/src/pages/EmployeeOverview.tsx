@@ -10,6 +10,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
 import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
@@ -49,6 +50,28 @@ const formatDateRange = (startDate: string, endDate: string): string => {
     return `${startText} - ${endText}`;
 };
 
+const formatHoursWorked = (hoursWorked: number): string => {
+    return Number.isInteger(hoursWorked) ? `${hoursWorked}` : hoursWorked.toFixed(1);
+};
+
+const buildPayslipMonthOptions = (numberOfMonths: number): string[] => {
+    const options: string[] = [];
+    const baseDate = new Date();
+
+    for (let monthOffset = 0; monthOffset < numberOfMonths; monthOffset += 1) {
+        const monthDate = new Date(baseDate.getFullYear(), baseDate.getMonth() - monthOffset, 1);
+
+        options.push(
+            monthDate.toLocaleDateString("en-GB", {
+                month: "long",
+                year: "numeric",
+            })
+        );
+    }
+
+    return options;
+};
+
 export function EmployeeOverview() {
     const { authenticationService } = useAuth();
 
@@ -56,10 +79,14 @@ export function EmployeeOverview() {
     const [search, setSearch] = useState("");
     const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
     const [selectedEmployee, setSelectedEmployee] = useState<EmployeeOverviewResponse | null>(null);
-    const [selectedPayslipMonth, setSelectedPayslipMonth] = useState("");
     const [listError, setListError] = useState<string | null>(null);
 
     const sanitisedSearch = useMemo(() => sanitiseEmployeeSearch(search), [search]);
+
+    const payslipMonthOptions = useMemo(() => buildPayslipMonthOptions(12), []);
+    const [selectedPayslipMonth, setSelectedPayslipMonth] = useState<string>(
+        () => payslipMonthOptions[0] ?? ""
+    );
 
     useEffect(() => {
         let isMounted = true;
@@ -135,18 +162,26 @@ export function EmployeeOverview() {
         };
     }, [authenticationService, selectedEmployeeId]);
 
+    const handlePayslipMonthChange = (event: SelectChangeEvent) => {
+        setSelectedPayslipMonth(event.target.value);
+    };
+
     return (
         <Box sx={styles.pageContainer}>
             <Box sx={styles.content}>
                 <Box sx={styles.layout}>
                     <Paper elevation={0} sx={styles.sideCard}>
                         <Box sx={styles.sideHeader}>
-                            <Typography variant="h6">
+                            <Typography sx={styles.sideTitle}>
                                 Employees ({employees.length})
                             </Typography>
 
-                            <IconButton onClick={() => void 0}>
-                                <AddRoundedIcon />
+                            <IconButton
+                                aria-label="Add employee"
+                                onClick={() => void 0}
+                                sx={styles.addEmployeeButton}
+                            >
+                                <AddRoundedIcon sx={styles.addEmployeeButtonIcon} />
                             </IconButton>
                         </Box>
 
@@ -160,7 +195,7 @@ export function EmployeeOverview() {
                                 input: {
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <SearchRoundedIcon />
+                                            <SearchRoundedIcon sx={styles.searchIcon} />
                                         </InputAdornment>
                                     ),
                                 },
@@ -192,13 +227,25 @@ export function EmployeeOverview() {
                                                     isSelected && styles.employeeListItemSelected,
                                                 ]}
                                             >
-                                                <Box sx={styles.employeeListItemIconWrapper}>
-                                                    <PersonOutlineRoundedIcon />
+                                                <Box
+                                                    sx={[
+                                                        styles.employeeListItemIconWrapper,
+                                                        isSelected && styles.employeeListItemIconWrapperSelected,
+                                                    ]}
+                                                >
+                                                    <PersonOutlineRoundedIcon
+                                                        sx={[
+                                                            styles.employeeListItemIcon,
+                                                            isSelected && styles.employeeListItemIconSelected,
+                                                        ]}
+                                                    />
                                                 </Box>
 
                                                 <Box sx={styles.employeeListItemText}>
-                                                    <Typography>{employee.fullName}</Typography>
-                                                    <Typography variant="body2">
+                                                    <Typography sx={styles.employeeListItemName}>
+                                                        {employee.fullName}
+                                                    </Typography>
+                                                    <Typography sx={styles.employeeListItemPosition}>
                                                         {employee.position}
                                                     </Typography>
                                                 </Box>
@@ -211,79 +258,117 @@ export function EmployeeOverview() {
                     </Paper>
 
                     {selectedEmployeeId === null || selectedEmployee === null ? (
-                        <Box sx={styles.emptyState}>
-                            <Box>
-                                <PersonOutlineRoundedIcon fontSize="large" />
-                                <Typography variant="h6">
+                        <Paper elevation={0} sx={styles.emptyStateCard}>
+                            <Box sx={styles.emptyStateContent}>
+                                <PersonOutlineRoundedIcon sx={styles.emptyStateIcon} />
+
+                                <Typography sx={styles.emptyStateTitle}>
                                     Select an Employee
                                 </Typography>
-                                <Typography variant="body2">
+
+                                <Typography sx={styles.emptyStateSubtitle}>
                                     Choose an employee from the list to view their details
                                 </Typography>
                             </Box>
-                        </Box>
+                        </Paper>
                     ) : (
                         <Paper elevation={0} sx={styles.detailsCard}>
-                            <Box sx={styles.employeeHeader}>
-                                <Box>
-                                    <Typography variant="h5">
-                                        {selectedEmployee.fullName}
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        {selectedEmployee.position}
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        {selectedEmployee.email}
-                                    </Typography>
+                            <Box sx={styles.employeeHeaderCard}>
+                                <Box sx={styles.employeeHeaderLeft}>
+                                    <Box sx={styles.employeeHeaderIconWrapper}>
+                                        <PersonOutlineRoundedIcon sx={styles.employeeHeaderIcon} />
+                                    </Box>
+
+                                    <Box sx={styles.employeeHeaderText}>
+                                        <Typography sx={styles.employeeHeaderName}>
+                                            {selectedEmployee.fullName}
+                                        </Typography>
+                                        <Typography sx={styles.employeeHeaderPosition}>
+                                            {selectedEmployee.position}
+                                        </Typography>
+                                        <Typography sx={styles.employeeHeaderEmail}>
+                                            {selectedEmployee.email}
+                                        </Typography>
+                                    </Box>
                                 </Box>
 
-                                <IconButton>
-                                    <EditOutlinedIcon />
+                                <IconButton
+                                    aria-label="Edit employee"
+                                    onClick={() => void 0}
+                                    sx={styles.employeeHeaderEditButton}
+                                >
+                                    <EditOutlinedIcon sx={styles.employeeHeaderEditIcon} />
                                 </IconButton>
                             </Box>
 
                             <Box sx={styles.statsRow}>
                                 <Paper elevation={0} sx={styles.statCard}>
-                                    <Box sx={styles.sectionHeader}>
-                                        <AccessTimeRoundedIcon />
-                                        <Typography variant="subtitle1">
-                                            Hours Worked
-                                        </Typography>
+                                    <Box sx={styles.statCardTopRow}>
+                                        <Box sx={styles.hoursWorkedIconWrapper}>
+                                            <AccessTimeRoundedIcon sx={styles.hoursWorkedIcon} />
+                                        </Box>
+
+                                        <Box sx={styles.statCardTopRowText}>
+                                            <Typography sx={styles.statCardPeriodText}>
+                                                This Month
+                                            </Typography>
+
+                                            <Typography sx={styles.statCardValue}>
+                                                {formatHoursWorked(selectedEmployee.hoursWorkedThisMonth)} hours
+                                            </Typography>
+                                        </Box>
                                     </Box>
-                                    <Typography>
-                                        {selectedEmployee.hoursWorkedThisMonth} hours this month
+
+                                    <Typography sx={styles.statCardLabel}>
+                                        Hours Worked
                                     </Typography>
                                 </Paper>
 
                                 <Paper elevation={0} sx={styles.statCard}>
-                                    <Box sx={styles.sectionHeader}>
-                                        <WarningAmberRoundedIcon />
-                                        <Typography variant="subtitle1">
-                                            Lates
-                                        </Typography>
+                                    <Box sx={styles.statCardTopRow}>
+                                        <Box sx={styles.latesIconWrapper}>
+                                            <WarningAmberRoundedIcon sx={styles.latesIcon} />
+                                        </Box>
+
+                                        <Box sx={styles.statCardTopRowText}>
+                                            <Typography sx={styles.statCardPeriodText}>
+                                                This Month
+                                            </Typography>
+
+                                            <Typography sx={styles.statCardValue}>
+                                                {selectedEmployee.latesThisMonth}
+                                            </Typography>
+                                        </Box>
                                     </Box>
-                                    <Typography>
-                                        {selectedEmployee.latesThisMonth} this month
+
+                                    <Typography sx={styles.statCardLabel}>
+                                        Late
                                     </Typography>
                                 </Paper>
                             </Box>
 
                             <Paper elevation={0} sx={styles.sectionCard}>
                                 <Box sx={styles.sectionHeader}>
-                                    <EventAvailableRoundedIcon />
-                                    <Typography variant="subtitle1">
+                                    <Box sx={styles.timeOffIconWrapper}>
+                                        <EventAvailableRoundedIcon sx={styles.timeOffIcon} />
+                                    </Box>
+
+                                    <Typography sx={styles.sectionTitle}>
                                         Upcoming Time Off
                                     </Typography>
                                 </Box>
 
                                 {selectedEmployee.upcomingLeave === null ? (
-                                    <Typography>No upcoming approved leave</Typography>
+                                    <Typography sx={styles.sectionEmptyText}>
+                                        No upcoming approved leave
+                                    </Typography>
                                 ) : (
-                                    <Box>
-                                        <Typography>
+                                    <Box sx={styles.sectionContent}>
+                                        <Typography sx={styles.leaveTypeChip}>
                                             {selectedEmployee.upcomingLeave.leaveType}
                                         </Typography>
-                                        <Typography>
+
+                                        <Typography sx={styles.sectionMainText}>
                                             {formatDateRange(
                                                 selectedEmployee.upcomingLeave.startDate,
                                                 selectedEmployee.upcomingLeave.endDate
@@ -295,41 +380,66 @@ export function EmployeeOverview() {
 
                             <Paper elevation={0} sx={styles.sectionCard}>
                                 <Box sx={styles.sectionHeader}>
-                                    <SchoolOutlinedIcon />
-                                    <Typography variant="subtitle1">
+                                    <Box sx={styles.learningIconWrapper}>
+                                        <SchoolOutlinedIcon sx={styles.learningIcon} />
+                                    </Box>
+
+                                    <Typography sx={styles.sectionTitle}>
                                         College and Learning Days
                                     </Typography>
                                 </Box>
 
-                                <Typography>Not yet implemented</Typography>
+                                <Box sx={styles.sectionContent}>
+                                    <Typography sx={styles.sectionSecondaryLabel}>
+                                        Education Type
+                                    </Typography>
+
+                                    <Typography sx={styles.sectionEmptyText}>
+                                        No learning day information available
+                                    </Typography>
+                                </Box>
                             </Paper>
 
                             <Paper elevation={0} sx={styles.sectionCard}>
                                 <Box sx={styles.sectionHeader}>
-                                    <DescriptionOutlinedIcon />
-                                    <Typography variant="subtitle1">
+                                    <Box sx={styles.payslipIconWrapper}>
+                                        <DescriptionOutlinedIcon sx={styles.payslipIcon} />
+                                    </Box>
+
+                                    <Typography sx={styles.sectionTitle}>
                                         Payslip Management
                                     </Typography>
                                 </Box>
 
-                                <Box sx={styles.payslipRow}>
-                                    <Select
-                                        fullWidth
-                                        value={selectedPayslipMonth}
-                                        onChange={(event) => setSelectedPayslipMonth(event.target.value)}
-                                    >
-                                        <MenuItem value="January 2026">January 2026</MenuItem>
-                                        <MenuItem value="February 2026">February 2026</MenuItem>
-                                        <MenuItem value="March 2026">March 2026</MenuItem>
-                                    </Select>
+                                <Box sx={styles.sectionContent}>
+                                    <Typography sx={styles.sectionSecondaryLabel}>
+                                        Upload New Payslip
+                                    </Typography>
 
-                                    <Button
-                                        variant="contained"
-                                        startIcon={<UploadRoundedIcon />}
-                                        onClick={() => void 0}
-                                    >
-                                        Upload
-                                    </Button>
+                                    <Box sx={styles.payslipRow}>
+                                        <Select
+                                            fullWidth
+                                            displayEmpty
+                                            value={selectedPayslipMonth}
+                                            onChange={handlePayslipMonthChange}
+                                            sx={styles.payslipSelect}
+                                        >
+                                            {payslipMonthOptions.map((monthOption) => (
+                                                <MenuItem key={monthOption} value={monthOption}>
+                                                    {monthOption}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+
+                                        <Button
+                                            variant="contained"
+                                            startIcon={<UploadRoundedIcon />}
+                                            onClick={() => void 0}
+                                            sx={styles.uploadButton}
+                                        >
+                                            Upload
+                                        </Button>
+                                    </Box>
                                 </Box>
                             </Paper>
                         </Paper>
