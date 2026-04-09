@@ -83,7 +83,7 @@ public class RiskAssessmentController {
     public ResponseEntity<Void> markActionComplete(@PathVariable final Long id) {
         try {
             riskAssessmentService.markActionComplete(id);
-            return ResponseEntity.noContent().build(); 
+            return ResponseEntity.noContent().build();
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (Exception e) {

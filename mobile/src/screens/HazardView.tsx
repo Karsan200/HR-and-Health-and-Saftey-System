@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import {View, Text, ScrollView, ActivityIndicator, TouchableOpacity, Alert} from 'react-native';
 
 import { Checkbox } from 'react-native-paper';
 import AuthenticationService from '../logic/AuthenticationService.ts';
@@ -128,6 +128,24 @@ export default function HazardView({ hazardId, onBack }: Props) {
         }
     };
 
+    //Confirmation that the action is complete before timestamping
+    const confirmCompleteAction = () => {
+        Alert.alert(
+            "Complete Action",
+            "Are you sure you want to mark this action as completed?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                {
+                    text: "Yes",
+                    onPress: handleCompleteAction
+                }
+            ]
+        );
+    };
+
     return (
         <ScrollView
             style={styles.screen}
@@ -180,7 +198,7 @@ export default function HazardView({ hazardId, onBack }: Props) {
                 {/* Checkbox behaviour: greyed out if closed, interactive when submitted */}
                 <View style={styles.checkboxRow}>
                     <TouchableOpacity
-                        onPress={!isCompleted ? handleCompleteAction : undefined}
+                        onPress={!isCompleted ? confirmCompleteAction : undefined}
                         activeOpacity={!isCompleted ? 0.7 : 1}
                     >
                         <Checkbox
@@ -188,6 +206,7 @@ export default function HazardView({ hazardId, onBack }: Props) {
                             color={!isCompleted ? theme.redPrimary : theme.greyIconLight}
                         />
                     </TouchableOpacity>
+
                     <Text style={[styles.checkboxLabel, isCompleted && styles.checkboxLabelDisabled]}>
                         Action completed
                     </Text>
