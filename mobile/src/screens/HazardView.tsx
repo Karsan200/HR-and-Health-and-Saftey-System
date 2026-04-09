@@ -92,7 +92,10 @@ export default function HazardView({ hazardId, onBack }: Props) {
     if (loading) {
         return (
             <View style={styles.centeredContainer}>
-                <ActivityIndicator size="large" color={theme.redPrimary} />
+                <ActivityIndicator
+                    size="large"
+                    testID="loading-indicator"
+                    color={theme.redPrimary} />
             </View>
         );
     }
@@ -188,6 +191,7 @@ export default function HazardView({ hazardId, onBack }: Props) {
                         >
                             {hazard.fileUrls.map((url, i) => (
                                 <Image
+                                    testID={`hazard-photo-${i}`}
                                     key={i}
                                     source={{ uri: url }}
                                     style={styles.photoThumb}
@@ -205,6 +209,7 @@ export default function HazardView({ hazardId, onBack }: Props) {
                         activeOpacity={!isCompleted ? 0.7 : 1}
                     >
                         <Checkbox
+                            testID="action-checkbox"
                             status={actionCompleted ? 'checked' : 'unchecked'}
                             color={!isCompleted ? theme.redPrimary : theme.greyIconLight}
                         />
