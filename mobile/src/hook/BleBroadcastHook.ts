@@ -16,9 +16,9 @@ async function startBleAdvertising(broadcastId: string) {
       uuid: AppSettings.BLE_SERVICE_UUID,
       characteristics: [
         {
-          uuid: broadcastId,
+          uuid: AppSettings.BLE_CHARACTERISTIC_UUID,
           properties: ['read', 'notify'],
-          value: 'RAT',
+          value: broadcastId,
         },
       ],
     },

@@ -12,4 +12,7 @@ export const AppSettings = {
 
   // BLE Service ID for advertising
   BLE_SERVICE_UUID: '0000FFFF-0000-1000-8000-00805F9B34FB',
+
+  // BLE Characteristic ID for broadcasting the unique identifier
+  BLE_CHARACTERISTIC_UUID: '0000ABCD-0000-1000-8000-00805F9B34FB',
 };
