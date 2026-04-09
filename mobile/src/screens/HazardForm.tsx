@@ -77,7 +77,8 @@ export default function HazardForm({ onDone, hazardId, initialData }: Props): JS
             setFurtherActions(data.questionFour);
             setWhoAction(data.questionFive);
             setInputDate(data.questionSix ? new Date(data.questionSix) : undefined);
-            setActionCompleted(data.isCompleted);
+            // Jackson serialises isClosed → "closed", not "isCompleted"
+            setActionCompleted(!!data.closed);
         };
 
         fetchDraft();
@@ -101,7 +102,14 @@ export default function HazardForm({ onDone, hazardId, initialData }: Props): JS
             };
         });
 
-        //buids payload for backend submission
+        // Serialise the date as a local date string (no timezone offset) so the
+        // backend receives exactly the date/time the user selected.
+        const formatDateForBackend = (date: Date): string => {
+            const pad = (n: number) => String(n).padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        };
+
+        //builds payload for backend submission
         const payload = {
             title,
             questionOne: hazardDesc,
@@ -109,7 +117,7 @@ export default function HazardForm({ onDone, hazardId, initialData }: Props): JS
             questionThree: controlMeasures,
             questionFour: furtherActions,
             questionFive: whoAction,
-            questionSix: inputDate ? inputDate.toISOString().slice(0, 19) : null,
+            questionSix: inputDate ? formatDateForBackend(inputDate) : null,
             isDraft: isDraftFlag,
             isCompleted: actionCompleted,
             files,
