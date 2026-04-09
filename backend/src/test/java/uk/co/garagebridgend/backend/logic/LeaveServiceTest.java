@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
 import org.springframework.security.core.userdetails.User;
@@ -15,8 +14,10 @@ import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.LeaveTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.LeaveSummaryResponse;
+import uk.co.garagebridgend.backend.models.response.PendingLeaveResponse;
 import uk.co.garagebridgend.backend.repository.LeaveRepository;
 import uk.co.garagebridgend.backend.models.entity.LeaveTypeTable;
+import uk.co.garagebridgend.backend.models.request.LeaveDecisionRequest;
 import uk.co.garagebridgend.backend.models.request.LeaveRequest;
 import uk.co.garagebridgend.backend.models.response.LeaveTypeResponse;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
@@ -191,14 +192,14 @@ public class LeaveServiceTest {
         LeaveTable approvedLeave = new LeaveTable();
         approvedLeave.setAccount(account);
         approvedLeave.setApproved(true);
-        approvedLeave.setStartDate(LocalDateTime.of(2026, 3, 2, 8, 0));   // Monday 08:00
-        approvedLeave.setEndDate(LocalDateTime.of(2026, 3, 3, 17, 0));    // Tuesday 17:00
+        approvedLeave.setStartDate(LocalDateTime.of(2026, 3, 2, 8, 0));
+        approvedLeave.setEndDate(LocalDateTime.of(2026, 3, 3, 17, 0));
 
         LeaveTable pendingLeave = new LeaveTable();
         pendingLeave.setAccount(account);
         pendingLeave.setApproved(false);
-        pendingLeave.setStartDate(LocalDateTime.of(2026, 3, 4, 8, 0)); // Wednesday 08:00
-        pendingLeave.setEndDate(LocalDateTime.of(2026, 3, 4, 17, 0)); // Wednesday 17:00
+        pendingLeave.setStartDate(LocalDateTime.of(2026, 3, 4, 8, 0));
+        pendingLeave.setEndDate(LocalDateTime.of(2026, 3, 4, 17, 0));
 
         when(leaveRepository.findAll()).thenReturn(List.of(approvedLeave, pendingLeave));
 
@@ -643,9 +644,9 @@ public class LeaveServiceTest {
 
         // Then one item per working day should be returned (Monday + Tuesday = 2)
         assertEquals(2, result.size());
-        assertEquals("John Doe", result.get(0).getEmployeeName());
-        assertEquals("bookedLeave", result.get(0).getLeaveType());
-        assertEquals("Spring break", result.get(0).getNotes());
+        assertEquals("John Doe", result.getFirst().getEmployeeName());
+        assertEquals("Annual Leave", result.getFirst().getLeaveType());
+        assertEquals("Spring break", result.getFirst().getNotes());
     }
 
     @Test
@@ -684,13 +685,13 @@ public class LeaveServiceTest {
         account.setLastName("Jones");
 
         LeaveTypeTable leaveType = new LeaveTypeTable();
-        leaveType.setName("training leave");
+        leaveType.setName("Training Leave");
 
         LeaveTable leave = new LeaveTable();
         leave.setAccount(account);
         leave.setLeaveType(leaveType);
-        leave.setStartDate(LocalDateTime.of(2026, 3, 30, 8, 0));  // Monday in March
-        leave.setEndDate(LocalDateTime.of(2026, 4, 1, 17, 0));    // Wednesday in April
+        leave.setStartDate(LocalDateTime.of(2026, 3, 30, 8, 0));
+        leave.setEndDate(LocalDateTime.of(2026, 4, 1, 17, 0));
         leave.setNotes(null);
 
         when(leaveRepository.findApprovedLeaveInRange(any(), any())).thenReturn(List.of(leave));
@@ -704,48 +705,38 @@ public class LeaveServiceTest {
     }
 
     @Test
-    void testGetCalendarItemsLeaveTypeMapping() {
+    void testGetCalendarItemsPassesRawLeaveTypeName() {
 
         // Given leaves with each mapped leave type name
         AccountTable account = new AccountTable();
         account.setFirstName("Alice");
         account.setLastName("Brown");
 
-        LeaveTypeTable nationalHolidayType = new LeaveTypeTable();
-        nationalHolidayType.setName("national holiday");
-
-        LeaveTypeTable sickLeaveType = new LeaveTypeTable();
-        sickLeaveType.setName("sick leave");
-
-        LeaveTypeTable trainingLeaveType = new LeaveTypeTable();
-        trainingLeaveType.setName("training leave");
-
-        LeaveTypeTable unknownType = new LeaveTypeTable();
-        unknownType.setName("other type");
-
-        LeaveTypeTable nullType = new LeaveTypeTable();
-        nullType.setName(null);
-
         LocalDate monday = LocalDate.of(2026, 4, 6);
 
-        LeaveTable leave1 = buildLeaveTableForDay(account, nationalHolidayType, monday);
-        LeaveTable leave2 = buildLeaveTableForDay(account, sickLeaveType, monday.plusDays(1));
-        LeaveTable leave3 = buildLeaveTableForDay(account, trainingLeaveType, monday.plusDays(2));
-        LeaveTable leave4 = buildLeaveTableForDay(account, unknownType, monday.plusDays(3));
-        LeaveTable leave5 = buildLeaveTableForDay(account, nullType, monday.plusDays(4));
+        String[] dbNames = { "Holiday", "Sick Leave", "Training Leave", "Emergency Leave" };
 
-        when(leaveRepository.findApprovedLeaveInRange(any(), any()))
-                .thenReturn(List.of(leave1, leave2, leave3, leave4, leave5));
+        List<LeaveTable> leaves = new java.util.ArrayList<>();
+        for (int i = 0; i < dbNames.length; i++) {
+            LeaveTypeTable lt = new LeaveTypeTable();
+            lt.setName(dbNames[i]);
+            LeaveTable leave = new LeaveTable();
+            leave.setAccount(account);
+            leave.setLeaveType(lt);
+            leave.setStartDate(monday.plusDays(i).atTime(8, 0));
+            leave.setEndDate(monday.plusDays(i).atTime(17, 0));
+            leave.setNotes(null);
+            leaves.add(leave);
+        }
 
-        // When calendar items are requested
+        when(leaveRepository.findApprovedLeaveInRange(any(), any())).thenReturn(leaves);
+
         var result = leaveService.getCalendarItems(2026, 4);
 
-        // Then each leave type name should map to the correct frontend event type string
-        assertEquals("nationalHoliday", result.get(0).getLeaveType());
-        assertEquals("sickLeave",        result.get(1).getLeaveType());
-        assertEquals("trainingLeave",    result.get(2).getLeaveType());
-        assertEquals("bookedLeave",      result.get(3).getLeaveType());
-        assertEquals("bookedLeave",      result.get(4).getLeaveType());
+        assertEquals(4, result.size());
+        for (int i = 0; i < dbNames.length; i++) {
+            assertEquals(dbNames[i], result.get(i).getLeaveType());
+        }
     }
 
     @Test
@@ -761,17 +752,235 @@ public class LeaveServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // Helper to reduce boilerplate in the mapping test above
-    private LeaveTable buildLeaveTableForDay(
-            final AccountTable account,
-            final LeaveTypeTable leaveType,
-            final LocalDate date) {
+    @Test
+    void testGetPendingLeaveReturnsCorrectFields() {
+
+        AccountTable account = new AccountTable();
+        account.setFirstName("John");
+        account.setLastName("Doe");
+
+        LeaveTypeTable leaveType = new LeaveTypeTable();
+        leaveType.setName("Holiday");
+
         LeaveTable leave = new LeaveTable();
+        leave.setLeaveId(1L);
         leave.setAccount(account);
         leave.setLeaveType(leaveType);
-        leave.setStartDate(date.atTime(8, 0));
-        leave.setEndDate(date.atTime(17, 0));
-        leave.setNotes(null);
-        return leave;
+        leave.setStartDate(LocalDateTime.of(2026, 6, 1, 8, 0));
+        leave.setEndDate(LocalDateTime.of(2026, 6, 5, 17, 0));
+        leave.setNotes("Summer break");
+        leave.setCreated(LocalDateTime.of(2026, 5, 1, 10, 0));
+
+        when(leaveRepository.findPendingLeave()).thenReturn(List.of(leave));
+
+        List<PendingLeaveResponse> result = leaveService.getPendingLeave();
+
+        assertEquals(1, result.size());
+        PendingLeaveResponse response = result.getFirst();
+        assertEquals(1L, response.leaveId());
+        assertEquals("John Doe", response.employeeName());
+        assertEquals("Holiday", response.leaveType());
+        assertEquals(leave.getStartDate(), response.startDate());
+        assertEquals(leave.getEndDate(), response.endDate());
+        assertEquals("Summer break", response.notes());
+        assertEquals(leave.getCreated(), response.created());
+    }
+
+    @Test
+    void testGetPendingLeaveReturnsEmptyList() {
+
+        when(leaveRepository.findPendingLeave()).thenReturn(List.of());
+
+        List<PendingLeaveResponse> result = leaveService.getPendingLeave();
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetPendingLeaveReturnsMultipleRequests() {
+
+        AccountTable accountA = new AccountTable();
+        accountA.setFirstName("Alice");
+        accountA.setLastName("Blue");
+
+        AccountTable accountB = new AccountTable();
+        accountB.setFirstName("Bob");
+        accountB.setLastName("Green");
+
+        LeaveTypeTable leaveType = new LeaveTypeTable();
+        leaveType.setName("Holiday");
+
+        LeaveTable leaveA = new LeaveTable();
+        leaveA.setLeaveId(1L);
+        leaveA.setAccount(accountA);
+        leaveA.setLeaveType(leaveType);
+        leaveA.setStartDate(LocalDate.of(2026, 6, 1).atTime(8, 0));
+        leaveA.setEndDate(LocalDate.of(2026, 6, 1).atTime(17, 0));
+        leaveA.setCreated(LocalDateTime.of(2026, 5, 1, 9, 0));
+
+        LeaveTable leaveB = new LeaveTable();
+        leaveB.setLeaveId(2L);
+        leaveB.setAccount(accountB);
+        leaveB.setLeaveType(leaveType);
+        leaveB.setStartDate(LocalDate.of(2026, 6, 2).atTime(8, 0));
+        leaveB.setEndDate(LocalDate.of(2026, 6, 2).atTime(17, 0));
+        leaveB.setCreated(LocalDateTime.of(2026, 5, 2, 9, 0));
+
+        when(leaveRepository.findPendingLeave()).thenReturn(List.of(leaveA, leaveB));
+
+        List<PendingLeaveResponse> result = leaveService.getPendingLeave();
+
+        assertEquals(2, result.size());
+        assertEquals("Alice Blue", result.get(0).employeeName());
+        assertEquals("Bob Green", result.get(1).employeeName());
+    }
+
+    @Test
+    void testApproveLeaveSuccess() {
+
+        LeaveTable leave = new LeaveTable();
+        leave.setLeaveId(1L);
+        leave.setApproved(false);
+        leave.setResponse(null);
+
+        when(leaveRepository.findById(1L)).thenReturn(Optional.of(leave));
+
+        leaveService.approveLeave(1L, new LeaveDecisionRequest("Approved"));
+
+        assertTrue(leave.isApproved());
+        assertEquals("Approved", leave.getResponse());
+        verify(leaveRepository).save(leave);
+    }
+
+    @Test
+    void testApproveLeaveNotFound() {
+
+        when(leaveRepository.findById(99L)).thenReturn(Optional.empty());
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                leaveService.approveLeave(99L, new LeaveDecisionRequest("OK"))
+        );
+
+        assertEquals("Leave request not found.", exception.getMessage());
+        verify(leaveRepository, never()).save(any());
+    }
+
+    @Test
+    void testApproveLeaveAlreadyApproved() {
+
+        LeaveTable leave = new LeaveTable();
+        leave.setLeaveId(1L);
+        leave.setApproved(true);
+        leave.setResponse(null);
+
+        when(leaveRepository.findById(1L)).thenReturn(Optional.of(leave));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                leaveService.approveLeave(1L, new LeaveDecisionRequest("OK"))
+        );
+
+        assertEquals("This leave request has already been approved.", exception.getMessage());
+        verify(leaveRepository, never()).save(any());
+    }
+
+    @Test
+    void testApproveLeaveAlreadyDeclined() {
+
+        LeaveTable leave = new LeaveTable();
+        leave.setLeaveId(1L);
+        leave.setApproved(false);
+        leave.setResponse("Declined");
+
+        when(leaveRepository.findById(1L)).thenReturn(Optional.of(leave));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                leaveService.approveLeave(1L, new LeaveDecisionRequest("OK"))
+        );
+
+        assertEquals("This leave request has already been declined.", exception.getMessage());
+        verify(leaveRepository, never()).save(any());
+    }
+
+    @Test
+    void testDeclineLeaveSuccess() {
+
+        LeaveTable leave = new LeaveTable();
+        leave.setLeaveId(1L);
+        leave.setApproved(false);
+        leave.setResponse(null);
+
+        when(leaveRepository.findById(1L)).thenReturn(Optional.of(leave));
+
+        leaveService.declineLeave(1L, new LeaveDecisionRequest("Too many absences"));
+
+        assertFalse(leave.isApproved());
+        assertEquals("Too many absences", leave.getResponse());
+        verify(leaveRepository).save(leave);
+    }
+
+    @Test
+    void testDeclineLeaveWithNullResponseDefaultsToDeclined() {
+
+        LeaveTable leave = new LeaveTable();
+        leave.setLeaveId(1L);
+        leave.setApproved(false);
+        leave.setResponse(null);
+
+        when(leaveRepository.findById(1L)).thenReturn(Optional.of(leave));
+
+        leaveService.declineLeave(1L, new LeaveDecisionRequest(null));
+
+        assertFalse(leave.isApproved());
+        assertEquals("Declined", leave.getResponse());
+        verify(leaveRepository).save(leave);
+    }
+
+    @Test
+    void testDeclineLeaveNotFound() {
+
+        when(leaveRepository.findById(99L)).thenReturn(Optional.empty());
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                leaveService.declineLeave(99L, new LeaveDecisionRequest("No"))
+        );
+
+        assertEquals("Leave request not found.", exception.getMessage());
+        verify(leaveRepository, never()).save(any());
+    }
+
+    @Test
+    void testDeclineLeaveAlreadyApproved() {
+
+        LeaveTable leave = new LeaveTable();
+        leave.setLeaveId(1L);
+        leave.setApproved(true);
+        leave.setResponse(null);
+
+        when(leaveRepository.findById(1L)).thenReturn(Optional.of(leave));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                leaveService.declineLeave(1L, new LeaveDecisionRequest("No"))
+        );
+
+        assertEquals("This leave request has already been approved.", exception.getMessage());
+        verify(leaveRepository, never()).save(any());
+    }
+
+    @Test
+    void testDeclineLeaveAlreadyDeclined() {
+
+        LeaveTable leave = new LeaveTable();
+        leave.setLeaveId(1L);
+        leave.setApproved(false);
+        leave.setResponse("Already declined");
+
+        when(leaveRepository.findById(1L)).thenReturn(Optional.of(leave));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                leaveService.declineLeave(1L, new LeaveDecisionRequest("No"))
+        );
+
+        assertEquals("This leave request has already been declined.", exception.getMessage());
+        verify(leaveRepository, never()).save(any());
     }
 }

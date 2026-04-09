@@ -7,4 +7,4 @@ package uk.co.garagebridgend.backend.models.request;
  *
  * @param response optional message from the admin explaining the decision
  */
-public record LeaveDecisionRequest(String response) {}
+public record LeaveDecisionRequest(String response) { }

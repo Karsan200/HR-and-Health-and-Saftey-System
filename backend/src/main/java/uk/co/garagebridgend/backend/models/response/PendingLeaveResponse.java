@@ -22,4 +22,4 @@ public record PendingLeaveResponse(
         LocalDateTime endDate,
         String notes,
         LocalDateTime created
-) {}
+) { }
