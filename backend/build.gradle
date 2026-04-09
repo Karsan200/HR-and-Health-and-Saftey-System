@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'uk.co.garage-bridgend'
-version = '0.2.0'
+version = '0.3.0'
 description = 'Rent-A-Tech API'
 
 java {
