@@ -20,6 +20,7 @@ import HandbookScreen from "../screens/HandbookScreen.tsx";
 import PersonalScreen from "../screens/PersonalScreen.tsx";
 import HazardView from "../screens/HazardView.tsx";
 import HazardList from "../screens/HazardList.tsx";
+import ClockInScreen from '../screens/ClockInScreen.tsx';
 
 export function ScreenConfig(body: ScreenConfigProps) {
   // Defaulting to the calendar screen when the HR section is selected.
@@ -127,7 +128,9 @@ export function ScreenConfig(body: ScreenConfigProps) {
       return (
         <>
           <TopNavBar title="Clock-In" />
-          <View style={styles.content} />
+          <View style={styles.content}>
+            <ClockInScreen/>
+          </View>
         </>
       );
 

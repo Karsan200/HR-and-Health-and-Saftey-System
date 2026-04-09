@@ -9,6 +9,35 @@ import LeaveService from '../src/logic/LeaveService';
 import { HttpException } from '../src/exception/HttpException';
 import * as LeaveBookingLogic from '../src/logic/LeaveBookingLogic';
 
+const mockPad = (value: number) => String(value).padStart(2, '0');
+
+const mockToDateOnlyString = (date: Date) =>
+    `${date.getFullYear()}-${mockPad(date.getMonth() + 1)}-${mockPad(
+        date.getDate(),
+    )}`;
+
+const mockAddDays = (date: Date, days: number) =>
+    new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate() + days,
+        12,
+        0,
+        0,
+        0,
+    );
+
+const mockToday = new Date(2026, 3, 1, 12, 0, 0, 0);
+const mockMinimumBookableDate = mockAddDays(mockToday, 14);
+const mockValidDate = mockAddDays(mockMinimumBookableDate, 5);
+const mockTooSoonDate = mockAddDays(mockToday, 1);
+const mockLaterDate = mockAddDays(mockValidDate, 5);
+const mockEarlierDate = mockAddDays(mockValidDate, -2);
+
+const mockFutureDate = mockToDateOnlyString(mockValidDate);
+const mockSubmissionStartDate = `${mockFutureDate}T08:00:00`;
+const mockSubmissionEndDate = `${mockFutureDate}T17:00:00`;
+
 jest.mock('../src/logic/LeaveService');
 
 jest.mock('../src/theme/colourController', () => ({
@@ -50,22 +79,38 @@ jest.mock('react-native-paper-dates', () => {
         ),
         mockReact.createElement(
           TouchableOpacity,
-          { onPress: () => onChange(new Date('2026-04-20T00:00:00')) },
+        {
+          onPress: () =>
+              onChange(new Date(`${mockToDateOnlyString(mockValidDate)}T00:00:00`)),
+        },
           mockReact.createElement(Text, null, 'Set Date Picker To Valid'),
         ),
         mockReact.createElement(
           TouchableOpacity,
-          { onPress: () => onChange(new Date('2000-04-10T00:00:00')) },
+          {
+            onPress: () =>
+                onChange(
+                    new Date(`${mockToDateOnlyString(mockTooSoonDate)}T00:00:00`),
+                ),
+          },
           mockReact.createElement(Text, null, 'Set Date Picker To TooSoon'),
         ),
         mockReact.createElement(
           TouchableOpacity,
-          { onPress: () => onChange(new Date('2026-04-25T00:00:00')) },
+              {
+                onPress: () =>
+                  onChange(new Date(`${mockToDateOnlyString(mockLaterDate)}T00:00:00`)),
+              },
           mockReact.createElement(Text, null, 'Set Date Picker To Later'),
         ),
         mockReact.createElement(
           TouchableOpacity,
-          { onPress: () => onChange(new Date('2026-04-18T00:00:00')) },
+            {
+            onPress: () =>
+                onChange(
+                    new Date(`${mockToDateOnlyString(mockEarlierDate)}T00:00:00`),
+                ),
+            },
           mockReact.createElement(Text, null, 'Set Date Picker To Earlier'),
         ),
         mockReact.createElement(
@@ -204,19 +249,18 @@ jest.mock('../src/logic/LeaveBookingLogic', () => ({
     };
   }),
   formatTime: jest.fn((hours: number, minutes: number) =>
-    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`,
+      `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`,
   ),
   validatePartialDayTimes: jest.fn(() => ''),
   buildSubmissionDates: jest.fn(() => ({
-    startDate: '2026-04-20T08:00:00',
-    endDate: '2026-04-20T17:00:00',
+    startDate: mockSubmissionStartDate,
+    endDate: mockSubmissionEndDate,
   })),
   getWorkingHoursText: jest.fn(() => 'Working hours are 08:00 - 17:00.'),
 }));
 
 describe('BookLeaveModal', () => {
-  // TODO: change this and other dates to mock dates relative to each-other.
-  const futureDate = '9999-04-20';
+  const futureDate = mockFutureDate;
 
   const mockLeaveTypes = [
     {
@@ -290,18 +334,24 @@ describe('BookLeaveModal', () => {
   };
 
   beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(mockToday);
     jest.clearAllMocks();
 
     (LeaveService.getLeaveTypes as jest.Mock).mockResolvedValue(mockLeaveTypes);
     (LeaveService.createLeave as jest.Mock).mockResolvedValue(undefined);
     (LeaveBookingLogic.validatePartialDayTimes as jest.Mock).mockReturnValue('');
     (LeaveBookingLogic.buildSubmissionDates as jest.Mock).mockReturnValue({
-      startDate: '2026-04-20T08:00:00',
-      endDate: '2026-04-20T17:00:00',
+      startDate: mockSubmissionStartDate,
+      endDate: mockSubmissionEndDate,
     });
     (LeaveBookingLogic.getWorkingHoursText as jest.Mock).mockReturnValue(
       'Working hours are 08:00 - 17:00.',
     );
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('does not load leave types when the modal is not visible', () => {
@@ -483,8 +533,8 @@ describe('BookLeaveModal', () => {
     // Then the leave service should receive the built dates, selected leave type and trimmed notes
     await waitFor(() => {
       expect(LeaveService.createLeave).toHaveBeenCalledWith({
-        startDate: '2026-04-20T08:00:00',
-        endDate: '2026-04-20T17:00:00',
+        startDate: mockSubmissionStartDate,
+        endDate: mockSubmissionEndDate,
         leaveTypeId: 1,
         notes: 'Annual leave note',
       });

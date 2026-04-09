@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import uk.co.garagebridgend.backend.models.entity.DocumentTable;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -37,4 +38,23 @@ public interface DocumentRepository extends JpaRepository<DocumentTable, Long> {
      */
     List<DocumentTable> findByFileAccountAndTitleContainingIgnoreCaseOrderByCreatedDesc(
             AccountTable account, String titleFragment);
+
+    /**
+     * Retrieves all documents that require a signature.
+     *
+     * @return a list of documents where signatureRequired is true
+     */
+    List<DocumentTable> findAllBySignatureRequiredTrue();
+
+    /**
+     * Retrieves all documents that require a signature and were created within the given date range.
+     *
+     * @param startDateTime the start of the date range
+     * @param endDateTime   the end of the date range
+     * @return a list of documents matching the criteria
+     */
+    List<DocumentTable> findAllBySignatureRequiredTrueAndCreatedGreaterThanEqualAndCreatedLessThan(
+            LocalDateTime startDateTime,
+            LocalDateTime endDateTime
+    );
 }
