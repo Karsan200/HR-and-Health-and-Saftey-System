@@ -582,5 +582,73 @@ describe('HazardForm', () => {
 
             expect(AuthenticationService.fetch).not.toHaveBeenCalled();
         });
+
+            it('fetches and populates draft hazard data when hazardId is provided', async () => {
+
+                (AuthenticationService.fetch as jest.Mock).mockResolvedValue({
+                    ok: true,
+                    json: async () => ({
+                        title: 'Draft Hazard',
+                        questionOne: 'Hazard description',
+                        questionTwo: 'Workers',
+                        questionThree: 'Controls',
+                        questionFour: 'Further actions',
+                        questionFive: 'Supervisor',
+                        questionSix: TOMORROW.toISOString(),
+                        closed: true,
+                    }),
+                });
+
+                const { getByDisplayValue, getByTestId } = renderWithTheme(
+                    <HazardForm hazardId={123} />
+                );
+
+                await act(async () => {});
+
+                expect(AuthenticationService.fetch).toHaveBeenCalledWith(
+                    '/api/risk-assessment/hazard/123'
+                );
+
+                expect(getByDisplayValue('Draft Hazard')).toBeTruthy();
+                expect(getByDisplayValue('Hazard description')).toBeTruthy();
+                expect(getByDisplayValue('Workers')).toBeTruthy();
+                expect(getByDisplayValue('Controls')).toBeTruthy();
+                expect(getByDisplayValue('Further actions')).toBeTruthy();
+                expect(getByDisplayValue('Supervisor')).toBeTruthy();
+
+                const checkbox = getByTestId('actionCompletedCheckbox');
+                expect(checkbox.props.accessibilityState?.checked).toBe(true);
+            });
+        });
+
+    it('handles null questionSix date when loading draft', async () => {
+
+        (AuthenticationService.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            json: async () => ({
+                title: 'Draft Hazard',
+                questionOne: 'Hazard description',
+                questionTwo: 'Workers',
+                questionThree: 'Controls',
+                questionFour: 'Further actions',
+                questionFive: 'Supervisor',
+                questionSix: null,
+                closed: false,
+            }),
+        });
+
+        const { getByDisplayValue, getByTestId } = renderWithTheme(
+            <HazardForm hazardId={99} />
+        );
+
+        await act(async () => {});
+
+        expect(getByDisplayValue('Draft Hazard')).toBeTruthy();
+
+        const checkbox = getByTestId('actionCompletedCheckbox');
+        expect(checkbox.props.accessibilityState?.checked).toBe(false);
     });
+
+
+
 });
