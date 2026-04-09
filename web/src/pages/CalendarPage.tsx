@@ -15,30 +15,17 @@ import { calendarPageStyles as styles } from "./CalendarPage.styles";
 import { SectionNavBar, type SectionNavTab } from "../components/SectionNavbar";
 import { DefaultColours } from "../theme/colours";
 import { fetchCalendarEvents } from "../logic/LeaveCalendarService";
+import { fetchPendingLeaveCount } from "../logic/PendingRequestsService";
+import { fetchLeaveTypes, type ResolvedLeaveType } from "../logic/LeaveTypeService";
 import { useAuth } from "../AuthContext";
 import { DayDetailOverlay } from "../components/DayDetailOverlay";
-import { type CalendarEventType, type CalendarEvent, eventConfig } from "../models/CalendarTypes";
-
-// Tabs shown at the top of the calendar section
-const CALENDAR_TABS: SectionNavTab[] = [
-    { label: "Calendar View", route: "/calendar", alert: true },
-    { label: "Pending Requests", route: "/calendar/requests" },
-    { label: "Clock Overrides", route: "/calendar/overrides" },
-];
+import { type CalendarEvent, eventConfigForType } from "../models/CalendarTypes";
 
 const DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 const MONTH_NAMES = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
-];
-
-// Describes each entry shown in the calendar key at the bottom
-const KEY_ITEMS: { type: CalendarEventType; label: string }[] = [
-    { type: "nationalHoliday", label: "National Holiday" },
-    { type: "sickLeave",       label: "Sick Leave" },
-    { type: "bookedLeave",     label: "Booked Leave" },
-    { type: "trainingLeave",   label: "Training Leave" },
 ];
 
 // Converts year, month, day into an ISO date string
@@ -89,8 +76,16 @@ function TooltipContent({ label, notes }: { label: string; notes?: string }) {
 }
 
 // Renders a single full-width coloured event chip inside a calendar day cell
-function EventChip({ event, onEventClick }: { event: CalendarEvent; onEventClick?: (e: CalendarEvent) => void }) {
-    const { chipBg, iconCircleBg, textColor, Icon } = eventConfig(event.type);
+function EventChip({
+                       event,
+                       leaveTypes,
+                       onEventClick,
+                   }: {
+    event: CalendarEvent;
+    leaveTypes: ResolvedLeaveType[];
+    onEventClick?: (e: CalendarEvent) => void;
+}) {
+    const { chipBg, iconCircleBg, textColor, Icon } = eventConfigForType(event.type, leaveTypes);
     return (
         <Tooltip
             title={<TooltipContent label={event.label} notes={event.notes} />}
@@ -112,19 +107,21 @@ function EventChip({ event, onEventClick }: { event: CalendarEvent; onEventClick
     );
 }
 
-// Renders the colour key row at the bottom of the calendar
-function CalendarKey() {
+// Renders the colour key row at the bottom of the calendar, one entry per leave type
+function CalendarKey({ leaveTypes }: { leaveTypes: ResolvedLeaveType[] }) {
+    if (leaveTypes.length === 0) return null;
+
     return (
         <Box sx={styles.keyRow}>
-            {KEY_ITEMS.map(({ type, label }) => {
-                const { chipBg, iconCircleBg, textColor, Icon } = eventConfig(type);
+            {leaveTypes.map((lt) => {
+                const { chipBg, iconCircleBg, Icon } = eventConfigForType(lt.name, leaveTypes);
                 return (
-                    <Box key={type} sx={styles.keyItem}>
+                    <Box key={lt.leaveTypeId} sx={styles.keyItem}>
                         <Box sx={styles.eventIconCircle(chipBg)}>
                             <Icon sx={{ fontSize: "14px", color: iconCircleBg }} />
                         </Box>
-                        <Typography sx={styles.keyLabel(textColor)}>
-                            {label}
+                        <Typography sx={styles.keyLabel(iconCircleBg)}>
+                            {lt.name}
                         </Typography>
                     </Box>
                 );
@@ -149,10 +146,27 @@ export function CalendarPage({ onEventClick }: CalendarPageProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const [leaveTypes, setLeaveTypes] = useState<ResolvedLeaveType[]>([]);
+    const [pendingCount, setPendingCount] = useState<number>(0);
+
     const [overlayDate, setOverlayDate] = useState<string | null>(null);
     const [overlayOpen, setOverlayOpen] = useState(false);
 
     const weeks = useMemo(() => buildCalendarGrid(viewYear, viewMonth), [viewYear, viewMonth]);
+
+    // Fetch leave types once on mount — drives chip colours and the calendar key
+    const loadLeaveTypes = useCallback(async () => {
+        try {
+            const data = await fetchLeaveTypes(auth.authenticationService);
+            setLeaveTypes(data);
+        } catch {
+            // Non-critical — chips fall back to grey if this fails
+        }
+    }, [auth.authenticationService]);
+
+    useEffect(() => {
+        loadLeaveTypes();
+    }, [loadLeaveTypes]);
 
     // Fetch events from the backend whenever the viewed month changes
     const loadEvents = useCallback(async () => {
@@ -171,6 +185,20 @@ export function CalendarPage({ onEventClick }: CalendarPageProps) {
     useEffect(() => {
         loadEvents();
     }, [loadEvents]);
+
+    // Fetch the pending request count once on mount for the nav badge
+    const loadPendingCount = useCallback(async () => {
+        try {
+            const count = await fetchPendingLeaveCount(auth.authenticationService);
+            setPendingCount(count);
+        } catch {
+            // Non-critical — badge stays at 0 if the request fails
+        }
+    }, [auth.authenticationService]);
+
+    useEffect(() => {
+        loadPendingCount();
+    }, [loadPendingCount]);
 
     // Index events by date string for fast lookup per day cell
     const eventsByDate = useMemo(() => {
@@ -205,10 +233,17 @@ export function CalendarPage({ onEventClick }: CalendarPageProps) {
 
     const todayISO = toISODate(today.getFullYear(), today.getMonth(), today.getDate());
 
+    // Built inside the component so pendingCount stays live
+    const calendarTabs: SectionNavTab[] = [
+        { label: "Calendar View",    route: "/calendar", alert: true },
+        { label: "Pending Requests", route: "/calendar/requests", count: pendingCount },
+        { label: "Clock Overrides",  route: "/calendar/overrides" },
+    ];
+
     return (
         <Box sx={styles.pageContainer}>
             {/* Section navigation shared across all calendar sub-pages */}
-            <SectionNavBar tabs={CALENDAR_TABS} />
+            <SectionNavBar tabs={calendarTabs} />
 
             {/* Main calendar card containing navigation and the day grid */}
             <Box sx={styles.calendarCard}>
@@ -288,6 +323,7 @@ export function CalendarPage({ onEventClick }: CalendarPageProps) {
                                                     <EventChip
                                                         key={ev.id}
                                                         event={ev}
+                                                        leaveTypes={leaveTypes}
                                                         onEventClick={onEventClick}
                                                     />
                                                 ))}
@@ -305,13 +341,14 @@ export function CalendarPage({ onEventClick }: CalendarPageProps) {
                     </Box>
                 )}
 
-                <CalendarKey />
+                <CalendarKey leaveTypes={leaveTypes} />
             </Box>
 
             <DayDetailOverlay
                 open={overlayOpen}
                 date={overlayDate}
                 events={overlayEvents}
+                leaveTypes={leaveTypes}
                 onClose={() => setOverlayOpen(false)}
             />
         </Box>

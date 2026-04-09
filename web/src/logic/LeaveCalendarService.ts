@@ -1,6 +1,5 @@
-import { AppSettings } from "../AppSettings";
 import type { AuthenticationService } from "./AuthenticationService";
-import type { CalendarEvent, CalendarEventType } from "../models/CalendarTypes";
+import type { CalendarEvent } from "../models/CalendarTypes";
 
 interface LeaveCalendarItemResponse {
     date: string;
@@ -14,14 +13,11 @@ export async function fetchCalendarEvents(
     month: number,
     authService: AuthenticationService,
 ): Promise<CalendarEvent[]> {
-    const response = await fetch(
-        `${AppSettings.API_URL}/api/leave/admin/calendar?year=${year}&month=${month}`,
+    const response = await authService.fetch(
+        `/api/leave/admin/calendar?year=${year}&month=${month}`,
         {
             method: "GET",
             credentials: "include",
-            headers: {
-                "Authorization": `Bearer ${authService.auth.accessToken}`,
-            },
         }
     );
 
@@ -34,9 +30,9 @@ export async function fetchCalendarEvents(
     const data: LeaveCalendarItemResponse[] = await response.json();
 
     return data.map((item, index) => ({
-        id: `${item.date}-${item.employeeName}-${index}`,
-        date: item.date,
-        type: item.leaveType as CalendarEventType,
+        id:    `${item.date}-${item.employeeName}-${index}`,
+        date:  item.date,
+        type:  item.leaveType,
         label: item.employeeName,
         notes: item.notes ?? undefined,
     }));

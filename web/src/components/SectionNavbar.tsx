@@ -8,6 +8,8 @@ export interface SectionNavTab {
     label: string;
     route: string;
     alert?: boolean;
+    /** Optional live count shown as a red badge beside the label */
+    count?: number;
 }
 
 interface SectionNavBarProps {
@@ -33,7 +35,16 @@ export function SectionNavBar({ tabs }: SectionNavBarProps) {
                             ...(isActive ? styles.cardActive : {}),
                         }}
                     >
-                        <Typography sx={styles.label}>{tab.label}</Typography>
+                        <Box sx={styles.labelRow}>
+                            <Typography sx={styles.label}>{tab.label}</Typography>
+                            {tab.count !== undefined && (
+                                <Box sx={styles.badge}>
+                                    <Typography sx={styles.badgeText}>
+                                        {tab.count}
+                                    </Typography>
+                                </Box>
+                            )}
+                        </Box>
                     </Box>
                 );
             })}
