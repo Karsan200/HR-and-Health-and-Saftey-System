@@ -98,6 +98,24 @@ export const styles = (theme: any, accessibility: { largeText: boolean; dyslexic
             color: theme.greyIconLight,
         },
 
+        // Strip of photos
+        photoSection: {
+            marginBottom: 12,
+        },
+        // Horizontal scroll container for the thumbnails
+        photoStrip: {
+            flexDirection: 'row',
+            gap: 8,
+            paddingVertical: 4,
+        },
+        // Each thumbnail — square, rounded corners, matching the card aesthetic
+        photoThumb: {
+            width: 100,
+            height: 100,
+            borderRadius: BorderRadius.smallTextField,
+            backgroundColor: theme.greyBackground,
+        },
+
         // Error
         errorText: {
             color: theme.redTrafficPrimary,

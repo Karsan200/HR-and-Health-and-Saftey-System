@@ -164,6 +164,13 @@ INSERT INTO files_table (
       ('3cc58063-df14-4e45-bce0-15f30f5d08ff', 1, 2,
        'driving_licence_mmay', 'pdf', '2026-01-15 10:00:00'),
 
+      ('eb683333-a195-4a93-ba59-6134846e6a17', 2, 2,
+       'oil_spill_photo_1', 'jpg', CURRENT_TIMESTAMP),
+
+
+      ('177da04a-35f2-4bd5-b6f4-92a0756a71bc', 2, 2,
+       'oil_spill_photo_3', 'jpg', CURRENT_TIMESTAMP),
+
       (UUID(), 1, 1,
        'sop_equipment_procedures', 'pdf', '2025-02-14 10:15:00'),
 
@@ -765,6 +772,10 @@ INSERT INTO hazard_files_table (
       ((SELECT file_id FROM files_table WHERE name = 'oil_spill_lift_photo'),
        (SELECT hazard_id FROM hazard_table WHERE title = 'Oil Spill Near Lift'),
        CURRENT_TIMESTAMP),
+
+      ('eb683333-a195-4a93-ba59-6134846e6a17', 3, CURRENT_TIMESTAMP),
+      ('3cc58063-df14-4e45-bce0-15f30f5d08ff', 3, CURRENT_TIMESTAMP),
+      ('177da04a-35f2-4bd5-b6f4-92a0756a71bc', 3, CURRENT_TIMESTAMP),
 
       ((SELECT file_id FROM files_table WHERE name = 'damaged_air_hose_photo'),
        (SELECT hazard_id FROM hazard_table WHERE title = 'Damaged Air Hose'),
