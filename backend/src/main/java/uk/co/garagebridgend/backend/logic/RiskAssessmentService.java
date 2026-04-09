@@ -1,7 +1,6 @@
 package uk.co.garagebridgend.backend.logic;
 
 import org.springframework.stereotype.Service;
-import uk.co.garagebridgend.backend.models.entity.HazardTable;
 import uk.co.garagebridgend.backend.models.entity.RiskAssessmentHazardTable;
 import uk.co.garagebridgend.backend.models.response.HazardReportResponse;
 import uk.co.garagebridgend.backend.models.response.HazardResponse;
@@ -22,26 +21,43 @@ import java.util.stream.Collectors;
 @Service
 public class RiskAssessmentService {
 
+    /** Repository for accessing risk assessment data. */
     private final RiskAssessmentRepository riskAssessmentRepository;
+    /** Repository for accessing the join table between risk assessments and hazards. */
     private final RiskAssessmentHazardRepository riskAssessmentHazardRepository;
+    /** Repository for accessing hazard data. */
     private final HazardRepository hazardRepository;
+    /** Repository for accessing hazard file associations. */
     private final HazardFilesRepository hazardFilesRepository;
+    /** Service for generating presigned URLs for file access. */
     private final StorageService storageService;
+    /** Service for accessing the currently authenticated user. */
     private final AuthenticationService authenticationService;
 
+    /**
+     * Constructor for RiskAssessmentService, with dependencies injected.
+     *
+     * @param riskAssessmentRepositoryParam repository for risk assessments
+     * @param riskAssessmentHazardRepositoryParam repository for risk assessment-hazard joins
+     * @param hazardRepositoryParam repository for hazards
+     * @param hazardFilesRepositoryParam repository for hazard file associations
+     * @param storageServiceParam service for generating presigned URLs
+     * @param authenticationServiceParam service for accessing authenticated user info
+     */
     public RiskAssessmentService(
-            final RiskAssessmentRepository riskAssessmentRepository,
-            final RiskAssessmentHazardRepository riskAssessmentHazardRepository,
-            final HazardRepository hazardRepository,
-            final HazardFilesRepository hazardFilesRepository,
-            final StorageService storageService,
-            final AuthenticationService authenticationService) {
-        this.riskAssessmentRepository = riskAssessmentRepository;
-        this.riskAssessmentHazardRepository = riskAssessmentHazardRepository;
-        this.hazardRepository = hazardRepository;
-        this.hazardFilesRepository = hazardFilesRepository;
-        this.storageService = storageService;
-        this.authenticationService = authenticationService;
+            final RiskAssessmentRepository riskAssessmentRepositoryParam,
+            final RiskAssessmentHazardRepository riskAssessmentHazardRepositoryParam,
+            final HazardRepository hazardRepositoryParam,
+            final HazardFilesRepository hazardFilesRepositoryParam,
+            final StorageService storageServiceParam,
+            final AuthenticationService authenticationServiceParam) {
+
+        this.riskAssessmentRepository = riskAssessmentRepositoryParam;
+        this.riskAssessmentHazardRepository = riskAssessmentHazardRepositoryParam;
+        this.hazardRepository = hazardRepositoryParam;
+        this.hazardFilesRepository = hazardFilesRepositoryParam;
+        this.storageService = storageServiceParam;
+        this.authenticationService = authenticationServiceParam;
     }
 
     /**
@@ -60,7 +76,8 @@ public class RiskAssessmentService {
 
                     boolean hasDrafts = joins.stream()
                             .anyMatch(j ->
-                                    j.getHazard().isDraft() &&
+                                    j.getHazard().isDraft()
+                                            &&
                                             j.getHazard().getAccount().getAccountId()
                                                     .equals(currentUser.getAccountId())
                             );
@@ -158,13 +175,19 @@ public class RiskAssessmentService {
         );
     }
 
+    /**
+     * Returns a list of hazard summaries for the currently authenticated user's draft hazards.
+     *
+     * @return list of the user's draft hazard summaries
+     */
     public List<HazardResponse> getMyDraftHazards() {
 
         var currentUser = authenticationService.getCurrentUser();
 
         return hazardRepository.findAll().stream()
                 .filter(hazard ->
-                        hazard.isDraft() &&
+                        hazard.isDraft()
+                                &&
                                 hazard.getAccount().getAccountId().equals(currentUser.getAccountId())
                 )
                 .map(hazard -> {

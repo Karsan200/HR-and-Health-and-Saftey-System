@@ -26,5 +26,6 @@ public class RiskAssessmentResponse {
     /** The creation timestamp of the risk assessment. */
     private LocalDateTime created;
 
+    /** Whether the risk assessment is saved as a draft. */
     private boolean hasDrafts;
 }

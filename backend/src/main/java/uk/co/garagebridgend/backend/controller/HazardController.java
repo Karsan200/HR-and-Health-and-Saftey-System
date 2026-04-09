@@ -51,8 +51,13 @@ public class HazardController {
         }
     }
 
+    /**
+     * Endpoint to update an existing hazard report.
+     * @param id The ID of the hazard report to update.
+     * @param body The request body containing the updated hazard report details and files to upload.
+     */
     @PutMapping("/report/{id}")
-    public void updateHazard(@PathVariable final Long id, @RequestBody final HazardReportRequest body) {
+    public final void updateHazard(@PathVariable final Long id, @RequestBody final HazardReportRequest body) {
         try {
             hazardService.update(id, body);
         } catch (AuthenticatedAccountNotFoundException e) {

@@ -127,7 +127,17 @@ public class HazardService {
             }
         }
     }
-    public void update(final Long hazardId, final HazardReportRequest body)
+
+    /**
+     * Updates an existing hazard report with the provided details.
+     *
+     * @param hazardId the ID of the hazard to update
+     * @param body the request containing updated hazard report details
+     * @throws AuthenticatedAccountNotFoundException if the authenticated account cannot be found
+     * @throws IllegalArgumentException if any of the uploaded files exceed the maximum allowed size
+     * @throws NoSuchElementException if the hazard with the specified ID does not exist
+     */
+    public final void update(final Long hazardId, final HazardReportRequest body)
             throws AuthenticatedAccountNotFoundException, IllegalArgumentException {
 
         var hazard = hazardRepository.findById(hazardId)

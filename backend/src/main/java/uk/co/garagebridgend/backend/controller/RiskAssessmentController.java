@@ -20,8 +20,9 @@ import java.util.NoSuchElementException;
 @RestController
 @RequestMapping("/api/risk-assessment")
 @RequiredArgsConstructor
-public class RiskAssessmentController {
+public final class RiskAssessmentController {
 
+    /** Service for handling risk assessment and hazard viewing operations. */
     private final RiskAssessmentService riskAssessmentService;
 
     /**
@@ -74,11 +75,22 @@ public class RiskAssessmentController {
         }
     }
 
+    /**
+     * Returns a list of hazard summaries for the currently authenticated user's draft hazards.
+     *
+     * @return list of the user's draft hazard summaries
+     */
     @GetMapping("/hazards/drafts")
     public List<HazardResponse> getMyDraftHazards() {
         return riskAssessmentService.getMyDraftHazards();
     }
 
+    /**
+     * Marks a hazard action as complete (closed).
+     *
+     * @param id the ID of the hazard to mark as complete
+     * @return HTTP 204 No Content if successful
+     */
     @PatchMapping("/hazard/{id}/complete")
     public ResponseEntity<Void> markActionComplete(@PathVariable final Long id) {
         try {
