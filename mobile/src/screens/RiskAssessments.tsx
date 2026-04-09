@@ -70,7 +70,11 @@ export default function RiskAssessment({ onViewHazards, onStartAssessment, onEdi
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={theme.redPrimary} />
+                <ActivityIndicator
+                    size="large"
+                    color={theme.redPrimary}
+                    testID="loading-indicator"
+                />
             </View>
         );
     }
