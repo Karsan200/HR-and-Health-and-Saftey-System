@@ -820,7 +820,7 @@ INSERT INTO settings_table (
     silent_end
 ) VALUES
       (1, FALSE, FALSE, FALSE,
-       FALSE, FALSE, NULL, NULL),
+       FALSE, FALSE, '22:00:00', '07:00:00'),
 
       (2, FALSE, FALSE,
        FALSE, FALSE, FALSE, '22:00:00', '07:00:00'),
