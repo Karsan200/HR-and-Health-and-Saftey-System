@@ -5,10 +5,21 @@ import { MemoryRouter } from "react-router-dom";
 import { CalendarPage } from "../../src/pages/CalendarPage";
 import { useAuth } from "../../src/AuthContext";
 import { fetchCalendarEvents } from "../../src/logic/LeaveCalendarService";
+import { fetchLeaveTypes } from "../../src/logic/LeaveTypeService";
+import { fetchPendingLeaveCount } from "../../src/logic/PendingRequestsService";
 import type { CalendarEvent } from "../../src/models/CalendarTypes";
 
 jest.mock("../../src/AuthContext");
 jest.mock("../../src/logic/LeaveCalendarService");
+jest.mock("../../src/logic/LeaveTypeService");
+jest.mock("../../src/logic/PendingRequestsService", () => ({
+    fetchPendingLeaveCount: jest.fn(),
+    fetchPendingLeave: jest.fn(),
+    approveLeaveRequest: jest.fn(),
+    declineLeaveRequest: jest.fn(),
+    formatDateRange: jest.fn(),
+    formatRequestedOn: jest.fn(),
+}));
 jest.mock("../../src/components/DayDetailOverlay", () => ({
     DayDetailOverlay: ({ open, date, events, onClose }: {
         open: boolean;
@@ -26,8 +37,10 @@ jest.mock("../../src/components/DayDetailOverlay", () => ({
     ) : null,
 }));
 
-const mockUseAuth = useAuth as jest.Mock;
+const mockUseAuth             = useAuth as jest.Mock;
 const mockFetchCalendarEvents = fetchCalendarEvents as jest.Mock;
+const mockFetchLeaveTypes     = fetchLeaveTypes as jest.Mock;
+const mockFetchPendingCount   = fetchPendingLeaveCount as jest.Mock;
 
 const mockAuthService = { getToken: jest.fn() };
 
@@ -35,6 +48,10 @@ beforeEach(() => {
     jest.clearAllMocks();
     mockUseAuth.mockReturnValue({ authenticationService: mockAuthService });
     mockFetchCalendarEvents.mockResolvedValue([]);
+    // Resolve with empty array so the calendar key renders nothing and doesn't block tests
+    mockFetchLeaveTypes.mockResolvedValue([]);
+    // Resolve with 0 so the pending badge does not throw
+    mockFetchPendingCount.mockResolvedValue(0);
 });
 
 function renderCalendarPage(props = {}) {
@@ -88,16 +105,6 @@ describe("CalendarPage", () => {
             }
         });
 
-        it("renders all four calendar key items", async () => {
-            renderCalendarPage();
-            await waitFor(() => {
-                expect(screen.getByText("National Holiday")).toBeInTheDocument();
-                expect(screen.getByText("Sick Leave")).toBeInTheDocument();
-                expect(screen.getByText("Booked Leave")).toBeInTheDocument();
-                expect(screen.getByText("Training Leave")).toBeInTheDocument();
-            });
-        });
-
         it("renders the previous and next month navigation buttons", () => {
             renderCalendarPage();
             expect(getPrevButton()).toBeInTheDocument();
@@ -108,6 +115,20 @@ describe("CalendarPage", () => {
             renderCalendarPage();
             await waitFor(() =>
                 expect(mockFetchCalendarEvents).toHaveBeenCalledTimes(1)
+            );
+        });
+
+        it("calls fetchLeaveTypes on mount", async () => {
+            renderCalendarPage();
+            await waitFor(() =>
+                expect(mockFetchLeaveTypes).toHaveBeenCalledTimes(1)
+            );
+        });
+
+        it("calls fetchPendingLeaveCount on mount", async () => {
+            renderCalendarPage();
+            await waitFor(() =>
+                expect(mockFetchPendingCount).toHaveBeenCalledTimes(1)
             );
         });
 
@@ -222,6 +243,16 @@ describe("CalendarPage", () => {
 
             await userEvent.click(getNextButton());
             await waitFor(() => expect(mockFetchCalendarEvents).toHaveBeenCalledTimes(2));
+        });
+
+        it("does not re-fetch leave types when navigating months", async () => {
+            renderCalendarPage();
+            await waitFor(() => expect(mockFetchLeaveTypes).toHaveBeenCalledTimes(1));
+
+            await userEvent.click(getNextButton());
+            await waitFor(() => expect(mockFetchCalendarEvents).toHaveBeenCalledTimes(2));
+
+            expect(mockFetchLeaveTypes).toHaveBeenCalledTimes(1);
         });
     });
 

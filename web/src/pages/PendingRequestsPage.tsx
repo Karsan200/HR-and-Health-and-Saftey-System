@@ -19,7 +19,7 @@ import {
     type ResolvedLeaveType,
 } from "../logic/LeaveTypeService";
 import { pendingRequestsPageStyles as styles } from "./PendingRequestsPage.styles";
-import {DefaultColours} from "../theme/colours.ts";
+import {DefaultColours} from "../theme/colours";
 
 interface LeaveRequestCardProps {
     request: PendingLeaveRequest;

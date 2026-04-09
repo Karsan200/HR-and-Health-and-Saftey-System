@@ -8,7 +8,7 @@ import { AuthProvider } from "./AuthContext";
 import { Navbar } from "./components/Navbar";
 import { Dashboard } from "./pages/Dashboard";
 import {CalendarPage} from "./pages/CalendarPage";
-import {PendingRequestsPage} from "./pages/PendingRequestsPage.tsx";
+import {PendingRequestsPage} from "./pages/PendingRequestsPage";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
