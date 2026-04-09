@@ -55,14 +55,14 @@ function ProfileTab({ profile, settings }: { profile: ProfileResponse, settings:
             <Box sx={styles.sectionCard}>
                 <Typography sx={styles.sectionTitle}>Personal Details</Typography>
                 <InfoRow
-                    icon={<EmailIcon sx={{ fontSize: 16, color: "#AE010B" }} />}
-                    iconBg="#F6CDD0"
+                    icon={<EmailIcon sx={styles.redIcon} />}
+                    iconBg={styles.iconColours.red.icon}
                     label="Email"
                     value={"​"+profile.email}
                 />
                 <InfoRow
-                    icon={<PhoneIcon sx={{ fontSize: 16, color: "#AE010B" }} />}
-                    iconBg="#F6CDD0"
+                    icon={<PhoneIcon sx={styles.redIcon} />}
+                    iconBg={styles.iconColours.red.icon}
                     label="Phone"
                     value={profile.phoneNumber}
                 />
@@ -71,14 +71,14 @@ function ProfileTab({ profile, settings }: { profile: ProfileResponse, settings:
             <Box sx={styles.sectionCard}>
                 <Typography sx={styles.sectionTitle}>Employee Details</Typography>
                 <InfoRow
-                    icon={<PersonOutlineIcon sx={{ fontSize: 16, color: "#0D7B42" }} />}
-                    iconBg="#D0EDDE"
+                    icon={<PersonOutlineIcon sx={styles.greenIcon} />}
+                    iconBg={styles.iconColours.green.icon}
                     label="Name"
                     value={profile.firstName+" ​"+profile.lastName}
                 />
                 <InfoRow
-                    icon={<CalendarTodayIcon sx={{ fontSize: 16, color: "#0D7B42" }} />}
-                    iconBg="#D0EDDE"
+                    icon={<CalendarTodayIcon sx={styles.greenIcon} />}
+                    iconBg={styles.iconColours.green.icon}
                     label="Join Date"
                     value={profile.created}
                 />
@@ -88,8 +88,8 @@ function ProfileTab({ profile, settings }: { profile: ProfileResponse, settings:
                 <Box sx={styles.sectionCard}>
                     <Typography sx={styles.sectionTitle}>Notifications</Typography>
                     <Box sx={styles.infoRow}>
-                        <Box sx={styles.iconWrap("#FFECCD")}>
-                            <NotificationsOffIcon sx={{ fontSize: 16, color: "#E8960A" }} />
+                        <Box sx={styles.iconWrap(styles.iconColours.amber.icon)}>
+                            <NotificationsOffIcon sx={styles.amberIcon} />
                         </Box>
                         <Typography sx={styles.notifText}>
                             Notifications silenced between {settings.silentStart} and {settings.silentEnd}
@@ -106,7 +106,7 @@ function ProfileTab({ profile, settings }: { profile: ProfileResponse, settings:
 
 function SettingsTab({ label }: { label: string }) {
     return (
-        <Box sx={{ ...styles.sectionCard, textAlign: "center", padding: "3rem" }}>
+        <Box sx={{ ...styles.sectionCard, ...styles.placeHolderCard }}>
             <Typography sx={styles.infoLabel}>{label} TBC </Typography>
         </Box>
     );
@@ -117,7 +117,7 @@ function SettingsTab({ label }: { label: string }) {
 
 function SecurityTab({ label }: { label: string }) {
     return (
-        <Box sx={{ ...styles.sectionCard, textAlign: "center", padding: "3rem"}}>
+        <Box sx={{ ...styles.sectionCard, ...styles.placeHolderCard }}>
             <Typography sx={styles.infoLabel}>{label} TBC </Typography>
         </Box>
     );
@@ -156,7 +156,7 @@ export function PersonalPage() {
             {profile && (
                 <Box sx={styles.headerCard}>
                     <Box sx={styles.avatarCircle}>
-                        <PersonOutlineIcon sx={{ fontSize: 28, color: "white" }} />
+                        <PersonOutlineIcon sx={styles.avatarIcon} />
                     </Box>
                     <Box sx={styles.headerInfo}>
                         <Typography sx={styles.headerName}>
@@ -165,7 +165,7 @@ export function PersonalPage() {
                         <Typography sx={styles.headerEmail}>{profile.email}</Typography>
                     </Box>
                     <Box sx={styles.adminBadge}>
-                        <ShieldIcon sx={{ fontSize: 24 }} />
+                        <ShieldIcon sx={styles.adminBadgeIcon} />
                     </Box>
                 </Box>
             )}
@@ -186,7 +186,7 @@ export function PersonalPage() {
             {/* Content */}
             {loading && (
                 <Box sx={styles.loadingContainer}>
-                    <CircularProgress size={32} sx={{ color: "#D20414" }} />
+                    <CircularProgress size={32} sx={styles.loadingSpinner} />
                 </Box>
             )}
 

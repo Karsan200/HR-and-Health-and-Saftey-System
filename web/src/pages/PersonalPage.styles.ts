@@ -3,14 +3,14 @@ import {BorderRadius, FontSize, TextStyles} from "../theme/theme.ts";
 
 export const personalPageStyles = {
     pageContainer: {
-        maxWidth: "900px",
+        maxWidth: "1200px",
         margin: "0 auto",
         padding: "1.5rem",
     },
 
     headerCard: {
         background: DefaultColours.redPrimary,
-        borderRadius: BorderRadius.largeButtonsAndOutlines,
+        borderRadius: BorderRadius.smallTextBackground,
         padding: "1.25rem 1.5rem",
         display: "flex",
         alignItems: "center",
@@ -19,10 +19,10 @@ export const personalPageStyles = {
     },
 
     avatarCircle: {
-        width: 52,
-        height: 52,
+        width: 64,
+        height: 64,
         borderRadius: "50%",
-        background: DefaultColours.greyPrimaryMainText,
+        background: DefaultColours.redTextDark,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -36,19 +36,12 @@ export const personalPageStyles = {
     headerName: {
         fontSize: FontSize.m20,
         fontFamily: TextStyles.semiBold,
-        fontWeight: 500,
         color: DefaultColours.white,
         lineHeight: 1.3,
     },
 
-    headerRole: {
-        fontSize: FontSize.xs14,
-        fontFamily: TextStyles.regular,
-        color: DefaultColours.greyBackground,
-    },
-
     headerEmail: {
-        fontSize: FontSize.xs14,
+        fontSize: FontSize.s16,
         fontFamily: TextStyles.regular,
         color: DefaultColours.greyBackground,
     },
@@ -57,14 +50,8 @@ export const personalPageStyles = {
         display: "flex",
         alignItems: "center",
         gap: "6px",
-        background: "rgba(255,255,255,0.15)",
-        border: "0.5px solid rgba(255,255,255,0.3)",
-        borderRadius: "8px",
         padding: "8px 14px",
         color: DefaultColours.white,
-        fontSize: FontSize.xs14,
-        fontFamily: TextStyles.regular,
-        fontWeight: 500,
         whiteSpace: "nowrap",
         flexShrink: 0,
     },
@@ -101,7 +88,6 @@ export const personalPageStyles = {
     sectionTitle: {
         fontSize: FontSize.xs14,
         fontFamily: TextStyles.regular,
-        fontWeight: 500,
         color: DefaultColours.black,
         marginBottom: "1rem",
     },
@@ -163,5 +149,60 @@ export const personalPageStyles = {
         color: DefaultColours.redPrimary,
         textAlign: "center",
         padding: "2rem",
+    },
+
+    placeHolderCard: {
+        textAlign: "center",
+        padding: "3rem",
+    },
+
+    // Icon colours and backgrounds for info rows
+    iconColours: {
+        red: {
+            icon: DefaultColours.redBackgroundLight,
+            bg: DefaultColours.redTextDark,
+        },
+        green: {
+            icon: DefaultColours.greenBackgroundLight,
+            bg: DefaultColours.greenTextDark,
+        },
+        amber: {
+            icon: DefaultColours.amberBackgroundLight,
+            bg: DefaultColours.amberTextDark,
+        },
+    },
+
+    redIcon: {
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular,
+        color: DefaultColours.redPrimary,
+    },
+
+    greenIcon: {
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular,
+        color: DefaultColours.greenPrimary,
+    },
+
+    amberIcon: {
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular,
+        color: DefaultColours.amberPrimary,
+    },
+
+    loadingSpinner: {
+        color: DefaultColours.redPrimary,
+    },
+
+    adminBadgeIcon: {
+        fontSize: FontSize.xl32,
+        fontFamily: TextStyles.bold,
+        color: DefaultColours.white,
+    },
+
+    avatarIcon: {
+        fontSize: FontSize.xl32,
+        fontFamily: TextStyles.bold,
+        color: DefaultColours.white,
     },
 };
