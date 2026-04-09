@@ -9,6 +9,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import { StatusBar, useColorScheme, View } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 import BackgroundService from 'react-native-background-actions';
+import DeviceInfo from 'react-native-device-info';
 
 import AuthenticationService from './src/logic/AuthenticationService.ts';
 import { AppSection, ScreenKey } from "./src/logic/NavigationConfiguration.ts";
@@ -37,53 +38,57 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [showPinCodeScreen, setShowPinCodeScreen] = useState(true);
 
-  const [BleUUID, setBleUUID] = useState<string | null>(null);
+  const theme = useContext(ThemeContext);
 
+  // Run once on mount to check auth
   useEffect(() => {
     const checkAuth = async () => {
       try {
         await AuthenticationService.refresh();
         setIsAuthenticated(true);
-
-        // get the BLE UUID for the device and store it in state
-        const response = await AuthenticationService.fetch(
-          '/api/attendance/signature',
-          {
-            method: 'GET',
-          },
-        );
-
-        const data = await response.json();
-        setBleUUID(data.signature);
-
-        // load the background service for BLE attendance tracking
-        const options = {
-          taskName: 'Example',
-          taskTitle: 'ExampleTask title',
-          taskDesc: 'ExampleTask description',
-          taskIcon: {
-            name: 'ic_launcher',
-            type: 'mipmap',
-          },
-          color: '#ff00ff',
-          linkingURI: 'yourSchemeHere://chat/jane', // See Deep Linking for more info
-          parameters: {
-            broadcastId: BleUUID,
-          } satisfies BleBroadcastTaskArgs,
-        };
-        await BackgroundService.start(BleBroadcastHook, options);
       } catch (error) {
-        console.log(error);
         if (error instanceof HttpException && error.statusCode === 401) {
           setIsAuthenticated(false);
         }
       }
     };
-
     checkAuth();
-  }, [BleUUID, isAuthenticated]);
+  }, []);
 
-  const theme = useContext(ThemeContext);
+// Run only when authenticated to fetch UUID and start BLE
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const startBle = async () => {
+      const isEmulator = await DeviceInfo.isEmulator();
+
+      if (isEmulator) {
+        console.warn('Skipping BLE setup on emulator');
+        return;
+      }
+
+      try {
+        const response = await AuthenticationService.fetch('/api/attendance/signature', { method: 'GET' });
+        const data = await response.json();
+
+        await BackgroundService.start(BleBroadcastHook, {
+          taskName: 'Attendance',
+          taskTitle: 'Attendance Tracking',
+          taskDesc: 'Your device is being used to track attendance for your shifts. ' +
+            'Please keep Bluetooth on and the app running in the background.',
+          taskIcon: { name: 'ic_launcher', type: 'mipmap' },
+          color: theme.theme.greyBackground,
+          parameters: {
+            broadcastId: data.signature,
+          } satisfies BleBroadcastTaskArgs,
+        });
+      } catch (error) {
+        console.log('BLE setup error:', error);
+      }
+    };
+
+    startBle();
+  }, [isAuthenticated, theme.theme.greyBackground]); // only triggers when auth state changes
 
     return (
       <ThemeProvider>

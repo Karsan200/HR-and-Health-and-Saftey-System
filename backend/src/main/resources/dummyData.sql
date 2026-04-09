@@ -13,11 +13,12 @@ INSERT INTO account_table (
     postal_code,
     two_factor_secret,
     mobile_pin,
+    ble_signature,
     created
 ) VALUES
       (
           1,
-       'Maggie',
+          'Maggie',
           'May',
           'MMay',
           'MMay@test.com',
@@ -29,11 +30,12 @@ INSERT INTO account_table (
           'CF31 1AA',
           '532MDCTNSUJLFXJ2TJTLRSSJKQCR5LFD',
           NULL,
+          UUID(),
           '2025-02-14 09:12:00'
       ),
       (
           2,
-       'Craig',
+          'Craig',
           'Sheppard',
           'CSheppard',
           'CSheppard@test.com',
@@ -45,11 +47,12 @@ INSERT INTO account_table (
           'CF32 9RQ',
           NULL,
           NULL,
+          UUID(),
           '2020-03-02 10:45:00'
       ),
       (
           3,
-       'Mark',
+          'Mark',
           'Hughes',
           'MHughes',
           'mark.hughes@test.com',
@@ -61,11 +64,12 @@ INSERT INTO account_table (
           'CF31 2AD',
           NULL,
           NULL,
+          UUID(),
           '2025-05-29 11:03:00'
       ),
       (
           4,
-       'Emily',
+          'Emily',
           'Jones',
           'EJones',
           'emily.jones@test.com',
@@ -77,11 +81,12 @@ INSERT INTO account_table (
           'CF32 9AF',
           NULL,
           NULL,
+          UUID(),
           '2025-07-12 08:51:00'
       ),
       (
           5,
-       'Daniel',
+          'Daniel',
           'Roberts',
           'DRoberts',
           'daniel.roberts@test.com',
@@ -93,11 +98,12 @@ INSERT INTO account_table (
           'CF31 4JD',
           NULL,
           NULL,
+          UUID(),
           '2025-08-20 16:17:00'
       ),
       (
           6,
-       'Laura',
+          'Laura',
           'Williams',
           'LWilliams',
           'laura.williams@test.com',
@@ -109,11 +115,12 @@ INSERT INTO account_table (
           'CF31 5HG',
           NULL,
           NULL,
+          UUID(),
           '2025-09-15 13:05:00'
       ),
       (
           7,
-       'Olivia',
+          'Olivia',
           'Davies',
           'ODavies',
           'olivia.davies@test.com',
@@ -125,11 +132,12 @@ INSERT INTO account_table (
           'CF31 2TR',
           NULL,
           NULL,
+          UUID(),
           '2025-12-06 12:11:00'
       ),
       (
           8,
-       'Ryan',
+          'Ryan',
           'Price',
           'RPrice',
           'ryan.price@test.com',
@@ -141,6 +149,7 @@ INSERT INTO account_table (
           'CF31 1PL',
           NULL,
           NULL,
+          UUID(),
           '2026-01-11 09:34:00'
       );
 
@@ -668,38 +677,38 @@ INSERT INTO signature_table (
        '2025-10-30 18:20:00');
 
 INSERT INTO risk_assessment_table (
-   risk_assessment_id,
-   file_id,
-   title,
-   created
+    risk_assessment_id,
+    file_id,
+    title,
+    created
 ) VALUES
-    (1,
-     (SELECT file_id FROM files_table WHERE name = 'safety_policy'),
-     'Risk Assessment for Safety Policy',
-     '2025-02-14 10:45:00'),
+      (1,
+       (SELECT file_id FROM files_table WHERE name = 'safety_policy'),
+       'Risk Assessment for Safety Policy',
+       '2025-02-14 10:45:00'),
 
-    (2,
-     (SELECT file_id FROM files_table WHERE name = 'fire_safety'),
-     'Risk Assessment for Fire Safety',
-     '2025-02-14 10:50:00'),
+      (2,
+       (SELECT file_id FROM files_table WHERE name = 'fire_safety'),
+       'Risk Assessment for Fire Safety',
+       '2025-02-14 10:50:00'),
 
-    (3,
-     (SELECT file_id FROM files_table WHERE name = 'training_manual'),
-     'Risk Assessment for Training Manual', '2025-03-02 11:30:00'),
+      (3,
+       (SELECT file_id FROM files_table WHERE name = 'training_manual'),
+       'Risk Assessment for Training Manual', '2025-03-02 11:30:00'),
 
-    (4,
-     (SELECT file_id FROM files_table WHERE name = 'hr_guidelines'),
-     'Risk Assessment for HR Guidelines', '2025-04-18 15:30:00'),
+      (4,
+       (SELECT file_id FROM files_table WHERE name = 'hr_guidelines'),
+       'Risk Assessment for HR Guidelines', '2025-04-18 15:30:00'),
 
-    (5,
-     (SELECT file_id FROM files_table WHERE name = 'hazard_report_template'),
-     'Risk Assessment for Hazard Report Template',
-     '2025-05-29 12:30:00'),
+      (5,
+       (SELECT file_id FROM files_table WHERE name = 'hazard_report_template'),
+       'Risk Assessment for Hazard Report Template',
+       '2025-05-29 12:30:00'),
 
-    (6,
-     (SELECT file_id FROM files_table WHERE name = 'equipment_safety'),
-     'Risk Assessment for Equipment Safety',
-     '2025-07-12 09:30:00');
+      (6,
+       (SELECT file_id FROM files_table WHERE name = 'equipment_safety'),
+       'Risk Assessment for Equipment Safety',
+       '2025-07-12 09:30:00');
 
 
 INSERT INTO risk_assessment_hazard_table (
@@ -867,44 +876,44 @@ INSERT INTO leave_table (
     created
 ) VALUES
       (2, 1,
-      '2026-06-01 00:00:00',
-      '2026-06-07 00:00:00',
-      TRUE,
-      'Family holiday booked earlier this year.',
-      'Approved by manager.',
-      CURRENT_TIMESTAMP),
+       '2026-06-01 00:00:00',
+       '2026-06-07 00:00:00',
+       TRUE,
+       'Family holiday booked earlier this year.',
+       'Approved by manager.',
+       CURRENT_TIMESTAMP),
 
       (3,2,
-      '2026-04-12 00:00:00',
-      '2026-04-14 00:00:00',
-      TRUE,
-      'Flu symptoms and doctor advised rest.',
-      'Get well soon.',
-      CURRENT_TIMESTAMP),
+       '2026-04-12 00:00:00',
+       '2026-04-14 00:00:00',
+       TRUE,
+       'Flu symptoms and doctor advised rest.',
+       'Get well soon.',
+       CURRENT_TIMESTAMP),
 
       (4,1,
-      '2026-07-20 00:00:00',
-      '2026-07-25 00:00:00',
-      FALSE,
-      'Trip abroad planned.',
-      'Rejected due to staffing shortage that week.',
-      CURRENT_TIMESTAMP),
+       '2026-07-20 00:00:00',
+       '2026-07-25 00:00:00',
+       FALSE,
+       'Trip abroad planned.',
+       'Rejected due to staffing shortage that week.',
+       CURRENT_TIMESTAMP),
 
       (5,3,
-      '2026-05-10 00:00:00',
-      '2026-05-11 00:00:00',
-      TRUE,
-      'Family emergency.',
-      'Approved immediately.',
-      CURRENT_TIMESTAMP),
+       '2026-05-10 00:00:00',
+       '2026-05-11 00:00:00',
+       TRUE,
+       'Family emergency.',
+       'Approved immediately.',
+       CURRENT_TIMESTAMP),
 
       (6,4,
-      '2026-08-01 00:00:00',
-      '2026-08-10 00:00:00',
-      FALSE,
-      'Personal time off requested.',
-      'Pending review.',
-      CURRENT_TIMESTAMP);
+       '2026-08-01 00:00:00',
+       '2026-08-10 00:00:00',
+       FALSE,
+       'Personal time off requested.',
+       'Pending review.',
+       CURRENT_TIMESTAMP);
 
 INSERT INTO clock_in_table (
     clock_id,
@@ -1017,38 +1026,38 @@ INSERT INTO qualifications_table (
     details,
     created
 ) VALUES
-        (1,
-        (SELECT file_id FROM files_table WHERE name = 'safety_policy'),
-         'Workshop Safety Training',
-         'Internal safety training covering workshop hazards and procedures.',
-         '2024-06-12 10:05:00'),
+      (1,
+       (SELECT file_id FROM files_table WHERE name = 'safety_policy'),
+       'Workshop Safety Training',
+       'Internal safety training covering workshop hazards and procedures.',
+       '2024-06-12 10:05:00'),
 
       (5,
-      (SELECT file_id FROM files_table WHERE name = 'nvq_level3_motor_vehicle_droberts'),
-      'NVQ Level 3 Motor Vehicle Maintenance',
-      'Level 3 qualification in diagnosing and repairing light vehicles.',
-      '2024-06-12 10:05:00'),
+       (SELECT file_id FROM files_table WHERE name = 'nvq_level3_motor_vehicle_droberts'),
+       'NVQ Level 3 Motor Vehicle Maintenance',
+       'Level 3 qualification in diagnosing and repairing light vehicles.',
+       '2024-06-12 10:05:00'),
 
       (5,
-      (SELECT file_id FROM files_table WHERE name = 'mot_tester_certificate_droberts'),
-      'DVSA MOT Tester Certification',
-      'Authorised MOT tester certification issued by DVSA.',
-      '2023-11-10 16:10:00'),
+       (SELECT file_id FROM files_table WHERE name = 'mot_tester_certificate_droberts'),
+       'DVSA MOT Tester Certification',
+       'Authorised MOT tester certification issued by DVSA.',
+       '2023-11-10 16:10:00'),
 
       (6,
-      (SELECT file_id FROM files_table WHERE name = 'health_safety_certificate_lwilliams'),
-      'Health and Safety in the Workplace',
-      'Certified course covering workplace hazard awareness and risk management.',
-      '2024-09-18 09:45:00'),
+       (SELECT file_id FROM files_table WHERE name = 'health_safety_certificate_lwilliams'),
+       'Health and Safety in the Workplace',
+       'Certified course covering workplace hazard awareness and risk management.',
+       '2024-09-18 09:45:00'),
 
       (7,
-      (SELECT file_id FROM files_table WHERE name = 'first_aid_at_work_odavies'),
-      'First Aid at Work',
-      'Three day emergency first aid training including CPR and AED use.',
-      '2025-01-20 14:15:00'),
+       (SELECT file_id FROM files_table WHERE name = 'first_aid_at_work_odavies'),
+       'First Aid at Work',
+       'Three day emergency first aid training including CPR and AED use.',
+       '2025-01-20 14:15:00'),
 
       (8,
-      (SELECT file_id FROM files_table WHERE name = 'hybrid_vehicle_training_rprice'),
-      'Hybrid and Electric Vehicle Awareness',
-      'Training course on safe servicing of hybrid and electric vehicles.',
-      '2025-03-05 11:30:00');
+       (SELECT file_id FROM files_table WHERE name = 'hybrid_vehicle_training_rprice'),
+       'Hybrid and Electric Vehicle Awareness',
+       'Training course on safe servicing of hybrid and electric vehicles.',
+       '2025-03-05 11:30:00');

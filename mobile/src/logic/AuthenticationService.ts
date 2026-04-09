@@ -160,6 +160,8 @@ class AuthenticationService {
             body: JSON.stringify(body)
         });
 
+        console.warn(response.status)
+
         if (!response.ok) {
             switch (response.status) {
               case 401:
