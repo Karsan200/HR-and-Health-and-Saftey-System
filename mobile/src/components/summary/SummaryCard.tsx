@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, Pressable, ViewStyle, TextStyle } from 'react-native';
 import { Icon } from 'react-native-paper';
-import { FontSize, BorderRadius, TextStyles } from '../../theme/theme';
+import { FontSize, BorderRadius, TextStyles, Fonts } from '../../theme/theme';
 import { ThemeContext } from '../../theme/colourController';
 
 type CardColour = 'red' | 'amber' | 'green' | 'neutral';
@@ -14,6 +14,7 @@ interface SummaryCardProps {
   iconColor?: string; // optional override
   iconBackgroundColor?: string; // optional override
   onPress?: () => void;
+  stacked?: boolean;
 }
 
 const SummaryCard: React.FC<SummaryCardProps> = ({
@@ -24,10 +25,12 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
                                                    iconColor,
                                                    iconBackgroundColor,
                                                    onPress,
+                                                   stacked = false,
                                                  }) => {
-  const { theme } = useContext(ThemeContext); // grab theme dynamically
-
+  const { theme, accessibility } = useContext(ThemeContext);
   const Container = onPress ? Pressable : View;
+  const fontScale = accessibility.largeText ? 1.3 : 1;
+  const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
 
   // Colour mapping based on theme
   const colourStyles: Record<CardColour, { iconColor: string; background: string }> = {
@@ -95,21 +98,33 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
 
     label: {
       ...TextStyles.regular,
-      fontSize: FontSize.xs14,
+      fontSize: FontSize.xs14 * fontScale,
+      fontFamily: fontFamilies.regular,
       color: theme.greyIconLight,
     } as TextStyle,
 
     value: {
       ...TextStyles.regular,
-      fontSize: FontSize.l24,
+      fontSize: FontSize.l24 * fontScale,
+      fontFamily: fontFamilies.regular,
       color: theme.black,
     } as TextStyle,
+
+    topRowStacked: {
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 4,
+    } as ViewStyle,
+
+    iconContainerStacked: {
+      marginRight: 0,
+    } as ViewStyle,
   });
 
   return (
     <Container style={styles.card} onPress={onPress}>
       <View style={styles.content}>
-        <View style={styles.topRow}>
+        <View style={[styles.topRow, stacked && styles.topRowStacked]}>
           {icon && (
             <View style={styles.iconContainer}>
               <Icon source={icon} size={15} color={resolvedIconColor} />
