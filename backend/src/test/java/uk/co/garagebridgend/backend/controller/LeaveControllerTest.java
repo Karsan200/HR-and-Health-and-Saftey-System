@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import org.springframework.http.MediaType;
 
+import uk.co.garagebridgend.backend.models.request.LeaveDecisionRequest;
 import uk.co.garagebridgend.backend.models.request.LeaveRequest;
 import uk.co.garagebridgend.backend.models.response.*;
 import uk.co.garagebridgend.backend.RentATechApplication;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -67,7 +69,7 @@ public class LeaveControllerTest {
                 new LeaveCalendarAdminResponse(
                         LocalDate.of(2026, 4, 1),
                         "John Doe",
-                        "bookedLeave",
+                        "Holiday",
                         "Annual leave"
                 )
         );
@@ -166,7 +168,7 @@ public class LeaveControllerTest {
                         "Technician",
                         start,
                         end,
-                        true // partialDay = true
+                        true
                 )
         );
 
@@ -198,9 +200,9 @@ public class LeaveControllerTest {
     @Test
     void testGetSummarySuccess() throws Exception {
         LeaveSummaryResponse mockSummary = new LeaveSummaryResponse(
-                120, // remainingHours
-                2,   // pendingCount
-                5    // approvedCount
+                120,
+                2,
+                5
         );
 
         when(leaveService.getLeaveSummaryForCurrentUser()).thenReturn(mockSummary);
@@ -339,6 +341,192 @@ public class LeaveControllerTest {
                             "leaveTypeId": 1,
                             "notes": "Annual leave"
                         }
+                        """))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testGetPendingLeaveSuccess() throws Exception {
+
+        when(leaveService.getPendingLeave()).thenReturn(List.of(
+                new PendingLeaveResponse(
+                        1L,
+                        "John Doe",
+                        "Holiday",
+                        LocalDateTime.of(2026, 6, 1, 8, 0),
+                        LocalDateTime.of(2026, 6, 5, 17, 0),
+                        "Summer holiday",
+                        LocalDateTime.of(2026, 5, 1, 10, 0)
+                )
+        ));
+
+        mockMvc.perform(get("/api/leave/admin/pending"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetPendingLeaveEmpty() throws Exception {
+
+        when(leaveService.getPendingLeave()).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/leave/admin/pending"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetPendingLeaveUnauthorized() throws Exception {
+
+        when(leaveService.getPendingLeave())
+                .thenThrow(new AuthenticatedAccountNotFoundException());
+
+        mockMvc.perform(get("/api/leave/admin/pending"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testGetPendingLeaveThrowsException() throws Exception {
+
+        when(leaveService.getPendingLeave())
+                .thenThrow(new RuntimeException("Database error"));
+
+        mockMvc.perform(get("/api/leave/admin/pending"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testApproveLeaveSuccess() throws Exception {
+
+        doNothing().when(leaveService).approveLeave(eq(1L), any(LeaveDecisionRequest.class));
+
+        mockMvc.perform(post("/api/leave/admin/1/approve")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        { "response": "Approved" }
+                        """))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testApproveLeaveNotFound() throws Exception {
+
+        doThrow(new IllegalArgumentException("Leave request not found."))
+                .when(leaveService).approveLeave(eq(99L), any(LeaveDecisionRequest.class));
+
+        mockMvc.perform(post("/api/leave/admin/99/approve")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        { "response": "OK" }
+                        """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testApproveLeaveAlreadyActioned() throws Exception {
+
+        doThrow(new IllegalArgumentException("This leave request has already been approved."))
+                .when(leaveService).approveLeave(eq(1L), any(LeaveDecisionRequest.class));
+
+        mockMvc.perform(post("/api/leave/admin/1/approve")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        { "response": "OK" }
+                        """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testApproveLeaveUnauthorized() throws Exception {
+
+        doThrow(new AuthenticatedAccountNotFoundException())
+                .when(leaveService).approveLeave(eq(1L), any(LeaveDecisionRequest.class));
+
+        mockMvc.perform(post("/api/leave/admin/1/approve")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        { "response": "OK" }
+                        """))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testApproveLeaveThrowsException() throws Exception {
+
+        doThrow(new RuntimeException("Database error"))
+                .when(leaveService).approveLeave(eq(1L), any(LeaveDecisionRequest.class));
+
+        mockMvc.perform(post("/api/leave/admin/1/approve")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        { "response": "OK" }
+                        """))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void testDeclineLeaveSuccess() throws Exception {
+
+        doNothing().when(leaveService).declineLeave(eq(1L), any(LeaveDecisionRequest.class));
+
+        mockMvc.perform(post("/api/leave/admin/1/decline")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        { "response": "Too many absences" }
+                        """))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testDeclineLeaveNotFound() throws Exception {
+
+        doThrow(new IllegalArgumentException("Leave request not found."))
+                .when(leaveService).declineLeave(eq(99L), any(LeaveDecisionRequest.class));
+
+        mockMvc.perform(post("/api/leave/admin/99/decline")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        { "response": "No" }
+                        """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testDeclineLeaveAlreadyActioned() throws Exception {
+
+        doThrow(new IllegalArgumentException("This leave request has already been declined."))
+                .when(leaveService).declineLeave(eq(1L), any(LeaveDecisionRequest.class));
+
+        mockMvc.perform(post("/api/leave/admin/1/decline")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        { "response": "No" }
+                        """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testDeclineLeaveUnauthorized() throws Exception {
+
+        doThrow(new AuthenticatedAccountNotFoundException())
+                .when(leaveService).declineLeave(eq(1L), any(LeaveDecisionRequest.class));
+
+        mockMvc.perform(post("/api/leave/admin/1/decline")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        { "response": "No" }
+                        """))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testDeclineLeaveThrowsException() throws Exception {
+
+        doThrow(new RuntimeException("Database error"))
+                .when(leaveService).declineLeave(eq(1L), any(LeaveDecisionRequest.class));
+
+        mockMvc.perform(post("/api/leave/admin/1/decline")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        { "response": "No" }
                         """))
                 .andExpect(status().isInternalServerError());
     }

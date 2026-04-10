@@ -875,11 +875,11 @@ INSERT INTO leave_type_table (
     colour_bg,
     icon_type
 ) VALUES
-      ('Holiday', '14A45A', 'D0EDDE', 'sunbed'),
-      ('Sick Leave', 'D20414', 'F6CDD0', 'medical'),
-      ('Emergency Leave', 'E8960A', 'FFECCD', 'warning'),
-      ('Maternity/Paternity Leave', 'D20414', 'F6CDD0', 'medical'),
-      ('Unpaid Leave', '588FFF', 'E6ECF9', 'cross');
+      ('Holiday', '14A45A', 'D0EDDE', 'beach_access'),
+      ('Sick Leave', 'D20414', 'F6CDD0', 'sick'),
+      ('Emergency Leave', 'E8960A', 'FFECCD', 'priority_high'),
+      ('Maternity/Paternity Leave', 'ad32a7', 'edd1ec', 'child_care'),
+      ('Unpaid Leave', '588FFF', 'E6ECF9', 'money_off');
 
 INSERT INTO leave_table (
     account_id,
@@ -923,12 +923,20 @@ INSERT INTO leave_table (
       'Approved immediately.',
       CURRENT_TIMESTAMP),
 
+      (1,3,
+       '2026-05-10 00:00:00',
+       '2026-05-14 00:00:00',
+       FALSE,
+       'Family emergency.',
+       NULL,
+       CURRENT_TIMESTAMP),
+
       (6,4,
       '2026-08-01 00:00:00',
       '2026-08-10 00:00:00',
       FALSE,
       'Personal time off requested.',
-      'Pending review.',
+      NULL,
       CURRENT_TIMESTAMP);
 
 INSERT INTO clock_in_table (
