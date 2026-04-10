@@ -3,7 +3,7 @@ import {ScrollView, View, Text, Alert,} from 'react-native';
 
 import {TextInput, Checkbox, Button} from 'react-native-paper';
 import { ThemeContext } from '../theme/colourController.tsx';
-import { FontSize } from '../theme/theme';
+import {Fonts, FontSize} from '../theme/theme';
 import { JSX } from 'react/jsx-runtime';
 import { DatePickerInput} from "react-native-paper-dates";
 import ButtonActionBar from '../components/ButtonActionBar.tsx';
@@ -408,7 +408,12 @@ export default function HazardForm({ onDone, hazardId, initialData }: Props): JS
                         inputMode="start"
                         validRange={{ startDate: minDate }}
                         {...commonInputProps}
-                        contentStyle={{ fontSize: FontSize.xs14 }}
+                        contentStyle={{
+                            fontSize: FontSize.xs14 * (accessibility.largeText ? 1.3 : 1),
+                            fontFamily: accessibility.dyslexicFont
+                                ? Fonts.dyslexic.regular
+                                : Fonts.poppins.regular,
+                        }}
                     />
                     {errors.inputDate && <Text style={styles.errorText}>{errors.inputDate}</Text>}
 
