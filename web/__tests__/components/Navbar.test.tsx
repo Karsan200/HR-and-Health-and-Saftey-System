@@ -5,7 +5,7 @@ import { Navbar } from "../../src/components/Navbar";
 const mainNavItems = [
     { name: "Overview", href: "/" },
     { name: "Calendar", href: "/calendar" },
-    { name: "Employee Overview", href: "/employee-overview" },
+    { name: "Employee Overview", href: "/employee/overview" },
     { name: "Health and Safety", href: "/health-and-safety" },
 ] as const;
 

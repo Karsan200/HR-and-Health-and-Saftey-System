@@ -330,7 +330,7 @@ describe("Dashboard (full coverage)", () => {
             await userEvent.click(button);
 
             // Then navigation should be triggered to the pending leave review page
-            expect(mockNavigate).toHaveBeenCalledWith("calendar/pending-requests");
+            expect(mockNavigate).toHaveBeenCalledWith("calendar/requests");
         });
     });
 
