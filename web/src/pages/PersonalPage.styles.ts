@@ -64,8 +64,8 @@ export const personalPageStyles = {
 
     tab: (active: boolean) => ({
         padding: "10px 24px",
-        fontSize: FontSize.xs14,
-        fontFamily: TextStyles.regular,
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.bold,
         color: active ? DefaultColours.redPrimary : DefaultColours.greyPrimaryMainText,
         cursor: "pointer",
         borderBottom: active ? `2px solid ${DefaultColours.redPrimary}` : "2px solid transparent",
@@ -80,14 +80,14 @@ export const personalPageStyles = {
     sectionCard: {
         background: DefaultColours.white,
         border: `0.5px solid ${DefaultColours.greyBackground}`,
-        borderRadius: "12px",
+        borderRadius: BorderRadius.smallTextBackground,
         padding: "1.25rem",
         marginBottom: "1rem",
     },
 
     sectionTitle: {
-        fontSize: FontSize.xs14,
-        fontFamily: TextStyles.regular,
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.medium,
         color: DefaultColours.black,
         marginBottom: "1rem",
     },
@@ -210,14 +210,14 @@ export const personalPageStyles = {
     securityCard: {
         background: DefaultColours.white,
         border: `0.5px solid ${DefaultColours.greyBackground}`,
-        borderRadius: BorderRadius.largeButtonsAndOutlines,
+        borderRadius: BorderRadius.smallTextBackground,
         padding: "1.25rem",
         marginBottom: "1rem",
     },
 
     securityTitle: {
         fontSize: FontSize.m20,
-        fontWeight: 500,
+        fontFamily: TextStyles.medium,
         color: DefaultColours.black,
         marginBottom: "1.25rem",
     },
@@ -227,7 +227,7 @@ export const personalPageStyles = {
         padding: "14px 16px",
         fontSize: FontSize.xs14,
         border: `0.5px solid ${DefaultColours.greyBackground}`,
-        borderRadius: BorderRadius.mediumNotification,
+        borderRadius: BorderRadius.smallTextField,
         marginBottom: "12px",
         outline: "none",
         fontFamily: "inherit",
@@ -252,25 +252,27 @@ export const personalPageStyles = {
         background: DefaultColours.redPrimary,
         color: DefaultColours.white,
         border: "none",
-        borderRadius: "8px",
+        borderRadius: BorderRadius.smallTextField,
         padding: "12px 20px",
         fontSize: FontSize.xs14,
         cursor: "pointer",
-        fontFamily: "inherit",
+        fontFamily: TextStyles.medium,
         "&:hover": {
-            background: DefaultColours.redBackgroundLight,
+            background: DefaultColours.redTextDark,
         },
     },
 
     securitySuccessText: {
-        fontSize: FontSize.m20,
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular,
         color: DefaultColours.greenPrimary,
         textAlign: "right" as const,
         marginTop: "8px",
     },
 
     securityErrorText: {
-        fontSize: FontSize.xs14,
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular,
         color: DefaultColours.redPrimary,
         textAlign: "right" as const,
         marginTop: "8px",
