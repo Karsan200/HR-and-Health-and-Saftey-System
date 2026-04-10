@@ -52,7 +52,7 @@ describe('BleBroadcastHook', () => {
       expect(mockStartAdvertising).toHaveBeenCalledWith({
         serviceUUIDs: [AppSettings.BLE_SERVICE_UUID],
         advertisingData: {
-          shortenedLocalName: 'R.A.T Device',
+          shortenedLocalName: 'R.A.T Signal',
           completeLocalName: 'R.A.T device-123',
         },
       });
