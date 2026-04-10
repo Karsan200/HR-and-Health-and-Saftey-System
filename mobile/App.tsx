@@ -71,6 +71,12 @@ function App() {
         const response = await AuthenticationService.fetch('/api/attendance/signature', { method: 'GET' });
         const data = await response.json();
 
+        // Stop any existing background task before starting a new one
+        if (BackgroundService.isRunning()) {
+          await BackgroundService.stop();
+        }
+
+        // Start the background service with the BLE broadcast hook and pass the signature as a parameter
         await BackgroundService.start(BleBroadcastHook, {
           taskName: 'Attendance',
           taskTitle: 'Attendance Tracking',
@@ -83,7 +89,7 @@ function App() {
           } satisfies BleBroadcastTaskArgs,
         });
       } catch (error) {
-        console.log('BLE setup error:', error);
+        console.error('BLE setup error:', error);
       }
     };
 

@@ -8,8 +8,12 @@ export interface BleBroadcastTaskArgs {
 async function startBleAdvertising(broadcastId: string) {
   startAdvertising({
     serviceUUIDs: [AppSettings.BLE_SERVICE_UUID],
-    localName: `R.A.T ${broadcastId}`,
+    advertisingData: {
+      shortenedLocalName: "R.A.T Signal",
+      completeLocalName: `R.A.T ${broadcastId}`,
+    }
   });
+  console.log('Broadcasting as:', `R.A.T ${broadcastId}`);
 
   setServices([
     {
