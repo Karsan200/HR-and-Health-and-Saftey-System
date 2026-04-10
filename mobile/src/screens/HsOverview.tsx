@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { Icon } from 'react-native-paper';
+import {Icon} from 'react-native-paper';
+import { TouchableOpacity } from 'react-native';
 import SummaryRow from '../components/summary/SummaryRow';
 import AlertBox from '../components/AlertBox';
 import { styles as baseStyles, localStyles as baseLocalStyles } from './HsOverview.styles';
@@ -12,6 +13,10 @@ interface HsStatProps {
     count: string | number;
     label: string;
     styles: ReturnType<typeof baseLocalStyles>; // pass in themed styles
+}
+
+interface Props {
+    onOpenRiskAssessment: () => void;
 }
 
 // Small summary card showing a number and label
@@ -30,15 +35,16 @@ const HsStat: React.FC<HsStatProps> = ({ count, label, styles }) => (
 const RiskCard: React.FC<{
     styles: ReturnType<typeof baseLocalStyles>,
     screenStyles: ReturnType<typeof baseStyles>,
-    colours: any
-}> = ({ styles, screenStyles, colours }) => (
+    colours: any,
+    onPress: () => void
+}> = ({ styles, screenStyles, colours, onPress }) => (
     <View style={screenStyles.riskWrapper}>
-        <View style={styles.riskCard}>
+        <TouchableOpacity style={styles.riskCard} onPress={onPress}>
             <View style={styles.iconBox}>
                 <Icon source="clipboard-alert-outline" size={28} color={colours.bluePrimary} />
             </View>
             <Text style={styles.riskLabel}>Risk Assessment</Text>
-        </View>
+        </TouchableOpacity>
     </View>
 );
 
@@ -50,7 +56,7 @@ interface HsOverviewResponse {
 }
 
 // Main HsOverview screen component
-export default function HsOverview() {
+export default function HsOverview({ onOpenRiskAssessment }: Props) {
     const { theme, accessibility } = useContext(ThemeContext); // get current theme
 
     const styles = baseStyles(theme, accessibility); // themed styles
@@ -130,6 +136,7 @@ export default function HsOverview() {
                 styles={localStyles}
                 screenStyles={styles}
                 colours={theme}
+                onPress={onOpenRiskAssessment}
             />
             {/* Summary stat cards row */}
             <View style={styles.cardsWrapper}>

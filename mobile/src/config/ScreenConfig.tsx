@@ -139,7 +139,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
         <>
           <TopNavBar title="Overview" />
           <View style={styles.content}>
-            <HsOverview />
+              <HsOverview onOpenRiskAssessment={() => handleNavigate('hazardForm')} />
           </View>
         </>
       );
