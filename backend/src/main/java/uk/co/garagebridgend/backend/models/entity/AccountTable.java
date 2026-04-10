@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Account entity mapped to the database.
@@ -90,6 +91,10 @@ public class AccountTable {
     /** Optional mobile PIN (should be hashed). */
     @Column(columnDefinition = "TEXT", name = "mobile_pin")
     private String mobilePin;
+
+    /** UUID for broadcasting a BLE service. */
+    @Column(name = "ble_signature", unique = true, nullable = false, updatable = false)
+    private UUID bleSignature = UUID.randomUUID();
 
     /** Creation timestamp (auto-populated, not updatable). */
     @CreationTimestamp
