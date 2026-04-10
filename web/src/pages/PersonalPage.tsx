@@ -14,7 +14,7 @@ import ShieldIcon from "@mui/icons-material/Shield";
 import { personalPageStyles as styles } from "./PersonalPage.styles";
 import { useAuth } from "../AuthContext";
 import { fetchPersonalData, type ProfileResponse, type SettingsResponse } from "../logic/PersonalService";
-import {changePassword} from "../logic/PersonalSecurityService.ts";
+import {changePassword} from "../logic/PersonalSecurityService";
 
 type Tab = "profile" | "settings" | "security";
 
