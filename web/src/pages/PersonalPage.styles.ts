@@ -205,4 +205,74 @@ export const personalPageStyles = {
         fontFamily: TextStyles.bold,
         color: DefaultColours.white,
     },
+
+    // Security tab
+    securityCard: {
+        background: DefaultColours.white,
+        border: `0.5px solid ${DefaultColours.greyBackground}`,
+        borderRadius: BorderRadius.largeButtonsAndOutlines,
+        padding: "1.25rem",
+        marginBottom: "1rem",
+    },
+
+    securityTitle: {
+        fontSize: FontSize.m20,
+        fontWeight: 500,
+        color: DefaultColours.black,
+        marginBottom: "1.25rem",
+    },
+
+    securityInput: {
+        width: "100%",
+        padding: "14px 16px",
+        fontSize: FontSize.xs14,
+        border: `0.5px solid ${DefaultColours.greyBackground}`,
+        borderRadius: BorderRadius.mediumNotification,
+        marginBottom: "12px",
+        outline: "none",
+        fontFamily: "inherit",
+        color: DefaultColours.black,
+        backgroundColor: DefaultColours.white,
+        boxSizing: "border-box" as const,
+        "&:focus": {
+            borderColor: DefaultColours.redPrimary,
+        },
+    },
+
+    securityButtonRow: {
+        display: "flex",
+        justifyContent: "flex-end",
+        marginTop: "4px",
+    },
+
+    securityButton: {
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        background: DefaultColours.redPrimary,
+        color: DefaultColours.white,
+        border: "none",
+        borderRadius: "8px",
+        padding: "12px 20px",
+        fontSize: FontSize.xs14,
+        cursor: "pointer",
+        fontFamily: "inherit",
+        "&:hover": {
+            background: DefaultColours.redBackgroundLight,
+        },
+    },
+
+    securitySuccessText: {
+        fontSize: FontSize.m20,
+        color: DefaultColours.greenPrimary,
+        textAlign: "right" as const,
+        marginTop: "8px",
+    },
+
+    securityErrorText: {
+        fontSize: FontSize.xs14,
+        color: DefaultColours.redPrimary,
+        textAlign: "right" as const,
+        marginTop: "8px",
+    },
 };

@@ -5,6 +5,7 @@ import {
     CircularProgress,
 } from "@mui/material";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -113,12 +114,105 @@ function SettingsTab({ label }: { label: string }) {
 }
 
 // Third Tab (Security)
-// TODO: Complete the Security Tab
+// TODO: Build Out Backend Connection
 
-function SecurityTab({ label }: { label: string }) {
+function SecurityTab() {
+    const { authenticationService } = useAuth();
+
+    const [currentPassword, setCurrentPassword]     = useState("");
+    const [newPassword, setNewPassword]             = useState("");
+    const [confirmNewPassword, setConfirmPassword]  = useState("");
+    const [submitting, setSubmitting]               = useState(false);
+    const [success, setSuccess]                     = useState(false);
+    const [error, setError]                         = useState<string | null>(null);
+
+    async function handleSubmit() {
+        setError(null);
+        setSuccess(false);
+
+        if (!currentPassword || !newPassword || !confirmNewPassword) {
+            setError("Please fill in all fields.");
+            return;
+        }
+
+        if (newPassword !== confirmNewPassword) {
+            setError("New passwords do not match.");
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            setSuccess(true);
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+        } catch {
+            setError("Failed to change password. Please try again.");
+        } finally {
+            setSubmitting(false);
+        }
+    }
+
     return (
-        <Box sx={{ ...styles.sectionCard, ...styles.placeHolderCard }}>
-            <Typography sx={styles.infoLabel}>{label} TBC </Typography>
+        <Box sx={styles.securityCard}>
+            <Typography sx={styles.securityTitle}>Change Password</Typography>
+
+            <Box
+                component="input"
+                type="password"
+                placeholder="Password"
+                value={currentPassword}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setCurrentPassword(e.target.value)
+                }
+                sx={styles.securityInput}
+            />
+
+            <Box
+                component="input"
+                type="password"
+                placeholder="New Password"
+                value={newPassword}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewPassword(e.target.value)
+                }
+                sx={styles.securityInput}
+            />
+
+            <Box
+                component="input"
+                type="password"
+                placeholder="Confirm New Password"
+                value={confirmNewPassword}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setConfirmPassword(e.target.value)
+                }
+                sx={styles.securityInput}
+            />
+
+            <Box sx={styles.securityButtonRow}>
+                <Box
+                    component="button"
+                    onClick={handleSubmit}
+                    disabled={submitting}
+                    sx={styles.securityButton}
+                >
+                    <LockOutlinedIcon sx={{ fontSize: 16 }} />
+                    {submitting ? "Changing..." : "Change Password"}
+                </Box>
+            </Box>
+
+            {success && (
+                <Typography sx={styles.securitySuccessText}>
+                    Password changed successfully.
+                </Typography>
+            )}
+
+            {error && (
+                <Typography sx={styles.securityErrorText}>
+                    {error}
+                </Typography>
+            )}
         </Box>
     );
 }
@@ -198,7 +292,7 @@ export function PersonalPage() {
                 <>
                     {activeTab === "profile"  && <ProfileTab profile={profile} settings={settings} />}
                     {activeTab === "settings" && <SettingsTab label="Settings" />}
-                    {activeTab === "security" && <SecurityTab label="Security" />}
+                    {activeTab === "security" && <SecurityTab/>}
                 </>
             )}
         </Box>
