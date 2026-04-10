@@ -92,6 +92,28 @@ jest.mock('../src/screens/PersonalScreen', () => {
       );
 });
 
+jest.mock('../src/screens/HazardList', () => {
+  const { View, Text } = require('react-native');
+
+  return () =>
+      require('react').createElement(
+          View,
+          null,
+          require('react').createElement(Text, null, 'Hazard List Screen')
+      );
+});
+
+jest.mock('../src/screens/HazardView', () => {
+  const { View, Text } = require('react-native');
+
+  return () =>
+      require('react').createElement(
+          View,
+          null,
+          require('react').createElement(Text, null, 'Hazard View Screen')
+      );
+});
+
 jest.mock('../src/screens/ClockInScreen', () => {
   const { View, Text } = require('react-native');
   return () =>
