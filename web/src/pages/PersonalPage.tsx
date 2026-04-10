@@ -14,6 +14,7 @@ import ShieldIcon from "@mui/icons-material/Shield";
 import { personalPageStyles as styles } from "./PersonalPage.styles";
 import { useAuth } from "../AuthContext";
 import { fetchPersonalData, type ProfileResponse, type SettingsResponse } from "../logic/PersonalService";
+import {changePassword} from "../logic/PersonalSecurityService.ts";
 
 type Tab = "profile" | "settings" | "security";
 
@@ -114,7 +115,6 @@ function SettingsTab({ label }: { label: string }) {
 }
 
 // Third Tab (Security)
-// TODO: Build Out Backend Connection
 
 function SecurityTab() {
     const { authenticationService } = useAuth();
@@ -140,8 +140,23 @@ function SecurityTab() {
             return;
         }
 
+        if (newPassword == currentPassword) {
+            setError("New password must be different to old password.")
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            setError("Password must be at least 8 characters.");
+            return;
+        }
+
         setSubmitting(true);
         try {
+            await changePassword(authenticationService, {
+                oldPassword: currentPassword,
+                newPassword,
+                confirmNewPassword,
+            });
             setSuccess(true);
             setCurrentPassword("");
             setNewPassword("");
