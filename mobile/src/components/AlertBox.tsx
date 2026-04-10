@@ -68,7 +68,7 @@ const styles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: b
 
   return StyleSheet.create({
     container: {
-      height: 88,
+      minHeight: 88,
       backgroundColor: theme.white,
       borderRadius: BorderRadius.largeButtonsAndOutlines,
       paddingHorizontal: 10,

@@ -27,8 +27,12 @@ const HsStat: React.FC<HsStatProps> = ({ count, label, styles }) => (
 );
 
 // Quick Actions card that displays the Risk Assessment tile
-const RiskCard: React.FC<{ styles: ReturnType<typeof baseLocalStyles>, colours: any }> = ({ styles, colours }) => (
-    <View style={colours.riskWrapper}>
+const RiskCard: React.FC<{
+    styles: ReturnType<typeof baseLocalStyles>,
+    screenStyles: ReturnType<typeof baseStyles>,
+    colours: any
+}> = ({ styles, screenStyles, colours }) => (
+    <View style={screenStyles.riskWrapper}>
         <View style={styles.riskCard}>
             <View style={styles.iconBox}>
                 <Icon source="clipboard-alert-outline" size={28} color={colours.bluePrimary} />
@@ -122,8 +126,11 @@ export default function HsOverview() {
             <View style={styles.riskHeadingWrapper}>
                 <Text style={styles.sectionHeading}>Quick Actions</Text>
             </View>
-            <RiskCard styles={localStyles} colours={theme} />
-
+            <RiskCard
+                styles={localStyles}
+                screenStyles={styles}
+                colours={theme}
+            />
             {/* Summary stat cards row */}
             <View style={styles.cardsWrapper}>
                 <SummaryRow>
