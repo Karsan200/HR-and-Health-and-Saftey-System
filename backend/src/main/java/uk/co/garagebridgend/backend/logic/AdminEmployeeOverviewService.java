@@ -143,8 +143,8 @@ public class AdminEmployeeOverviewService {
                 continue;
             }
 
-            LocalTime startTime = clockIn.getClockInTime().toLocalTime();
-            LocalTime endTime = clockIn.getClockOutTime().toLocalTime();
+            LocalTime startTime = clockIn.getClockInTime();
+            LocalTime endTime = clockIn.getClockOutTime();
 
             if (!endTime.isAfter(startTime)) {
                 continue;

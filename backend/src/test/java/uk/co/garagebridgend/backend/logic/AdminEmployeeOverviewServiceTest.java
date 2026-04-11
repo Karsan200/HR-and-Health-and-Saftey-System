@@ -166,20 +166,20 @@ class AdminEmployeeOverviewServiceTest {
         permissions.setManager(true);
 
         ClockInTable validClockInOne = new ClockInTable();
-        validClockInOne.setClockInTime(Time.valueOf("08:00:00"));
-        validClockInOne.setClockOutTime(Time.valueOf("12:15:00"));
+        validClockInOne.setClockInTime(Time.valueOf("08:00:00").toLocalTime());
+        validClockInOne.setClockOutTime(Time.valueOf("12:15:00").toLocalTime());
 
         ClockInTable validClockInTwo = new ClockInTable();
-        validClockInTwo.setClockInTime(Time.valueOf("13:00:00"));
-        validClockInTwo.setClockOutTime(Time.valueOf("17:00:00"));
+        validClockInTwo.setClockInTime(Time.valueOf("13:00:00").toLocalTime());
+        validClockInTwo.setClockOutTime(Time.valueOf("17:00:00").toLocalTime());
 
         ClockInTable missingClockOut = new ClockInTable();
-        missingClockOut.setClockInTime(Time.valueOf("08:00:00"));
+        missingClockOut.setClockInTime(Time.valueOf("08:00:00").toLocalTime());
         missingClockOut.setClockOutTime(null);
 
         ClockInTable endBeforeStart = new ClockInTable();
-        endBeforeStart.setClockInTime(Time.valueOf("17:00:00"));
-        endBeforeStart.setClockOutTime(Time.valueOf("08:00:00"));
+        endBeforeStart.setClockInTime(Time.valueOf("17:00:00").toLocalTime());
+        endBeforeStart.setClockOutTime(Time.valueOf("08:00:00").toLocalTime());
 
         LeaveTypeTable leaveType = new LeaveTypeTable();
         leaveType.setName("Annual Leave");
@@ -230,8 +230,8 @@ class AdminEmployeeOverviewServiceTest {
         nullTimes.setClockOutTime(null);
 
         ClockInTable sameStartAndEnd = new ClockInTable();
-        sameStartAndEnd.setClockInTime(Time.valueOf("08:00:00"));
-        sameStartAndEnd.setClockOutTime(Time.valueOf("08:00:00"));
+        sameStartAndEnd.setClockInTime(Time.valueOf("08:00:00").toLocalTime());
+        sameStartAndEnd.setClockOutTime(Time.valueOf("08:00:00").toLocalTime());
 
         when(accountRepository.findById(11L)).thenReturn(Optional.of(account));
         when(permissionsRepository.findById(11L)).thenReturn(Optional.empty());
