@@ -3,8 +3,44 @@ import userEvent from "@testing-library/user-event";
 
 import { DayDetailOverlay } from "../../src/components/DayDetailOverlay";
 import type { CalendarEvent } from "../../src/models/CalendarTypes";
+import type { ResolvedLeaveType } from "../../src/logic/LeaveTypeService";
+import CalendarMonthOutlined from "@mui/icons-material/CalendarMonthOutlined";
 
-// Minimal set of events covering all four types
+// Mock leave types matching the four legacy event type names
+// The component now matches event.type against leaveType.name, so these names
+// must match the type strings used in the test events below.
+
+const mockLeaveTypes: ResolvedLeaveType[] = [
+    {
+        leaveTypeId: 1,
+        name: "bookedLeave",
+        colourBg: "FFECCD",
+        colourIcon: "E8960A",
+        Icon: CalendarMonthOutlined,
+    },
+    {
+        leaveTypeId: 2,
+        name: "sickLeave",
+        colourBg: "F6CDD0",
+        colourIcon: "D20414",
+        Icon: CalendarMonthOutlined,
+    },
+    {
+        leaveTypeId: 3,
+        name: "nationalHoliday",
+        colourBg: "E6ECF9",
+        colourIcon: "002A80",
+        Icon: CalendarMonthOutlined,
+    },
+    {
+        leaveTypeId: 4,
+        name: "trainingLeave",
+        colourBg: "D0EDDE",
+        colourIcon: "0D7B42",
+        Icon: CalendarMonthOutlined,
+    },
+];
+
 const bookedLeaveEvent: CalendarEvent = {
     id: "1",
     date: "2026-04-15",
@@ -46,6 +82,7 @@ function renderOverlay(
             open={open}
             date={date}
             events={events}
+            leaveTypes={mockLeaveTypes}
             onClose={onClose}
         />
     );
@@ -101,7 +138,7 @@ describe("DayDetailOverlay", () => {
             expect(screen.getByText("Monday, April 13th")).toBeInTheDocument();
         });
 
-        it("uses 'th' suffix for 21st — wait, uses 'st'", () => {
+        it("uses 'st' suffix for the 21st", () => {
             renderOverlay(true, "2026-04-21", []);
             expect(screen.getByText("Tuesday, April 21st")).toBeInTheDocument();
         });
@@ -125,9 +162,9 @@ describe("DayDetailOverlay", () => {
             expect(screen.getByText("John Doe")).toBeInTheDocument();
         });
 
-        it("renders the type label 'Booked Leave'", () => {
+        it("renders the type label for a booked leave event", () => {
             renderOverlay(true, "2026-04-15", [bookedLeaveEvent]);
-            expect(screen.getByText("Booked Leave")).toBeInTheDocument();
+            expect(screen.getByText("bookedLeave")).toBeInTheDocument();
         });
 
         it("renders the event label for a sick leave event", () => {
@@ -135,9 +172,9 @@ describe("DayDetailOverlay", () => {
             expect(screen.getByText("Jane Smith")).toBeInTheDocument();
         });
 
-        it("renders the type label 'Sick Leave'", () => {
+        it("renders the type label for a sick leave event", () => {
             renderOverlay(true, "2026-04-15", [sickLeaveEvent]);
-            expect(screen.getByText("Sick Leave")).toBeInTheDocument();
+            expect(screen.getByText("sickLeave")).toBeInTheDocument();
         });
 
         it("renders the event label for a national holiday event", () => {
@@ -145,9 +182,9 @@ describe("DayDetailOverlay", () => {
             expect(screen.getByText("Easter Monday")).toBeInTheDocument();
         });
 
-        it("renders the type label 'National Holiday'", () => {
+        it("renders the type label for a national holiday event", () => {
             renderOverlay(true, "2026-04-15", [nationalHolidayEvent]);
-            expect(screen.getByText("National Holiday")).toBeInTheDocument();
+            expect(screen.getByText("nationalHoliday")).toBeInTheDocument();
         });
 
         it("renders the event label for a training leave event", () => {
@@ -155,15 +192,26 @@ describe("DayDetailOverlay", () => {
             expect(screen.getByText("Bob Jones")).toBeInTheDocument();
         });
 
-        it("renders the type label 'Training Leave'", () => {
+        it("renders the type label for a training leave event", () => {
             renderOverlay(true, "2026-04-15", [trainingLeaveEvent]);
-            expect(screen.getByText("Training Leave")).toBeInTheDocument();
+            expect(screen.getByText("trainingLeave")).toBeInTheDocument();
         });
 
         it("renders multiple events", () => {
             renderOverlay(true, "2026-04-15", [bookedLeaveEvent, sickLeaveEvent]);
             expect(screen.getByText("John Doe")).toBeInTheDocument();
             expect(screen.getByText("Jane Smith")).toBeInTheDocument();
+        });
+
+        it("falls back to the raw type string when no matching leave type is found", () => {
+            const unknownEvent: CalendarEvent = {
+                id: "99",
+                date: "2026-04-15",
+                type: "unknownType",
+                label: "Mystery Person",
+            };
+            renderOverlay(true, "2026-04-15", [unknownEvent]);
+            expect(screen.getByText("unknownType")).toBeInTheDocument();
         });
     });
 
@@ -175,7 +223,6 @@ describe("DayDetailOverlay", () => {
 
         it("does not render notes when the field is absent", () => {
             renderOverlay(true, "2026-04-15", [sickLeaveEvent]);
-            // Only label and type label are present — no notes text
             expect(screen.queryByText("Annual leave")).not.toBeInTheDocument();
         });
 
@@ -196,7 +243,6 @@ describe("DayDetailOverlay", () => {
         it("calls onClose when the backdrop is clicked", async () => {
             const onClose = jest.fn();
             const { baseElement } = renderOverlay(true, "2026-04-15", [], onClose);
-            // The MUI Modal backdrop sits outside the panel
             const backdrop = baseElement.querySelector(".MuiBackdrop-root") as HTMLElement;
             if (backdrop) {
                 await userEvent.click(backdrop);

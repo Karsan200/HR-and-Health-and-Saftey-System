@@ -107,6 +107,9 @@ public class ProfileService {
         boolean hasOld     = request.getOldPassword() != null && !request.getOldPassword().isBlank();
         boolean hasNew     = request.getNewPassword() != null && !request.getNewPassword().isBlank();
         boolean hasConfirm = request.getConfirmNewPassword() != null && !request.getConfirmNewPassword().isBlank();
+        // System.out.println(hasOld);
+        // System.out.println(hasNew);
+        // System.out.println(hasConfirm);
 
         if (hasOld || hasNew || hasConfirm) {
             // All three fields are required together

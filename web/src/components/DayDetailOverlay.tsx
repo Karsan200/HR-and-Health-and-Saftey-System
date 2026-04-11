@@ -6,7 +6,8 @@ import {
     Modal,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
-import { type CalendarEvent, eventConfig } from "../models/CalendarTypes";
+import { type CalendarEvent, eventConfigForType } from "../models/CalendarTypes";
+import { type ResolvedLeaveType, findLeaveTypeByName } from "../logic/LeaveTypeService";
 import { dayDetailOverlayStyles as styles } from "./DayDetailOverlay.styles";
 import { DefaultColours } from "../theme/colours";
 
@@ -14,6 +15,7 @@ interface DayDetailOverlayProps {
     open: boolean;
     date: string | null;
     events: CalendarEvent[];
+    leaveTypes: ResolvedLeaveType[];
     onClose: () => void;
 }
 
@@ -38,19 +40,13 @@ function formatDate(iso: string): string {
     return `${dayNames[d.getDay()]}, ${monthNames[d.getMonth()]} ${day}${suffix(day)}`;
 }
 
-// Returns a human-readable label for each event type
-function typeLabel(type: CalendarEvent["type"]): string {
-    switch (type) {
-        case "nationalHoliday": return "National Holiday";
-        case "sickLeave":       return "Sick Leave";
-        case "bookedLeave":     return "Booked Leave";
-        case "trainingLeave":   return "Training Leave";
-    }
-}
-
 // Single event row card inside the overlay
-function EventRow({ event }: { event: CalendarEvent }) {
-    const { chipBg, iconCircleBg, textColor, Icon } = eventConfig(event.type);
+function EventRow({ event, leaveTypes }: { event: CalendarEvent; leaveTypes: ResolvedLeaveType[] }) {
+    const { chipBg, iconCircleBg, textColor, Icon } = eventConfigForType(event.type, leaveTypes);
+
+    // Use the matched leave type name as the label, falling back to the raw type string
+    const matchedType = findLeaveTypeByName(leaveTypes, event.type);
+    const typeLabel = matchedType?.name ?? event.type;
 
     return (
         <Box sx={styles.eventRow}>
@@ -83,7 +79,7 @@ function EventRow({ event }: { event: CalendarEvent }) {
                         <Icon sx={{ fontSize: "16px", color: DefaultColours.white }} />
                     </Box>
                     <Typography sx={styles.eventTypeLabel(textColor)}>
-                        {typeLabel(event.type)}
+                        {typeLabel}
                     </Typography>
                 </Box>
             </Box>
@@ -91,7 +87,7 @@ function EventRow({ event }: { event: CalendarEvent }) {
     );
 }
 
-export function DayDetailOverlay({ open, date, events, onClose }: DayDetailOverlayProps) {
+export function DayDetailOverlay({ open, date, events, leaveTypes, onClose }: DayDetailOverlayProps) {
     const formattedDate = useMemo(() => (date ? formatDate(date) : ""), [date]);
 
     return (
@@ -124,7 +120,7 @@ export function DayDetailOverlay({ open, date, events, onClose }: DayDetailOverl
                         ) : (
                             <Box sx={styles.eventList}>
                                 {events.map(ev => (
-                                    <EventRow key={ev.id} event={ev} />
+                                    <EventRow key={ev.id} event={ev} leaveTypes={leaveTypes} />
                                 ))}
                             </Box>
                         )}

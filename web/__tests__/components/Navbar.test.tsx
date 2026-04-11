@@ -11,7 +11,7 @@ const mainNavItems = [
 
 const actionNavItems = [
     { name: "notifications", href: "/notifications" },
-    { name: "profile", href: "/profile" },
+    { name: "profile", href: "/personal" },
 ] as const;
 
 function renderNavbar(initialPath = "/") {

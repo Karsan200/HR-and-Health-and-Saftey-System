@@ -5,16 +5,46 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uk.co.garagebridgend.backend.models.entity.ClockInTable;
+import uk.co.garagebridgend.backend.models.entity.AccountTable;
 
 import java.sql.Time;
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 /**
  * Repository interface for finding late's to work for a specific week.
  */
 @Repository
 public interface ClockInRepository extends JpaRepository<ClockInTable, UUID> {
+
+    /**
+     * Finds all clock-in records for a given account, ordered by creation time descending.
+     * @param account the account to find records for
+     * @return list of clock-in records
+     */
+    List<ClockInTable> findByAccountOrderByCreatedDesc(AccountTable account);
+
+    /**
+     * Finds all clock-in records for a given account within a date range.
+     * @param account the account to find records for
+     * @param from the start of the date range (inclusive)
+     * @param to the end of the date range (inclusive)
+     * @return list of clock-in records within the range
+     */
+    List<ClockInTable> findByAccountAndCreatedBetweenOrderByCreatedDesc(
+            AccountTable account,
+            LocalDateTime from,
+            LocalDateTime to
+    );
+
+    /**
+     * Finds the most recent clock-in record for a given account.
+     * @param account the account to find the most recent record for
+     * @return an optional containing the most recent record, or empty if none exists
+     */
+    Optional<ClockInTable> findFirstByAccountOrderByCreatedDesc(AccountTable account);
 
     /**
      * Counts the number of clock-ins that are considered late for the current week.
@@ -32,7 +62,7 @@ public interface ClockInRepository extends JpaRepository<ClockInTable, UUID> {
           AND c.created < :endOfWeek
     """)
     int countLateClockInsThisWeek(
-            @Param("lateThreshold") Time lateThreshold,
+            @Param("lateThreshold") LocalTime lateThreshold,
             @Param("startOfWeek") LocalDateTime startOfWeek,
             @Param("endOfWeek") LocalDateTime endOfWeek
     );
@@ -49,7 +79,7 @@ public interface ClockInRepository extends JpaRepository<ClockInTable, UUID> {
     List<ClockInTable> findAllByCreatedGreaterThanEqualAndCreatedLessThanAndClockInTimeGreaterThan(
             LocalDateTime startDateTime,
             LocalDateTime endDateTime,
-            Time lateThreshold
+            LocalTime lateThreshold
     );
 
     /**
@@ -64,7 +94,7 @@ public interface ClockInRepository extends JpaRepository<ClockInTable, UUID> {
     WHERE c.clockInTime > :lateThreshold
     ORDER BY c.created DESC
 """)
-    List<ClockInTable> findTop10LateClockIns(@Param("lateThreshold") Time lateThreshold);
+    List<ClockInTable> findTop10LateClockIns(@Param("lateThreshold") LocalTime lateThreshold);
 
     /**
      * Retrieves all clock-ins for an employee within a given date range.

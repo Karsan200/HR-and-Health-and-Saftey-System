@@ -60,6 +60,20 @@ public interface LeaveRepository extends JpaRepository<LeaveTable, Long> {
     List<LeaveTable> findTop5ByOrderByCreatedDesc();
 
     /**
+     * Retrieves all leave entries that are pending approval (not yet approved).
+     * Ordered by creation date ascending so the oldest request appears first.
+     *
+     * @return a list of pending {@link LeaveTable} entries
+     */
+    @Query("""
+    SELECT l FROM LeaveTable l
+    WHERE l.isApproved = false
+    AND l.response IS NULL
+    ORDER BY l.created ASC
+    """)
+    List<LeaveTable> findPendingLeave();
+
+    /**
      * Retrieves upcoming approved leave entries for an employee, ordered by soonest start date.
      *
      * @param accountId the employee account id

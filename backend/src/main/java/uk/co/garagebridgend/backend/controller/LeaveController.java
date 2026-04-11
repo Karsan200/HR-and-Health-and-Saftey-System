@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import uk.co.garagebridgend.backend.logic.LeaveService;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
+import uk.co.garagebridgend.backend.models.request.LeaveDecisionRequest;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarAdminResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
@@ -20,6 +21,7 @@ import uk.co.garagebridgend.backend.models.response.LeaveTypeResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.co.garagebridgend.backend.models.request.LeaveRequest;
+import uk.co.garagebridgend.backend.models.response.PendingLeaveResponse;
 
 import java.util.List;
 
@@ -182,6 +184,70 @@ public class LeaveController {
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error"
             );
+        }
+    }
+
+    /**
+     * Retrieves all leave requests that are currently pending approval.
+     * Only accessible to admin and manager roles (enforced in SecurityConfig).
+     *
+     * @return a list of {@link PendingLeaveResponse} objects, ordered oldest first
+     */
+    @GetMapping("/admin/pending")
+    public List<PendingLeaveResponse> getPendingLeave() {
+        try {
+            return leaveService.getPendingLeave();
+        } catch (AuthenticatedAccountNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+        }
+    }
+
+
+    /**
+     * Declines a pending leave request.
+     * Only accessible to admin and manager roles (enforced in SecurityConfig).
+     *
+     * @param leaveId  the ID of the leave record to decline
+     * @param decision request body containing the optional admin response message
+     */
+    @PostMapping("/admin/{leaveId}/decline")
+    public void declineLeave(
+            @PathVariable final Long leaveId,
+            @RequestBody final LeaveDecisionRequest decision
+    ) {
+        try {
+            leaveService.declineLeave(leaveId, decision);
+        } catch (AuthenticatedAccountNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+        }
+    }
+
+    /**
+     * Approves a pending leave request.
+     * Only accessible to admin and manager roles (enforced in SecurityConfig).
+     *
+     * @param leaveId  the ID of the leave record to approve
+     * @param decision request body containing the optional admin response message
+     */
+    @PostMapping("/admin/{leaveId}/approve")
+    public void approveLeave(
+            @PathVariable final Long leaveId,
+            @RequestBody final LeaveDecisionRequest decision
+    ) {
+        try {
+            leaveService.approveLeave(leaveId, decision);
+        } catch (AuthenticatedAccountNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 }

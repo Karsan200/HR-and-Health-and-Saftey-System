@@ -62,7 +62,7 @@ export function Navbar() {
                     {/* Displaying the profile button, with a redirect for when the button is clicked*/}
                     <IconButton
                         component={NavLink}
-                        to="/profile"
+                        to="/personal"
                         aria-label="profile"
                         sx={styles.iconButton}
                     >

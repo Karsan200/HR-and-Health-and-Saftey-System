@@ -1,12 +1,11 @@
 import { fetchCalendarEvents } from "../../src/logic/LeaveCalendarService";
-import { AppSettings } from "../../src/AppSettings";
+import type { AuthenticationService } from "../../src/logic/AuthenticationService";
 
-const mockAuthService = {
-    auth: { accessToken: "test-token" },
-} as never;
-
+// authService.fetch is what the service calls — mock it directly on the object
 const mockFetch = jest.fn();
-global.fetch = mockFetch;
+const mockAuthService = {
+    fetch: mockFetch,
+} as unknown as AuthenticationService;
 
 beforeEach(() => {
     jest.clearAllMocks();
@@ -24,16 +23,16 @@ function makeMockResponse(ok: boolean, data: object | string, status = 200) {
 describe("fetchCalendarEvents", () => {
 
     describe("successful fetch", () => {
-        it("calls fetch with the correct URL including year and month", async () => {
+        it("calls authService.fetch with the correct URL including year and month", async () => {
             mockFetch.mockResolvedValueOnce(makeMockResponse(true, []));
             await fetchCalendarEvents(2026, 4, mockAuthService);
             expect(mockFetch).toHaveBeenCalledWith(
-                `${AppSettings.API_URL}/api/leave/admin/calendar?year=2026&month=4`,
+                "/api/leave/admin/calendar?year=2026&month=4",
                 expect.any(Object)
             );
         });
 
-        it("calls fetch with the correct method, credentials and authorization header", async () => {
+        it("calls authService.fetch with the correct method and credentials", async () => {
             mockFetch.mockResolvedValueOnce(makeMockResponse(true, []));
             await fetchCalendarEvents(2026, 4, mockAuthService);
             expect(mockFetch).toHaveBeenCalledWith(
@@ -41,9 +40,6 @@ describe("fetchCalendarEvents", () => {
                 {
                     method: "GET",
                     credentials: "include",
-                    headers: {
-                        Authorization: "Bearer test-token",
-                    },
                 }
             );
         });
@@ -61,9 +57,9 @@ describe("fetchCalendarEvents", () => {
             const result = await fetchCalendarEvents(2026, 4, mockAuthService);
             expect(result).toHaveLength(1);
             expect(result[0]).toEqual({
-                id: "2026-04-15-John Doe-0",
-                date: "2026-04-15",
-                type: "bookedLeave",
+                id:    "2026-04-15-John Doe-0",
+                date:  "2026-04-15",
+                type:  "bookedLeave",
                 label: "John Doe",
                 notes: "Holiday",
             });
@@ -71,7 +67,7 @@ describe("fetchCalendarEvents", () => {
 
         it("maps multiple response items with correct incrementing index in id", async () => {
             mockFetch.mockResolvedValueOnce(makeMockResponse(true, [
-                { date: "2026-04-15", employeeName: "John Doe",  leaveType: "bookedLeave",   notes: null },
+                { date: "2026-04-15", employeeName: "John Doe",   leaveType: "bookedLeave",   notes: null },
                 { date: "2026-04-16", employeeName: "Jane Smith", leaveType: "sickLeave",     notes: null },
                 { date: "2026-04-17", employeeName: "Bob Jones",  leaveType: "trainingLeave", notes: null },
             ]));
@@ -97,8 +93,8 @@ describe("fetchCalendarEvents", () => {
             expect(result[0].notes).toBe("Annual leave");
         });
 
-        it("passes the leaveType string through as the event type", async () => {
-            const types = ["bookedLeave", "sickLeave", "trainingLeave", "nationalHoliday"];
+        it("passes the leaveType string through as the event type without transformation", async () => {
+            const types = ["Holiday", "Sick Leave", "Emergency Leave", "Unpaid Leave"];
             for (const leaveType of types) {
                 mockFetch.mockResolvedValueOnce(makeMockResponse(true, [
                     { date: "2026-04-15", employeeName: "Test User", leaveType, notes: null },
@@ -135,7 +131,7 @@ describe("fetchCalendarEvents", () => {
             expect(mockResponse.text).toHaveBeenCalled();
         });
 
-        it("throws when fetch itself rejects due to a network error", async () => {
+        it("throws when authService.fetch itself rejects due to a network error", async () => {
             mockFetch.mockRejectedValueOnce(new Error("Network failure"));
             await expect(fetchCalendarEvents(2026, 4, mockAuthService))
                 .rejects.toThrow("Network failure");
