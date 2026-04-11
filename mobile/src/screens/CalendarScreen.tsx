@@ -9,6 +9,7 @@ import SummaryCard from '../components/summary/SummaryCard';
 import SummaryRow from '../components/summary/SummaryRow';
 import AuthenticationService from "../logic/AuthenticationService";
 import { ThemeContext } from '../theme/colourController';
+import { Icon } from 'react-native-paper/src';
 
 type Props = {
   onDayPress: (date: string) => void;
@@ -195,6 +196,17 @@ const [refreshing, setRefreshing] = useState(false);
           <Calendar
             onDayPress={handleDayPress}
             markedDates={markedDates}
+            renderArrow={direction => (
+              <View>
+                <Icon
+                  source={
+                    direction === 'left' ? 'chevron-left' : 'chevron-right'
+                  }
+                  size={24}
+                  color={theme.redPrimary}
+                />
+              </View>
+            )}
             theme={{
               calendarBackground: theme.white,
               textSectionTitleColor: theme.greyPrimaryMainText,

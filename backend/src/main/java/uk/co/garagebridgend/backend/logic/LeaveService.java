@@ -5,6 +5,8 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,11 +15,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
+import uk.co.garagebridgend.backend.models.request.LeaveDecisionRequest;
 import uk.co.garagebridgend.backend.models.request.LeaveRequest;
+import uk.co.garagebridgend.backend.models.response.LeaveCalendarAdminResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveCalendarResponse;
 import uk.co.garagebridgend.backend.models.response.LeaveDayResponse;
 import uk.co.garagebridgend.backend.models.entity.LeaveTable;
 import uk.co.garagebridgend.backend.models.response.LeaveSummaryResponse;
+import uk.co.garagebridgend.backend.models.response.PendingLeaveResponse;
 import uk.co.garagebridgend.backend.repository.LeaveRepository;
 import uk.co.garagebridgend.backend.models.entity.LeaveTypeTable;
 import uk.co.garagebridgend.backend.models.response.LeaveTypeResponse;
@@ -62,18 +67,58 @@ public class LeaveService {
     @Value("${leave.working-hours.friday.end}")
     private LocalTime fridayEndTime;
 
-    /**
-     * Repository used to access leave data from the database.
-     */
+    /** Repository used to access leave data from the database. */
     private final LeaveRepository leaveRepository;
 
-    /**
-     * Repository used to access leave type data from the database.
-     */
+    /** Repository used to access leave type data from the database. */
     private final LeaveTypeRepository leaveTypeRepository;
 
     /** Service for handling authentication and retrieving the current user. */
     private final AuthenticationService authenticationService;
+
+    /**
+     * Retrieves all approved leave entries for a given month and expands multi-day
+     * leave records into one {@link LeaveCalendarAdminResponse} per calendar day.
+     * Weekends are excluded from the expansion since the calendar only shows weekdays.
+     *
+     * @param year the calendar year to query
+     * @param month the calendar month to query (1 = January, 12 = December)
+     * @return a flat list of calendar items, one per employee per working day on leave
+     */
+    public List<LeaveCalendarAdminResponse> getCalendarItems(final int year, final int month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+
+        // Fetch all leave that overlaps the requested month
+        LocalDateTime rangeStart = yearMonth.atDay(1).atStartOfDay();
+        LocalDateTime rangeEnd = yearMonth.atEndOfMonth().atTime(LocalTime.MAX);
+
+        List<LeaveTable> leaveList = leaveRepository.findApprovedLeaveInRange(rangeStart, rangeEnd);
+
+        List<LeaveCalendarAdminResponse> items = new ArrayList<>();
+
+        for (LeaveTable leave : leaveList) {
+            String employeeName = leave.getAccount().getFirstName()
+                    + " " + leave.getAccount().getLastName();
+            String leaveType = leave.getLeaveType().getName();
+            String notes = leave.getNotes();
+
+            // Expand each leave record into one item per calendar day it covers
+            LocalDate current = leave.getStartDate().toLocalDate();
+            LocalDate end = leave.getEndDate().toLocalDate();
+
+            while (!current.isAfter(end)) {
+                // Only include days within the requested month and skip weekends
+                if (current.getYear() == year
+                        && current.getMonthValue() == month
+                        && !isWeekend(current)) {
+                    items.add(new LeaveCalendarAdminResponse(current, employeeName, leaveType, notes));
+                }
+                current = current.plusDays(1);
+            }
+        }
+
+        return items;
+    }
 
     /**
      * Retrieves all approved leave entries for calendar display.
@@ -224,6 +269,87 @@ public class LeaveService {
 
         leaveRepository.save(leave);
     }
+
+    /**
+     * Retrieves all leave requests that are currently pending approval.
+     * A request is considered pending when it is not approved and has no
+     * response set (i.e. it has not been declined either).
+     *
+     * @return a list of {@link PendingLeaveResponse} objects ordered oldest first
+     */
+    public List<PendingLeaveResponse> getPendingLeave() {
+        return leaveRepository.findPendingLeave()
+                .stream()
+                .map(leave -> new PendingLeaveResponse(
+                        leave.getLeaveId(),
+                        leave.getAccount().getFirstName() + " " + leave.getAccount().getLastName(),
+                        leave.getLeaveType().getName(),
+                        leave.getStartDate(),
+                        leave.getEndDate(),
+                        leave.getNotes(),
+                        leave.getCreated()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Approves a pending leave request by setting its approved flag to true
+     * and persisting an optional response message from the admin.
+     *
+     * @param leaveId  the ID of the leave record to approve
+     * @param decision the decision body containing the optional admin response
+     * @throws IllegalArgumentException if no leave record exists for the given ID,
+     *                                  or if the record has already been actioned
+     */
+    @Transactional
+    public void approveLeave(final Long leaveId, final LeaveDecisionRequest decision)
+            throws IllegalArgumentException {
+
+        LeaveTable leave = leaveRepository.findById(leaveId)
+                .orElseThrow(() -> new IllegalArgumentException("Leave request not found."));
+
+        if (leave.isApproved()) {
+            throw new IllegalArgumentException("This leave request has already been approved.");
+        }
+
+        if (leave.getResponse() != null) {
+            throw new IllegalArgumentException("This leave request has already been declined.");
+        }
+
+        leave.setApproved(true);
+        leave.setResponse(decision.response());
+        leaveRepository.save(leave);
+    }
+
+    /**
+     * Declines a pending leave request by leaving the approved flag as false
+     * and persisting an optional response message from the admin.
+     *
+     * @param leaveId  the ID of the leave record to decline
+     * @param decision the decision body containing the optional admin response
+     * @throws IllegalArgumentException if no leave record exists for the given ID,
+     *                                  or if the record has already been actioned
+     */
+    @Transactional
+    public void declineLeave(final Long leaveId, final LeaveDecisionRequest decision)
+            throws IllegalArgumentException {
+
+        LeaveTable leave = leaveRepository.findById(leaveId)
+                .orElseThrow(() -> new IllegalArgumentException("Leave request not found."));
+
+        if (leave.isApproved()) {
+            throw new IllegalArgumentException("This leave request has already been approved.");
+        }
+
+        if (leave.getResponse() != null) {
+            throw new IllegalArgumentException("This leave request has already been declined.");
+        }
+
+        // Approved stays false — a non-null response marks the request as declined
+        leave.setResponse(decision.response() != null ? decision.response() : "Declined");
+        leaveRepository.save(leave);
+    }
+
 
     /**
      * Validates the leave request data.

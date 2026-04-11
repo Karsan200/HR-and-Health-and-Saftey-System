@@ -48,6 +48,60 @@ jest.mock('../src/screens/HazardForm', () => {
   );
 });
 
+jest.mock('../src/screens/PayslipScreen', () => {
+  const { View, Text } = require('react-native');
+
+  return () =>
+      require('react').createElement(
+          View,
+          null,
+          require('react').createElement(Text, null, 'Payslips Screen')
+      );
+});
+
+jest.mock('../src/screens/HandbookScreen', () => {
+  const { View, Text } = require('react-native');
+
+  return () =>
+      require('react').createElement(
+          View,
+          null,
+          require('react').createElement(Text, null, 'Handbook Screen')
+      );
+});
+
+jest.mock('../src/screens/DocumentsScreen', () => {
+  const { View, Text } = require('react-native');
+
+  return () =>
+      require('react').createElement(
+          View,
+          null,
+          require('react').createElement(Text, null, 'Documents Screen')
+      );
+});
+
+jest.mock('../src/screens/PersonalScreen', () => {
+  const { View, Text } = require('react-native');
+
+  return () =>
+      require('react').createElement(
+          View,
+          null,
+          require('react').createElement(Text, null, 'Personal Screen')
+      );
+});
+
+jest.mock('../src/screens/ClockInScreen', () => {
+  const { View, Text } = require('react-native');
+  return () =>
+    require('react').createElement(
+      View,
+      null,
+      require('react').createElement(Text, null, 'Clock-In Screen'),
+    );
+});
+
 // Mocking HomeScreen to render the available buttons
 jest.mock('../src/screens/HomeScreen', () => {
   const { View, Text } = require('react-native');
@@ -338,6 +392,7 @@ describe('App navigation flow', () => {
 
     // Then the clock-in screen should be shown
     expect(getByText('Clock-In')).toBeTruthy();
+    expect(getByText('Clock-In Screen')).toBeTruthy();
   });
 
   it('opens the documents screen from the health and safety bottom navigation', async () => {

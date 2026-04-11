@@ -4,6 +4,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import uk.co.garagebridgend.backend.models.entity.SignatureTable;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
+import uk.co.garagebridgend.backend.models.entity.DocumentTable;
+
+import java.util.List;
 
 /**
  * Repository for managing SignatureTable entities.
@@ -18,4 +21,36 @@ public interface SignatureRepository extends JpaRepository<SignatureTable, Long>
      * @return the number of signatures for the account
      */
     int countByAccount(AccountTable account);
+
+    /**
+     * Checks if a signature exists for the given account and document.
+     *
+     * @param account  the account to check for
+     * @param document the document to check for
+     * @return true if a signature exists for the account and document, false otherwise
+     */
+    boolean existsByAccountAndDocument(AccountTable account, DocumentTable document);
+
+    /**
+     * Counts the number of signatures recorded for the given document id.
+     *
+     * @param documentId the document id to count signatures for
+     * @return the number of signatures linked to that document
+     */
+    long countByDocumentDocumentId(Long documentId);
+
+    /**
+     * Counts the number of signatures recorded for the given hazard id.
+     *
+     * @param hazardId the hazard id to count signatures for
+     * @return the number of signatures linked to that hazard
+     */
+    long countByHazardHazardId(Long hazardId);
+
+    /**
+     * Retrieves the most recent document signatures.
+     *
+     * @return the latest document signature records, ordered by created descending
+     */
+    List<SignatureTable> findTop10ByDocumentIsNotNullOrderByCreatedDesc();
 }
