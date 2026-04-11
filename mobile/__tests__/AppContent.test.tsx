@@ -13,6 +13,21 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
+jest.mock('react-native-background-actions', () => ({
+  start: jest.fn(),
+  isRunning: jest.fn().mockResolvedValue(true),
+  stop: jest.fn(),
+}));
+
+jest.mock('react-native-device-info', () => ({
+  isEmulator: jest.fn().mockResolvedValue(false),
+}));
+
+jest.mock('munim-bluetooth', () => ({
+  startAdvertising: jest.fn(),
+  setServices: jest.fn(),
+}));
+
 jest.mock('../src/theme/paperTheme', () => ({
   paperTheme: () => ({}),
 }));

@@ -4,6 +4,7 @@ import { ThemeContextType } from '../model/ThemeContextType.ts';
 import { getSettings } from '../logic/SettingsService.ts';
 import AuthenticationService from '../logic/AuthenticationService.ts';
 import {generateColorSet} from "../screens/personal/SettingsScreen.tsx";
+import { HttpException } from '../exception/HttpException.ts';
 
 const defaultAccessibility = {
   largeText: false,
@@ -118,7 +119,12 @@ export function ThemeProvider({ children }: any) {
         }
 
       } catch (err) {
-        console.error('Failed to load settings:', err);
+        if (err instanceof HttpException && err.statusCode === 401) {
+          console.warn(err.message);
+        }
+        else {
+          console.error('Failed to load settings:', err);
+        }
       }
     }
 
