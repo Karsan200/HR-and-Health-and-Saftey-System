@@ -214,7 +214,7 @@ public class HsOverviewControllerTest {
      * @throws Exception if the request or assertions fail
      */
     @Test
-    @WithMockUser(username = "60")
+    @WithMockUser(username = "0")
     @Order(2)
     void testHsOverviewUserNotFound() throws Exception {
 

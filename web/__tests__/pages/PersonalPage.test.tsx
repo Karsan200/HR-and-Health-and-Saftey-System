@@ -5,12 +5,19 @@ import { MemoryRouter } from "react-router-dom";
 import { PersonalPage } from "../../src/pages/PersonalPage";
 import { useAuth } from "../../src/AuthContext";
 import { fetchPersonalData } from "../../src/logic/PersonalService";
+import { changePassword } from "../../src/logic/PersonalSecurityService";
+
+
+jest.mock("../../src/logic/PersonalSecurityService", () => ({
+    changePassword: jest.fn(),
+}));
 
 jest.mock("../../src/AuthContext");
 jest.mock("../../src/logic/PersonalService");
 
 const mockUseAuth = useAuth as jest.Mock;
 const mockFetchPersonalData = fetchPersonalData as jest.Mock;
+const mockChangePassword = changePassword as jest.Mock;
 
 const mockAuthService = { getToken: jest.fn() };
 
@@ -203,8 +210,138 @@ describe("PersonalPage", () => {
         });
     });
 
+    describe("security tab", () => {
+
+        async function openSecurityTab() {
+            renderPersonalPage();
+
+            await waitFor(() =>
+                expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
+            );
+
+            await userEvent.click(screen.getByText("Security"));
+        }
+
+        beforeEach(() => {
+            mockChangePassword.mockResolvedValue(undefined);
+        });
+
+        it("renders the change password form", async () => {
+            await openSecurityTab();
+
+            expect(screen.getByText("Change Password")).toBeInTheDocument();
+            expect(screen.getByPlaceholderText("Password")).toBeInTheDocument();
+            expect(screen.getByPlaceholderText("New Password")).toBeInTheDocument();
+            expect(screen.getByPlaceholderText("Confirm New Password")).toBeInTheDocument();
+            expect(screen.getByText("Submit Change")).toBeInTheDocument();
+        });
+
+        it("shows error when fields are empty", async () => {
+            await openSecurityTab();
+
+            await userEvent.click(screen.getByText("Submit Change"));
+
+            expect(
+                screen.getByText("Please fill in all fields.")
+            ).toBeInTheDocument();
+        });
+
+        it("shows error when passwords do not match", async () => {
+            await openSecurityTab();
+
+            await userEvent.type(screen.getByPlaceholderText("Password"), "oldPass123");
+            await userEvent.type(screen.getByPlaceholderText("New Password"), "newPass123");
+            await userEvent.type(screen.getByPlaceholderText("Confirm New Password"), "wrongPass");
+
+            await userEvent.click(screen.getByText("Submit Change"));
+
+            expect(
+                screen.getByText("New passwords do not match.")
+            ).toBeInTheDocument();
+        });
+
+        it("shows error when new password equals old password", async () => {
+            await openSecurityTab();
+
+            await userEvent.type(screen.getByPlaceholderText("Password"), "samePass123");
+            await userEvent.type(screen.getByPlaceholderText("New Password"), "samePass123");
+            await userEvent.type(screen.getByPlaceholderText("Confirm New Password"), "samePass123");
+
+            await userEvent.click(screen.getByText("Submit Change"));
+
+            expect(
+                screen.getByText("New password must be different to old password.")
+            ).toBeInTheDocument();
+        });
+
+        it("shows error when password is too short", async () => {
+            await openSecurityTab();
+
+            await userEvent.type(screen.getByPlaceholderText("Password"), "oldPass123");
+            await userEvent.type(screen.getByPlaceholderText("New Password"), "short");
+            await userEvent.type(screen.getByPlaceholderText("Confirm New Password"), "short");
+
+            await userEvent.click(screen.getByText("Submit Change"));
+
+            expect(
+                screen.getByText("Password must be at least 8 characters.")
+            ).toBeInTheDocument();
+        });
+
+        it("calls changePassword with correct payload on valid submit", async () => {
+            await openSecurityTab();
+
+            await userEvent.type(screen.getByPlaceholderText("Password"), "oldPass123");
+            await userEvent.type(screen.getByPlaceholderText("New Password"), "newPass123");
+            await userEvent.type(screen.getByPlaceholderText("Confirm New Password"), "newPass123");
+
+            await userEvent.click(screen.getByText("Submit Change"));
+
+            await waitFor(() =>
+                expect(mockChangePassword).toHaveBeenCalledWith(
+                    mockAuthService,
+                    {
+                        oldPassword: "oldPass123",
+                        newPassword: "newPass123",
+                        confirmNewPassword: "newPass123",
+                    }
+                )
+            );
+        });
+
+        it("shows success message on successful password change", async () => {
+            await openSecurityTab();
+
+            await userEvent.type(screen.getByPlaceholderText("Password"), "oldPass123");
+            await userEvent.type(screen.getByPlaceholderText("New Password"), "newPass123");
+            await userEvent.type(screen.getByPlaceholderText("Confirm New Password"), "newPass123");
+
+            await userEvent.click(screen.getByText("Submit Change"));
+
+            expect(
+                await screen.findByText("Password changed successfully.")
+            ).toBeInTheDocument();
+        });
+
+        it("shows error message when API call fails", async () => {
+            mockChangePassword.mockRejectedValueOnce(new Error("fail"));
+
+            await openSecurityTab();
+
+            await userEvent.type(screen.getByPlaceholderText("Password"), "oldPass123");
+            await userEvent.type(screen.getByPlaceholderText("New Password"), "newPass123");
+            await userEvent.type(screen.getByPlaceholderText("Confirm New Password"), "newPass123");
+
+            await userEvent.click(screen.getByText("Submit Change"));
+
+            expect(
+                await screen.findByText("Failed to change password. Please try again.")
+            ).toBeInTheDocument();
+        });
+    });
+
     // Tab navigation
-    // TODO: THESE TESTS WILL NEED TO BE REMOVED WHEN THE OTHER TABS ARE FILLED OUT!
+    // TODO: THESE TESTS WILL NEED TO BE REMOVED/EDITED WHEN THE OTHER TABS ARE FILLED OUT!
 
     describe("tab navigation", () => {
         it("shows the settings placeholder when the Settings tab is clicked", async () => {
@@ -214,15 +351,6 @@ describe("PersonalPage", () => {
             );
             await userEvent.click(screen.getByText("Settings"));
             expect(screen.getByText("Settings TBC")).toBeInTheDocument();
-        });
-
-        it("shows the security placeholder when the Security tab is clicked", async () => {
-            renderPersonalPage();
-            await waitFor(() =>
-                expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
-            );
-            await userEvent.click(screen.getByText("Security"));
-            expect(screen.getByText("Security TBC")).toBeInTheDocument();
         });
 
         it("returns to the profile tab when Profile Information is clicked after switching", async () => {
