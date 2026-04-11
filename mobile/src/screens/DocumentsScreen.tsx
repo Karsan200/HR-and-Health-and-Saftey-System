@@ -234,7 +234,7 @@ export default function DocumentsScreen() {
                                 <Icon
                                     source="file-document-outline"
                                     size={22}
-                                    color={item.signed ? theme.greenPrimary : theme.redTrafficPrimary}
+                                    color={item.signed ? theme.greenTextDark : theme.redTrafficTextDark}
                                 />
                             </View>
 
@@ -248,12 +248,12 @@ export default function DocumentsScreen() {
 
                                 {item.signed ? (
                                     <View style={styles.signedBadge}>
-                                        <Icon source="check" size={12} color={theme.greenPrimary} />
+                                        <Icon source="check" size={12} color={theme.greenTextDark} />
                                         <Text style={styles.signedBadgeText}>Signed</Text>
                                     </View>
                                 ) : (
                                     <View style={styles.unsignedBadge}>
-                                        <Icon source="clock-outline" size={12} color={theme.redTrafficPrimary} />
+                                        <Icon source="clock-outline" size={12} color={theme.redTrafficTextDark} />
                                         <Text style={styles.unsignedBadgeText}>NEW • Signature Required</Text>
                                     </View>
                                 )}

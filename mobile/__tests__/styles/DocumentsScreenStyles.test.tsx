@@ -47,12 +47,12 @@ describe('DocumentsScreenStyles', () => {
 
     it('signedBadgeText uses green primary colour', () => {
         const result = styles(DefaultColours, baseAccessibility);
-        expect(result.signedBadgeText.color).toBe(DefaultColours.greenPrimary);
+        expect(result.signedBadgeText.color).toBe(DefaultColours.greenTextDark);
     });
 
     it('unsignedBadgeText uses red primary colour', () => {
         const result = styles(DefaultColours, baseAccessibility);
-        expect(result.unsignedBadgeText.color).toBe(DefaultColours.redPrimary);
+        expect(result.unsignedBadgeText.color).toBe(DefaultColours.redTrafficTextDark);
     });
 
     it('pdf background is white', () => {

@@ -120,7 +120,7 @@ export const styles = (
             fontFamily: fontFamilies.regular,
             fontWeight: TextStyles.semiBold.fontWeight,
             fontSize: FontSize.xxs12 * fontScale,
-            color: theme.greenPrimary,
+            color: theme.greenTextDark,
         },
 
         unsignedBadge: {
@@ -138,7 +138,7 @@ export const styles = (
             fontFamily: fontFamilies.regular,
             fontWeight: TextStyles.semiBold.fontWeight,
             fontSize: FontSize.xxs12 * fontScale,
-            color: theme.redTrafficPrimary,
+            color: theme.redTrafficTextDark,
         },
 
         // PDF viewer

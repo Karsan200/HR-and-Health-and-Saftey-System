@@ -89,7 +89,7 @@ export default function HsOverview({ onOpenRiskAssessment }: Props) {
             {/* Header row: icon + title + badge */}
             <View style={styles.headerRow}>
                 <View style={styles.headerLeft}>
-                    <Icon source="alert-circle-outline" size={30} color={theme.redPrimary} />
+                    <Icon source="alert-circle-outline" size={30} color={theme.redTrafficPrimary} />
                     <Text style={styles.headerTitle}>Actions Required</Text>
                 </View>
                 <View style={styles.headerBadge}>
@@ -102,9 +102,9 @@ export default function HsOverview({ onOpenRiskAssessment }: Props) {
                 <AlertBox
                     label="Document"
                     body="Fire and Safety Policy v2.0 requires a signature"
-                    circleColor={theme.redPrimary}
-                    labelColor={theme.redTextDark}
-                    labelBackground={theme.redBackgroundLight}
+                    circleColor={theme.redTrafficPrimary}
+                    labelColor={theme.redTrafficTextDark}
+                    labelBackground={theme.redTrafficBackgroundLight}
                 />
             </View>
 
