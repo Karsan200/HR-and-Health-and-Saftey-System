@@ -64,8 +64,8 @@ export const personalPageStyles = {
 
     tab: (active: boolean) => ({
         padding: "10px 24px",
-        fontSize: FontSize.xs14,
-        fontFamily: TextStyles.regular,
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.bold,
         color: active ? DefaultColours.redPrimary : DefaultColours.greyPrimaryMainText,
         cursor: "pointer",
         borderBottom: active ? `2px solid ${DefaultColours.redPrimary}` : "2px solid transparent",
@@ -80,14 +80,14 @@ export const personalPageStyles = {
     sectionCard: {
         background: DefaultColours.white,
         border: `0.5px solid ${DefaultColours.greyBackground}`,
-        borderRadius: "12px",
+        borderRadius: BorderRadius.smallTextBackground,
         padding: "1.25rem",
         marginBottom: "1rem",
     },
 
     sectionTitle: {
-        fontSize: FontSize.xs14,
-        fontFamily: TextStyles.regular,
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.medium,
         color: DefaultColours.black,
         marginBottom: "1rem",
     },
@@ -204,5 +204,77 @@ export const personalPageStyles = {
         fontSize: FontSize.xl32,
         fontFamily: TextStyles.bold,
         color: DefaultColours.white,
+    },
+
+    // Security tab
+    securityCard: {
+        background: DefaultColours.white,
+        border: `0.5px solid ${DefaultColours.greyBackground}`,
+        borderRadius: BorderRadius.smallTextBackground,
+        padding: "1.25rem",
+        marginBottom: "1rem",
+    },
+
+    securityTitle: {
+        fontSize: FontSize.m20,
+        fontFamily: TextStyles.medium,
+        color: DefaultColours.black,
+        marginBottom: "1.25rem",
+    },
+
+    securityInput: {
+        width: "100%",
+        padding: "14px 16px",
+        fontSize: FontSize.xs14,
+        border: `0.5px solid ${DefaultColours.greyBackground}`,
+        borderRadius: BorderRadius.smallTextField,
+        marginBottom: "12px",
+        outline: "none",
+        fontFamily: "inherit",
+        color: DefaultColours.black,
+        backgroundColor: DefaultColours.white,
+        boxSizing: "border-box" as const,
+        "&:focus": {
+            borderColor: DefaultColours.redPrimary,
+        },
+    },
+
+    securityButtonRow: {
+        display: "flex",
+        justifyContent: "flex-end",
+        marginTop: "4px",
+    },
+
+    securityButton: {
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        background: DefaultColours.redPrimary,
+        color: DefaultColours.white,
+        border: "none",
+        borderRadius: BorderRadius.smallTextField,
+        padding: "12px 20px",
+        fontSize: FontSize.xs14,
+        cursor: "pointer",
+        fontFamily: TextStyles.medium,
+        "&:hover": {
+            background: DefaultColours.redTextDark,
+        },
+    },
+
+    securitySuccessText: {
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular,
+        color: DefaultColours.greenPrimary,
+        textAlign: "right" as const,
+        marginTop: "8px",
+    },
+
+    securityErrorText: {
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular,
+        color: DefaultColours.redPrimary,
+        textAlign: "right" as const,
+        marginTop: "8px",
     },
 };
