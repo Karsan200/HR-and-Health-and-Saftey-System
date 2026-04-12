@@ -45,6 +45,10 @@ export function ScreenConfig(body: ScreenConfigProps) {
         body.setSection(null);
         body.setCurrentScreen('hazardForm');
         return;
+    } else if (screen === 'risk') {
+        body.setSection('health-safety');
+        body.setCurrentScreen('risk');
+        return;
     } else if (screen === 'profile') {
       body.setSection(null);
       body.setCurrentScreen('profile');
