@@ -1,6 +1,8 @@
 package uk.co.garagebridgend.backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +25,9 @@ import uk.co.garagebridgend.backend.models.request.HazardReportRequest;
 @RequestMapping("/api/hazard")
 @RequiredArgsConstructor
 public class HazardController {
+    /** Logger for logging hazard-related events and errors. */
+    private static final Logger LOG = LoggerFactory.getLogger(HazardController.class);
+
     /** Service for handling hazard-related operations. */
     private final HazardService hazardService;
 
@@ -45,6 +50,7 @@ public class HazardController {
                     e.getMessage()
             );
         } catch (Exception e) {
+            LOG.error("Error reporting hazard", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal sever error"

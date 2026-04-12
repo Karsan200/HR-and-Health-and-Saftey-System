@@ -1,6 +1,8 @@
 package uk.co.garagebridgend.backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -22,6 +24,8 @@ import uk.co.garagebridgend.backend.models.response.ProfileResponse;
 @RequestMapping("/api/profile")
 @RequiredArgsConstructor
 public class ProfileController {
+    /** Logger for logging profile-related events and errors. */
+    private static final Logger LOG = LoggerFactory.getLogger(ProfileController.class);
 
     /** Service responsible for fetching and updating profile data. */
     private final ProfileService profileService;
@@ -41,6 +45,7 @@ public class ProfileController {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED, "Invalid or expired refresh token");
         } catch (Exception e) {
+            LOG.error("Error retrieving current user's profile", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
@@ -65,6 +70,7 @@ public class ProfileController {
             throw new ResponseStatusException(
                     HttpStatus.NOT_ACCEPTABLE, e.getMessage());
         } catch (Exception e) {
+            LOG.error("Error updating current user's profile", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
