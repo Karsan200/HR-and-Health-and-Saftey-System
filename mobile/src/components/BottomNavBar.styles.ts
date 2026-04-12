@@ -17,13 +17,15 @@ export const bottomNavStyles = (theme: any, accessibility: { largeText: boolean,
     borderTopWidth: 1,
     borderTopColor: theme.white,
     backgroundColor: theme.white,
+    minHeight: 105,
   },
   navItem: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 6,
+    paddingVertical: accessibility.largeText ? 10 : 6,
   },
+
   navLabel: {
     fontSize: FontSize.xxs12 * fontScale,
     fontFamily: fontFamilies.regular,

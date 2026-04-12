@@ -39,11 +39,13 @@ export default function BottomNavBar({
               size={40}
               color={isActive ? theme.redPrimary : theme.greyIconLight}
             />
-            <Text
-              style={[themedStyles.navLabel, isActive && themedStyles.activeNavLabel]}
-            >
-              {item.label}
-            </Text>
+            {!accessibility.largeText && (
+                <Text
+                    style={[themedStyles.navLabel, isActive && themedStyles.activeNavLabel]}
+                >
+                  {item.label}
+                </Text>
+            )}
           </Pressable>
         );
       })}

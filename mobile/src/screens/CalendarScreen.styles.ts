@@ -37,6 +37,7 @@ export const calendarScreenStyles = (theme: any, accessibility: { largeText: boo
 
     keyContainer: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         justifyContent: 'center',
         gap: 20,
         paddingVertical: 10,

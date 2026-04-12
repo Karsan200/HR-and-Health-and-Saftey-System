@@ -123,6 +123,7 @@ export const clockInScreenStyles = (
 
     statHeader: {
       flexDirection: 'row',
+      flexWrap: 'wrap',
       alignItems: 'center',
       paddingHorizontal: Spacing.smallPadding,
       gap: Spacing.smallPadding,
@@ -180,6 +181,7 @@ export const clockInScreenStyles = (
     // Report Issue Button
     reportButton: {
       flexDirection: 'row',
+      flexWrap: 'wrap',
       alignItems: 'center',
       justifyContent: 'center',
       gap: 8,

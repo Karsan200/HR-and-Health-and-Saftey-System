@@ -20,50 +20,6 @@ export const styles = (theme: any, accessibility: { largeText: boolean; dyslexic
             backgroundColor: theme.greyBackground,
         },
 
-        // Category toggle
-        categoryToggleContainer: {
-            flexDirection: 'row',
-            marginHorizontal: Spacing.mediumPadding,
-            marginTop: 16,
-            marginBottom: 12,
-            gap: 10,
-        },
-
-        categoryButtonWrapper: {
-            flex: 1,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-            borderWidth: 2,
-            borderColor: 'transparent',
-            backgroundColor: theme.white,
-            minHeight: 70,
-        },
-
-        categoryButtonWrapperActive: {
-            borderColor: theme.redPrimary,
-        },
-
-        categoryButton: {
-            flex: 1,
-            paddingVertical: 12,
-            paddingHorizontal: 12,
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-
-        categoryButtonText: {
-            fontFamily: fontFamilies.regular,
-            fontWeight: TextStyles.regular.fontWeight,
-            fontSize: FontSize.s16 * fontScale,
-            color: theme.greyPrimaryMainText,
-            textAlign: 'center',
-            flexShrink: 1,
-        },
-
-        categoryButtonTextActive: {
-            fontWeight: TextStyles.semiBold.fontWeight,
-            color: theme.black,
-        },
-
         // List
         listContent: {
             paddingHorizontal: Spacing.mediumPadding,
@@ -117,23 +73,6 @@ export const styles = (theme: any, accessibility: { largeText: boolean; dyslexic
             fontWeight: TextStyles.regular.fontWeight,
             fontSize: FontSize.xxs12 * fontScale,
             color: theme.greyPrimaryMainText,
-        },
-
-        // View button
-        viewButton: {
-            backgroundColor: theme.redPrimary,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-        },
-
-        buttonLabel: {
-            fontFamily: fontFamilies.regular,
-            fontWeight: TextStyles.semiBold.fontWeight,
-            fontSize: FontSize.xs14 * fontScale,
-            color: theme.white,
-        },
-
-        buttonContent: {
-            paddingVertical: 4,
         },
 
         // PDF viewer

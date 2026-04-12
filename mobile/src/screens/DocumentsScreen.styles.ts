@@ -26,60 +26,6 @@ export const styles = (
             backgroundColor: theme.greyBackground,
         },
 
-        // Category buttons
-
-        categoryToggleContainer: {
-            flexDirection: 'row',
-            marginHorizontal: Spacing.mediumPadding,
-            marginTop: 16,
-            marginBottom: 12,
-            gap: 10,
-        },
-
-        categoryButtonWrapper: {
-            flex: 1,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-            borderWidth: 2,
-            borderColor: 'transparent',
-            backgroundColor: theme.white,
-            minHeight: 90,
-        },
-
-        categoryButtonWrapperActive: {
-            borderColor: theme.redPrimary,
-        },
-
-        categoryButton: {
-            paddingVertical: 16,
-            paddingHorizontal: 12,
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-
-        categoryButtonLeft: {},
-
-        categoryButtonRight: {},
-
-        categoryButtonActive: {
-            borderColor: theme.redPrimary,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-            zIndex: 1,
-        },
-
-        categoryButtonText: {
-            fontFamily: fontFamilies.regular,
-            fontWeight: TextStyles.regular.fontWeight,
-            fontSize: FontSize.s16 * fontScale,
-            color: theme.greyPrimaryMainText,
-            textAlign: 'center',
-            flexShrink: 1,
-        },
-
-        categoryButtonTextActive: {
-            fontWeight: TextStyles.semiBold.fontWeight,
-            color: theme.black,
-        },
-
         // Filtering Pills
 
         statusFilterContainer: {
@@ -87,31 +33,6 @@ export const styles = (
             paddingHorizontal: Spacing.mediumPadding,
             gap: 8,
             marginBottom: 12,
-        },
-
-        statusPill: {
-            paddingHorizontal: 12,
-            paddingVertical: 6,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-            borderWidth: 1,
-            borderColor: theme.greyIconLight,
-        },
-
-        statusPillActive: {
-            borderColor: theme.redPrimary,
-            borderWidth: 1.5,
-        },
-
-        statusPillText: {
-            fontFamily: fontFamilies.regular,
-            fontWeight: TextStyles.regular.fontWeight,
-            fontSize: FontSize.xxs12 * fontScale,
-            color: theme.greyPrimaryMainText,
-        },
-
-        statusPillTextActive: {
-            fontWeight: TextStyles.semiBold.fontWeight,
-            color: theme.black,
         },
 
         // List view
@@ -199,7 +120,7 @@ export const styles = (
             fontFamily: fontFamilies.regular,
             fontWeight: TextStyles.semiBold.fontWeight,
             fontSize: FontSize.xxs12 * fontScale,
-            color: theme.greenPrimary,
+            color: theme.greenTextDark,
         },
 
         unsignedBadge: {
@@ -217,30 +138,7 @@ export const styles = (
             fontFamily: fontFamilies.regular,
             fontWeight: TextStyles.semiBold.fontWeight,
             fontSize: FontSize.xxs12 * fontScale,
-            color: theme.redTrafficPrimary,
-        },
-
-        // View buttons
-
-        viewButtonUnsigned: {
-            backgroundColor: theme.redPrimary,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-        },
-
-        viewButtonSigned: {
-            backgroundColor: theme.greyPrimaryMainText,
-            borderRadius: BorderRadius.largeButtonsAndOutlines,
-        },
-
-        buttonLabel: {
-            fontFamily: fontFamilies.regular,
-            fontWeight: TextStyles.semiBold.fontWeight,
-            fontSize: FontSize.xs14 * fontScale,
-            color: theme.white,
-        },
-
-        buttonContent: {
-            paddingVertical: 4,
+            color: theme.redTrafficTextDark,
         },
 
         // PDF viewer
@@ -314,5 +212,14 @@ export const styles = (
             color: theme.black,
             flex: 1,
         },
+
+        buttonWrapperCompact: {
+            minHeight: 55,
+        },
+
+        buttonCompact: {
+            paddingVertical: 10,
+        },
+
     });
 };

@@ -48,16 +48,6 @@ describe('PersonalScreenStyles', () => {
         expect(result.loadingContainer.backgroundColor).toBe(DefaultColours.greyBackground);
     });
 
-    it('categoryButtonWrapper has white background', () => {
-        const result = styles(DefaultColours, baseAccessibility);
-        expect(result.categoryButtonWrapper.backgroundColor).toBe(DefaultColours.white);
-    });
-
-    it('categoryButtonWrapperActive has correct border colour', () => {
-        const result = styles(DefaultColours, baseAccessibility);
-        expect(result.categoryButtonWrapperActive.borderColor).toBe(DefaultColours.redPrimary);
-    });
-
     it('card has white background', () => {
         const result = styles(DefaultColours, baseAccessibility);
         expect(result.card.backgroundColor).toBe(DefaultColours.white);

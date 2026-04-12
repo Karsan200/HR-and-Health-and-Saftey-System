@@ -2,16 +2,33 @@ import { StyleSheet } from 'react-native';
 import { FontSize, BorderRadius, TextStyles, Fonts } from '../theme/theme';
 
 // styling for common fields like the text boxes
-export const getCommonInputProps = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => ({
-    mode: 'outlined' as const,
-    dense: true,
-    underlineColor: 'transparent',
-    placeholderTextColor: theme.greyIconLight,
-    contentStyle: { fontSize: FontSize.xs14 * (accessibility.largeText ? 1.3 : 1), padding: 5 },
-    textColor: theme.black,
-    outlineStyle: { borderRadius: BorderRadius.smallTextField },
-    style: { backgroundColor: theme.white },
-} as any);
+export const getCommonInputProps = (
+    theme: any,
+    accessibility: { largeText: boolean, dyslexicFont: boolean }
+) => {
+    const fontScale = accessibility.largeText ? 1.3 : 1;
+    const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
+
+    return {
+        mode: 'outlined' as const,
+        dense: true,
+        underlineColor: 'transparent',
+        placeholderTextColor: theme.greyIconLight,
+        textColor: theme.black,
+
+        contentStyle: {
+            fontSize: FontSize.xs14 * fontScale,
+            fontFamily: fontFamilies.regular,
+            padding: 5,
+        },
+
+        outlineStyle: { borderRadius: BorderRadius.smallTextField },
+
+        style: {
+            backgroundColor: theme.white,
+        },
+    } as any;
+};
 
 //main styling fo the hazard form
 export const styles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
