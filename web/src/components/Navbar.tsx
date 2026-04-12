@@ -9,7 +9,7 @@ import { navbarStyles as styles } from "./Navbar.styles";
 const navbarItems = [
     { label: "Overview", path: "/" },
     { label: "Calendar", path: "/calendar" },
-    { label: "Employee Overview", path: "/employee-overview" },
+    { label: "Employee Overview", path: "/employee/overview" },
     { label: "Health and Safety", path: "/health-and-safety" },
 ] as const;
 

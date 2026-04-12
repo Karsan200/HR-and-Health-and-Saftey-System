@@ -10,6 +10,7 @@ import { Dashboard } from "./pages/Dashboard";
 import {CalendarPage} from "./pages/CalendarPage";
 import {PendingRequestsPage} from "./pages/PendingRequestsPage";
 import { PersonalPage } from "./pages/PersonalPage";
+import { EmployeeOverview } from "./pages/EmployeeOverview";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
@@ -59,6 +60,7 @@ function AppContent() {
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/personal" element={<PersonalPage />} />
                 <Route path="/employee-overview" element={<></>} />
+                <Route path="/employee/overview" element={<EmployeeOverview />} />
                 <Route path="/health-and-safety" element={<></>} />
                 <Route path="/notifications" element={<></>} />
                 <Route path="/health-and-safety/send-out" element={<></>} />
