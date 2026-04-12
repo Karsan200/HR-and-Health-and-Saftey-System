@@ -19,6 +19,8 @@ import java.util.List;
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 public class AdminDashboardController {
+    /** Logger for logging admin dashboard related events and errors. */
+    private static final Logger LOG = LoggerFactory.getLogger(AdminDashboardController.class);
 
     /** Service layer for handling admin dashboard logic. */
     private final AdminDashboardService adminDashboardService;
@@ -36,6 +38,7 @@ public class AdminDashboardController {
                     "Authenticated account not found."
             );
         } catch (Exception e) {
+            LOG.error("Error retrieving admin dashboard summary", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal sever error " + e.getMessage()
@@ -61,6 +64,7 @@ public class AdminDashboardController {
                     e.getMessage()
             );
         } catch (Exception e) {
+            LOG.error("Error retrieving late arrivals chart data", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error"
@@ -86,6 +90,7 @@ public class AdminDashboardController {
                     e.getMessage()
             );
         } catch (Exception e) {
+            LOG.error("Error retrieving document signatures chart data", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error"
@@ -111,6 +116,7 @@ public class AdminDashboardController {
                     e.getMessage()
             );
         } catch (Exception e) {
+            LOG.error("Error retrieving hazards reported chart data", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error " + e.getMessage()
@@ -128,6 +134,7 @@ public class AdminDashboardController {
         try {
             return adminDashboardService.getRecentActivity();
         } catch (Exception e) {
+            LOG.error("Error retrieving recent activity data", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error " + e.getMessage()
