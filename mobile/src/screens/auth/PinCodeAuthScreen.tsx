@@ -142,16 +142,18 @@ export function PinCodeAuthScreen(props: { isAuth: Dispatch<SetStateAction<boole
     }, []);
 
     return (
-        <ScrollView contentContainerStyle={themedStyles.container}>
-            <ScrollView contentContainerStyle={authThemedStyles.imageContainer}>
+        <ScrollView
+            style={themedStyles.scrollView}
+            contentContainerStyle={themedStyles.container}>
+            <View style={authThemedStyles.imageContainer}>
                 <Image
                     source={require('../../assets/images/Rent-a-Tech-Logo.png')}
                     style={authThemedStyles.image}
                 />
-            </ScrollView>
-          <ScrollView contentContainerStyle={themedStyles.welcomeBackTextContainer}>
+            </View>
+          <View style={themedStyles.welcomeBackTextContainer}>
             <Text style={themedStyles.welcomeBackText}>{greeting}</Text>
-          </ScrollView>
+          </View>
             <View style={themedStyles.bubbleContainer}>
                 {pinBubbles.map((isEnabled, index) => (
                     <PinCodeBubble key={index} isEnabled={isEnabled} />

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { Icon } from 'react-native-paper';
+import {Icon} from 'react-native-paper';
+import { TouchableOpacity } from 'react-native';
 import SummaryRow from '../components/summary/SummaryRow';
 import AlertBox from '../components/AlertBox';
 import { styles as baseStyles, localStyles as baseLocalStyles } from './HsOverview.styles';
@@ -12,6 +13,10 @@ interface HsStatProps {
     count: string | number;
     label: string;
     styles: ReturnType<typeof baseLocalStyles>; // pass in themed styles
+}
+
+interface Props {
+    onOpenRiskAssessment: () => void;
 }
 
 // Small summary card showing a number and label
@@ -27,14 +32,19 @@ const HsStat: React.FC<HsStatProps> = ({ count, label, styles }) => (
 );
 
 // Quick Actions card that displays the Risk Assessment tile
-const RiskCard: React.FC<{ styles: ReturnType<typeof baseLocalStyles>, colours: any }> = ({ styles, colours }) => (
-    <View style={colours.riskWrapper}>
-        <View style={styles.riskCard}>
+const RiskCard: React.FC<{
+    styles: ReturnType<typeof baseLocalStyles>,
+    screenStyles: ReturnType<typeof baseStyles>,
+    colours: any,
+    onPress: () => void
+}> = ({ styles, screenStyles, colours, onPress }) => (
+    <View style={screenStyles.riskWrapper}>
+        <TouchableOpacity style={styles.riskCard} onPress={onPress}>
             <View style={styles.iconBox}>
                 <Icon source="clipboard-alert-outline" size={28} color={colours.bluePrimary} />
             </View>
             <Text style={styles.riskLabel}>Risk Assessment</Text>
-        </View>
+        </TouchableOpacity>
     </View>
 );
 
@@ -46,7 +56,7 @@ interface HsOverviewResponse {
 }
 
 // Main HsOverview screen component
-export default function HsOverview() {
+export default function HsOverview({ onOpenRiskAssessment }: Props) {
     const { theme, accessibility } = useContext(ThemeContext); // get current theme
 
     const styles = baseStyles(theme, accessibility); // themed styles
@@ -79,7 +89,7 @@ export default function HsOverview() {
             {/* Header row: icon + title + badge */}
             <View style={styles.headerRow}>
                 <View style={styles.headerLeft}>
-                    <Icon source="alert-circle-outline" size={30} color={theme.redPrimary} />
+                    <Icon source="alert-circle-outline" size={30} color={theme.redTrafficPrimary} />
                     <Text style={styles.headerTitle}>Actions Required</Text>
                 </View>
                 <View style={styles.headerBadge}>
@@ -92,9 +102,9 @@ export default function HsOverview() {
                 <AlertBox
                     label="Document"
                     body="Fire and Safety Policy v2.0 requires a signature"
-                    circleColor={theme.redPrimary}
-                    labelColor={theme.redTextDark}
-                    labelBackground={theme.redBackgroundLight}
+                    circleColor={theme.redTrafficPrimary}
+                    labelColor={theme.redTrafficTextDark}
+                    labelBackground={theme.redTrafficBackgroundLight}
                 />
             </View>
 
@@ -122,8 +132,12 @@ export default function HsOverview() {
             <View style={styles.riskHeadingWrapper}>
                 <Text style={styles.sectionHeading}>Quick Actions</Text>
             </View>
-            <RiskCard styles={localStyles} colours={theme} />
-
+            <RiskCard
+                styles={localStyles}
+                screenStyles={styles}
+                colours={theme}
+                onPress={onOpenRiskAssessment}
+            />
             {/* Summary stat cards row */}
             <View style={styles.cardsWrapper}>
                 <SummaryRow>

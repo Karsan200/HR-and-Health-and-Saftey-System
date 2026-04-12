@@ -8,10 +8,13 @@ import {
     Alert,
 } from 'react-native';
 import Pdf from 'react-native-pdf';
-import { Button, Checkbox, Icon } from 'react-native-paper';
+import { Checkbox, Icon } from 'react-native-paper';
 import AuthenticationService from '../logic/AuthenticationService';
 import { ThemeContext } from '../theme/colourController';
 import { styles as screenStyles } from './DocumentsScreen.styles';
+import FilterPills from "../components/FilterPills.tsx";
+import EyeButton from "../components/EyeButton.tsx";
+import CategoryToggle from '../components/CategoryToggle';
 
 type Document = {
     documentId: number;
@@ -193,65 +196,26 @@ export default function DocumentsScreen() {
         <View style={styles.screen}>
 
             {/* Category Toggle */}
-            <View style={styles.categoryToggleContainer}>
-                <View style={[
-                    styles.categoryButtonWrapper,
-                    categoryFilter === 'policies' && styles.categoryButtonWrapperActive,
-                ]}>
-                    <TouchableOpacity
-                        style={styles.categoryButton}
-                        onPress={() => setCategoryFilter('policies')}
-                    >
-                        <Text style={[
-                            styles.categoryButtonText,
-                            categoryFilter === 'policies' && styles.categoryButtonTextActive,
-                        ]}>
-                            {'Health and Safety\nPolicies'}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-                <View style={[
-                    styles.categoryButtonWrapper,
-                    categoryFilter === 'sop' && styles.categoryButtonWrapperActive,
-                ]}>
-                    <TouchableOpacity
-                        style={styles.categoryButton}
-                        onPress={() => setCategoryFilter('sop')}
-                    >
-                        <Text style={[
-                            styles.categoryButtonText,
-                            categoryFilter === 'sop' && styles.categoryButtonTextActive,
-                        ]}>
-                            {'SOPs/\nInstructions'}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+            <CategoryToggle
+                options={[
+                    { key: 'policies', label: 'Health and Safety\nPolicies' },
+                    { key: 'sop', label: 'SOPs/\nInstructions' },
+                ]}
+                selected={categoryFilter}
+                onSelect={(value) => setCategoryFilter(value as CategoryFilter)}
+            />
 
             {/* Status Filter Pills */}
-            <View style={styles.statusFilterContainer}>
-                {(['all', 'awaiting', 'signed'] as StatusFilter[]).map((s) => {
-                    const label = s === 'all' ? 'All' : s === 'awaiting' ? 'Awaiting Signature' : 'Signed';
-                    return (
-                        <TouchableOpacity
-                            key={s}
-                            style={[
-                                styles.statusPill,
-                                statusFilter === s && styles.statusPillActive,
-                            ]}
-                            onPress={() => setStatusFilter(s)}
-                        >
-                            <Text style={[
-                                styles.statusPillText,
-                                statusFilter === s && styles.statusPillTextActive,
-                            ]}>
-                                {label}
-                            </Text>
-                        </TouchableOpacity>
-                    );
-                })}
-            </View>
+            <FilterPills
+                options={[
+                    { key: 'all', label: 'All' },
+                    { key: 'awaiting', label: 'Awaiting Signature' },
+                    { key: 'signed', label: 'Signed' },
+                ]}
+                selected={statusFilter}
+                onSelect={setStatusFilter}
+                style={styles.statusFilterContainer}
+            />
 
             {/* Document List */}
             <FlatList
@@ -270,7 +234,7 @@ export default function DocumentsScreen() {
                                 <Icon
                                     source="file-document-outline"
                                     size={22}
-                                    color={item.signed ? theme.greenPrimary : theme.redTrafficPrimary}
+                                    color={item.signed ? theme.greenTextDark : theme.redTrafficTextDark}
                                 />
                             </View>
 
@@ -284,12 +248,12 @@ export default function DocumentsScreen() {
 
                                 {item.signed ? (
                                     <View style={styles.signedBadge}>
-                                        <Icon source="check" size={12} color={theme.greenPrimary} />
+                                        <Icon source="check" size={12} color={theme.greenTextDark} />
                                         <Text style={styles.signedBadgeText}>Signed</Text>
                                     </View>
                                 ) : (
                                     <View style={styles.unsignedBadge}>
-                                        <Icon source="clock-outline" size={12} color={theme.redTrafficPrimary} />
+                                        <Icon source="clock-outline" size={12} color={theme.redTrafficTextDark} />
                                         <Text style={styles.unsignedBadgeText}>NEW • Signature Required</Text>
                                     </View>
                                 )}
@@ -297,19 +261,14 @@ export default function DocumentsScreen() {
                         </View>
 
                         {/* Action Button */}
-                        <Button
-                            mode="contained"
-                            icon="eye"
+                        <EyeButton
+                            label={item.signed ? 'View' : 'Review & Sign'}
+                            active={!item.signed} // red if not signed, grey if signed
                             onPress={() => {
                                 setSelectedDocument(item);
                                 setChecked(item.signed);
                             }}
-                            style={item.signed ? styles.viewButtonSigned : styles.viewButtonUnsigned}
-                            labelStyle={styles.buttonLabel}
-                            contentStyle={styles.buttonContent}
-                        >
-                            {item.signed ? 'View' : 'Review & Sign'}
-                        </Button>
+                            />
                     </View>
                 )}
             />

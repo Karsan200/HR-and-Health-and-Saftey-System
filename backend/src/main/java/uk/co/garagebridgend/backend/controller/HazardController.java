@@ -2,14 +2,13 @@ package uk.co.garagebridgend.backend.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.HazardService;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.request.HazardReportRequest;
+
+import java.util.NoSuchElementException;
 
 /**
  * REST controller for handling hazard-related endpoints.
@@ -49,6 +48,28 @@ public class HazardController {
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal sever error"
             );
+        }
+    }
+
+    /**
+     * Endpoint to update an existing hazard report.
+     * @param id The ID of the hazard report to update.
+     * @param body The request body containing the updated hazard report details and files to upload.
+     */
+    @PutMapping("/report/{id}")
+    public final void updateHazard(@PathVariable final Long id, @RequestBody final HazardReportRequest body) {
+        try {
+            hazardService.update(id, body);
+        } catch (AuthenticatedAccountNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated account not found.");
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (SecurityException e) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 }

@@ -5,6 +5,7 @@ export const homeStyles = (theme: any, accessibility: { largeText: boolean, dysl
 
   const fontScale = accessibility.largeText ? 1.3 : 1;
   const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
+  const buttonHeight = accessibility.largeText ? 88 : 60;
 
   return StyleSheet.create({
   /**
@@ -79,8 +80,9 @@ export const homeStyles = (theme: any, accessibility: { largeText: boolean, dysl
    * Inner layout for section button content: fixed height, horizontal padding and row alignment.
    */
   sectionButtonContent: {
-    height: 60,
+    minHeight: buttonHeight,
     paddingHorizontal: 16,
+    paddingVertical: accessibility.largeText ? 14 : 8,
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',

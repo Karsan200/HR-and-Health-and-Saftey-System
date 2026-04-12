@@ -30,19 +30,19 @@ const AlertBox: React.FC<AlertBoxProps> = ({
         <View
           style={[
             themedStyles.circle,
-            { backgroundColor: circleColor || theme.redPrimary },
+            { backgroundColor: circleColor || theme.redTrafficPrimary },
           ]}
         />
         <View
           style={[
             themedStyles.labelWrap,
-            { backgroundColor: labelBackground || theme.redBackgroundLight },
+            { backgroundColor: labelBackground || theme.redTrafficBackgroundLight },
           ]}
         >
           <Text
             style={[
               themedStyles.labelText,
-              { color: labelColor || theme.redTextDark },
+              { color: labelColor || theme.redTrafficTextDark },
             ]}
             numberOfLines={1}
             ellipsizeMode="tail"
@@ -68,7 +68,7 @@ const styles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: b
 
   return StyleSheet.create({
     container: {
-      height: 88,
+      minHeight: 88,
       backgroundColor: theme.white,
       borderRadius: BorderRadius.largeButtonsAndOutlines,
       paddingHorizontal: 10,
