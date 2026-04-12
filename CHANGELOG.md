@@ -1,3 +1,19 @@
+## [V0.3.0] - 2026-04-09
+
+### Added
+- Dashboard and Navbar for the web app
+- Web app profile page so admins can view and edit their details
+- Mobile app personal page — view hazard reports, signed policies, and SOPs
+- Mobile app documents page — view all available documentation, pending and signed
+- Mobile app payslip page — view all payslips, with document download support
+- Mobile app handbook page — view the current company handbook
+- Manager holiday/events calendar to view all employee leave and events, with filtering options on the web app
+- Ability to view and manage all users in the system, with filtering options on the web app
+- V0.3.0 flyway database migration (V4) to account for changes in this version
+
+### Fixed
+- Various QoL improvements to the mobile app
+
 ## [V0.2.0] - 2026-03-31
 
 ### Added
