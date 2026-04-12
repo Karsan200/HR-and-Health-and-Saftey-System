@@ -14,7 +14,6 @@ import uk.co.garagebridgend.backend.repository.ClockInRepository;
 import uk.co.garagebridgend.backend.repository.LeaveRepository;
 import uk.co.garagebridgend.backend.repository.PermissionsRepository;
 
-import java.sql.Time;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -99,7 +98,7 @@ public class AdminEmployeeOverviewService {
 
         int latesThisMonth = clockInRepository.countLateClockInsForEmployeeWithinDateRange(
                 accountId,
-                Time.valueOf(LATE_THRESHOLD),
+                LATE_THRESHOLD,
                 startOfMonth,
                 startOfNextMonth
         );

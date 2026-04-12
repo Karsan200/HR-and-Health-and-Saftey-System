@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import uk.co.garagebridgend.backend.models.entity.ClockInTable;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 
-import java.sql.Time;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -137,7 +136,7 @@ public interface ClockInRepository extends JpaRepository<ClockInTable, UUID> {
     """)
     int countLateClockInsForEmployeeWithinDateRange(
             @Param("accountId") Long accountId,
-            @Param("lateThreshold") Time lateThreshold,
+            @Param("lateThreshold") LocalTime lateThreshold,
             @Param("startDateTime") LocalDateTime startDateTime,
             @Param("endDateTime") LocalDateTime endDateTime
     );
