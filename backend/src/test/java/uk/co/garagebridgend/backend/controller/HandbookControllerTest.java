@@ -63,4 +63,13 @@ class HandbookControllerTest {
 
         assertTrue(result.isEmpty());
     }
+
+    @Test
+    void testGetHandbooksHandlesException() {
+        when(documentService.getAllDocuments()).thenThrow(new RuntimeException("Database error"));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, handbookController::getHandbooks);
+
+        assertEquals("500 INTERNAL_SERVER_ERROR \"Internal server error.\"", exception.getMessage());
+    }
 }
