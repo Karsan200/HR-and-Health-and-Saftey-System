@@ -9,7 +9,6 @@ import { ThemeProvider, useTheme } from '../src/theme/colourController';
 import { DefaultColours } from '../src/theme/colours';
 import { getSettings } from '../src/logic/SettingsService';
 import AuthenticationService from '../src/logic/AuthenticationService';
-import SettingsScreen from "../src/screens/personal/SettingsScreen.tsx";
 
 // Mock dependencies
 jest.mock('../src/logic/SettingsService', () => ({
