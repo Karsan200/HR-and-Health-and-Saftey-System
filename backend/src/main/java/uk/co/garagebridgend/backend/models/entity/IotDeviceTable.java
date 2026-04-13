@@ -37,15 +37,15 @@ public class IotDeviceTable {
     private String accessToken;
 
     /** Interval (in seconds) for scanning for nearby devices. */
-    @Column(name = "scanning_interval", nullable = false)
+    @Column(columnDefinition = "INT NOT NULL DEFAULT 30", name = "scanning_interval", nullable = false)
     private int scanningInterval;
 
     /** Interval (in seconds) for uploading data to the server. */
-    @Column(name = "upload_interval", nullable = false)
+    @Column(columnDefinition = "INT NOT NULL DEFAULT 120", name = "upload_interval", nullable = false)
     private int uploadInterval;
 
     /** RSSI threshold for determining proximity. */
-    @Column(name = "rssi_threshold", nullable = false)
+    @Column(columnDefinition = "INT NOT NULL DEFAULT -75", name = "rssi_threshold", nullable = false)
     private int rssiThreshold;
 
     /** Timestamp of the last activity from the device. */
