@@ -365,16 +365,20 @@ export default function SettingsScreen() {
   async function updateColor(hex: string) {
 
     if (!editingColor) return;
-
-    setPickColors(prev => ({
-      ...prev,
+    const newPickColors = {
+      ...pickColors,
       [editingColor]: hex
-    }));
+    };
+    setPickColors(newPickColors);
 
     const newColors = generateColorSet(hex);
     setColors(newColors);
 
-    let payload: any = { };
+    let payload: any = {
+      accentColour: newPickColors.accent,
+      textColour: newPickColors.text,
+      backgroundColour: newPickColors.background,
+    };
 
     if (editingColor === "accent") {
       updateTheme({
@@ -402,7 +406,7 @@ export default function SettingsScreen() {
       payload.backgroundColour = newColors.primary;
     }
 
-    const accentToCheck = editingColor === "accent" ? newColors.primary : theme.redPrimary;
+    const accentToCheck = editingColor === "accent" ? newColors.primary : newPickColors.redPrimary;
     payload.themePreset = PRESET_COLOURS.includes(accentToCheck) ? getCurrentPreset(accentToCheck) : null;
 
     await save(payload);
