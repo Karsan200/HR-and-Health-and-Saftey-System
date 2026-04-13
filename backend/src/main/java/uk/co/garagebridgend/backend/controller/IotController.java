@@ -50,7 +50,7 @@ public class IotController {
             iotService.authorise(deviceId, deviceToken);
 
             // Process the attendance upload
-            // TODO: Implement the logic to handle the attendance upload, e.g. save to database, trigger events, etc.
+            iotService.registerAttendance(body);
         } catch (UnauthorisedIotDeviceException e) {
             LOG.warn("Unauthorised access attempt from IoT device with ID: {}", deviceId);
             throw new ResponseStatusException(
