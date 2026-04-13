@@ -1,6 +1,8 @@
 package uk.co.garagebridgend.backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +21,8 @@ import java.util.List;
 @RequestMapping("/api/qualifications")
 @RequiredArgsConstructor
 public class QualificationController {
+    /** Logger for logging qualification-related events and errors. */
+    private static final Logger LOG = LoggerFactory.getLogger(QualificationController.class);
 
     /** Qualification service. */
     private final QualificationService qualificationService;
@@ -38,6 +42,7 @@ public class QualificationController {
                     "Authenticated account not found."
             );
         } catch (Exception e) {
+            LOG.error("Error retrieving qualifications", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error"

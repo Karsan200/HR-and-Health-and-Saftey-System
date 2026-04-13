@@ -1,6 +1,8 @@
 package uk.co.garagebridgend.backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +27,9 @@ import uk.co.garagebridgend.backend.models.response.HsOverviewResponseModel;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class HsOverviewController {
+    /** Logger for logging overview-related events and errors. */
+    private static final Logger LOG = LoggerFactory.getLogger(HsOverviewController.class);
+
     /** Service for handling the overview command. */
     private final HsOverviewService hsOverviewService;
 
@@ -42,6 +47,7 @@ public class HsOverviewController {
                     "Authenticated account not found."
             );
         } catch (Exception e) {
+            LOG.error("Error retrieving Health & Safety overview", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal sever error"

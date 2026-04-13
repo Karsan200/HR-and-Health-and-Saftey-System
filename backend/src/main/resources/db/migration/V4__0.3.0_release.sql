@@ -11,14 +11,14 @@ update leave_type_table
 
 update leave_type_table
     set icon_type = 'sick'
-    where icon_type = 'medical' and name = 'Sick Leave';;
+    where icon_type = 'medical' and name = 'Sick Leave';
 
 update leave_type_table
     set icon_type = 'priority_high'
     where icon_type = 'warning';
 
 update leave_type_table
-    set icon_type = 'child_care', color_icon = 'ad32a7', colour_bg = 'edd1ec'
+    set icon_type = 'child_care', colour_icon = 'ad32a7', colour_bg = 'edd1ec'
     where icon_type = 'medical' and name = 'Maternity/Paternity Leave';
 
 update leave_type_table

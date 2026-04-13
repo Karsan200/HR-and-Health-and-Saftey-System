@@ -1,3 +1,12 @@
+## [V0.3.1] - 2026-04-13
+
+### Added
+- Added logging for all API endpoints to log any internal server errors that occur with a stack trace
+- V0.3.1 flyway database migration (V5) to account for changes in this version
+
+### Fixed
+- Fixed bug where requires signature column was not in the documents or hazards table causing a 500 error in production
+
 ## [V0.3.0] - 2026-04-09
 
 ### Added
