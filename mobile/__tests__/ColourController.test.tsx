@@ -9,6 +9,7 @@ import { ThemeProvider, useTheme } from '../src/theme/colourController';
 import { DefaultColours } from '../src/theme/colours';
 import { getSettings } from '../src/logic/SettingsService';
 import AuthenticationService from '../src/logic/AuthenticationService';
+import SettingsScreen from "../src/screens/personal/SettingsScreen.tsx";
 
 // Mock dependencies
 jest.mock('../src/logic/SettingsService', () => ({
@@ -217,6 +218,77 @@ describe('colourController', () => {
       expect(capturedCtx.theme.redPrimary).toBe('#FF0000');
       expect(capturedCtx.theme.greyBackground).toBe('#222222');
       expect(capturedCtx.theme.greyPrimaryMainText).toBe('#111111');
+    });
+  });
+
+  it('uses default colour values directly when custom colours match defaults', async () => {
+    (getSettings as jest.Mock).mockResolvedValue({
+      ...defaultSettings,
+      themePreset: null,
+      accentColour: DefaultColours.redPrimary,
+      textColour: DefaultColours.black,
+      backgroundColour: DefaultColours.greyBackground,
+    });
+
+    let capturedCtx: any;
+
+    render(
+        <ThemeProvider>
+          <ThemeConsumer onRender={(ctx) => { capturedCtx = ctx; }} />
+        </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(capturedCtx.theme.redPrimary).toBe(DefaultColours.redPrimary);
+      expect(capturedCtx.theme.redTextDark).toBe(DefaultColours.redTextDark);
+      expect(capturedCtx.theme.redBackgroundLight).toBe(DefaultColours.redBackgroundLight);
+      expect(capturedCtx.theme.black).toBe(DefaultColours.black);
+      expect(capturedCtx.theme.greyBackground).toBe(DefaultColours.greyBackground);
+    });
+  });
+
+  it('generates colour set for custom text colour', async () => {
+    (getSettings as jest.Mock).mockResolvedValue({
+      ...defaultSettings,
+      themePreset: null,
+      accentColour: DefaultColours.redPrimary,
+      textColour: '#123456',
+      backgroundColour: DefaultColours.greyBackground,
+    });
+
+    let capturedCtx: any;
+
+    render(
+        <ThemeProvider>
+          <ThemeConsumer onRender={(ctx) => { capturedCtx = ctx; }} />
+        </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(capturedCtx.theme.black).toBe(DefaultColours.black);
+    });
+  });
+
+
+  it('generates colour set for custom background colour', async () => {
+    (getSettings as jest.Mock).mockResolvedValue({
+      ...defaultSettings,
+      themePreset: null,
+      accentColour: DefaultColours.redPrimary,
+      textColour: DefaultColours.black,
+      backgroundColour: '#abcdef',
+    });
+
+    let capturedCtx: any;
+
+    render(
+        <ThemeProvider>
+          <ThemeConsumer onRender={(ctx) => { capturedCtx = ctx; }} />
+        </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(capturedCtx.theme.greyBackground).toBe("#abcdef");
     });
   });
 
