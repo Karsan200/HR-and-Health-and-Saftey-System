@@ -9,7 +9,7 @@ from scan import scan
 # Check if the /cache directory exists, if not create it
 if "cache" not in os.listdir():
     os.mkdir("cache")
-    
+
 # Check if the config file exists, if not create it
 if "config.json" not in os.listdir():
     with open("config.json", "w") as f:
@@ -26,21 +26,24 @@ if "config.json" not in os.listdir():
     "max_cache_entries": 100
 }
         """)
-    
+
 # Load the config
 with open("config.json") as f:
     settings = ujson.load(f)
-    
+
+
 # Start the uploading process
 def upload_loop():
     while True:
         upload()
-        
+
         time.sleep(settings["upload_interval"])
+
+
 _thread.start_new_thread(upload_loop, ())
 
 # Main thread continues with BLE scanning
 while True:
     scan()
-    
+
     time.sleep(settings["scanning_interval"])

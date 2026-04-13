@@ -4,7 +4,7 @@ import ujson
 
 
 # Company ID, 16 bit little endian
-COMPANY_ID = 0xFFFF
+COMPANY_ID = 0x0000
 
 _UUID_LENGTH = 16
 _MIN_PAYLOAD_LENGTH = 2 + _UUID_LENGTH  # 18 — 2 bytes company ID + 16 bytes raw binary UUID
@@ -94,8 +94,8 @@ def scan():
     status for each entry.
 
     CSV format:
-        uuid,rssi,status
-        550e8400-e29b-41d4-a716-446655440000,-65,pending
+        uuid,rssi
+        550e8400-e29b-41d4-a716-446655440000,-65
     """
     settings = _load_settings()
     rssi_threshold = settings.get("rssi_threshold", -75)
@@ -169,9 +169,9 @@ def scan():
 
     try:
         with open(filepath, "w") as f:
-            f.write("uuid,rssi,status\n")
+            f.write("uuid,rssi\n")
             for uuid, rssi in sorted_devices:
-                f.write("{},{},pending\n".format(uuid, rssi))
+                f.write("{},{}\n".format(uuid, rssi))
 
         print("scan: wrote {} device(s) to {}".format(len(sorted_devices), filepath))
 
