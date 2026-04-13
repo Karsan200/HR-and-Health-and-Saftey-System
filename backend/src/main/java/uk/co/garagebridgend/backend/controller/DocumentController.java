@@ -1,6 +1,8 @@
 package uk.co.garagebridgend.backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +20,9 @@ import java.util.List;
 @RequestMapping("/api/documents")
 @RequiredArgsConstructor
 public class DocumentController {
+    /** Logger for logging document-related events and errors. */
+    private static final Logger LOG = LoggerFactory.getLogger(DocumentController.class);
+
 
     /** Service responsible for handling document-related operations. */
     private final DocumentService documentService;
@@ -31,6 +36,7 @@ public class DocumentController {
         try {
             return documentService.getAllDocuments();
         } catch (Exception e) {
+            LOG.error("Error retrieving documents", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
@@ -46,6 +52,7 @@ public class DocumentController {
         } catch (AuthenticatedAccountNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated account not found.");
         } catch (Exception e) {
+            LOG.error("Error signing document with ID: {}", id, e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }

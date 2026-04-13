@@ -2,6 +2,8 @@ package uk.co.garagebridgend.backend.controller;
 
 import lombok.RequiredArgsConstructor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +34,8 @@ import java.util.List;
 @RequestMapping("/api/leave")
 @RequiredArgsConstructor
 public class LeaveController {
+    /** Logger for logging leave-related events and errors. */
+    private static final Logger LOG = LoggerFactory.getLogger(LeaveController.class);
 
     /** Minimum valid month value (January). */
     private static final int MIN_MONTH = 1;
@@ -72,6 +76,7 @@ public class LeaveController {
                     e.getMessage()
             );
         } catch (Exception e) {
+            LOG.error("Error retrieving calendar items for year {} month {}", year, month, e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error"
@@ -89,6 +94,7 @@ public class LeaveController {
         try {
             return leaveService.getAllLeaveDates();
         } catch (Exception e) {
+            LOG.error("Error retrieving calendar leave dates", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal sever error"
@@ -112,6 +118,7 @@ public class LeaveController {
                     e.getMessage()
             );
         } catch (Exception e) {
+            LOG.error("Error retrieving leave for date {}", date, e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal sever error"
@@ -136,6 +143,7 @@ public class LeaveController {
                     "User not authenticated"
             );
         } catch (Exception e) {
+            LOG.error("Error retrieving leave summary for current user", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error"
@@ -153,6 +161,7 @@ public class LeaveController {
         try {
             return leaveService.getLeaveTypes();
         } catch (Exception e) {
+            LOG.error("Error retrieving leave types", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error"
@@ -180,6 +189,7 @@ public class LeaveController {
                     e.getMessage()
             );
         } catch (Exception e) {
+            LOG.error("Error creating leave request", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error"
@@ -200,6 +210,7 @@ public class LeaveController {
         } catch (AuthenticatedAccountNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
         } catch (Exception e) {
+            LOG.error("Error retrieving pending leave requests", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
@@ -224,6 +235,7 @@ public class LeaveController {
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
+            LOG.error("Error declining leave request with ID: {}", leaveId, e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }

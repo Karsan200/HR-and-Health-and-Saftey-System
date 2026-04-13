@@ -1,6 +1,8 @@
 package uk.co.garagebridgend.backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +20,9 @@ import uk.co.garagebridgend.backend.models.response.DrivingLicenceResponse;
 @RequestMapping("/api/driving-licence")
 @RequiredArgsConstructor
 public class DrivingLicenceController {
+
+    /** Logger for logging driving licence related events and errors. */
+    private static final Logger LOG = LoggerFactory.getLogger(DrivingLicenceController.class);
 
     /** Service for handling driving licence operations. */
     private final DrivingLicenceService drivingLicenceService;
@@ -42,6 +47,7 @@ public class DrivingLicenceController {
                     "No driving licence found."
             );
         } catch (Exception e) {
+            LOG.error("Error retrieving driving licence", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error."

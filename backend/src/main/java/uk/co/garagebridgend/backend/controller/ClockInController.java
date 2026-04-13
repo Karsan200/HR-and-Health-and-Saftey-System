@@ -1,6 +1,8 @@
 package uk.co.garagebridgend.backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +28,8 @@ import java.util.List;
 @RequestMapping("/api/clock")
 @RequiredArgsConstructor
 public class ClockInController {
+    /** Logger for logging clock-in related events and errors. */
+    private static final Logger LOG = LoggerFactory.getLogger(ClockInController.class);
 
     /** Service for handling clock-in operations and statistics. */
     private final ClockInService clockInService;
@@ -45,6 +49,7 @@ public class ClockInController {
                     "Authenticated account not found."
             );
         } catch (Exception e) {
+            LOG.error("Error retrieving clock-in status", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error."
@@ -67,6 +72,7 @@ public class ClockInController {
                     "Authenticated account not found."
             );
         } catch (Exception e) {
+            LOG.error("Error retrieving recent clock-in records", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error."
@@ -93,6 +99,7 @@ public class ClockInController {
                     e.getMessage()
             );
         } catch (Exception e) {
+            LOG.error("Error submitting clock-in issue report", e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error."
