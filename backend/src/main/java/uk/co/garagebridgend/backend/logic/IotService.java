@@ -55,6 +55,10 @@ public class IotService {
         }
     }
 
+    /** Registers attendance records from an IoT device upload request.
+     *
+     * @param body the request containing attendance data, including BLE signatures and timestamps
+     */
     public void registerAttendance(final IotAttendanceUploadRequest body) {
         // Iterate through the attendance records in the request body and process them
         for (var record : body.getSignatures()) {

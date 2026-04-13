@@ -41,9 +41,9 @@ public class IotController {
      */
     @PostMapping("/attendance/upload")
     public void uploadAttendance(
-            @RequestHeader("X-Device-Id") UUID deviceId,
-            @RequestHeader("X-Device-Token") String deviceToken,
-            @RequestBody IotAttendanceUploadRequest body
+            final @RequestHeader("X-Device-Id") UUID deviceId,
+            final @RequestHeader("X-Device-Token") String deviceToken,
+            final @RequestBody IotAttendanceUploadRequest body
     ) {
         try {
             // Authorise the device
