@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect, useCallback } from "react";
+import dayjs, { type Dayjs } from "dayjs";
 import {
     Box,
     Typography,
@@ -11,10 +12,14 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
 import ShieldIcon from "@mui/icons-material/Shield";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
 import { personalPageStyles as styles } from "./PersonalPage.styles";
 import { useAuth } from "../AuthContext";
-import { fetchPersonalData, type ProfileResponse, type SettingsResponse } from "../logic/PersonalService";
+import { fetchPersonalData, updateNotificationSettings, type ProfileResponse, type SettingsResponse } from "../logic/PersonalService";
 import { changePassword } from "../logic/PersonalSecurityService";
+import {DefaultColours} from "../theme/colours.ts";
 
 type Tab = "profile" | "settings" | "security";
 
@@ -104,13 +109,173 @@ function ProfileTab({ profile, settings }: { profile: ProfileResponse, settings:
 }
 
 // Second Tab (Settings)
-// TODO: Complete the Settings Tab
 
-function SettingsTab({ label }: { label: string }) {
+function SettingsTab({ settings }: { settings: SettingsResponse }) {
+    const { authenticationService } = useAuth();
+
+    // Parse existing silent times from "HH:mm:ss" strings or default to 5am/6am
+    const parseTime = (t: string | null): Dayjs =>
+        t ? dayjs(`2000-01-01T${t}`) : dayjs("2000-01-01T05:00:00");
+
+    const [silentStart, setSilentStart] = useState<Dayjs>(parseTime(settings.silentStart));
+    const [silentEnd, setSilentEnd]     = useState<Dayjs>(parseTime(settings.silentEnd));
+    const [editing, setEditing]         = useState<"start" | "end">("start");
+    const [submitting, setSubmitting]   = useState(false);
+    const [success, setSuccess]         = useState(false);
+    const [error, setError]             = useState<string | null>(null);
+
+    function formatDisplay(t: Dayjs): string {
+        return t.format("hh:mm");
+    }
+
+    function formatAmPm(t: Dayjs): string {
+        return t.format("A");
+    }
+
+    async function handleOk() {
+        setError(null);
+        setSuccess(false);
+        setSubmitting(true);
+        try {
+            await updateNotificationSettings(authenticationService, {
+                silentStart: silentStart.format("HH:mm:ss"),
+                silentEnd: silentEnd.format("HH:mm:ss"),
+            });
+            setSuccess(true);
+        } catch {
+            setError("Failed to save notification settings. Please try again.");
+        } finally {
+            setSubmitting(false);
+        }
+    }
+
+    function handleCancel() {
+        setSilentStart(parseTime(settings.silentStart));
+        setSilentEnd(parseTime(settings.silentEnd));
+        setError(null);
+        setSuccess(false);
+    }
+
     return (
-        <Box sx={{ ...styles.sectionCard, ...styles.placeHolderCard }}>
-            <Typography sx={styles.infoLabel}>{label} TBC </Typography>
-        </Box>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Box>
+                <Typography>Notification Settings</Typography>
+
+                <Typography>
+                    NOTIFICATION QUIET TIME
+                </Typography>
+
+                <Box>
+                    <Box
+                        onClick={() => setEditing("start")}
+                        sx={{ cursor: "pointer", display: "flex", alignItems: "flex-end", gap: "4px" }}
+                    >
+                        <Typography sx={{
+                            fontSize: "40px",
+                            fontWeight: 400,
+                            color: editing === "start"
+                                ? DefaultColours.redPrimary
+                                : DefaultColours.black,
+                            lineHeight: 1,
+                        }}>
+                            {formatDisplay(silentStart)}
+                        </Typography>
+                        <Typography sx={{
+                            fontSize: "12px",
+                            color: editing === "start"
+                                ? DefaultColours.redPrimary
+                                : DefaultColours.greyPrimaryMainText,
+                            paddingBottom: "4px",
+                            lineHeight: 1.2,
+                        }}>
+                            {formatAmPm(silentStart)}
+                        </Typography>
+                    </Box>
+
+                    <Typography>→</Typography>
+
+                    <Box
+                        onClick={() => setEditing("end")}
+                        sx={{ cursor: "pointer", display: "flex", alignItems: "flex-end", gap: "4px" }}
+                    >
+                        <Typography sx={{
+                            fontSize: "40px",
+                            fontWeight: 400,
+                            color: editing === "end"
+                                ? DefaultColours.redPrimary
+                                : DefaultColours.black,
+                            lineHeight: 1,
+                        }}>
+                            {formatDisplay(silentEnd)}
+                        </Typography>
+                        <Typography sx={{
+                            fontSize: "12px",
+                            color: editing === "end"
+                                ? DefaultColours.redPrimary
+                                : DefaultColours.greyPrimaryMainText,
+                            paddingBottom: "4px",
+                            lineHeight: 1.2,
+                        }}>
+                            {formatAmPm(silentEnd)}
+                        </Typography>
+                    </Box>
+                </Box>
+
+                <StaticTimePicker
+                    value={editing === "start" ? silentStart : silentEnd}
+                    onChange={(newValue) => {
+                        if (!newValue) return;
+                        if (editing === "start") setSilentStart(newValue);
+                        else setSilentEnd(newValue);
+                    }}
+                    slotProps={{
+                        actionBar: { sx: { display: "none" } },
+                        toolbar: { sx: { display: "none" } },
+                    }}
+                    sx={{
+                        "& .MuiClock-pin": { backgroundColor: DefaultColours.redPrimary },
+                        "& .MuiClockPointer-root": { backgroundColor: DefaultColours.redPrimary },
+                        "& .MuiClockPointer-thumb": {
+                            backgroundColor: DefaultColours.redPrimary,
+                            borderColor: DefaultColours.redPrimary,
+                        },
+                        "& .MuiClockNumber-root.Mui-selected": {
+                            backgroundColor: DefaultColours.redPrimary,
+                        },
+                        "& .MuiPickersToolbar-root": { display: "none" },
+                    }}
+                />
+
+                <Box>
+                    <Box
+                        component="button"
+                        onClick={handleCancel}
+                        disabled={submitting}
+                    >
+                        CANCEL
+                    </Box>
+                    <Box
+                        component="button"
+                        onClick={handleOk}
+                        disabled={submitting}
+                    >
+                        {submitting ? "SAVING..." : "OK"}
+                    </Box>
+                </Box>
+
+                {success && (
+                    <Typography>
+                        Notification settings saved.
+                    </Typography>
+                )}
+
+                {error && (
+                    <Typography>
+                        {error}
+                    </Typography>
+                )}
+            </Box>
+        </LocalizationProvider>
     );
 }
 
@@ -306,7 +471,7 @@ export function PersonalPage() {
             {!loading && !error && profile && settings && (
                 <>
                     {activeTab === "profile"  && <ProfileTab profile={profile} settings={settings} />}
-                    {activeTab === "settings" && <SettingsTab label="Settings" />}
+                    {activeTab === "settings" && <SettingsTab settings={settings} />}
                     {activeTab === "security" && <SecurityTab/>}
                 </>
             )}

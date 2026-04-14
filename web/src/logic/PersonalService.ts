@@ -47,3 +47,18 @@ export async function fetchPersonalData(authenticationService: AuthenticationSer
 
     return { profile, settings };
 }
+
+export async function updateNotificationSettings(
+    authenticationService: AuthenticationService,
+    request: SettingsResponse
+): Promise<void> {
+    const response = await authenticationService.fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to update notification settings");
+    }
+}
