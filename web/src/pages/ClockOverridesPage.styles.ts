@@ -221,7 +221,6 @@ export const clockOverridesPageStyles = {
         backgroundColor: DefaultColours.amberBackgroundLight,
         borderRadius: `${BorderRadius.mediumNotification}px`,
         border: `1px solid ${DefaultColours.amberPrimary}`,
-        alignSelf: "flex-start",
     },
 
     reportIssueLabel: {
@@ -235,6 +234,57 @@ export const clockOverridesPageStyles = {
         ...TextStyles.regular,
         fontSize: FontSize.s16,
         color: DefaultColours.amberTextDark,
+        letterSpacing: "0.17px",
+    },
+
+    addButton: {
+        height: "auto",
+        justifyContent: "center",
+        display: "flex",
+        alignItems: "center",
+        padding: "10px 24px",
+        gap: "10px",
+        minWidth: "180px",
+        backgroundColor: DefaultColours.greenPrimary,
+        boxShadow: `0px 0px 4px ${DefaultColours.greyIconLight}`,
+        borderRadius: `${BorderRadius.largeButtonsAndOutlines}px`,
+        textTransform: "none" as const,
+        flexShrink: 0,
+        "&:hover": {
+            backgroundColor: DefaultColours.greenTextDark,
+            boxShadow: `0px 0px 4px ${DefaultColours.greyIconLight}`,
+        },
+    },
+
+    addButtonLabel: {
+        ...TextStyles.semiBold,
+        fontSize: FontSize.m20,
+        color: DefaultColours.white,
+        lineHeight: "120%",
+        letterSpacing: "0.17px",
+    },
+
+    deleteButton: {
+        display: "flex",
+        alignItems: "center",
+        padding: "10px 20px",
+        gap: "8px",
+        height: "66px",
+        minWidth: "120px",
+        borderColor: DefaultColours.redPrimary,
+        borderRadius: `${BorderRadius.largeButtonsAndOutlines}px`,
+        textTransform: "none" as const,
+        "&:hover": {
+            borderColor: DefaultColours.redTextDark,
+            backgroundColor: DefaultColours.redBackgroundLight,
+        },
+    },
+
+    deleteButtonLabel: {
+        ...TextStyles.semiBold,
+        fontSize: FontSize.m20,
+        color: DefaultColours.redPrimary,
+        lineHeight: "120%",
         letterSpacing: "0.17px",
     },
 

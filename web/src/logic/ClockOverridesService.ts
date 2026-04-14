@@ -20,6 +20,15 @@ export interface ClockInRecord {
     report: ClockInReport | null;
 }
 
+
+/** Payload for manually creating a clock-in record */
+export interface ClockInCreateRequest {
+    accountId: number;
+    date: string;
+    clockInTime: string | null;
+    clockOutTime: string | null;
+}
+
 /** Payload sent when an admin overrides a clock-in record */
 export interface ClockOverrideRequest {
     clockInTime: string | null;
@@ -103,6 +112,52 @@ export async function submitClockOverride(
         const body = await response.text();
         console.error(`Clock override failed — status: ${response.status}, body: ${body}`);
         throw new Error(body || `Override failed: ${response.status}`);
+    }
+}
+
+/**
+ * Creates a new clock-in record for a specific employee on a given date.
+ *
+ * @param request the details of the record to create
+ * @param authService the authentication service used to make the request
+ */
+export async function createClockIn(
+    request: ClockInCreateRequest,
+    authService: AuthenticationService,
+): Promise<void> {
+    const response = await authService.fetch("/api/admin/clock-ins", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+        const body = await response.text();
+        console.error(`Clock-in create failed — status: ${response.status}, body: ${body}`);
+        throw new Error(body || `Create failed: ${response.status}`);
+    }
+}
+
+/**
+ * Permanently deletes a clock-in record and its associated report.
+ *
+ * @param clockId the UUID of the clock-in record to delete
+ * @param authService the authentication service used to make the request
+ */
+export async function deleteClockIn(
+    clockId: string,
+    authService: AuthenticationService,
+): Promise<void> {
+    const response = await authService.fetch(`/api/admin/clock-ins/${clockId}`, {
+        method: "DELETE",
+        credentials: "include",
+    });
+
+    if (!response.ok) {
+        const body = await response.text();
+        console.error(`Clock-in delete failed — status: ${response.status}, body: ${body}`);
+        throw new Error(body || `Delete failed: ${response.status}`);
     }
 }
 

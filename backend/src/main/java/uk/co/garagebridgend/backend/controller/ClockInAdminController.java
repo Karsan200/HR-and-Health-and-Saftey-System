@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.ClockInAdminService;
+import uk.co.garagebridgend.backend.models.request.ClockInCreateRequest;
 import uk.co.garagebridgend.backend.models.request.ClockInOverrideRequest;
 import uk.co.garagebridgend.backend.models.response.ClockInAdminResponse;
 
@@ -102,4 +104,47 @@ public class ClockInAdminController {
             );
         }
     }
+
+    /**
+     * Creates a new clock-in record for a specific employee on a given date.
+     * Requires admin or manager authority (enforced in SecurityConfig).
+     *
+     * @param request the details of the record to create
+     */
+    @PostMapping("/clock-ins")
+    public void createClockIn(@RequestBody final ClockInCreateRequest request) {
+        try {
+            clockInAdminService.createClockIn(request);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            LOG.error("Error creating clock-in record", e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal server error."
+            );
+        }
+    }
+
+    /**
+     * Permanently deletes a clock-in record and any associated report.
+     * Requires admin or manager authority (enforced in SecurityConfig).
+     *
+     * @param clockId the UUID of the clock-in record to delete
+     */
+    @DeleteMapping("/clock-ins/{clockId}")
+    public void deleteClockIn(@PathVariable final UUID clockId) {
+        try {
+            clockInAdminService.deleteClockIn(clockId);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            LOG.error("Error deleting clock-in record for clockId {}", clockId, e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal server error."
+            );
+        }
+    }
+
 }

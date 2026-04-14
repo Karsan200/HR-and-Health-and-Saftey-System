@@ -15,6 +15,8 @@ import {
     FormControlLabel,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberOutlined from "@mui/icons-material/WarningAmberOutlined";
 import CalendarTodayOutlined from "@mui/icons-material/CalendarTodayOutlined";
@@ -25,6 +27,8 @@ import {
     fetchClockInsForDate,
     fetchAllClockIns,
     submitClockOverride,
+    createClockIn,
+    deleteClockIn,
     formatTime,
     formatDateHeading,
     toBackendTime,
@@ -32,6 +36,7 @@ import {
 } from "../logic/ClockOverridesService";
 import { clockOverridesPageStyles as styles } from "./ClockOverridesPage.styles";
 import { DefaultColours } from "../theme/colours";
+import { FontSize, TextStyles, BorderRadius } from "../theme/theme";
 
 function todayISO(): string {
     return new Date().toISOString().split("T")[0];
@@ -51,11 +56,11 @@ interface EditModalProps {
 function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
     const { authenticationService } = useAuth();
 
-    const [clockIn, setClockIn]       = useState<string>("");
-    const [clockOut, setClockOut]     = useState<string>("");
-    const [dismissReport, setDismissReport] = useState<boolean>(true);
-    const [saving, setSaving]         = useState(false);
-    const [error, setError]           = useState<string | null>(null);
+    const [clockIn, setClockIn]               = useState<string>("");
+    const [clockOut, setClockOut]             = useState<string>("");
+    const [dismissReport, setDismissReport]   = useState<boolean>(true);
+    const [saving, setSaving]                 = useState(false);
+    const [error, setError]                   = useState<string | null>(null);
 
     useEffect(() => {
         if (!record) return;
@@ -176,25 +181,278 @@ function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
                 )}
 
                 <Box sx={styles.modalActions}>
-                    <Button
-                        variant="outlined"
-                        onClick={onClose}
-                        disabled={saving}
-                        sx={styles.cancelButton}
-                    >
+                    <Button variant="outlined" onClick={onClose} disabled={saving} sx={styles.cancelButton}>
                         Cancel
                     </Button>
                     <Button
                         variant="contained"
                         onClick={handleSave}
                         disabled={saving}
-                        startIcon={saving
-                            ? <CircularProgress size={16} sx={{ color: DefaultColours.white }} />
-                            : undefined
-                        }
+                        startIcon={saving ? <CircularProgress size={16} sx={{ color: DefaultColours.white }} /> : undefined}
                         sx={styles.saveButton}
                     >
                         {saving ? "Saving..." : "Save Override"}
+                    </Button>
+                </Box>
+
+            </Box>
+        </Modal>
+    );
+}
+
+// Add clock-in modal
+
+interface AddModalProps {
+    open: boolean;
+    defaultDate: string;
+    onClose: () => void;
+    onAdded: (record: ClockInRecord) => void;
+}
+
+function AddClockInModal({ open, defaultDate, onClose, onAdded }: AddModalProps) {
+    const { authenticationService } = useAuth();
+
+    const [accountId, setAccountId] = useState<string>("");
+    const [date, setDate]           = useState<string>(defaultDate);
+    const [clockIn, setClockIn]     = useState<string>("");
+    const [clockOut, setClockOut]   = useState<string>("");
+    const [saving, setSaving]       = useState(false);
+    const [error, setError]         = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!open) return;
+        setAccountId("");
+        setDate(defaultDate);
+        setClockIn("");
+        setClockOut("");
+        setError(null);
+    }, [open, defaultDate]);
+
+    async function handleAdd() {
+        if (!accountId.trim()) {
+            setError("Employee ID is required.");
+            return;
+        }
+        if (!date) {
+            setError("Date is required.");
+            return;
+        }
+        setSaving(true);
+        setError(null);
+        try {
+            await createClockIn({
+                accountId: Number(accountId),
+                date,
+                clockInTime:  toBackendTime(clockIn  || null),
+                clockOutTime: toBackendTime(clockOut || null),
+            }, authenticationService);
+
+            // Optimistically add a placeholder card so the list updates immediately.
+            // The real record (with correct clockId) will load on the next fetch.
+            onAdded({
+                clockId:     crypto.randomUUID(),
+                employeeName: `Account ${accountId}`,
+                accountId:   Number(accountId),
+                clockInTime: toBackendTime(clockIn  || null),
+                clockOutTime: toBackendTime(clockOut || null),
+                created:     `${date}T00:00:00`,
+                report:      null,
+            });
+            onClose();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Something went wrong.");
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    return (
+        <Modal open={open} onClose={onClose} sx={styles.modalBackdrop}>
+            <Box sx={styles.modalPanel}>
+
+                <Box sx={styles.modalHeader}>
+                    <Box>
+                        <Typography sx={styles.modalTitle}>Add Clock-in</Typography>
+                        <Typography sx={styles.modalSubtitle}>
+                            Manually create a clock-in record for an employee
+                        </Typography>
+                    </Box>
+                    <IconButton onClick={onClose} sx={styles.modalCloseButton} aria-label="Close">
+                        <CloseIcon />
+                    </IconButton>
+                </Box>
+
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <Typography sx={styles.clockPickerLabel}>Employee ID</Typography>
+                    <TextField
+                        type="number"
+                        placeholder="Enter account ID..."
+                        value={accountId}
+                        onChange={(e) => setAccountId(e.target.value)}
+                        disabled={saving}
+                        size="small"
+                        fullWidth
+                        sx={styles.timeTextField}
+                    />
+                </Box>
+
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <Typography sx={styles.clockPickerLabel}>Date</Typography>
+                    <TextField
+                        type="date"
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
+                        disabled={saving}
+                        size="small"
+                        fullWidth
+                        sx={styles.timeTextField}
+                    />
+                </Box>
+
+                <Box sx={styles.clockPickersRow}>
+                    <Box sx={styles.clockPickerWrapper}>
+                        <Typography sx={styles.clockPickerLabel}>Clock In (optional)</Typography>
+                        <TextField
+                            type="time"
+                            value={clockIn}
+                            onChange={(e) => setClockIn(e.target.value)}
+                            disabled={saving}
+                            size="small"
+                            fullWidth
+                            sx={styles.timeTextField}
+                        />
+                    </Box>
+
+                    <Box sx={styles.clockPickerWrapper}>
+                        <Typography sx={styles.clockPickerLabel}>Clock Out (optional)</Typography>
+                        <TextField
+                            type="time"
+                            value={clockOut}
+                            onChange={(e) => setClockOut(e.target.value)}
+                            disabled={saving}
+                            size="small"
+                            fullWidth
+                            sx={styles.timeTextField}
+                        />
+                    </Box>
+                </Box>
+
+                {error && (
+                    <Typography sx={styles.errorText}>{error}</Typography>
+                )}
+
+                <Box sx={styles.modalActions}>
+                    <Button variant="outlined" onClick={onClose} disabled={saving} sx={styles.cancelButton}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={handleAdd}
+                        disabled={saving}
+                        startIcon={saving ? <CircularProgress size={16} sx={{ color: DefaultColours.white }} /> : undefined}
+                        sx={styles.saveButton}
+                    >
+                        {saving ? "Adding..." : "Add Clock-in"}
+                    </Button>
+                </Box>
+
+            </Box>
+        </Modal>
+    );
+}
+
+// Delete confirmation modal
+
+interface DeleteConfirmModalProps {
+    record: ClockInRecord | null;
+    open: boolean;
+    onClose: () => void;
+    onDeleted: (clockId: string) => void;
+}
+
+function DeleteConfirmModal({ record, open, onClose, onDeleted }: DeleteConfirmModalProps) {
+    const { authenticationService } = useAuth();
+    const [deleting, setDeleting]   = useState(false);
+    const [error, setError]         = useState<string | null>(null);
+
+    useEffect(() => {
+        if (open) setError(null);
+    }, [open]);
+
+    async function handleDelete() {
+        if (!record) return;
+        setDeleting(true);
+        setError(null);
+        try {
+            await deleteClockIn(record.clockId, authenticationService);
+            onDeleted(record.clockId);
+            onClose();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Something went wrong.");
+        } finally {
+            setDeleting(false);
+        }
+    }
+
+    if (!record) return null;
+
+    const clockIn  = formatTime(record.clockInTime);
+    const clockOut = formatTime(record.clockOutTime);
+
+    return (
+        <Modal open={open} onClose={onClose} sx={styles.modalBackdrop}>
+            <Box sx={styles.modalPanel}>
+
+                <Box sx={styles.modalHeader}>
+                    <Box>
+                        <Typography sx={styles.modalTitle}>Delete Clock-in</Typography>
+                        <Typography sx={styles.modalSubtitle}>
+                            This action cannot be undone
+                        </Typography>
+                    </Box>
+                    <IconButton onClick={onClose} sx={styles.modalCloseButton} aria-label="Close">
+                        <CloseIcon />
+                    </IconButton>
+                </Box>
+
+                <Box sx={{
+                    padding: "16px",
+                    backgroundColor: DefaultColours.redBackgroundLight,
+                    borderRadius: `${BorderRadius.mediumNotification}px`,
+                    border: `1px solid ${DefaultColours.redPrimary}`,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                }}>
+                    <Typography sx={{ ...TextStyles.medium, fontSize: FontSize.s16, color: DefaultColours.redTextDark }}>
+                        Are you sure you want to delete this clock-in?
+                    </Typography>
+                    <Typography sx={{ ...TextStyles.regular, fontSize: FontSize.s16, color: DefaultColours.redTextDark }}>
+                        {record.employeeName} · {clockIn ?? "--:--"} → {clockOut ?? "--:--"}
+                    </Typography>
+                    {record.report && (
+                        <Typography sx={{ ...TextStyles.regular, fontSize: FontSize.xs14, color: DefaultColours.redTextDark }}>
+                            The attached employee report will also be deleted.
+                        </Typography>
+                    )}
+                </Box>
+
+                {error && (
+                    <Typography sx={styles.errorText}>{error}</Typography>
+                )}
+
+                <Box sx={styles.modalActions}>
+                    <Button variant="outlined" onClick={onClose} disabled={deleting} sx={styles.cancelButton}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        startIcon={deleting ? <CircularProgress size={16} sx={{ color: DefaultColours.white }} /> : <DeleteOutlineIcon />}
+                        sx={{ ...styles.saveButton, backgroundColor: DefaultColours.redPrimary, "&:hover": { backgroundColor: DefaultColours.redTextDark } }}
+                    >
+                        {deleting ? "Deleting..." : "Delete"}
                     </Button>
                 </Box>
 
@@ -208,9 +466,10 @@ function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
 interface ClockInCardProps {
     record: ClockInRecord;
     onEdit: (record: ClockInRecord) => void;
+    onDelete: (record: ClockInRecord) => void;
 }
 
-function ClockInCard({ record, onEdit }: ClockInCardProps) {
+function ClockInCard({ record, onEdit, onDelete }: ClockInCardProps) {
     const hasReport = record.report !== null;
     const clockIn   = formatTime(record.clockInTime);
     const clockOut  = formatTime(record.clockOutTime);
@@ -268,14 +527,24 @@ function ClockInCard({ record, onEdit }: ClockInCardProps) {
                         </Box>
                     </Box>
 
-                    <Button
-                        variant="contained"
-                        startIcon={<EditIcon sx={{ color: DefaultColours.white, fontSize: "20px" }} />}
-                        onClick={() => onEdit(record)}
-                        sx={styles.editButton}
-                    >
-                        <Typography sx={styles.editButtonLabel}>Edit Times</Typography>
-                    </Button>
+                    <Box sx={{ display: "flex", gap: "12px" }}>
+                        <Button
+                            variant="outlined"
+                            startIcon={<DeleteOutlineIcon sx={{ fontSize: "20px" }} />}
+                            onClick={() => onDelete(record)}
+                            sx={styles.deleteButton}
+                        >
+                            <Typography sx={styles.deleteButtonLabel}>Delete</Typography>
+                        </Button>
+                        <Button
+                            variant="contained"
+                            startIcon={<EditIcon sx={{ color: DefaultColours.white, fontSize: "20px" }} />}
+                            onClick={() => onEdit(record)}
+                            sx={styles.editButton}
+                        >
+                            <Typography sx={styles.editButtonLabel}>Edit Times</Typography>
+                        </Button>
+                    </Box>
                 </Box>
 
             </Box>
@@ -292,12 +561,15 @@ export function ClockOverridesPage() {
     const [employeeFilter, setEmployeeFilter]     = useState<string>("");
     const [sortBy, setSortBy]                     = useState<SortOption>("date-asc");
     const [showReportedOnly, setShowReportedOnly] = useState<boolean>(false);
-    const [showAll, setShowAll]                     = useState<boolean>(false);
+    const [showAll, setShowAll]                   = useState<boolean>(false);
     const [records, setRecords]                   = useState<ClockInRecord[]>([]);
     const [loading, setLoading]                   = useState(false);
     const [error, setError]                       = useState<string | null>(null);
     const [editingRecord, setEditingRecord]       = useState<ClockInRecord | null>(null);
-    const [modalOpen, setModalOpen]               = useState(false);
+    const [editModalOpen, setEditModalOpen]       = useState(false);
+    const [addModalOpen, setAddModalOpen]         = useState(false);
+    const [deletingRecord, setDeletingRecord]     = useState<ClockInRecord | null>(null);
+    const [deleteModalOpen, setDeleteModalOpen]   = useState(false);
 
     const loadRecords = useCallback(async () => {
         setLoading(true);
@@ -332,16 +604,11 @@ export function ClockOverridesPage() {
 
         result.sort((a, b) => {
             switch (sortBy) {
-                case "date-asc":
-                    return a.created.localeCompare(b.created);
-                case "date-desc":
-                    return b.created.localeCompare(a.created);
-                case "reported-first":
-                    return (b.report ? 1 : 0) - (a.report ? 1 : 0);
-                case "employee-asc":
-                    return a.employeeName.localeCompare(b.employeeName);
-                default:
-                    return 0;
+                case "date-asc":       return a.created.localeCompare(b.created);
+                case "date-desc":      return b.created.localeCompare(a.created);
+                case "reported-first": return (b.report ? 1 : 0) - (a.report ? 1 : 0);
+                case "employee-asc":   return a.employeeName.localeCompare(b.employeeName);
+                default:               return 0;
             }
         });
 
@@ -350,7 +617,12 @@ export function ClockOverridesPage() {
 
     function handleEdit(record: ClockInRecord) {
         setEditingRecord(record);
-        setModalOpen(true);
+        setEditModalOpen(true);
+    }
+
+    function handleDelete(record: ClockInRecord) {
+        setDeletingRecord(record);
+        setDeleteModalOpen(true);
     }
 
     function handleSaved(clockId: string, newIn: string | null, newOut: string | null, removeReport: boolean) {
@@ -361,6 +633,14 @@ export function ClockOverridesPage() {
                     : r
             )
         );
+    }
+
+    function handleAdded(record: ClockInRecord) {
+        setRecords((prev) => [...prev, record]);
+    }
+
+    function handleDeleted(clockId: string) {
+        setRecords((prev) => prev.filter((r) => r.clockId !== clockId));
     }
 
     const reportedCount = records.filter((r) => r.report !== null).length;
@@ -377,83 +657,94 @@ export function ClockOverridesPage() {
         <Box sx={styles.pageContainer}>
             <SectionNavBar tabs={calendarTabs} />
 
-            {/* Filters — always visible */}
-            <Box sx={styles.filtersCard}>
-                <TextField
-                    type="date"
-                    label="Date"
-                    value={selectedDate}
-                    onChange={(e) => {
-                        setSelectedDate(e.target.value);
-                        setShowAll(false);
-                    }}
-                    size="small"
-                    disabled={showAll}
-                    sx={{ ...styles.filterField, minWidth: "180px", opacity: showAll ? 0.5 : 1 }}
-                />
+            {/* Filters and add button row */}
+            <Box sx={{ display: "flex", gap: "16px", alignItems: "stretch" }}>
+                <Box sx={{ ...styles.filtersCard, flex: 1 }}>
+                    <TextField
+                        type="date"
+                        label="Date"
+                        value={selectedDate}
+                        onChange={(e) => {
+                            setSelectedDate(e.target.value);
+                            setShowAll(false);
+                        }}
+                        size="small"
+                        disabled={showAll}
+                        sx={{ ...styles.filterField, minWidth: "180px", opacity: showAll ? 0.5 : 1 }}
+                    />
 
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            checked={showAll}
-                            onChange={(e) => setShowAll(e.target.checked)}
-                            sx={{
-                                color: DefaultColours.greyIconLight,
-                                "&.Mui-checked": { color: DefaultColours.redPrimary },
-                            }}
-                        />
-                    }
-                    label={
-                        <Typography sx={{ ...styles.filterField["& .MuiInputLabel-root"], fontSize: "14px", color: DefaultColours.greyPrimaryMainText }}>
-                            Show all clock-ins
-                        </Typography>
-                    }
-                    sx={{ marginLeft: 0, whiteSpace: "nowrap" }}
-                />
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={showAll}
+                                onChange={(e) => setShowAll(e.target.checked)}
+                                sx={{
+                                    color: DefaultColours.greyIconLight,
+                                    "&.Mui-checked": { color: DefaultColours.redPrimary },
+                                }}
+                            />
+                        }
+                        label={
+                            <Typography sx={{ fontSize: "14px", ...TextStyles.regular, color: DefaultColours.greyPrimaryMainText }}>
+                                Show all clock-ins
+                            </Typography>
+                        }
+                        sx={{ marginLeft: 0, whiteSpace: "nowrap" }}
+                    />
 
-                <Box sx={styles.filterDivider} />
+                    <Box sx={styles.filterDivider} />
 
-                <TextField
-                    label="Search employee"
-                    value={employeeFilter}
-                    onChange={(e) => setEmployeeFilter(e.target.value)}
-                    size="small"
-                    placeholder="Name..."
-                    sx={{ ...styles.filterField, minWidth: "200px" }}
-                />
+                    <TextField
+                        label="Search employee"
+                        value={employeeFilter}
+                        onChange={(e) => setEmployeeFilter(e.target.value)}
+                        size="small"
+                        placeholder="Name..."
+                        sx={{ ...styles.filterField, minWidth: "200px" }}
+                    />
 
-                <Box sx={styles.filterDivider} />
+                    <Box sx={styles.filterDivider} />
 
-                <FormControl size="small" sx={filterSx}>
-                    <InputLabel>Sort by</InputLabel>
-                    <Select
-                        value={sortBy}
-                        label="Sort by"
-                        onChange={(e) => setSortBy(e.target.value as SortOption)}
-                    >
-                        <MenuItem value="date-asc">Time (earliest first)</MenuItem>
-                        <MenuItem value="date-desc">Time (latest first)</MenuItem>
-                        <MenuItem value="reported-first">Reported first</MenuItem>
-                        <MenuItem value="employee-asc">Employee (A–Z)</MenuItem>
-                    </Select>
-                </FormControl>
+                    <FormControl size="small" sx={filterSx}>
+                        <InputLabel>Sort by</InputLabel>
+                        <Select
+                            value={sortBy}
+                            label="Sort by"
+                            onChange={(e) => setSortBy(e.target.value as SortOption)}
+                        >
+                            <MenuItem value="date-asc">Time (earliest first)</MenuItem>
+                            <MenuItem value="date-desc">Time (latest first)</MenuItem>
+                            <MenuItem value="reported-first">Reported first</MenuItem>
+                            <MenuItem value="employee-asc">Employee (A–Z)</MenuItem>
+                        </Select>
+                    </FormControl>
 
-                <FormControl size="small" sx={filterSx}>
-                    <InputLabel>Show</InputLabel>
-                    <Select
-                        value={showReportedOnly ? "reported" : "all"}
-                        label="Show"
-                        onChange={(e) => setShowReportedOnly(e.target.value === "reported")}
-                    >
-                        <MenuItem value="all">All clock-ins</MenuItem>
-                        <MenuItem value="reported">Reported only</MenuItem>
-                    </Select>
-                </FormControl>
+                    <FormControl size="small" sx={filterSx}>
+                        <InputLabel>Show</InputLabel>
+                        <Select
+                            value={showReportedOnly ? "reported" : "all"}
+                            label="Show"
+                            onChange={(e) => setShowReportedOnly(e.target.value === "reported")}
+                        >
+                            <MenuItem value="all">All clock-ins</MenuItem>
+                            <MenuItem value="reported">Reported only</MenuItem>
+                        </Select>
+                    </FormControl>
 
-                <Typography sx={styles.resultSummary}>
-                    {filteredAndSorted.length} result{filteredAndSorted.length !== 1 ? "s" : ""}
-                    {reportedCount > 0 && ` · ${reportedCount} reported`}
-                </Typography>
+                    <Typography sx={styles.resultSummary}>
+                        {filteredAndSorted.length} result{filteredAndSorted.length !== 1 ? "s" : ""}
+                        {reportedCount > 0 && ` · ${reportedCount} reported`}
+                    </Typography>
+                </Box>
+
+                <Button
+                    variant="contained"
+                    startIcon={<AddIcon sx={{ color: DefaultColours.white }} />}
+                    onClick={() => setAddModalOpen(true)}
+                    sx={styles.addButton}
+                >
+                    <Typography sx={styles.addButtonLabel}>Add Clock-in</Typography>
+                </Button>
             </Box>
 
             {loading && (
@@ -485,14 +776,29 @@ export function ClockOverridesPage() {
                     key={record.clockId}
                     record={record}
                     onEdit={handleEdit}
+                    onDelete={handleDelete}
                 />
             ))}
 
             <EditClockInModal
                 record={editingRecord}
-                open={modalOpen}
-                onClose={() => setModalOpen(false)}
+                open={editModalOpen}
+                onClose={() => setEditModalOpen(false)}
                 onSaved={handleSaved}
+            />
+
+            <AddClockInModal
+                open={addModalOpen}
+                defaultDate={selectedDate}
+                onClose={() => setAddModalOpen(false)}
+                onAdded={handleAdded}
+            />
+
+            <DeleteConfirmModal
+                record={deletingRecord}
+                open={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onDeleted={handleDeleted}
             />
         </Box>
     );

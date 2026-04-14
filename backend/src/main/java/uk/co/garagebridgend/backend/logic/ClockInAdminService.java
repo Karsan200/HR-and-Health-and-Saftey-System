@@ -3,11 +3,14 @@ package uk.co.garagebridgend.backend.logic;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.ClockInReportTable;
 import uk.co.garagebridgend.backend.models.entity.ClockInTable;
+import uk.co.garagebridgend.backend.models.request.ClockInCreateRequest;
 import uk.co.garagebridgend.backend.models.request.ClockInOverrideRequest;
 import uk.co.garagebridgend.backend.models.response.ClockInAdminResponse;
 import uk.co.garagebridgend.backend.repository.ClockInReportRepository;
+import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.ClockInRepository;
 
 import java.time.LocalDate;
@@ -30,6 +33,9 @@ public class ClockInAdminService {
 
     /** Repository for accessing clock-in issue reports. */
     private final ClockInReportRepository clockInReportRepository;
+
+    /** Repository for looking up employee accounts when creating manual records. */
+    private final AccountRepository accountRepository;
 
     /**
      * Returns all clock-in records for the given date across all employees,
@@ -90,6 +96,48 @@ public class ClockInAdminService {
                         uk.co.garagebridgend.backend.models.entity.ClockInTable::getCreated))
                 .map(this::toAdminResponse)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Creates a new clock-in record for a specific employee on a given date.
+     * The record is created with the supplied times; either may be null.
+     *
+     * @param request the details of the clock-in record to create
+     * @throws IllegalArgumentException if no account exists for the given accountId
+     */
+    @Transactional
+    public void createClockIn(final ClockInCreateRequest request) {
+        AccountTable account = accountRepository.findById(request.accountId())
+                .orElseThrow(() -> new IllegalArgumentException("Account not found."));
+
+        ClockInTable record = new ClockInTable();
+        record.setAccount(account);
+        record.setClockInTime(request.clockInTime());
+        record.setClockOutTime(request.clockOutTime());
+
+        // Set the created timestamp to the start of the requested date so the
+        // record is discoverable by the findAllForDate query
+        record.setCreated(request.date().atStartOfDay());
+
+        clockInRepository.save(record);
+    }
+
+    /**
+     * Permanently deletes a clock-in record and any associated report.
+     * The report is deleted first to avoid a foreign key constraint violation.
+     *
+     * @param clockId the UUID of the clock-in record to delete
+     * @throws IllegalArgumentException if no record exists for the given ID
+     */
+    @Transactional
+    public void deleteClockIn(final UUID clockId) {
+        ClockInTable record = clockInRepository.findById(clockId)
+                .orElseThrow(() -> new IllegalArgumentException("Clock-in record not found."));
+
+        clockInReportRepository.findMostRecentByClockIn(record)
+                .ifPresent(clockInReportRepository::delete);
+
+        clockInRepository.delete(record);
     }
 
     /**
