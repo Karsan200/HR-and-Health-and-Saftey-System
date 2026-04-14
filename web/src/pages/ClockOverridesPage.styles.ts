@@ -221,6 +221,7 @@ export const clockOverridesPageStyles = {
         backgroundColor: DefaultColours.amberBackgroundLight,
         borderRadius: `${BorderRadius.mediumNotification}px`,
         border: `1px solid ${DefaultColours.amberPrimary}`,
+        alignSelf: "flex-start",
     },
 
     reportIssueLabel: {

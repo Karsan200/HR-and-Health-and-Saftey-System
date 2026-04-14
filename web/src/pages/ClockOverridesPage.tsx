@@ -154,8 +154,6 @@ function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
                             size="small"
                             fullWidth
                             sx={styles.timeTextField}
-                            inputProps={{ step: 60 }}
-                            InputLabelProps={{ shrink: true }}
                         />
                     </Box>
 
@@ -169,8 +167,6 @@ function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
                             size="small"
                             fullWidth
                             sx={styles.timeTextField}
-                            inputProps={{ step: 60 }}
-                            InputLabelProps={{ shrink: true }}
                         />
                     </Box>
                 </Box>
@@ -234,15 +230,15 @@ function ClockInCard({ record, onEdit }: ClockInCardProps) {
                         <Typography sx={styles.employeeName}>
                             {record.employeeName}
                         </Typography>
+                        <Typography sx={styles.metaText}>
+                            Recorded on {createdDate}
+                        </Typography>
                         {hasReport && (
                             <Box sx={styles.reportBadge}>
                                 <WarningAmberOutlined sx={{ fontSize: "18px", color: DefaultColours.amberTextDark }} />
                                 <Typography sx={styles.reportBadgeText}>Reported</Typography>
                             </Box>
                         )}
-                        <Typography sx={styles.metaText}>
-                            Recorded on {createdDate}
-                        </Typography>
                     </Box>
                 </Box>
 
@@ -394,7 +390,6 @@ export function ClockOverridesPage() {
                     size="small"
                     disabled={showAll}
                     sx={{ ...styles.filterField, minWidth: "180px", opacity: showAll ? 0.5 : 1 }}
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 <FormControlLabel
@@ -425,7 +420,6 @@ export function ClockOverridesPage() {
                     size="small"
                     placeholder="Name..."
                     sx={{ ...styles.filterField, minWidth: "200px" }}
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 <Box sx={styles.filterDivider} />
