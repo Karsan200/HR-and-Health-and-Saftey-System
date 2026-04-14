@@ -169,9 +169,9 @@ def scan():
 
     try:
         with open(filepath, "w") as f:
-            f.write("uuid,rssi\n")
+            f.write("uuid,rssi")
             for uuid, rssi in sorted_devices:
-                f.write("{},{}\n".format(uuid, rssi))
+                f.write("\n{},{}".format(uuid, rssi))
 
         print("scan: wrote {} device(s) to {}".format(len(sorted_devices), filepath))
 

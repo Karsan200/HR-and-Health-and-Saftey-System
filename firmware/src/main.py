@@ -31,19 +31,23 @@ if "config.json" not in os.listdir():
 with open("config.json") as f:
     settings = ujson.load(f)
 
-
 # Start the uploading process
-def upload_loop():
+def upload_loop(interval: int):
     while True:
         upload()
 
-        time.sleep(settings["upload_interval"])
+        time.sleep(interval)
 
+def scan_loop(interval: int):
+    while True:
+        scan()
 
-_thread.start_new_thread(upload_loop, ())
+        time.sleep(interval)
+
+# Start the uploading thread
+print("Uploading Thread Started")
+_thread.start_new_thread(upload_loop, (settings["upload_interval"],))
 
 # Main thread continues with BLE scanning
-while True:
-    scan()
-
-    time.sleep(settings["scanning_interval"])
+print("Scanning Thread Started")
+scan_loop(settings["scanning_interval"])
