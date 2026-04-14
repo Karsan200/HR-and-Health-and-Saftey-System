@@ -577,4 +577,169 @@ export const employeeOverviewStyles = {
         color: DefaultColours.greyPrimaryMainText,
         lineHeight: 1.3,
     },
+
+    addEmployeeFormCard: {
+        paddingTop: 2.5,
+        paddingLeft: 2.5,
+        paddingRight: 2.5,
+        paddingBottom: 2.5,
+        border: cardBorder,
+        borderRadius: BorderRadius.largeButtonsAndOutlines / 2,
+        backgroundColor: DefaultColours.white,
+        minHeight: panelMinHeight,
+        height: sidePanelHeight,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        gap: 2,
+    },
+
+    addEmployeeFormScroll: {
+        flex: 1,
+        minHeight: 0,
+        overflowY: "auto",
+        paddingRight: 0.5,
+    },
+
+    addEmployeeSection: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.5,
+        marginBottom: 3,
+    },
+
+    addEmployeeSectionTitle: {
+        fontSize: FontSize.xl32,
+        fontFamily: TextStyles.medium.fontFamily,
+        fontWeight: TextStyles.medium.fontWeight,
+        color: DefaultColours.black,
+        lineHeight: 1.2,
+        marginBottom: 0.5,
+    },
+
+    addEmployeeFieldGridTwo: {
+        display: "grid",
+        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+        gap: 1.5,
+    },
+
+    addEmployeeFieldGridOne: {
+        display: "grid",
+        gridTemplateColumns: "minmax(0, 1fr)",
+        gap: 1.5,
+    },
+
+    addEmployeeTextField: {
+        "& .MuiOutlinedInput-root": {
+            borderRadius: BorderRadius.mediumNotification / 2,
+            backgroundColor: DefaultColours.white,
+            minHeight: inputMinHeight + 6,
+        },
+        "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: subtleFieldBorder,
+        },
+        "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: DefaultColours.greyPrimaryMainText,
+        },
+        "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: DefaultColours.redPrimary,
+        },
+        "& .MuiInputBase-input": {
+            fontSize: FontSize.s16,
+            fontFamily: TextStyles.regular.fontFamily,
+            fontWeight: TextStyles.regular.fontWeight,
+            color: DefaultColours.black,
+        },
+        "& .MuiInputBase-input::placeholder": {
+            color: DefaultColours.greyPrimaryMainText,
+            opacity: 1,
+        },
+    },
+
+    addEmployeeSelect: {
+        "& .MuiOutlinedInput-root": {
+            borderRadius: BorderRadius.mediumNotification / 2,
+            backgroundColor: DefaultColours.white,
+            minHeight: selectMinHeight + 6,
+        },
+        "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: subtleFieldBorder,
+        },
+        "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: DefaultColours.greyPrimaryMainText,
+        },
+        "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: DefaultColours.redPrimary,
+        },
+        "& .MuiSelect-select": {
+            fontSize: FontSize.s16,
+            fontFamily: TextStyles.regular.fontFamily,
+            fontWeight: TextStyles.regular.fontWeight,
+            color: DefaultColours.black,
+        },
+    },
+
+    addEmployeeButtonRow: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: 1.5,
+        marginTop: "auto",
+        paddingTop: 1,
+    },
+
+    addEmployeeCancelButton: {
+        minHeight: 56,
+        borderRadius: BorderRadius.largeButtonsAndOutlines / 2,
+        textTransform: "none" as const,
+        fontSize: FontSize.m20,
+        fontFamily: TextStyles.medium.fontFamily,
+        fontWeight: TextStyles.medium.fontWeight,
+        color: DefaultColours.black,
+        borderColor: DefaultColours.greyIconLight,
+        paddingLeft: 3,
+        paddingRight: 3,
+        flex: 1,
+    },
+
+    addEmployeeSubmitButton: {
+        minHeight: 56,
+        borderRadius: BorderRadius.largeButtonsAndOutlines / 2,
+        backgroundColor: DefaultColours.redPrimary,
+        color: DefaultColours.white,
+        textTransform: "none" as const,
+        fontSize: FontSize.m20,
+        fontFamily: TextStyles.medium.fontFamily,
+        fontWeight: TextStyles.medium.fontWeight,
+        paddingLeft: 3,
+        paddingRight: 3,
+        flex: 2,
+        boxShadow: "none",
+        "&:hover": {
+            backgroundColor: DefaultColours.redTextDark,
+            boxShadow: "none",
+        },
+        "&.Mui-disabled": {
+            backgroundColor: DefaultColours.greyIconLight,
+            color: DefaultColours.white,
+        },
+    },
+
+    addEmployeeHelperText: {
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular.fontFamily,
+        fontWeight: TextStyles.regular.fontWeight,
+        color: DefaultColours.greyPrimaryMainText,
+        lineHeight: 1.3,
+        marginTop: -0.5,
+    },
+
+    addEmployeeSuccessText: {
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular.fontFamily,
+        fontWeight: TextStyles.regular.fontWeight,
+        color: DefaultColours.greenPrimary,
+        lineHeight: 1.3,
+        marginBottom: 0.5,
+    },
 } as const;
