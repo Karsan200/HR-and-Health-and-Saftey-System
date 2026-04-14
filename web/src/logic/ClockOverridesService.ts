@@ -54,6 +54,29 @@ export async function fetchClockInsForDate(
 }
 
 /**
+ * Fetches all clock-in records across all employees and all dates.
+ * Used when the admin enables the "show all" toggle on the overrides page.
+ *
+ * @param authService the authentication service used to make the request
+ */
+export async function fetchAllClockIns(
+    authService: AuthenticationService,
+): Promise<ClockInRecord[]> {
+    const response = await authService.fetch("/api/admin/clock-ins/all", {
+        method: "GET",
+        credentials: "include",
+    });
+
+    if (!response.ok) {
+        const body = await response.text();
+        console.error(`Clock-in fetch failed — status: ${response.status}, body: ${body}`);
+        throw new Error(`Failed to fetch clock-ins: ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
  * Submits an admin override for a specific clock-in record,
  * replacing the existing times with the values provided.
  *

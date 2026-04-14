@@ -60,6 +60,25 @@ public class ClockInAdminController {
     }
 
     /**
+     * Returns all clock-in records across all employees and all dates.
+     * Used when the admin enables the "show all" toggle on the overrides page.
+     *
+     * @return a list of all clock-in records
+     */
+    @GetMapping("/clock-ins/all")
+    public List<ClockInAdminResponse> getAllClockIns() {
+        try {
+            return clockInAdminService.getAllClockIns();
+        } catch (Exception e) {
+            LOG.error("Error retrieving all admin clock-ins", e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal server error."
+            );
+        }
+    }
+
+    /**
      * Applies an admin override to a specific clock-in record, replacing
      * the existing times with those supplied in the request body.
      *

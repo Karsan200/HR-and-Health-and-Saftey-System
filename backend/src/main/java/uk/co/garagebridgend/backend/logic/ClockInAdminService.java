@@ -70,6 +70,22 @@ public class ClockInAdminService {
     }
 
     /**
+     * Returns all clock-in records across all employees and all dates,
+     * with any associated employee report attached to each record.
+     * Used when the admin selects "Show all clock-ins" on the overrides page.
+     *
+     * @return all clock-in records ordered by creation time ascending
+     */
+    public List<ClockInAdminResponse> getAllClockIns() {
+        return clockInRepository.findAll()
+                .stream()
+                .sorted(java.util.Comparator.comparing(
+                        uk.co.garagebridgend.backend.models.entity.ClockInTable::getCreated))
+                .map(this::toAdminResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Maps a {@link ClockInTable} entity to a {@link ClockInAdminResponse},
      * attaching the most recent report for that record if one exists.
      *

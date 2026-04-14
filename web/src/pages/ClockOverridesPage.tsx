@@ -11,6 +11,8 @@ import {
     Select,
     InputLabel,
     FormControl,
+    Checkbox,
+    FormControlLabel,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/EditOutlined";
 import CloseIcon from "@mui/icons-material/Close";
@@ -21,6 +23,7 @@ import { SectionNavBar, type SectionNavTab } from "../components/SectionNavbar";
 import { useAuth } from "../AuthContext";
 import {
     fetchClockInsForDate,
+    fetchAllClockIns,
     submitClockOverride,
     formatTime,
     formatDateHeading,
@@ -263,6 +266,7 @@ export function ClockOverridesPage() {
     const [employeeFilter, setEmployeeFilter]     = useState<string>("");
     const [sortBy, setSortBy]                     = useState<SortOption>("date-asc");
     const [showReportedOnly, setShowReportedOnly] = useState<boolean>(false);
+    const [showAll, setShowAll]                     = useState<boolean>(false);
     const [records, setRecords]                   = useState<ClockInRecord[]>([]);
     const [loading, setLoading]                   = useState(false);
     const [error, setError]                       = useState<string | null>(null);
@@ -273,14 +277,16 @@ export function ClockOverridesPage() {
         setLoading(true);
         setError(null);
         try {
-            const data = await fetchClockInsForDate(selectedDate, authenticationService);
+            const data = showAll
+                ? await fetchAllClockIns(authenticationService)
+                : await fetchClockInsForDate(selectedDate, authenticationService);
             setRecords(data);
         } catch {
             setError("Failed to load clock-in records. Please try again.");
         } finally {
             setLoading(false);
         }
-    }, [selectedDate, authenticationService]);
+    }, [selectedDate, showAll, authenticationService]);
 
     useEffect(() => {
         void loadRecords();
@@ -351,9 +357,33 @@ export function ClockOverridesPage() {
                     type="date"
                     label="Date"
                     value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
+                    onChange={(e) => {
+                        setSelectedDate(e.target.value);
+                        setShowAll(false);
+                    }}
                     size="small"
-                    sx={{ ...styles.filterField, minWidth: "180px" }}
+                    disabled={showAll}
+                    sx={{ ...styles.filterField, minWidth: "180px", opacity: showAll ? 0.5 : 1 }}
+                    InputLabelProps={{ shrink: true }}
+                />
+
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={showAll}
+                            onChange={(e) => setShowAll(e.target.checked)}
+                            sx={{
+                                color: DefaultColours.greyIconLight,
+                                "&.Mui-checked": { color: DefaultColours.redPrimary },
+                            }}
+                        />
+                    }
+                    label={
+                        <Typography sx={{ ...styles.filterField["& .MuiInputLabel-root"], fontSize: "14px", color: DefaultColours.greyPrimaryMainText }}>
+                            Show all clock-ins
+                        </Typography>
+                    }
+                    sx={{ marginLeft: 0, whiteSpace: "nowrap" }}
                 />
 
                 <Box sx={styles.filterDivider} />
