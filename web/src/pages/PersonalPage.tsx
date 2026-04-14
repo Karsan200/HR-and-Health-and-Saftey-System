@@ -158,14 +158,15 @@ function SettingsTab({ settings }: { settings: SettingsResponse }) {
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Box>
-                <Typography>Notification Settings</Typography>
+            <Box sx={styles.settingsCard}>
+                <Typography sx={styles.settingsTitle}>Notification Settings</Typography>
 
-                <Typography>
+                {/* Quiet time label */}
+                <Typography sx={styles.quietTimeLabel}>
                     NOTIFICATION QUIET TIME
                 </Typography>
 
-                <Box>
+                <Box sx={styles.quietTimeRow}>
                     <Box
                         onClick={() => setEditing("start")}
                         sx={{ cursor: "pointer", display: "flex", alignItems: "flex-end", gap: "4px" }}
@@ -192,7 +193,7 @@ function SettingsTab({ settings }: { settings: SettingsResponse }) {
                         </Typography>
                     </Box>
 
-                    <Typography>→</Typography>
+                    <Typography sx={styles.quietTimeArrow}>→</Typography>
 
                     <Box
                         onClick={() => setEditing("end")}
@@ -246,11 +247,12 @@ function SettingsTab({ settings }: { settings: SettingsResponse }) {
                     }}
                 />
 
-                <Box>
+                <Box sx={styles.settingsButtonRow}>
                     <Box
                         component="button"
                         onClick={handleCancel}
                         disabled={submitting}
+                        sx={styles.settingsCancelButton}
                     >
                         CANCEL
                     </Box>
@@ -258,19 +260,20 @@ function SettingsTab({ settings }: { settings: SettingsResponse }) {
                         component="button"
                         onClick={handleOk}
                         disabled={submitting}
+                        sx={styles.settingsOkButton}
                     >
                         {submitting ? "SAVING..." : "OK"}
                     </Box>
                 </Box>
 
                 {success && (
-                    <Typography>
+                    <Typography sx={styles.settingsSuccessText}>
                         Notification settings saved.
                     </Typography>
                 )}
 
                 {error && (
-                    <Typography>
+                    <Typography sx={styles.settingsErrorText}>
                         {error}
                     </Typography>
                 )}

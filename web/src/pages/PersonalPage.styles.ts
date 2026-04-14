@@ -277,4 +277,93 @@ export const personalPageStyles = {
         textAlign: "right" as const,
         marginTop: "8px",
     },
+
+    // Settings tab
+    settingsCard: {
+        background: DefaultColours.white,
+        border: `0.5px solid ${DefaultColours.greyBackground}`,
+        borderRadius: "12px",
+        padding: "1.25rem",
+        marginBottom: "1rem",
+    },
+
+    settingsTitle: {
+        fontSize: FontSize.xs14,
+        TextStyles: TextStyles.bold,
+        color: DefaultColours.black,
+        marginBottom: "1.25rem",
+    },
+
+    quietTimeLabel: {
+        fontSize: FontSize.xs14,
+        TextStyles: TextStyles.regular,
+        letterSpacing: "0.08em",
+        color: DefaultColours.greyPrimaryMainText,
+        marginBottom: "0.5rem",
+    },
+
+    quietTimeRow: {
+        display: "flex",
+        alignItems: "center",
+        gap: "1rem",
+        marginBottom: "1.5rem",
+    },
+
+    quietTimeArrow: {
+        fontSize: FontSize.l24,
+        color: DefaultColours.greyPrimaryMainText,
+    },
+
+    settingsButtonRow: {
+        display: "flex",
+        justifyContent: "flex-end",
+        gap: "12px",
+        marginTop: "1rem",
+    },
+
+    settingsCancelButton: {
+        background: "transparent",
+        color: DefaultColours.redPrimary,
+        border: "none",
+        borderRadius: BorderRadius.smallTextBackground,
+        padding: "10px 16px",
+        fontSize: FontSize.xs14,
+        TextStyles: TextStyles.regular,
+        cursor: "pointer",
+        fontFamily: "inherit",
+        letterSpacing: "0.05em",
+        "&:hover": {
+            background: DefaultColours.redTextDark,
+        },
+    },
+
+    settingsOkButton: {
+        background: "transparent",
+        color: DefaultColours.redPrimary,
+        border: "none",
+        borderRadius: BorderRadius.smallTextBackground,
+        padding: "10px 16px",
+        fontSize: FontSize.s16,
+        TextStyles: TextStyles.regular,
+        cursor: "pointer",
+        fontFamily: "inherit",
+        letterSpacing: "0.05em",
+        "&:hover": {
+            background: DefaultColours.redTextDark,
+        },
+    },
+
+    settingsSuccessText: {
+        fontSize: FontSize.xs14,
+        color: DefaultColours.greenPrimary,
+        textAlign: "right" as const,
+        marginTop: "8px",
+    },
+
+    settingsErrorText: {
+        fontSize: FontSize.xs14,
+        color: DefaultColours.redPrimary,
+        textAlign: "right" as const,
+        marginTop: "8px",
+    },
 };
