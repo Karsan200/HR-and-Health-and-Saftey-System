@@ -12,6 +12,9 @@ if "cache" not in os.listdir():
 
 # Check if the config file exists, if not create it
 if "config.json" not in os.listdir():
+
+    # TODO: In future this should start a network a user can join to initially flash the device with device_id,api_key,ssid,password
+
     with open("config.json", "w") as f:
         f.write("""
 {
@@ -30,6 +33,8 @@ if "config.json" not in os.listdir():
 # Load the config
 with open("config.json") as f:
     settings = ujson.load(f)
+
+# TODO: In future this should attempt to load the network connection and set the RTC on the pico
 
 # Start the uploading process
 def upload_loop(interval: int):

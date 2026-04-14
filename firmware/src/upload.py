@@ -17,14 +17,17 @@ def convert_timestamp(s):
 
     return "{}-{}-{}T{}:{}:{}".format(yyyy, mm, dd, hh, mi, ss)
 
+
 def upload():
+    # Load the config
+    with open("config.json") as f:
+        settings = ujson.load(f)
+
     # Load the internet connection
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
 
-    # Load the config
-    with open("config.json") as f:
-        settings = ujson.load(f)
+    # TODO: In future this should load the actual SSID and password from the config
 
     for item in os.listdir("/cache"):
         item = item.replace(".csv", "")
