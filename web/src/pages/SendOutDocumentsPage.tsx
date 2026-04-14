@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {
     Box,
     Button,
@@ -22,6 +22,7 @@ import {
 } from "../logic/SendOutDocumentsService";
 import { sendOutDocumentsStyles as styles, getDropZoneStyle } from "./SendOutDocumentsPage.styles";
 import { SectionNavBar} from "../components/SectionNavbar";
+import {type EmployeeListItemResponse, getEmployees} from "../logic/EmployeeOverviewService.ts";
 
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -41,6 +42,8 @@ export function SendOutDocumentsPage() {
     const [formState, setFormState] = useState<FormState>("idle");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isDragOver, setIsDragOver] = useState(false);
+    const [employees, setEmployees] = useState<EmployeeListItemResponse[]>([]);
+    const [selectedEmployees, setSelectedEmployees] = useState<number[]>([]);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -89,6 +92,12 @@ export function SendOutDocumentsPage() {
     const handleCategoryChange = (e: SelectChangeEvent) => {
         setCategory(e.target.value as DocumentCategory);
     };
+
+    useEffect(() => {
+        getEmployees(authenticationService, "")
+            .then((res) => setEmployees(res ?? []))
+            .catch(() => setEmployees([]));
+    }, [authenticationService]);
 
     const handleSubmit = async () => {
         setErrorMessage(null);
@@ -193,7 +202,7 @@ export function SendOutDocumentsPage() {
                 </FormControl>
 
                 {/* Send to */}
-                <FormControl disabled={isSubmitting}>
+                <FormControl fullWidth disabled={isSubmitting}>
                     <InputLabel>Send to</InputLabel>
                     <Select
                         value={sendTo}
@@ -201,10 +210,38 @@ export function SendOutDocumentsPage() {
                         onChange={(e) => setSendTo(e.target.value)}
                     >
                         <MenuItem value="everyone">Everyone</MenuItem>
-                        <MenuItem value="managers">Managers</MenuItem>
                         <MenuItem value="specific">Specific Employees</MenuItem>
                     </Select>
                 </FormControl>
+
+                {sendTo === "specific" && (
+                    <FormControl fullWidth>
+                        <InputLabel>Select Employees</InputLabel>
+                        <Select
+                            multiple
+                            value={selectedEmployees}
+                            label="Select Employees"
+                            renderValue={(selected) =>
+                                employees
+                                    .filter((e) => selected.includes(e.accountId))
+                                    .map((e) => e.fullName)
+                                    .join(", ")
+                            }
+                            onChange={(e) =>
+                                setSelectedEmployees(e.target.value as number[])
+                            }
+                        >
+                            {employees.map((employee) => (
+                                <MenuItem key={employee.accountId} value={employee.accountId}>
+                                    <Checkbox
+                                        checked={selectedEmployees.includes(employee.accountId)}
+                                    />
+                                    {employee.fullName}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                )}
 
                 {/* Require signature */}
                 <FormControlLabel
