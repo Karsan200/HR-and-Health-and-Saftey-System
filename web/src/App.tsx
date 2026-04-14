@@ -64,10 +64,9 @@ function AppContent() {
                     <Route path="/employee/overview" element={<EmployeeOverview />} />
                     <Route path="/health-and-safety" element={<></>} />
                     <Route path="/notifications" element={<></>} />
-                    <Route path="/health-and-safety/send-out" element={<></>} />
                     <Route path="/health-and-safety/send-out/safety-alert" element={<></>} />
                     <Route path="calendar/requests" element={<PendingRequestsPage />} />
-                    <Route path="documents/send-out" element={<SendOutDocumentsPage />} />
+                    <Route path="/health-and-safety/send-out" element={<SendOutDocumentsPage />} />
                 </Routes>
             </BrowserRouter>
         </>
