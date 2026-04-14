@@ -99,7 +99,7 @@ public class DocumentService {
         switch (request.getCategory()) {
             case "sop" -> {
                 if (!title.toUpperCase().startsWith("SOP")) {
-                    title = "SOP " + title;
+                    title = "SOP: " + title;
                 }
             }
             case "handbook" -> {
