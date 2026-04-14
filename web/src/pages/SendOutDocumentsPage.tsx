@@ -97,6 +97,7 @@ export function SendOutDocumentsPage() {
         if (newCategory === "handbook") {
             setSendTo("everyone");
             setSelectedEmployees([]);
+            setRequireSignature(false);
         }
     };
 
@@ -163,7 +164,7 @@ export function SendOutDocumentsPage() {
             {/* Tab navigation */}
             <SectionNavBar
                 tabs={[
-                    { label: "Upload and Send Documents", route: "/documents/send-out" },
+                    { label: "Upload and Send Documents", route: "/health-and-safety/send-out" },
                     { label: "Review Submissions", route: "/documents/review" },
                 ]}
             />
@@ -257,7 +258,7 @@ export function SendOutDocumentsPage() {
                         <Checkbox
                             checked={requireSignature}
                             onChange={(e) => setRequireSignature(e.target.checked)}
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || category === "handbook"}
                         />
                     }
                     label="Require Signature"
