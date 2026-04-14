@@ -203,8 +203,39 @@ export async function createEmployee(
     });
 
     if (!response.ok) {
-        const message = await response.text();
-        throw new Error(message || "Failed to create employee");
+        let message = "";
+
+        try {
+            const contentType = response.headers.get("content-type") ?? "";
+
+            if (contentType.includes("application/json")) {
+                const data = await response.json();
+
+                if (typeof data?.message === "string") {
+                    message = data.message.trim();
+                } else if (typeof data === "string") {
+                    message = data.trim();
+                }
+            } else {
+                message = (await response.text()).trim();
+            }
+        } catch {
+            message = "";
+        }
+
+        if (message !== "") {
+            throw new Error(message);
+        }
+
+        if (response.status === 400) {
+            throw new Error("Please check the employee details and try again.");
+        }
+
+        if (response.status === 403) {
+            throw new Error("You do not have permission to create this employee.");
+        }
+
+        throw new Error("Failed to create employee.");
     }
 
     return response.json();

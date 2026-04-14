@@ -257,8 +257,8 @@ export function EmployeeOverview() {
             let message = "Failed to create employee.";
 
             if (error instanceof Error) {
-                message = error.message;
-                if (!message || message.trim() === "") {
+                message = error.message.trim();
+                if (message === "") {
                     message = "Something went wrong while creating the employee.";
                 }
             }
@@ -279,13 +279,15 @@ export function EmployeeOverview() {
             (field === "username" && msg.includes("username")) ||
             (field === "password" && msg.includes("password")) ||
             (field === "phone" && msg.includes("phone")) ||
-            (field === "postalCode" && msg.includes("postal")) ||
+            (field === "postalCode" && (msg.includes("postal") || msg.includes("postcode"))) ||
             (field === "firstName" && msg.includes("first")) ||
             (field === "surname" && msg.includes("surname")) ||
             (field === "addressOne" && msg.includes("address")) ||
             (field === "position" && msg.includes("position"))
         );
     };
+
+    const showCreateError = createError !== null && createError.trim() !== "";
 
     return (
         <Box sx={styles.pageContainer}>
@@ -529,13 +531,9 @@ export function EmployeeOverview() {
                                             sx={styles.addEmployeeTextField}
                                         />
                                     </Box>
-
-                                    <Typography sx={styles.addEmployeeHelperText}>
-                                        Please complete all required sections.
-                                    </Typography>
                                 </Box>
 
-                                {createError !== null && (
+                                {showCreateError && (
                                     <Typography
                                         sx={{
                                             ...styles.errorText,

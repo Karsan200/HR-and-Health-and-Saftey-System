@@ -564,9 +564,9 @@ export const employeeOverviewStyles = {
     errorText: {
         fontSize: FontSize.s16,
         fontFamily: TextStyles.regular.fontFamily,
-        fontWeight: TextStyles.regular.fontWeight,
+        fontWeight: TextStyles.medium.fontWeight,
         color: DefaultColours.redPrimary,
-        lineHeight: 1.3,
+        lineHeight: 1.4,
         marginBottom: 1,
     },
 
@@ -644,6 +644,13 @@ export const employeeOverviewStyles = {
         "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
             borderColor: DefaultColours.redPrimary,
         },
+        "& .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline": {
+            borderColor: DefaultColours.redPrimary,
+            borderWidth: "1.5px",
+        },
+        "& .MuiOutlinedInput-root.Mui-error": {
+            backgroundColor: `${DefaultColours.redTrafficBackgroundLight}55`,
+        },
         "& .MuiInputBase-input": {
             fontSize: FontSize.s16,
             fontFamily: TextStyles.regular.fontFamily,
@@ -657,6 +664,7 @@ export const employeeOverviewStyles = {
     },
 
     addEmployeeSelect: {
+        borderRadius: BorderRadius.mediumNotification / 2,
         "& .MuiOutlinedInput-root": {
             borderRadius: BorderRadius.mediumNotification / 2,
             backgroundColor: DefaultColours.white,
@@ -671,6 +679,13 @@ export const employeeOverviewStyles = {
         "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
             borderColor: DefaultColours.redPrimary,
         },
+        "& .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline": {
+            borderColor: DefaultColours.redPrimary,
+            borderWidth: "1.5px",
+        },
+        "& .MuiOutlinedInput-root.Mui-error": {
+            backgroundColor: `${DefaultColours.redTrafficBackgroundLight}55`,
+        },
         "& .MuiSelect-select": {
             fontSize: FontSize.s16,
             fontFamily: TextStyles.regular.fontFamily,
@@ -684,13 +699,13 @@ export const employeeOverviewStyles = {
         justifyContent: "space-between",
         alignItems: "center",
         gap: 1.5,
-        marginTop: "auto",
+        marginTop: 2,
         paddingTop: 1,
     },
 
     addEmployeeCancelButton: {
         minHeight: 56,
-        borderRadius: BorderRadius.largeButtonsAndOutlines / 2,
+        borderRadius: BorderRadius.largeButtonsAndOutlines / 4,
         textTransform: "none" as const,
         fontSize: FontSize.m20,
         fontFamily: TextStyles.medium.fontFamily,
@@ -704,7 +719,7 @@ export const employeeOverviewStyles = {
 
     addEmployeeSubmitButton: {
         minHeight: 56,
-        borderRadius: BorderRadius.largeButtonsAndOutlines / 2,
+        borderRadius: BorderRadius.largeButtonsAndOutlines / 4,
         backgroundColor: DefaultColours.redPrimary,
         color: DefaultColours.white,
         textTransform: "none" as const,
