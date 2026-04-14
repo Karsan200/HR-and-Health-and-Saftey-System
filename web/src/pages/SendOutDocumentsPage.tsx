@@ -3,19 +3,25 @@ import {
     Box,
     Button,
     Checkbox,
+    FormControl,
     FormControlLabel,
+    InputLabel,
     MenuItem,
     Select,
     TextField,
     Typography,
     type SelectChangeEvent,
 } from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
+import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
 import { useAuth } from "../AuthContext";
 import {
     sendOutDocument,
     stripPdfExtension,
     type DocumentCategory,
 } from "../logic/SendOutDocumentsService";
+import { sendOutDocumentsStyles as styles, getDropZoneStyle } from "./SendOutDocumentsPage.styles";
+import { SectionNavBar} from "../components/SectionNavbar";
 
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -26,8 +32,10 @@ export function SendOutDocumentsPage() {
     const { authenticationService } = useAuth();
 
     const [title, setTitle] = useState("");
+    const [version, setVersion] = useState("");
     const [category, setCategory] = useState<DocumentCategory>("policy");
-    const [requireSignature, setRequireSignature] = useState(false);
+    const [sendTo, setSendTo] = useState("everyone");
+    const [requireSignature, setRequireSignature] = useState(true);
     const [file, setFile] = useState<File | null>(null);
     const [fileError, setFileError] = useState<string | null>(null);
     const [formState, setFormState] = useState<FormState>("idle");
@@ -36,29 +44,24 @@ export function SendOutDocumentsPage() {
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const validateAndSetFile = useCallback(
-        (candidate: File) => {
-            setFileError(null);
+    const validateAndSetFile = useCallback((candidate: File) => {
+        setFileError(null);
 
-            if (!candidate.name.toLowerCase().endsWith(".pdf")) {
-                setFileError("Only PDF files are accepted.");
-                return;
-            }
+        if (!candidate.name.toLowerCase().endsWith(".pdf")) {
+            setFileError("Only PDF files are accepted.");
+            return;
+        }
 
-            if (candidate.size > MAX_FILE_SIZE_BYTES) {
-                setFileError(`File must be under ${MAX_FILE_SIZE_MB} MB.`);
-                return;
-            }
+        if (candidate.size > MAX_FILE_SIZE_BYTES) {
+            setFileError(`File must be under ${MAX_FILE_SIZE_MB} MB.`);
+            return;
+        }
 
-            setFile(candidate);
-
-            // Pre-fill the title from the filename if the user hasn't typed one yet
-            setTitle((current) =>
-                current.trim() ? current : stripPdfExtension(candidate.name)
-            );
-        },
-        []
-    );
+        setFile(candidate);
+        setTitle((current) =>
+            current.trim() ? current : stripPdfExtension(candidate.name)
+        );
+    }, []);
 
     const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const picked = e.target.files?.[0];
@@ -101,7 +104,6 @@ export function SendOutDocumentsPage() {
             return;
         }
 
-        // Mirror the handbook validation so the user gets feedback before the network call
         if (
             category === "handbook" &&
             !trimmedTitle.toLowerCase().includes("handbook")
@@ -122,8 +124,10 @@ export function SendOutDocumentsPage() {
 
             setFormState("success");
             setTitle("");
+            setVersion("");
             setCategory("policy");
-            setRequireSignature(false);
+            setSendTo("everyone");
+            setRequireSignature(true);
             setFile(null);
         } catch (err) {
             setFormState("error");
@@ -138,117 +142,152 @@ export function SendOutDocumentsPage() {
     const isSubmitting = formState === "submitting";
 
     return (
-        <Box sx={{ maxWidth: 600, mx: "auto", mt: 4, px: 2 }}>
-            <Typography variant="h5" gutterBottom>
-                Upload New Document
-            </Typography>
+        <Box sx={styles.pageContainer}>
 
-            {/* File drop zone */}
-            <Box
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onClick={() => fileInputRef.current?.click()}
-                sx={{
-                    border: "2px dashed",
-                    borderColor: isDragOver ? "primary.main" : "grey.400",
-                    borderRadius: 1,
-                    p: 4,
-                    mb: 2,
-                    textAlign: "center",
-                    cursor: "pointer",
-                    bgcolor: isDragOver ? "action.hover" : "transparent",
-                    transition: "border-color 0.15s, background-color 0.15s",
-                }}
-            >
-                <Typography variant="body1">
-                    {file ? file.name : "Click to upload or drag and drop"}
+            {/* Tab navigation */}
+            <SectionNavBar
+                tabs={[
+                    { label: "Upload and Send Documents", route: "/documents/send-out" },
+                    { label: "Review Submissions", route: "/documents/review" },
+                ]}
+            />
+
+            {/* Form card */}
+            <Box sx={styles.formCard}>
+                <Typography sx={styles.cardTitle}>
+                    Upload New Documents
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                    PDF only · max {MAX_FILE_SIZE_MB} MB
+
+                {/* Document Title */}
+                <TextField
+                    fullWidth
+                    label="Document Title"
+                    placeholder="e.g. Working Policy..."
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    disabled={isSubmitting}
+                />
+
+                {/* Version */}
+                <TextField
+                    fullWidth
+                    label="Version"
+                    placeholder="e.g. 1.0"
+                    value={version}
+                    onChange={(e) => setVersion(e.target.value)}
+                    disabled={isSubmitting}
+                />
+
+                {/* Category */}
+                <FormControl disabled={isSubmitting}>
+                    <InputLabel>Category</InputLabel>
+                    <Select
+                        value={category}
+                        label="Category"
+                        onChange={handleCategoryChange}
+                    >
+                        <MenuItem value="policy">Policy</MenuItem>
+                        <MenuItem value="sop">SOP</MenuItem>
+                        <MenuItem value="handbook">Handbook</MenuItem>
+                    </Select>
+                </FormControl>
+
+                {/* Send to */}
+                <FormControl disabled={isSubmitting}>
+                    <InputLabel>Send to</InputLabel>
+                    <Select
+                        value={sendTo}
+                        label="Send to"
+                        onChange={(e) => setSendTo(e.target.value)}
+                    >
+                        <MenuItem value="everyone">Everyone</MenuItem>
+                        <MenuItem value="managers">Managers</MenuItem>
+                        <MenuItem value="specific">Specific Employees</MenuItem>
+                    </Select>
+                </FormControl>
+
+                {/* Require signature */}
+                <FormControlLabel
+                    sx={styles.checkboxRow}
+                    control={
+                        <Checkbox
+                            checked={requireSignature}
+                            onChange={(e) => setRequireSignature(e.target.checked)}
+                            disabled={isSubmitting}
+                        />
+                    }
+                    label="Require Signature"
+                />
+
+                {/* Upload File section */}
+                <Typography sx={styles.uploadSectionLabel}>
+                    Upload File
                 </Typography>
-                {file && (
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                        {(file.size / (1024 * 1024)).toFixed(2)} MB
+
+                {/* Drop zone */}
+                <Box
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onClick={() => fileInputRef.current?.click()}
+                    style={getDropZoneStyle(isDragOver)}
+                >
+                    <UploadFileOutlinedIcon sx={styles.dropZoneIcon} />
+
+                    {file ? (
+                        <>
+                            <Typography sx={styles.dropZoneFileName}>
+                                {file.name}
+                            </Typography>
+                            <Typography sx={styles.dropZoneSubText}>
+                                {(file.size / (1024 * 1024)).toFixed(2)} MB
+                            </Typography>
+                        </>
+                    ) : (
+                        <>
+                            <Typography sx={styles.dropZoneText}>
+                                Click to upload or drag and drop
+                            </Typography>
+                            <Typography sx={styles.dropZoneSubText}>
+                                PDF or docx, max {MAX_FILE_SIZE_MB}MB
+                            </Typography>
+                        </>
+                    )}
+                </Box>
+
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="application/pdf"
+                    style={{ display: "none" }}
+                    onChange={handleFileInputChange}
+                />
+
+                {fileError && (
+                    <Typography sx={styles.errorText}>{fileError}</Typography>
+                )}
+
+                {errorMessage && (
+                    <Typography sx={styles.errorText}>{errorMessage}</Typography>
+                )}
+
+                {formState === "success" && (
+                    <Typography sx={styles.successText}>
+                        Document uploaded and sent successfully.
                     </Typography>
                 )}
+
+                <Button
+                    variant="contained"
+                    sx={styles.submitButton}
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    startIcon={<SendIcon />}
+                    disableElevation
+                >
+                    {isSubmitting ? "Uploading..." : "Upload and Send Now"}
+                </Button>
             </Box>
-
-            {/* Hidden file input */}
-            <input
-                ref={fileInputRef}
-                type="file"
-                accept="application/pdf"
-                style={{ display: "none" }}
-                onChange={handleFileInputChange}
-            />
-
-            {fileError && (
-                <Typography variant="body2" color="error" sx={{ mb: 1 }}>
-                    {fileError}
-                </Typography>
-            )}
-
-            {/* Document title */}
-            <TextField
-                fullWidth
-                label="Document Title"
-                placeholder="e.g. Working Policy"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                sx={{ mb: 2 }}
-                disabled={isSubmitting}
-            />
-
-            {/* Category */}
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                Category
-            </Typography>
-            <Select
-                fullWidth
-                value={category}
-                onChange={handleCategoryChange}
-                sx={{ mb: 2 }}
-                disabled={isSubmitting}
-            >
-                <MenuItem value="policy">Policy</MenuItem>
-                <MenuItem value="sop">SOP</MenuItem>
-                <MenuItem value="handbook">Handbook</MenuItem>
-            </Select>
-
-            {/* Require signature */}
-            <FormControlLabel
-                control={
-                    <Checkbox
-                        checked={requireSignature}
-                        onChange={(e) => setRequireSignature(e.target.checked)}
-                        disabled={isSubmitting}
-                    />
-                }
-                label="Require Signature"
-                sx={{ mb: 2, display: "block" }}
-            />
-
-            {errorMessage && (
-                <Typography variant="body2" color="error" sx={{ mb: 1 }}>
-                    {errorMessage}
-                </Typography>
-            )}
-
-            {formState === "success" && (
-                <Typography variant="body2" color="success.main" sx={{ mb: 1 }}>
-                    Document uploaded and sent successfully.
-                </Typography>
-            )}
-
-            <Button
-                fullWidth
-                variant="contained"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-            >
-                {isSubmitting ? "Uploading..." : "Upload and Send Now"}
-            </Button>
         </Box>
     );
 }
