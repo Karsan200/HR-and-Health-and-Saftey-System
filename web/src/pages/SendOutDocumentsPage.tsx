@@ -90,7 +90,14 @@ export function SendOutDocumentsPage() {
     const handleDragLeave = () => setIsDragOver(false);
 
     const handleCategoryChange = (e: SelectChangeEvent) => {
-        setCategory(e.target.value as DocumentCategory);
+        const newCategory = e.target.value as DocumentCategory;
+
+        setCategory(newCategory);
+
+        if (newCategory === "handbook") {
+            setSendTo("everyone");
+            setSelectedEmployees([]);
+        }
     };
 
     useEffect(() => {
@@ -202,7 +209,7 @@ export function SendOutDocumentsPage() {
                 </FormControl>
 
                 {/* Send to */}
-                <FormControl fullWidth disabled={isSubmitting}>
+                <FormControl fullWidth disabled={isSubmitting || category === "handbook"}>
                     <InputLabel>Send to</InputLabel>
                     <Select
                         value={sendTo}
