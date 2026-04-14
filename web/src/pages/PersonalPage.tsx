@@ -169,26 +169,12 @@ function SettingsTab({ settings }: { settings: SettingsResponse }) {
                 <Box sx={styles.quietTimeRow}>
                     <Box
                         onClick={() => setEditing("start")}
-                        sx={{ cursor: "pointer", display: "flex", alignItems: "flex-end", gap: "4px" }}
+                        sx={styles.clickableTimeBox}
                     >
-                        <Typography sx={{
-                            fontSize: "40px",
-                            fontWeight: 400,
-                            color: editing === "start"
-                                ? DefaultColours.redPrimary
-                                : DefaultColours.black,
-                            lineHeight: 1,
-                        }}>
+                        <Typography sx={styles.timeText(editing === "start")}>
                             {formatDisplay(silentStart)}
                         </Typography>
-                        <Typography sx={{
-                            fontSize: "12px",
-                            color: editing === "start"
-                                ? DefaultColours.redPrimary
-                                : DefaultColours.greyPrimaryMainText,
-                            paddingBottom: "4px",
-                            lineHeight: 1.2,
-                        }}>
+                        <Typography sx={styles.amPmText(editing === "start")}>
                             {formatAmPm(silentStart)}
                         </Typography>
                     </Box>
@@ -197,26 +183,13 @@ function SettingsTab({ settings }: { settings: SettingsResponse }) {
 
                     <Box
                         onClick={() => setEditing("end")}
-                        sx={{ cursor: "pointer", display: "flex", alignItems: "flex-end", gap: "4px" }}
+                        sx={styles.clickableTimeBox}
                     >
-                        <Typography sx={{
-                            fontSize: "40px",
-                            fontWeight: 400,
-                            color: editing === "end"
-                                ? DefaultColours.redPrimary
-                                : DefaultColours.black,
-                            lineHeight: 1,
-                        }}>
+                        <Typography sx={styles.timeText(editing === "end")}>
                             {formatDisplay(silentEnd)}
                         </Typography>
-                        <Typography sx={{
-                            fontSize: "12px",
-                            color: editing === "end"
-                                ? DefaultColours.redPrimary
-                                : DefaultColours.greyPrimaryMainText,
-                            paddingBottom: "4px",
-                            lineHeight: 1.2,
-                        }}>
+
+                        <Typography sx={styles.amPmText(editing === "end")}>
                             {formatAmPm(silentEnd)}
                         </Typography>
                     </Box>

@@ -366,4 +366,44 @@ export const personalPageStyles = {
         textAlign: "right" as const,
         marginTop: "8px",
     },
+
+    clickableTimeBox: {
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "flex-end",
+        gap: "4px",
+    },
+
+    timeText: (isActive: boolean) => ({
+        fontSize: "40px",
+        fontWeight: 400,
+        color: isActive
+            ? DefaultColours.redPrimary
+            : DefaultColours.black,
+        lineHeight: 1,
+    }),
+
+    amPmText: (isActive: boolean) => ({
+        fontSize: "12px",
+        color: isActive
+            ? DefaultColours.redPrimary
+            : DefaultColours.greyPrimaryMainText,
+        paddingBottom: "4px",
+        lineHeight: 1.2,
+    }),
+
+    timePicker: {
+        "& .MuiClock-pin": { backgroundColor: DefaultColours.redPrimary },
+        "& .MuiClockPointer-root": { backgroundColor: DefaultColours.redPrimary },
+        "& .MuiClockPointer-thumb": {
+            backgroundColor: DefaultColours.redPrimary,
+            borderColor: DefaultColours.redPrimary,
+        },
+        "& .MuiClockNumber-root.Mui-selected": {
+            backgroundColor: DefaultColours.redPrimary,
+        },
+        "& .MuiPickersToolbar-root": { display: "none" },
+    },
+
+    hideActionBar: { display: "none" },
 };
