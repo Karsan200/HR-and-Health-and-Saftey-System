@@ -226,7 +226,11 @@ public class ClockInService {
             throw new IllegalArgumentException("Clock-in record does not belong to this account.");
         }
 
-        ClockInReportTable report = new ClockInReportTable();
+        // Update the existing report if one exists, otherwise create a new one
+        ClockInReportTable report = clockInReportRepository
+                .findByAccountAndClockIn(account, clockIn)
+                .orElseGet(ClockInReportTable::new);
+
         report.setAccount(account);
         report.setClockIn(clockIn);
         report.setIssue(issue);
