@@ -127,12 +127,12 @@ public class DocumentService {
         // NOW get the generated ID
         UUID fileId = file.getFileId();
 
-        // Upload to MinIO using that ID
-        storageService.uploadFile(
-                fileId.toString(),
-                new ByteArrayInputStream(fileBytes),
-                "pdf"
-        );
+        // Upload to MinIO using that ID REMEMBER TO UNCOMMENT THIS BEFORE MERGE
+//        storageService.uploadFile(
+//                fileId.toString(),
+//                new ByteArrayInputStream(fileBytes),
+//                "pdf"
+//        );
 
         // Persist the DocumentTable record
         DocumentTable document = new DocumentTable();
