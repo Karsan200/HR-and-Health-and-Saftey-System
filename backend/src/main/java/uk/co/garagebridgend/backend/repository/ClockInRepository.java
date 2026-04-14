@@ -12,8 +12,9 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 /**
- * Repository interface for finding late's to work for a specific week.
+ * Repository interface for finding lates to work for a specific week.
  */
 @Repository
 public interface ClockInRepository extends JpaRepository<ClockInTable, UUID> {
@@ -139,5 +140,26 @@ public interface ClockInRepository extends JpaRepository<ClockInTable, UUID> {
             @Param("lateThreshold") LocalTime lateThreshold,
             @Param("startDateTime") LocalDateTime startDateTime,
             @Param("endDateTime") LocalDateTime endDateTime
+    );
+
+    /**
+     * Retrieves all clock-in records created on a given day across all accounts,
+     * ordered by creation time ascending. Used by the admin overrides page to
+     * display every employee's clock-in for a selected date.
+     *
+     * @param startOfDay the start of the target day (inclusive)
+     * @param endOfDay   the end of the target day (inclusive)
+     * @return all clock-in records for that day, ordered earliest first
+     */
+    @Query("""
+        SELECT c
+        FROM ClockInTable c
+        WHERE c.created >= :startOfDay
+          AND c.created <= :endOfDay
+        ORDER BY c.created ASC
+    """)
+    List<ClockInTable> findAllForDate(
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("endOfDay") LocalDateTime endOfDay
     );
 }

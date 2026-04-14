@@ -1,6 +1,6 @@
 import type { AuthenticationService } from "./AuthenticationService";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// Types
 
 /** A clock-in report submitted by an employee about an incorrect clock-in */
 export interface ClockInReport {
@@ -24,14 +24,13 @@ export interface ClockInRecord {
 export interface ClockOverrideRequest {
     clockInTime: string | null;
     clockOutTime: string | null;
-
 }
 
-// ── Service functions ─────────────────────────────────────────────────────────
+// Service functions
 
 /**
- * Fetches all clock-in records for a given date.
- * Records with associated reports are included and flagged via the report field.
+ * Fetches all clock-in records for a given date across all employees.
+ * Records with an associated employee report are included with the report field populated.
  *
  * @param date ISO date string (YYYY-MM-DD)
  * @param authService the authentication service used to make the request
@@ -55,10 +54,11 @@ export async function fetchClockInsForDate(
 }
 
 /**
- * Submits an admin override for a specific clock-in record.
+ * Submits an admin override for a specific clock-in record,
+ * replacing the existing times with the values provided.
  *
  * @param clockId the UUID of the clock-in record to update
- * @param override the new times and an optional admin note
+ * @param override the new clock-in and clock-out times
  * @param authService the authentication service used to make the request
  */
 export async function submitClockOverride(
@@ -82,11 +82,11 @@ export async function submitClockOverride(
     }
 }
 
-// ── Formatting helpers ────────────────────────────────────────────────────────
+// Formatting helpers
 
 /**
  * Formats a LocalTime string from the backend (HH:mm:ss) into a display
- * string (HH:mm). Returns null if the time is null.
+ * string (HH:mm). Returns null if the value is null.
  */
 export function formatTime(time: string | null): string | null {
     if (!time) return null;
@@ -94,8 +94,8 @@ export function formatTime(time: string | null): string | null {
 }
 
 /**
- * Formats an ISO date string into a human-readable label for the page heading.
- * e.g. "2026-04-14" → "Tuesday, 14 April 2026"
+ * Formats an ISO date string into a human-readable heading label.
+ * Example: "2026-04-14" becomes "Tuesday, 14 April 2026".
  */
 export function formatDateHeading(iso: string): string {
     const [year, month, day] = iso.split("-").map(Number);
@@ -109,8 +109,9 @@ export function formatDateHeading(iso: string): string {
 }
 
 /**
- * Converts a Dayjs object or HH:mm string from the MUI TimePicker back into
- * a HH:mm:ss string suitable for sending to the backend.
+ * Converts an HH:mm string from a time input back into an HH:mm:ss string
+ * suitable for sending to the backend as a LocalTime value.
+ * Returns null if the input is null or empty.
  */
 export function toBackendTime(time: string | null): string | null {
     if (!time) return null;

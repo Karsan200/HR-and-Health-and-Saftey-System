@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
     Box,
     Typography,
@@ -20,6 +20,7 @@ import CalendarTodayOutlined from "@mui/icons-material/CalendarTodayOutlined";
 import { SectionNavBar, type SectionNavTab } from "../components/SectionNavbar";
 import { useAuth } from "../AuthContext";
 import {
+    fetchClockInsForDate,
     submitClockOverride,
     formatTime,
     formatDateHeading,
@@ -32,63 +33,6 @@ import { DefaultColours } from "../theme/colours";
 function todayISO(): string {
     return new Date().toISOString().split("T")[0];
 }
-
-// Mock data — remove when wiring up to the backend
-const MOCK_RECORDS: ClockInRecord[] = [
-    {
-        clockId: "a1b2c3d4-0001",
-        employeeName: "James Carter",
-        accountId: 101,
-        clockInTime: "08:02:00",
-        clockOutTime: "17:05:00",
-        created: "2026-04-14T08:02:00",
-        report: null,
-    },
-    {
-        clockId: "a1b2c3d4-0002",
-        employeeName: "Sophie Williams",
-        accountId: 102,
-        clockInTime: "07:45:00",
-        clockOutTime: null,
-        created: "2026-04-13T07:45:00",
-        report: {
-            reportId: 1,
-            issue: "I clocked in at 08:00 but the system recorded 07:45 — I was still in the car park.",
-            created: "2026-04-14T09:10:00",
-        },
-    },
-    {
-        clockId: "a1b2c3d4-0003",
-        employeeName: "Tom Hughes",
-        accountId: 103,
-        clockInTime: "08:15:00",
-        clockOutTime: "16:58:00",
-        created: "2026-04-11T08:15:00",
-        report: null,
-    },
-    {
-        clockId: "a1b2c3d4-0004",
-        employeeName: "Priya Patel",
-        accountId: 104,
-        clockInTime: "08:00:00",
-        clockOutTime: "12:00:00",
-        created: "2026-04-14T08:00:00",
-        report: {
-            reportId: 2,
-            issue: "My clock-out was recorded as 12:00 but I worked until 17:00. System must have logged me out automatically.",
-            created: "2026-04-14T17:30:00",
-        },
-    },
-    {
-        clockId: "a1b2c3d4-0005",
-        employeeName: "Daniel Moore",
-        accountId: 105,
-        clockInTime: null,
-        clockOutTime: "17:02:00",
-        created: "2026-04-14T00:00:00",
-        report: null,
-    },
-];
 
 type SortOption = "date-asc" | "date-desc" | "reported-first" | "employee-asc";
 
@@ -179,8 +123,6 @@ function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
                             size="small"
                             fullWidth
                             sx={styles.timeTextField}
-                            inputProps={{ step: 60 }}
-                            InputLabelProps={{ shrink: true }}
                         />
                     </Box>
 
@@ -194,8 +136,6 @@ function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
                             size="small"
                             fullWidth
                             sx={styles.timeTextField}
-                            inputProps={{ step: 60 }}
-                            InputLabelProps={{ shrink: true }}
                         />
                     </Box>
                 </Box>
@@ -232,7 +172,7 @@ function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
     );
 }
 
-// Clock-in card (matches pending requests card style)
+// Clock-in card
 
 interface ClockInCardProps {
     record: ClockInRecord;
@@ -317,31 +257,34 @@ function ClockInCard({ record, onEdit }: ClockInCardProps) {
 // Page
 
 export function ClockOverridesPage() {
-    const { authenticationService: _authService } = useAuth();
+    const { authenticationService } = useAuth();
 
-    const [selectedDate, setSelectedDate]   = useState<string>(todayISO());
-    const [employeeFilter, setEmployeeFilter] = useState<string>("");
-    const [sortBy, setSortBy]               = useState<SortOption>("date-asc");
+    const [selectedDate, setSelectedDate]         = useState<string>(todayISO());
+    const [employeeFilter, setEmployeeFilter]     = useState<string>("");
+    const [sortBy, setSortBy]                     = useState<SortOption>("date-asc");
     const [showReportedOnly, setShowReportedOnly] = useState<boolean>(false);
-    const [records, setRecords]             = useState<ClockInRecord[]>(MOCK_RECORDS);
-    const [loading]                         = useState(false);
-    const [error]                           = useState<string | null>(null);
-    const [editingRecord, setEditingRecord] = useState<ClockInRecord | null>(null);
-    const [modalOpen, setModalOpen]         = useState(false);
+    const [records, setRecords]                   = useState<ClockInRecord[]>([]);
+    const [loading, setLoading]                   = useState(false);
+    const [error, setError]                       = useState<string | null>(null);
+    const [editingRecord, setEditingRecord]       = useState<ClockInRecord | null>(null);
+    const [modalOpen, setModalOpen]               = useState(false);
 
-    // Normally this would fetch from the backend when selectedDate changes.
-    // Replace the mock assignment below with a real fetch once the backend is ready:
-    //
-    //   const loadRecords = useCallback(async () => {
-    //       setLoading(true);
-    //       try {
-    //           const data = await fetchClockInsForDate(selectedDate, authService);
-    //           setRecords(data);
-    //       } catch { setError("Failed to load."); }
-    //       finally { setLoading(false); }
-    //   }, [selectedDate, authService]);
-    //
-    //   useEffect(() => { void loadRecords(); }, [loadRecords]);
+    const loadRecords = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await fetchClockInsForDate(selectedDate, authenticationService);
+            setRecords(data);
+        } catch {
+            setError("Failed to load clock-in records. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedDate, authenticationService]);
+
+    useEffect(() => {
+        void loadRecords();
+    }, [loadRecords]);
 
     const filteredAndSorted = useMemo(() => {
         let result = [...records];
@@ -411,7 +354,6 @@ export function ClockOverridesPage() {
                     onChange={(e) => setSelectedDate(e.target.value)}
                     size="small"
                     sx={{ ...styles.filterField, minWidth: "180px" }}
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 <Box sx={styles.filterDivider} />
@@ -423,7 +365,6 @@ export function ClockOverridesPage() {
                     size="small"
                     placeholder="Name..."
                     sx={{ ...styles.filterField, minWidth: "200px" }}
-                    InputLabelProps={{ shrink: true }}
                 />
 
                 <Box sx={styles.filterDivider} />
