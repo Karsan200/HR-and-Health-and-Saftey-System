@@ -728,7 +728,7 @@ export function Dashboard() {
                                 <Button
                                     fullWidth
                                     disableRipple
-                                    onClick={() => navigate("/health-and-safety/send-out")}
+                                    onClick={() => navigate("/documents/send-out")}
                                     sx={styles.quickActionButton}
                                 >
                                     <Box sx={{ ...styles.quickActionIconWrapper, ...styles.quickActionDocumentIconWrapper }}>
