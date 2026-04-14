@@ -24,6 +24,7 @@ export interface ClockInRecord {
 export interface ClockOverrideRequest {
     clockInTime: string | null;
     clockOutTime: string | null;
+    removeReport: boolean;
 }
 
 // Service functions

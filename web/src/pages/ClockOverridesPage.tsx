@@ -45,21 +45,23 @@ interface EditModalProps {
     record: ClockInRecord | null;
     open: boolean;
     onClose: () => void;
-    onSaved: (clockId: string, newIn: string | null, newOut: string | null) => void;
+    onSaved: (clockId: string, newIn: string | null, newOut: string | null, removeReport: boolean) => void;
 }
 
 function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
     const { authenticationService } = useAuth();
 
-    const [clockIn, setClockIn]   = useState<string>("");
-    const [clockOut, setClockOut] = useState<string>("");
-    const [saving, setSaving]     = useState(false);
-    const [error, setError]       = useState<string | null>(null);
+    const [clockIn, setClockIn]       = useState<string>("");
+    const [clockOut, setClockOut]     = useState<string>("");
+    const [dismissReport, setDismissReport] = useState<boolean>(true);
+    const [saving, setSaving]         = useState(false);
+    const [error, setError]           = useState<string | null>(null);
 
     useEffect(() => {
         if (!record) return;
         setClockIn(formatTime(record.clockInTime)   ?? "");
         setClockOut(formatTime(record.clockOutTime) ?? "");
+        setDismissReport(true);
         setError(null);
     }, [record]);
 
@@ -74,9 +76,10 @@ function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
             await submitClockOverride(record.clockId, {
                 clockInTime:  newIn,
                 clockOutTime: newOut,
+                removeReport: record.report !== null && dismissReport,
             }, authenticationService);
 
-            onSaved(record.clockId, newIn, newOut);
+            onSaved(record.clockId, newIn, newOut, record.report !== null && dismissReport);
             onClose();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -115,6 +118,31 @@ function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
                     </Box>
                 )}
 
+                {record.report && (
+                    <Box sx={styles.dismissReportRow}>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={dismissReport}
+                                    onChange={(e) => setDismissReport(e.target.checked)}
+                                    disabled={saving}
+                                    sx={{
+                                        color: DefaultColours.amberPrimary,
+                                        "&.Mui-checked": { color: DefaultColours.amberPrimary },
+                                        padding: "0 8px 0 0",
+                                    }}
+                                />
+                            }
+                            label={
+                                <Typography sx={styles.dismissReportLabel}>
+                                    Remove the attached report after saving
+                                </Typography>
+                            }
+                            sx={{ margin: 0 }}
+                        />
+                    </Box>
+                )}
+
                 <Box sx={styles.clockPickersRow}>
                     <Box sx={styles.clockPickerWrapper}>
                         <Typography sx={styles.clockPickerLabel}>Clock In</Typography>
@@ -126,6 +154,8 @@ function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
                             size="small"
                             fullWidth
                             sx={styles.timeTextField}
+                            inputProps={{ step: 60 }}
+                            InputLabelProps={{ shrink: true }}
                         />
                     </Box>
 
@@ -139,6 +169,8 @@ function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
                             size="small"
                             fullWidth
                             sx={styles.timeTextField}
+                            inputProps={{ step: 60 }}
+                            InputLabelProps={{ shrink: true }}
                         />
                     </Box>
                 </Box>
@@ -202,32 +234,14 @@ function ClockInCard({ record, onEdit }: ClockInCardProps) {
                         <Typography sx={styles.employeeName}>
                             {record.employeeName}
                         </Typography>
-                        <Box sx={styles.employeeMeta}>
-                            {hasReport && (
-                                <Box sx={styles.reportBadge}>
-                                    <WarningAmberOutlined sx={{ fontSize: "18px", color: DefaultColours.amberTextDark }} />
-                                    <Typography sx={styles.reportBadgeText}>Reported</Typography>
-                                </Box>
-                            )}
-                            <Typography sx={styles.metaText}>
-                                Recorded on {createdDate}
-                            </Typography>
-                        </Box>
-                    </Box>
-                </Box>
-
-                <Box sx={styles.timesRow}>
-                    <Box sx={styles.timeBlock}>
-                        <Typography sx={styles.timeLabel}>Clock In</Typography>
-                        <Typography sx={styles.timeValue(!clockIn)}>
-                            {clockIn ?? "--:--"}
-                        </Typography>
-                    </Box>
-
-                    <Box sx={styles.timeBlock}>
-                        <Typography sx={styles.timeLabel}>Clock Out</Typography>
-                        <Typography sx={styles.timeValue(!clockOut)}>
-                            {clockOut ?? "--:--"}
+                        {hasReport && (
+                            <Box sx={styles.reportBadge}>
+                                <WarningAmberOutlined sx={{ fontSize: "18px", color: DefaultColours.amberTextDark }} />
+                                <Typography sx={styles.reportBadgeText}>Reported</Typography>
+                            </Box>
+                        )}
+                        <Typography sx={styles.metaText}>
+                            Recorded on {createdDate}
                         </Typography>
                     </Box>
                 </Box>
@@ -241,7 +255,23 @@ function ClockInCard({ record, onEdit }: ClockInCardProps) {
                     </Box>
                 )}
 
-                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+                    <Box sx={styles.timesRow}>
+                        <Box sx={styles.timeBlock}>
+                            <Typography sx={styles.timeLabel}>Clock In</Typography>
+                            <Typography sx={styles.timeValue(!clockIn)}>
+                                {clockIn ?? "--:--"}
+                            </Typography>
+                        </Box>
+
+                        <Box sx={styles.timeBlock}>
+                            <Typography sx={styles.timeLabel}>Clock Out</Typography>
+                            <Typography sx={styles.timeValue(!clockOut)}>
+                                {clockOut ?? "--:--"}
+                            </Typography>
+                        </Box>
+                    </Box>
+
                     <Button
                         variant="contained"
                         startIcon={<EditIcon sx={{ color: DefaultColours.white, fontSize: "20px" }} />}
@@ -327,11 +357,11 @@ export function ClockOverridesPage() {
         setModalOpen(true);
     }
 
-    function handleSaved(clockId: string, newIn: string | null, newOut: string | null) {
+    function handleSaved(clockId: string, newIn: string | null, newOut: string | null, removeReport: boolean) {
         setRecords((prev) =>
             prev.map((r) =>
                 r.clockId === clockId
-                    ? { ...r, clockInTime: newIn, clockOutTime: newOut }
+                    ? { ...r, clockInTime: newIn, clockOutTime: newOut, report: removeReport ? null : r.report }
                     : r
             )
         );
@@ -395,6 +425,7 @@ export function ClockOverridesPage() {
                     size="small"
                     placeholder="Name..."
                     sx={{ ...styles.filterField, minWidth: "200px" }}
+                    InputLabelProps={{ shrink: true }}
                 />
 
                 <Box sx={styles.filterDivider} />

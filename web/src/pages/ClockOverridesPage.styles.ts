@@ -154,14 +154,6 @@ export const clockOverridesPageStyles = {
         letterSpacing: "0.17px",
     },
 
-    employeeMeta: {
-        display: "flex",
-        flexDirection: "row" as const,
-        alignItems: "center",
-        gap: "10px",
-        flexWrap: "wrap" as const,
-    },
-
     metaText: {
         ...TextStyles.regular,
         fontSize: FontSize.m20,
@@ -171,14 +163,16 @@ export const clockOverridesPageStyles = {
     },
 
     reportBadge: {
-        display: "flex",
+        display: "inline-flex",
         flexDirection: "row" as const,
         alignItems: "center",
+        alignSelf: "flex-start",
         gap: "6px",
         padding: "6px 12px",
         backgroundColor: DefaultColours.amberBackgroundLight,
         borderRadius: `${BorderRadius.mediumNotification}px`,
         border: `1px solid ${DefaultColours.amberPrimary}`,
+        width: "fit-content",
     },
 
     reportBadgeText: {
@@ -338,6 +332,23 @@ export const clockOverridesPageStyles = {
         ...TextStyles.regular,
         fontSize: FontSize.s16,
         color: DefaultColours.amberTextDark,
+    },
+
+    dismissReportRow: {
+        display: "flex",
+        flexDirection: "row" as const,
+        alignItems: "center",
+        padding: "12px 16px",
+        backgroundColor: DefaultColours.amberBackgroundLight,
+        borderRadius: `${BorderRadius.mediumNotification}px`,
+        border: `1px solid ${DefaultColours.amberPrimary}`,
+    },
+
+    dismissReportLabel: {
+        ...TextStyles.regular,
+        fontSize: FontSize.s16,
+        color: DefaultColours.amberTextDark,
+        letterSpacing: "0.17px",
     },
 
     clockPickersRow: {

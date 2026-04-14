@@ -53,9 +53,11 @@ public class ClockInAdminService {
      * Applies an admin override to a clock-in record, replacing the existing
      * clock-in and clock-out times with the values supplied in the request.
      * Either value may be null to clear that field.
+     * If the request includes removeReport=true and a report exists for this
+     * record, it will also be deleted.
      *
      * @param clockId  the UUID of the clock-in record to update
-     * @param override the new times to apply
+     * @param override the new times to apply and whether to remove the report
      * @throws IllegalArgumentException if no record exists for the given ID
      */
     @Transactional
@@ -67,6 +69,11 @@ public class ClockInAdminService {
         record.setClockOutTime(override.clockOutTime());
 
         clockInRepository.save(record);
+
+        if (override.removeReport()) {
+            clockInReportRepository.findMostRecentByClockIn(record)
+                    .ifPresent(clockInReportRepository::delete);
+        }
     }
 
     /**
