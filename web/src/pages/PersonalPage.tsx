@@ -19,7 +19,6 @@ import { personalPageStyles as styles } from "./PersonalPage.styles";
 import { useAuth } from "../AuthContext";
 import { fetchPersonalData, updateNotificationSettings, type ProfileResponse, type SettingsResponse } from "../logic/PersonalService";
 import { changePassword } from "../logic/PersonalSecurityService";
-import {DefaultColours} from "../theme/colours.ts";
 
 type Tab = "profile" | "settings" | "security";
 
@@ -181,7 +180,7 @@ function SettingsTab({ settings }: { settings: SettingsResponse }) {
                                 actionBar: { sx: { display: "none" } },
                                 toolbar:   { sx: { display: "none" } },
                             }}
-                            sx={clockSx}
+                            sx={styles.timePicker}
                         />
 
                         <Box sx={styles.settingsButtonRow}>
@@ -217,7 +216,7 @@ function SettingsTab({ settings }: { settings: SettingsResponse }) {
                                 actionBar: { sx: { display: "none" } },
                                 toolbar:   { sx: { display: "none" } },
                             }}
-                            sx={clockSx}
+                            sx={styles.timePicker}
                         />
 
                         <Box sx={styles.settingsButtonRow}>
@@ -303,14 +302,6 @@ function SettingsTab({ settings }: { settings: SettingsResponse }) {
         </LocalizationProvider>
     );
 }
-
-const clockSx = {
-    "& .MuiClock-pin":                    { backgroundColor: DefaultColours.redPrimary },
-    "& .MuiClockPointer-root":            { backgroundColor: DefaultColours.redPrimary },
-    "& .MuiClockPointer-thumb":           { backgroundColor: DefaultColours.redPrimary, borderColor: DefaultColours.redPrimary },
-    "& .MuiClockNumber-root.Mui-selected": { backgroundColor: DefaultColours.redPrimary },
-    "& .MuiPickersToolbar-root":          { display: "none" },
-};
 
 // Third Tab (Security)
 
@@ -458,56 +449,58 @@ export function PersonalPage() {
     }, [loadProfile]);
 
     return (
-        <Box sx={styles.pageContainer}>
+        <Box sx={styles.page}>
+            <Box sx={styles.pageContainer}>
 
-            {profile && (
-                <Box sx={styles.headerCard}>
-                    <Box sx={styles.avatarCircle}>
-                        <PersonOutlineIcon sx={styles.avatarIcon} />
+                {profile && (
+                    <Box sx={styles.headerCard}>
+                        <Box sx={styles.avatarCircle}>
+                            <PersonOutlineIcon sx={styles.avatarIcon} />
+                        </Box>
+                        <Box sx={styles.headerInfo}>
+                            <Typography sx={styles.headerName}>
+                                {profile.firstName} {profile.lastName}
+                            </Typography>
+                            <Typography sx={styles.headerEmail}>{profile.email}</Typography>
+                        </Box>
+                        <Box sx={styles.adminBadge}>
+                            <ShieldIcon sx={styles.adminBadgeIcon} />
+                        </Box>
                     </Box>
-                    <Box sx={styles.headerInfo}>
-                        <Typography sx={styles.headerName}>
-                            {profile.firstName} {profile.lastName}
-                        </Typography>
-                        <Typography sx={styles.headerEmail}>{profile.email}</Typography>
-                    </Box>
-                    <Box sx={styles.adminBadge}>
-                        <ShieldIcon sx={styles.adminBadgeIcon} />
-                    </Box>
+                )}
+
+                {/* Tabs */}
+                <Box sx={styles.tabsRow}>
+                    {TABS.map(({ key, label }) => (
+                        <Box
+                            key={key}
+                            sx={styles.tab(activeTab === key)}
+                            onClick={() => setActiveTab(key)}
+                        >
+                            {label}
+                        </Box>
+                    ))}
                 </Box>
-            )}
 
-            {/* Tabs */}
-            <Box sx={styles.tabsRow}>
-                {TABS.map(({ key, label }) => (
-                    <Box
-                        key={key}
-                        sx={styles.tab(activeTab === key)}
-                        onClick={() => setActiveTab(key)}
-                    >
-                        {label}
+                {/* Content */}
+                {loading && (
+                    <Box sx={styles.loadingContainer}>
+                        <CircularProgress size={32} sx={styles.loadingSpinner} />
                     </Box>
-                ))}
+                )}
+
+                {!loading && error && (
+                    <Typography sx={styles.errorText}>{error}</Typography>
+                )}
+
+                {!loading && !error && profile && settings && (
+                    <>
+                        {activeTab === "profile"  && <ProfileTab profile={profile} settings={settings} />}
+                        {activeTab === "settings" && <SettingsTab settings={settings} />}
+                        {activeTab === "security" && <SecurityTab/>}
+                    </>
+                )}
             </Box>
-
-            {/* Content */}
-            {loading && (
-                <Box sx={styles.loadingContainer}>
-                    <CircularProgress size={32} sx={styles.loadingSpinner} />
-                </Box>
-            )}
-
-            {!loading && error && (
-                <Typography sx={styles.errorText}>{error}</Typography>
-            )}
-
-            {!loading && !error && profile && settings && (
-                <>
-                    {activeTab === "profile"  && <ProfileTab profile={profile} settings={settings} />}
-                    {activeTab === "settings" && <SettingsTab settings={settings} />}
-                    {activeTab === "security" && <SecurityTab/>}
-                </>
-            )}
         </Box>
     );
 }

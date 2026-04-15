@@ -2,6 +2,11 @@
 import {BorderRadius, FontSize, TextStyles} from "../theme/theme";
 
 export const personalPageStyles = {
+    page: {
+        backgroundColor: DefaultColours.greyBackground,
+        minHeight: "100vh",
+    },
+
     pageContainer: {
         maxWidth: "1200px",
         margin: "0 auto",
@@ -282,14 +287,14 @@ export const personalPageStyles = {
     settingsCard: {
         background: DefaultColours.white,
         border: `0.5px solid ${DefaultColours.greyBackground}`,
-        borderRadius: "12px",
+        borderRadius: BorderRadius.smallTextBackground,
         padding: "1.25rem",
         marginBottom: "1rem",
     },
 
     settingsTitle: {
-        fontSize: FontSize.xs14,
-        TextStyles: TextStyles.bold,
+        fontSize: FontSize.m20,
+        fontFamily: TextStyles.medium,
         color: DefaultColours.black,
         marginBottom: "1.25rem",
     },
@@ -327,13 +332,14 @@ export const personalPageStyles = {
         border: "none",
         borderRadius: BorderRadius.smallTextBackground,
         padding: "10px 16px",
-        fontSize: FontSize.xs14,
+        fontSize: FontSize.s16,
         TextStyles: TextStyles.regular,
         cursor: "pointer",
         fontFamily: "inherit",
         letterSpacing: "0.05em",
         "&:hover": {
             background: DefaultColours.redTextDark,
+            color: DefaultColours.white,
         },
     },
 
@@ -350,6 +356,7 @@ export const personalPageStyles = {
         letterSpacing: "0.05em",
         "&:hover": {
             background: DefaultColours.redTextDark,
+            color: DefaultColours.white,
         },
     },
 
@@ -408,6 +415,9 @@ export const personalPageStyles = {
     hideActionBar: { display: "none" },
 
     quietTimeStepLabel: {
-
-    }
+        fontSize: FontSize.xs14,
+        fontFamily: TextStyles.medium,
+        color: DefaultColours.black,
+        marginBottom: "1.25rem",
+    },
 };
