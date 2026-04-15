@@ -123,11 +123,11 @@ public class DocumentService {
         UUID fileId = file.getFileId();
 
         // Upload to MinIO using that ID REMEMBER TO UNCOMMENT THIS BEFORE MERGE
-//        storageService.uploadFile(
-//                fileId.toString(),
-//                new ByteArrayInputStream(fileBytes),
-//                "pdf"
-//        );
+        storageService.uploadFile(
+                fileId.toString(),
+                new ByteArrayInputStream(fileBytes),
+                "pdf"
+        );
 
         DocumentTable document = new DocumentTable();
         document.setFile(file);
