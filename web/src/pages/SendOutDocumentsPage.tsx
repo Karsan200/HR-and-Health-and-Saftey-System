@@ -66,6 +66,11 @@ export function SendOutDocumentsPage() {
         );
     }, []);
 
+    const isValidVersion = (v: string, cat: DocumentCategory): boolean => {
+        if (cat === "handbook") return /^\d{4}$/.test(v);
+        return /^\d+\.\d+$/.test(v);
+    };
+
     const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const picked = e.target.files?.[0];
         if (picked) validateAndSetFile(picked);
@@ -131,6 +136,17 @@ export function SendOutDocumentsPage() {
             return;
         }
 
+        const trimmedVersion = version.trim();
+
+        if (trimmedVersion && !isValidVersion(trimmedVersion, category)) {
+            setErrorMessage(
+                category === "handbook"
+                    ? "Handbook version must be a year (e.g. 2026)."
+                    : "Version must be in the format 1.0 or 3.2."
+            );
+            return;
+        }
+
         setFormState("submitting");
 
         try {
@@ -141,6 +157,7 @@ export function SendOutDocumentsPage() {
                     requireSignature,
                     file,
                     recipientIds: sendTo === "specific" ? selectedEmployees : [],
+                    version: trimmedVersion || null,
                 },
                 authenticationService
             );
@@ -195,7 +212,7 @@ export function SendOutDocumentsPage() {
                 <TextField
                     fullWidth
                     label="Version"
-                    placeholder="e.g. 1.0"
+                    placeholder={category === "handbook" ? "e.g. 2026" : "e.g. 1.0"}
                     value={version}
                     onChange={(e) => setVersion(e.target.value)}
                     disabled={isSubmitting}

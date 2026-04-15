@@ -8,6 +8,7 @@ export interface SendOutDocumentPayload {
     requireSignature: boolean;
     file: File;
     recipientIds: number[];
+    version: string | null;
 }
 
 /**
@@ -44,10 +45,16 @@ export async function sendOutDocument(
     payload: SendOutDocumentPayload,
     authenticationService: AuthenticationService
 ): Promise<void> {
-    const title = stripPdfExtension(payload.title.trim());
+    let title = stripPdfExtension(payload.title.trim());
 
     if (payload.category === "handbook" && !title.toLowerCase().includes("handbook")) {
         throw new Error("Handbook documents must include the word 'handbook' in the title.");
+    }
+
+    // Append version to title if provided
+    if (payload.version) {
+        const prefix = payload.category === "handbook" ? " " : " v";
+        title = `${title}${prefix}${payload.version}`;
     }
 
     const content = await readFileAsBase64(payload.file);
@@ -62,9 +69,7 @@ export async function sendOutDocument(
 
     const response = await authenticationService.fetch("/api/documents/admin/send-out", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
     });
 
