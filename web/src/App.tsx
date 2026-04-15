@@ -7,10 +7,11 @@ import { IncompatibleScreen } from "./components/IncompatibleScreen";
 import { AuthProvider } from "./AuthContext";
 import { Navbar } from "./components/Navbar";
 import { Dashboard } from "./pages/Dashboard";
-import {CalendarPage} from "./pages/CalendarPage";
-import {PendingRequestsPage} from "./pages/PendingRequestsPage";
+import { CalendarPage } from "./pages/CalendarPage";
+import { PendingRequestsPage } from "./pages/PendingRequestsPage";
 import { PersonalPage } from "./pages/PersonalPage";
 import { EmployeeOverview } from "./pages/EmployeeOverview";
+import { NotificationPage } from "./pages/NotificationPage";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
@@ -62,7 +63,7 @@ function AppContent() {
                 <Route path="/employee-overview" element={<></>} />
                 <Route path="/employee/overview" element={<EmployeeOverview />} />
                 <Route path="/health-and-safety" element={<></>} />
-                <Route path="/notifications" element={<></>} />
+                <Route path="/notifications" element={<NotificationPage/>} />
                 <Route path="/health-and-safety/send-out" element={<></>} />
                 <Route path="/health-and-safety/send-out/safety-alert" element={<></>} />
                 <Route path="calendar/requests" element={<PendingRequestsPage />} />
