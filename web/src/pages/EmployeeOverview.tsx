@@ -84,6 +84,7 @@ export function EmployeeOverview() {
     const [payslipFile, setPayslipFile] = useState<File | null>(null);
     const [payslipError, setPayslipError] = useState<string | null>(null);
     const [isP60, setIsP60] = useState(false);
+    const [payslipSuccess, setPayslipSuccess] = useState<string | null>(null);
 
     const sanitisedSearch = useMemo(() => sanitiseEmployeeSearch(search), [search]);
 
@@ -237,7 +238,9 @@ export function EmployeeOverview() {
             setPayslipFile(null);
             setIsP60(false);
             setPayslipError(null);
+            setPayslipSuccess("Payslip uploaded successfully.");
         } catch (e) {
+            setPayslipSuccess(null);
             setPayslipError(e instanceof Error ? e.message : "Upload failed");
         }
     };
@@ -249,6 +252,7 @@ export function EmployeeOverview() {
         if (!file) return;
 
         setPayslipError(null);
+        setPayslipSuccess(null);
 
         if (!file.name.toLowerCase().endsWith(".pdf")) {
             setPayslipError("Only PDF files are accepted.");
@@ -538,6 +542,19 @@ export function EmployeeOverview() {
                                             Upload
                                         </Button>
 
+                                        <Typography
+                                            sx={styles.uploadHintText}
+                                            onClick={handleUploadClick}
+                                        >
+                                            Upload file
+                                        </Typography>
+
+                                        {payslipFile && (
+                                            <Typography sx={styles.selectedFileText}>
+                                                Selected: {payslipFile.name}
+                                            </Typography>
+                                        )}
+
                                         <FormControlLabel
                                             control={
                                                 <Checkbox
@@ -548,22 +565,15 @@ export function EmployeeOverview() {
                                             label="P60"
                                         />
 
-                                        <Typography
-                                            sx={{ mt: 1, fontSize: "0.85rem", color: "text.secondary", cursor: "pointer" }}
-                                            onClick={handleUploadClick}
-                                        >
-                                            Upload file
-                                        </Typography>
-
-                                        {payslipFile && (
-                                            <Typography sx={{ mt: 0.5, fontSize: "0.85rem" }}>
-                                                Selected: {payslipFile.name}
+                                        {payslipError && (
+                                            <Typography sx={styles.payslipErrorText}>
+                                                {payslipError}
                                             </Typography>
                                         )}
 
-                                        {payslipError && (
-                                            <Typography sx={{ mt: 0.5, color: "error.main", fontSize: "0.85rem" }}>
-                                                {payslipError}
+                                        {payslipSuccess && (
+                                            <Typography sx={styles.payslipSuccessText}>
+                                                {payslipSuccess}
                                             </Typography>
                                         )}
 
