@@ -114,6 +114,7 @@ export function SendOutDocumentsPage() {
 
     const handleSubmit = async () => {
         setErrorMessage(null);
+        setFormState("idle");
 
         if (!file) {
             setErrorMessage("Please select a file to upload.");
