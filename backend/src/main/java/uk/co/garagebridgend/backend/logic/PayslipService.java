@@ -31,7 +31,10 @@ public class PayslipService {
     /** Service for handling authentication and retrieving the current user. */
     private final AuthenticationService authenticationService;
 
+    /** Repository for accessing file data. */
     private final FilesRepository filesRepository;
+
+    /** Repository for accessing account data. */
     private final AccountRepository accountRepository;
 
     /**
@@ -63,7 +66,12 @@ public class PayslipService {
                 .toList();
     }
 
-    public void uploadPayslip(UploadPayslipRequest request) {
+    /**
+     * Uploads a new payslip for the specified account. This involves:
+     * @param request the request containing the account ID, file name, year,
+     * month, isPSixty flag, and base64-encoded PDF content
+     */
+    public void uploadPayslip(final UploadPayslipRequest request) {
 
         var account = accountRepository.findById(request.getAccountId())
                 .orElseThrow(() -> new IllegalArgumentException("Account not found"));

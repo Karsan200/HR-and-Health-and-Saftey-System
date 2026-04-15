@@ -49,8 +49,14 @@ public class PayslipController {
         }
     }
 
+    /**
+     * Endpoint for uploading a new payslip. Accepts a base64-encoded PDF along with metadata
+     * (name, year, month, isPSixty).
+     *
+     * @param request the request body containing payslip metadata and file content
+     */
     @PostMapping("/admin/upload")
-    public void uploadPayslip(@RequestBody UploadPayslipRequest request) {
+    public void uploadPayslip(final @RequestBody UploadPayslipRequest request) {
         try {
             payslipService.uploadPayslip(request);
 
