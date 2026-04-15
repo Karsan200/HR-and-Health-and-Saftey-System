@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.PayslipService;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
+import uk.co.garagebridgend.backend.models.request.UploadPayslipRequest;
 import uk.co.garagebridgend.backend.models.response.PayslipResponse;
 
 import java.util.List;
@@ -59,5 +60,76 @@ class PayslipControllerTest {
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
         assertEquals("Internal server error", exception.getReason());
+    }
+
+    @Test
+    void testUploadPayslipSuccess() throws Exception {
+
+        UploadPayslipRequest request = new UploadPayslipRequest(
+                1L, 1, 2026, false, "base64content", "payslip.pdf"
+        );
+
+        doNothing().when(payslipService).uploadPayslip(request);
+
+        assertDoesNotThrow(() -> payslipController.uploadPayslip(request));
+
+        verify(payslipService).uploadPayslip(request);
+    }
+
+    @Test
+    void testUploadPayslipUnauthorized() throws Exception {
+
+        UploadPayslipRequest request = new UploadPayslipRequest(
+                1L, 1, 2026, false, "base64content", "payslip.pdf"
+        );
+
+        doThrow(new AuthenticatedAccountNotFoundException())
+                .when(payslipService).uploadPayslip(request);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> payslipController.uploadPayslip(request)
+        );
+
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
+        assertEquals("Authenticated account not found.", exception.getReason());
+    }
+
+    @Test
+    void testUploadPayslipInternalServerError() throws Exception {
+
+        UploadPayslipRequest request = new UploadPayslipRequest(
+                1L, 1, 2026, false, "base64content", "payslip.pdf"
+        );
+
+        doThrow(new RuntimeException())
+                .when(payslipService).uploadPayslip(request);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> payslipController.uploadPayslip(request)
+        );
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+        assertEquals("Upload failed", exception.getReason());
+    }
+
+    @Test
+    void testUploadPayslipBadRequest() {
+
+        UploadPayslipRequest request = new UploadPayslipRequest(
+                1L, 1, 2026, false, "base64content", "payslip.pdf"
+        );
+
+        doThrow(new IllegalArgumentException("Invalid payslip data"))
+                .when(payslipService).uploadPayslip(request);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> payslipController.uploadPayslip(request)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertEquals("Invalid payslip data", exception.getReason());
     }
 }

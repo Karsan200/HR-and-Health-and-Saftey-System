@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {useCallback , useEffect, useMemo, useRef, useState} from "react";
 import {
     Box,
-    Button,
+    Button, Checkbox, FormControlLabel,
     IconButton,
     InputAdornment,
     MenuItem,
@@ -98,6 +98,11 @@ export function EmployeeOverview() {
     const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
     const [selectedEmployee, setSelectedEmployee] = useState<EmployeeOverviewResponse | null>(null);
     const [listError, setListError] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [payslipFile, setPayslipFile] = useState<File | null>(null);
+    const [payslipError, setPayslipError] = useState<string | null>(null);
+    const [isP60, setIsP60] = useState(false);
+    const [payslipSuccess, setPayslipSuccess] = useState<string | null>(null);
 
     const [isAddingEmployee, setIsAddingEmployee] = useState(false);
     const [createForm, setCreateForm] = useState<CreateEmployeeRequest>(buildInitialCreateForm);
@@ -209,6 +214,102 @@ export function EmployeeOverview() {
         setSelectedPayslipMonth(event.target.value);
     };
 
+    const readFileAsBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const result = reader.result as string;
+                resolve(result.split(",")[1]);
+            };
+            reader.onerror = () => reject(new Error("Failed to read file"));
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const handlePayslipUpload = async () => {
+        if (!payslipFile) {
+            setPayslipError("Please select a PDF file.");
+            return;
+        }
+
+        if (!selectedEmployeeId) {
+            setPayslipError("No employee selected.");
+            return;
+        }
+
+        const [monthName, yearStr] = selectedPayslipMonth.split(" ");
+        const year = Number(yearStr);
+
+        const monthMap: Record<string, number> = {
+            January: 1,
+            February: 2,
+            March: 3,
+            April: 4,
+            May: 5,
+            June: 6,
+            July: 7,
+            August: 8,
+            September: 9,
+            October: 10,
+            November: 11,
+            December: 12,
+        };
+
+        const month = monthMap[monthName];
+
+        try {
+            const content = await readFileAsBase64(payslipFile);
+
+            const res = await authenticationService.fetch("/api/payslips/admin/upload", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    accountId: selectedEmployeeId,
+                    month,
+                    year,
+                    isP60,
+                    content,
+                    fileName: payslipFile.name,
+                }),
+            });
+
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text);
+            }
+
+            setPayslipFile(null);
+            setIsP60(false);
+            setPayslipError(null);
+            setPayslipSuccess("Payslip uploaded successfully.");
+        } catch (e) {
+            setPayslipSuccess(null);
+            setPayslipError(e instanceof Error ? e.message : "Upload failed");
+        }
+    };
+
+    //payslip upload handling - only accepts pdf files
+    const handlePayslipFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+
+        if (!file) return;
+
+        setPayslipError(null);
+        setPayslipSuccess(null);
+
+        if (!file.name.toLowerCase().endsWith(".pdf")) {
+            setPayslipError("Only PDF files are accepted.");
+            e.target.value = "";
+            return;
+        }
+
+        setPayslipFile(file);
+        e.target.value = "";
+    };
+
+    const handleUploadClick = () => {
+        fileInputRef.current?.click();
+    };
     const handleOpenAddEmployee = () => {
         setIsAddingEmployee(true);
         setCreateError(null);
@@ -743,11 +844,54 @@ export function EmployeeOverview() {
                                         <Button
                                             variant="contained"
                                             startIcon={<UploadRoundedIcon />}
-                                            onClick={() => void 0}
+                                            onClick={handlePayslipUpload}
                                             sx={styles.uploadButton}
                                         >
                                             Upload
                                         </Button>
+
+                                        <Typography
+                                            sx={styles.uploadHintText}
+                                            onClick={handleUploadClick}
+                                        >
+                                            Upload file
+                                        </Typography>
+
+                                        {payslipFile && (
+                                            <Typography sx={styles.selectedFileText}>
+                                                Selected: {payslipFile.name}
+                                            </Typography>
+                                        )}
+
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={isP60}
+                                                    onChange={(e) => setIsP60(e.target.checked)}
+                                                />
+                                            }
+                                            label="P60"
+                                        />
+
+                                        {payslipError && (
+                                            <Typography sx={styles.payslipErrorText}>
+                                                {payslipError}
+                                            </Typography>
+                                        )}
+
+                                        {payslipSuccess && (
+                                            <Typography sx={styles.payslipSuccessText}>
+                                                {payslipSuccess}
+                                            </Typography>
+                                        )}
+
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept="application/pdf"
+                                            style={{ display: "none" }}
+                                            onChange={handlePayslipFileChange}
+                                        />
                                     </Box>
                                 </Box>
                             </Paper>
