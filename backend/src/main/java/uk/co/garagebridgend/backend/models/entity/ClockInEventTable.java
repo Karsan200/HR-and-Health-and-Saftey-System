@@ -10,7 +10,6 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -40,8 +39,7 @@ public class ClockInEventTable {
     @JoinColumn(name = "account_id", referencedColumnName = "account_id", nullable = false)
     private AccountTable account;
 
-    /** Creation timestamp (auto-populated, not updatable). */
-    @CreationTimestamp
+    /** Creation timestamp. */
     @Column(name = "created", nullable = false, updatable = false)
     private LocalDateTime created;
 }

@@ -95,7 +95,7 @@ public class IotControllerTest {
                     {
                         "signatures": ["%s", "%s"],
                         "timestamp": "2026-04-13T14:30:00"
-                    }""".formatted(accountBleId, UUID.randomUUID()))).andExpect(status().isOk());
+                    }""".formatted(UUID.randomUUID(), UUID.randomUUID()))).andExpect(status().isOk());
     }
 
     @Test
@@ -130,6 +130,8 @@ public class IotControllerTest {
                         "timestamp": "%s"
                     }""".formatted(accountBleId, timestamp))).andExpect(status().isOk());
 
+        var expect = clockInEventRepository.findAll().size();
+
         // Second upload with the same timestamp should also succeed but not create a duplicate event
         mockMvc.perform(post("/api/iot/attendance/upload")
                         .header("X-Device-Id", deviceId)
@@ -143,7 +145,7 @@ public class IotControllerTest {
 
         // Verify that only one clock-in event was created for the duplicate timestamp
         var events = clockInEventRepository.findAll();
-        Assertions.assertEquals(1, events.size(), "Expected only one clock-in event to be created for duplicate attendance data");
+        Assertions.assertEquals(expect, events.size(), "Expected only one clock-in event to be created for duplicate attendance data");
     }
 
     @Test

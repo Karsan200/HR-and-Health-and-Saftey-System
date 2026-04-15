@@ -82,10 +82,10 @@ public class IotService {
 
             if (account != null) {
                 // If a clock-in event has been registered within the last minute, drop the entry
-                if (clockInEventRepository.countByEventTimeBetween(
+                if (clockInEventRepository.countByAccountAndTimeRange(
                         account.getAccountId(),
                         body.getTimestamp().minusMinutes(MINUTES_BETWEEN_CLOCK_INS),
-                        body.getTimestamp()
+                        body.getTimestamp().plusMinutes(MINUTES_BETWEEN_CLOCK_INS)
                 ) > 0) {
                     continue;
                 }
