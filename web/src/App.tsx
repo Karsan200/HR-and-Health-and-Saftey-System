@@ -11,7 +11,7 @@ import {CalendarPage} from "./pages/CalendarPage";
 import {PendingRequestsPage} from "./pages/PendingRequestsPage";
 import { PersonalPage } from "./pages/PersonalPage";
 import { EmployeeOverview } from "./pages/EmployeeOverview";
-import { ClockOverridesPage} from "./pages/ClockOverridesPage.tsx";
+import { ClockOverridesPage} from "./pages/ClockOverridesPage";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
