@@ -1097,3 +1097,115 @@ INSERT INTO qualifications_table (
        'Hybrid and Electric Vehicle Awareness',
        'Training course on safe servicing of hybrid and electric vehicles.',
        '2025-03-05 11:30:00');
+
+INSERT INTO document_recipient_table (
+    document_id,
+    account_id,
+    created
+) VALUES
+-- Company Safety Policy v2.1 everyone (accounts 1–8)
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 1, '2025-02-14 10:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 2, '2025-02-14 10:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 3, '2025-02-14 10:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 4, '2025-02-14 10:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 5, '2025-02-14 10:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 6, '2025-02-14 10:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 7, '2025-02-14 10:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 8, '2025-02-14 10:00:00'),
+
+-- Employee Handbook everyone
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 1, '2026-03-24 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 2, '2026-03-24 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 3, '2026-03-24 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 4, '2026-03-24 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 5, '2026-03-24 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 6, '2026-03-24 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 7, '2026-03-24 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 8, '2026-03-24 10:05:00'),
+
+-- SOP: Fire Safety Procedures everyone
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 1, '2025-02-14 10:10:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 2, '2025-02-14 10:10:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 3, '2025-02-14 10:10:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 4, '2025-02-14 10:10:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 5, '2025-02-14 10:10:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 6, '2025-02-14 10:10:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 7, '2025-02-14 10:10:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 8, '2025-02-14 10:10:00'),
+
+-- SOP: Equipment Handling technicians only (3, 4, 5, 6)
+((SELECT document_id FROM document_table WHERE title = 'SOP: Equipment Handling Instructions'), 3, '2025-02-14 10:15:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Equipment Handling Instructions'), 4, '2025-02-14 10:15:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Equipment Handling Instructions'), 5, '2025-02-14 10:15:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Equipment Handling Instructions'), 6, '2025-02-14 10:15:00'),
+
+-- Fire Safety Guidelines everyone
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 1, '2025-02-14 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 2, '2025-02-14 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 3, '2025-02-14 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 4, '2025-02-14 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 5, '2025-02-14 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 6, '2025-02-14 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 7, '2025-02-14 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 8, '2025-02-14 10:05:00'),
+
+-- Employee Training Manual all except admins (3–8)
+((SELECT document_id FROM document_table WHERE title = 'Employee Training Manual v3.0'), 3, '2025-03-02 11:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Training Manual v3.0'), 4, '2025-03-02 11:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Training Manual v3.0'), 5, '2025-03-02 11:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Training Manual v3.0'), 6, '2025-03-02 11:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Training Manual v3.0'), 7, '2025-03-02 11:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Training Manual v3.0'), 8, '2025-03-02 11:00:00'),
+
+-- HR Guidelines managers only (1, 2, 3, 4)
+((SELECT document_id FROM document_table WHERE title = 'HR Guidelines'), 1, '2025-04-18 15:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'HR Guidelines'), 2, '2025-04-18 15:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'HR Guidelines'), 3, '2025-04-18 15:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'HR Guidelines'), 4, '2025-04-18 15:00:00'),
+
+-- Hazard Report Template everyone
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 1, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 2, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 3, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 4, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 5, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 6, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 7, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 8, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+
+-- Equipment Safety Procedures workshop staff (3, 4, 5, 6, 8)
+((SELECT document_id FROM document_table WHERE title = 'Equipment Safety Procedures'), 3, '2025-07-12 09:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Equipment Safety Procedures'), 4, '2025-07-12 09:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Equipment Safety Procedures'), 5, '2025-07-12 09:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Equipment Safety Procedures'), 6, '2025-07-12 09:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Equipment Safety Procedures'), 8, '2025-07-12 09:00:00'),
+
+-- Workshop Rules everyone
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 1, '2025-08-20 17:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 2, '2025-08-20 17:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 3, '2025-08-20 17:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 4, '2025-08-20 17:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 5, '2025-08-20 17:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 6, '2025-08-20 17:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 7, '2025-08-20 17:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 8, '2025-08-20 17:00:00'),
+
+-- Health and Safety Policy everyone
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 1, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 2, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 3, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 4, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 5, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 6, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 7, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 8, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+
+-- Emergency Procedures everyone
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 1, CURRENT_TIMESTAMP),
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 2, CURRENT_TIMESTAMP),
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 3, CURRENT_TIMESTAMP),
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 4, CURRENT_TIMESTAMP),
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 5, CURRENT_TIMESTAMP),
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 6, CURRENT_TIMESTAMP),
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 7, CURRENT_TIMESTAMP),
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 8, CURRENT_TIMESTAMP);
