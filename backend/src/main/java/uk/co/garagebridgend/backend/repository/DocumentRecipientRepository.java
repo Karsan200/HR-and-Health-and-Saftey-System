@@ -9,9 +9,19 @@ import java.util.List;
 
 public interface DocumentRecipientRepository extends JpaRepository<DocumentRecipientTable, Long> {
 
-    /** Check whether a document was sent to a specific account. */
+    /**
+     * Checks if a record exists for the given document and account,
+     * indicating whether the document was sent to that account.
+     * @param document
+     * @param account
+     * @return true if a record exists for the given document and account, false otherwise
+     */
     boolean existsByDocumentAndAccount(DocumentTable document, AccountTable account);
 
-    /** Get all recipient records for a given document. */
+    /**
+     * Finds all document recipient records for a given document, returning a list of accounts the document was sent to.
+     * @param document
+     * @return list of DocumentRecipientTable records for the given document
+     */
     List<DocumentRecipientTable> findAllByDocument(DocumentTable document);
 }

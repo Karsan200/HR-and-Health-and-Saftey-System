@@ -31,7 +31,10 @@ public class DocumentService {
     /** Repository for accessing file data. */
     private final FilesRepository filesRepository;
 
+    /** Repository for accessing account data. */
     private final AccountRepository accountRepository;
+
+    /** Repository for managing document recipients. */
     private final DocumentRecipientRepository documentRecipientRepository;
 
 
