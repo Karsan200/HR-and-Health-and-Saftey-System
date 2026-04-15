@@ -10,4 +10,4 @@ package uk.co.garagebridgend.backend.models.response;
 public record AccountSearchResponse(
         Long accountId,
         String fullName
-) {}
+) { }

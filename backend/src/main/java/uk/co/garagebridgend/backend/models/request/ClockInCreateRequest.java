@@ -16,4 +16,4 @@ public record ClockInCreateRequest(
         LocalDate date,
         LocalTime clockInTime,
         LocalTime clockOutTime
-) {}
+) { }

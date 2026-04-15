@@ -36,6 +36,7 @@ public interface ClockInReportRepository extends JpaRepository<ClockInReportTabl
      *
      * @param account the account to check
      * @param clockIn the clock-in record to check
+     * @return if a report already exists for the given account and clock-in record.
      */
     @Query("""
     SELECT r

@@ -36,5 +36,5 @@ public record ClockInAdminResponse(
             Long reportId,
             String issue,
             java.time.LocalDateTime created
-    ) {}
+    ) { }
 }

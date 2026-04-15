@@ -15,4 +15,4 @@ public record ClockInOverrideRequest(
         LocalTime clockInTime,
         LocalTime clockOutTime,
         boolean removeReport
-) {}
+) { }
