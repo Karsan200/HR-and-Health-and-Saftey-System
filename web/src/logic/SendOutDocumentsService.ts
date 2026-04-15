@@ -7,6 +7,7 @@ export interface SendOutDocumentPayload {
     category: DocumentCategory;
     requireSignature: boolean;
     file: File;
+    recipientIds: number[];
 }
 
 /**
@@ -56,6 +57,7 @@ export async function sendOutDocument(
         category: payload.category,
         requireSignature: payload.requireSignature,
         content,
+        recipientIds: payload.recipientIds,
     };
 
     const response = await authenticationService.fetch("/api/documents/admin/send-out", {

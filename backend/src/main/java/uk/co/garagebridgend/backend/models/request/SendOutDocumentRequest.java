@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * Data Transfer Object used to represent a send out document request.
  * This DTO is used by the backend to receive document data from the
@@ -28,4 +30,10 @@ public class SendOutDocumentRequest {
      * {@code data:application/pdf;base64,} header).
      */
     private String content;
+
+    /**
+     * List of account IDs to send the document to.
+     * Empty or null means send to everyone.
+     */
+    private List<Long> recipientIds;
 }

@@ -2,15 +2,11 @@ package uk.co.garagebridgend.backend.logic;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.co.garagebridgend.backend.models.entity.DocumentTable;
-import uk.co.garagebridgend.backend.models.entity.FilesTable;
-import uk.co.garagebridgend.backend.models.entity.SignatureTable;
+import uk.co.garagebridgend.backend.models.entity.*;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.request.SendOutDocumentRequest;
 import uk.co.garagebridgend.backend.models.response.DocumentResponse;
-import uk.co.garagebridgend.backend.repository.DocumentRepository;
-import uk.co.garagebridgend.backend.repository.FilesRepository;
-import uk.co.garagebridgend.backend.repository.SignatureRepository;
+import uk.co.garagebridgend.backend.repository.*;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -34,6 +30,9 @@ public class DocumentService {
 
     /** Repository for accessing file data. */
     private final FilesRepository filesRepository;
+
+    private final AccountRepository accountRepository;
+    private final DocumentRecipientRepository documentRecipientRepository;
 
 
     /**
@@ -92,10 +91,8 @@ public class DocumentService {
 
         var account = authenticationService.getCurrentUser();
 
-        // Strip trailing .pdf from the title
         String title = request.getTitle().trim().replaceAll("(?i)\\.pdf$", "");
 
-        // Apply category-specific title rules
         switch (request.getCategory()) {
             case "sop" -> {
                 if (!title.toUpperCase().startsWith("SOP")) {
@@ -109,22 +106,19 @@ public class DocumentService {
                     );
                 }
             }
-            default -> { /* policy — no transformation needed */ }
+            default -> {
+            }
         }
 
-        // Decode the base64 file content
         byte[] fileBytes = storageService.decodeBase64(request.getContent());
 
-        // Persist the FilesTable record FIRST (like hazard service)
         FilesTable file = new FilesTable();
         file.setAccount(account);
         file.setCreatedBy(account);
         file.setName(title);
         file.setExtension("pdf");
-
         filesRepository.save(file);
 
-        // NOW get the generated ID
         UUID fileId = file.getFileId();
 
         // Upload to MinIO using that ID REMEMBER TO UNCOMMENT THIS BEFORE MERGE
@@ -134,11 +128,25 @@ public class DocumentService {
 //                "pdf"
 //        );
 
-        // Persist the DocumentTable record
         DocumentTable document = new DocumentTable();
         document.setFile(file);
         document.setTitle(title);
         document.setSignatureRequired(request.isRequireSignature());
         documentRepository.save(document);
+
+        // Resolve recipients — everyone if list is null/empty, otherwise specific accounts
+        List<AccountTable> recipients;
+        if (request.getRecipientIds() == null || request.getRecipientIds().isEmpty()) {
+            recipients = accountRepository.findAll();
+        } else {
+            recipients = accountRepository.findAllById(request.getRecipientIds());
+        }
+
+        for (AccountTable recipient : recipients) {
+            DocumentRecipientTable recipientRecord = new DocumentRecipientTable();
+            recipientRecord.setDocument(document);
+            recipientRecord.setAccount(recipient);
+            documentRecipientRepository.save(recipientRecord);
+        }
     }
 }

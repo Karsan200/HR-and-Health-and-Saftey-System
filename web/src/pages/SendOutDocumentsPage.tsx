@@ -135,7 +135,13 @@ export function SendOutDocumentsPage() {
 
         try {
             await sendOutDocument(
-                { title: trimmedTitle, category, requireSignature, file },
+                {
+                    title: trimmedTitle,
+                    category,
+                    requireSignature,
+                    file,
+                    recipientIds: sendTo === "specific" ? selectedEmployees : [],
+                },
                 authenticationService
             );
 
