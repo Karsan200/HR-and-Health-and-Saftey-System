@@ -1,9 +1,11 @@
 package uk.co.garagebridgend.backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import uk.co.garagebridgend.backend.models.entity.ClockInEventTable;
 
 import java.time.LocalDate;
@@ -52,6 +54,18 @@ public interface ClockInEventRepository extends JpaRepository<ClockInEventTable,
     ORDER BY e.created ASC
     """)
     List<ClockInEventTable> findByDateAndAccount(
+            @Param("date") LocalDate date,
+            @Param("accountId") Long accountId
+    );
+
+    @Modifying
+    @Transactional
+    @Query("""
+    DELETE FROM ClockInEventTable e
+    WHERE CAST(e.created AS LocalDate) = :date
+    AND e.account.accountId = :accountId
+    """)
+    void deleteByDateAndAccountId(
             @Param("date") LocalDate date,
             @Param("accountId") Long accountId
     );

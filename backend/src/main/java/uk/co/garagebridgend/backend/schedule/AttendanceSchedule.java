@@ -115,6 +115,9 @@ public class AttendanceSchedule {
                         clockInRepository.save(clock);
                     }
                 }
+
+                // Delete the clock in events for the date and employee
+                clockInEventRepository.deleteByDateAndAccountId(date, employee.getAccountId());
             }
         }
     }
