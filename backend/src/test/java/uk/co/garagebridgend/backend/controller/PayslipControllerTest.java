@@ -113,4 +113,23 @@ class PayslipControllerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
         assertEquals("Upload failed", exception.getReason());
     }
+
+    @Test
+    void testUploadPayslipBadRequest() {
+
+        UploadPayslipRequest request = new UploadPayslipRequest(
+                1L, 1, 2026, false, "base64content", "payslip.pdf"
+        );
+
+        doThrow(new IllegalArgumentException("Invalid payslip data"))
+                .when(payslipService).uploadPayslip(request);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> payslipController.uploadPayslip(request)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertEquals("Invalid payslip data", exception.getReason());
+    }
 }
