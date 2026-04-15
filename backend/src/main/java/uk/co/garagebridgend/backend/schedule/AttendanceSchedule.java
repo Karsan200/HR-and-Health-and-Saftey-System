@@ -69,6 +69,7 @@ public class AttendanceSchedule {
             for (AccountTable employee : employees) {
                 // Get the clock in events for the employee on the date
                 var events = clockInEventRepository.findByDateAndAccount(date, employee.getAccountId());
+                LOG.debug("Processing {} events for account {} on {}", events.size(), employee.getAccountId(), date);
 
                 if (events.isEmpty()) continue;
 
@@ -101,23 +102,46 @@ public class AttendanceSchedule {
                 } else {
                     // If the record has not been admin edited, and there are more than 2 events then update the record
                     var clock = record.getFirst();
-                    if (!clock.isAdminAdjusted() && events.size() >= 2) {
-                        // If the new event is earlier than the start time
-                        if (LocalTime.from(events.getFirst().getCreated()).isBefore(clock.getClockInTime())) {
-                            clock.setClockInTime(LocalTime.from(events.getFirst().getCreated()));
+                    if (!clock.isAdminAdjusted()) {
+                        if (events.size() >= 2) {
+                            // If the new event is earlier than the start time
+                            if (LocalTime.from(events.getFirst().getCreated()).isBefore(clock.getClockInTime())) {
+                                clock.setClockInTime(LocalTime.from(events.getFirst().getCreated()));
+                            }
+                            // If clock out record is null or the new event is later than the end time
+                            if (clock.getClockOutTime() == null
+                                    || LocalTime.from(events.getLast().getCreated()).isAfter(clock.getClockOutTime())) {
+                                clock.setClockOutTime(LocalTime.from(events.getLast().getCreated()));
+                                clock.setCreated(events.getLast().getCreated());
+                            }
+                            clockInRepository.save(clock);
                         }
-                        // If clock out record is null or the new event is later than the end time
-                        if (clock.getClockOutTime() == null
-                                || LocalTime.from(events.getLast().getCreated()).isAfter(clock.getClockOutTime())) {
-                            clock.setClockOutTime(LocalTime.from(events.getLast().getCreated()));
-                            clock.setCreated(events.getLast().getCreated());
+                        else {
+                            // If the new event is earlier than the start time
+                            if (LocalTime.from(events.getFirst().getCreated()).isBefore(clock.getClockInTime())) {
+                                clock.setClockInTime(LocalTime.from(events.getFirst().getCreated()));
+                                clock.setCreated(events.getFirst().getCreated());
+                                clockInRepository.save(clock);
+                            } else {
+                                // If the clock out record is null then set it to the new event
+                                if (clock.getClockOutTime() == null) {
+                                    clock.setClockOutTime(LocalTime.from(events.getFirst().getCreated()));
+                                    clock.setCreated(events.getFirst().getCreated());
+                                    clockInRepository.save(clock);
+                                } else if (LocalTime.from(events.getFirst().getCreated()).isAfter(clock.getClockOutTime())) {
+                                    // If the new event is later than the end time
+                                    clock.setClockOutTime(LocalTime.from(events.getFirst().getCreated()));
+                                    clock.setCreated(events.getFirst().getCreated());
+                                    clockInRepository.save(clock);
+                                }
+                            }
                         }
-                        clockInRepository.save(clock);
                     }
                 }
 
                 // Delete the clock in events for the date and employee
                 clockInEventRepository.deleteByDateAndAccountId(date, employee.getAccountId());
+                LOG.debug("Deleted events for account {} on {}", employee.getAccountId(), date);
             }
         }
     }
