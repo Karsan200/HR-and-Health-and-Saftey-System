@@ -34,15 +34,16 @@ public class AttendanceSchedule {
     private final ClockInRepository clockInRepository;
 
     /**
-     * Constructor for AttendanceSchedule that initializes the required repositories for managing attendance-related data.
+     * Constructor for AttendanceSchedule that initializes the required repositories for
+     * managing attendance-related data.
      * @param accountRepositoryImpl the repository implementation for accessing account data
      * @param clockInEventRepositoryImpl the repository implementation for managing clock-in event data
      * @param clockInRepositoryImpl the repository implementation for managing clock-in records
      */
     public AttendanceSchedule(
-            AccountRepository accountRepositoryImpl,
-            ClockInEventRepository clockInEventRepositoryImpl,
-            ClockInRepository clockInRepositoryImpl
+            final AccountRepository accountRepositoryImpl,
+            final ClockInEventRepository clockInEventRepositoryImpl,
+            final ClockInRepository clockInRepositoryImpl
     ) {
         this.accountRepository = accountRepositoryImpl;
         this.clockInEventRepository = clockInEventRepositoryImpl;
@@ -71,7 +72,9 @@ public class AttendanceSchedule {
                 var events = clockInEventRepository.findByDateAndAccount(date, employee.getAccountId());
                 LOG.debug("Processing {} events for account {} on {}", events.size(), employee.getAccountId(), date);
 
-                if (events.isEmpty()) continue;
+                if (events.isEmpty()) {
+                    continue;
+                }
 
                 // Check if there is a clock in record for the employee on the date
                 LocalDateTime start = date.atStartOfDay();
@@ -115,8 +118,7 @@ public class AttendanceSchedule {
                                 clock.setCreated(events.getLast().getCreated());
                             }
                             clockInRepository.save(clock);
-                        }
-                        else {
+                        } else {
                             // If the new event is earlier than the start time
                             if (LocalTime.from(events.getFirst().getCreated()).isBefore(clock.getClockInTime())) {
                                 clock.setClockInTime(LocalTime.from(events.getFirst().getCreated()));
@@ -128,7 +130,8 @@ public class AttendanceSchedule {
                                     clock.setClockOutTime(LocalTime.from(events.getFirst().getCreated()));
                                     clock.setCreated(events.getFirst().getCreated());
                                     clockInRepository.save(clock);
-                                } else if (LocalTime.from(events.getFirst().getCreated()).isAfter(clock.getClockOutTime())) {
+                                } else if (
+                                LocalTime.from(events.getFirst().getCreated()).isAfter(clock.getClockOutTime())) {
                                     // If the new event is later than the end time
                                     clock.setClockOutTime(LocalTime.from(events.getFirst().getCreated()));
                                     clock.setCreated(events.getFirst().getCreated());

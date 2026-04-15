@@ -26,7 +26,8 @@ public interface ClockInEventRepository extends JpaRepository<ClockInEventTable,
      * @return the count of clock-in events in the specified time range
      */
     @Query(
-        "SELECT COUNT(e) FROM ClockInEventTable e WHERE e.account.accountId = :accountId AND (e.created BETWEEN :startTime AND :endTime)"
+        "SELECT COUNT(e) FROM ClockInEventTable e WHERE e.account.accountId = :accountId AND "
+        + "(e.created BETWEEN :startTime AND :endTime)"
     )
     long countByAccountAndTimeRange(
             @Param("accountId") Long accountId,
@@ -58,6 +59,11 @@ public interface ClockInEventRepository extends JpaRepository<ClockInEventTable,
             @Param("accountId") Long accountId
     );
 
+    /** Deletes all clock-in events for a specific account on a given date.
+     *
+     * @param date the date to filter events by
+     * @param accountId the ID of the account to filter events by
+     */
     @Modifying
     @Transactional
     @Query("""
