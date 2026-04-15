@@ -109,6 +109,7 @@ function ProfileTab({ profile, settings }: { profile: ProfileResponse, settings:
 }
 
 // Second Tab (Settings)
+type Step = "start" | "end" | "confirm";
 
 function SettingsTab({ settings }: { settings: SettingsResponse }) {
     const { authenticationService } = useAuth();
@@ -119,20 +120,16 @@ function SettingsTab({ settings }: { settings: SettingsResponse }) {
 
     const [silentStart, setSilentStart] = useState<Dayjs>(parseTime(settings.silentStart));
     const [silentEnd, setSilentEnd]     = useState<Dayjs>(parseTime(settings.silentEnd));
-    const [editing, setEditing]         = useState<"start" | "end">("start");
+    const [step, setStep]               = useState<Step>("start");
     const [submitting, setSubmitting]   = useState(false);
     const [success, setSuccess]         = useState(false);
     const [error, setError]             = useState<string | null>(null);
 
     function formatDisplay(t: Dayjs): string {
-        return t.format("hh:mm");
+        return t.format("hh:mm A");
     }
 
-    function formatAmPm(t: Dayjs): string {
-        return t.format("A");
-    }
-
-    async function handleOk() {
+    async function handleSubmit() {
         setError(null);
         setSuccess(false);
         setSubmitting(true);
@@ -142,6 +139,7 @@ function SettingsTab({ settings }: { settings: SettingsResponse }) {
                 silentEnd: silentEnd.format("HH:mm:ss"),
             });
             setSuccess(true);
+            setStep("start");
         } catch {
             setError("Failed to save notification settings. Please try again.");
         } finally {
@@ -154,106 +152,165 @@ function SettingsTab({ settings }: { settings: SettingsResponse }) {
         setSilentEnd(parseTime(settings.silentEnd));
         setError(null);
         setSuccess(false);
+        setStep("start");
     }
+
+    const clockChange = (newValue: Dayjs | null) => {
+        if (!newValue) return;
+        if (step === "start") setSilentStart(newValue);
+        else setSilentEnd(newValue);
+    };
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Box sx={styles.settingsCard}>
                 <Typography sx={styles.settingsTitle}>Notification Settings</Typography>
+                <Typography sx={styles.quietTimeLabel}>NOTIFICATION QUIET TIME</Typography>
 
-                {/* Quiet time label */}
-                <Typography sx={styles.quietTimeLabel}>
-                    NOTIFICATION QUIET TIME
-                </Typography>
-
-                <Box sx={styles.quietTimeRow}>
-                    <Box
-                        onClick={() => setEditing("start")}
-                        sx={styles.clickableTimeBox}
-                    >
-                        <Typography sx={styles.timeText(editing === "start")}>
-                            {formatDisplay(silentStart)}
-                        </Typography>
-                        <Typography sx={styles.amPmText(editing === "start")}>
-                            {formatAmPm(silentStart)}
-                        </Typography>
-                    </Box>
-
-                    <Typography sx={styles.quietTimeArrow}>→</Typography>
-
-                    <Box
-                        onClick={() => setEditing("end")}
-                        sx={styles.clickableTimeBox}
-                    >
-                        <Typography sx={styles.timeText(editing === "end")}>
-                            {formatDisplay(silentEnd)}
+                {/* Step: Set Start Time */}
+                {step === "start" && (
+                    <>
+                        <Typography sx={styles.quietTimeStepLabel}>
+                            Set start time
                         </Typography>
 
-                        <Typography sx={styles.amPmText(editing === "end")}>
-                            {formatAmPm(silentEnd)}
-                        </Typography>
-                    </Box>
-                </Box>
+                        <StaticTimePicker
+                            value={silentStart}
+                            onChange={clockChange}
+                            slotProps={{
+                                actionBar: { sx: { display: "none" } },
+                                toolbar:   { sx: { display: "none" } },
+                            }}
+                            sx={clockSx}
+                        />
 
-                <StaticTimePicker
-                    value={editing === "start" ? silentStart : silentEnd}
-                    onChange={(newValue) => {
-                        if (!newValue) return;
-                        if (editing === "start") setSilentStart(newValue);
-                        else setSilentEnd(newValue);
-                    }}
-                    slotProps={{
-                        actionBar: { sx: { display: "none" } },
-                        toolbar: { sx: { display: "none" } },
-                    }}
-                    sx={{
-                        "& .MuiClock-pin": { backgroundColor: DefaultColours.redPrimary },
-                        "& .MuiClockPointer-root": { backgroundColor: DefaultColours.redPrimary },
-                        "& .MuiClockPointer-thumb": {
-                            backgroundColor: DefaultColours.redPrimary,
-                            borderColor: DefaultColours.redPrimary,
-                        },
-                        "& .MuiClockNumber-root.Mui-selected": {
-                            backgroundColor: DefaultColours.redPrimary,
-                        },
-                        "& .MuiPickersToolbar-root": { display: "none" },
-                    }}
-                />
-
-                <Box sx={styles.settingsButtonRow}>
-                    <Box
-                        component="button"
-                        onClick={handleCancel}
-                        disabled={submitting}
-                        sx={styles.settingsCancelButton}
-                    >
-                        CANCEL
-                    </Box>
-                    <Box
-                        component="button"
-                        onClick={handleOk}
-                        disabled={submitting}
-                        sx={styles.settingsOkButton}
-                    >
-                        {submitting ? "SAVING..." : "OK"}
-                    </Box>
-                </Box>
-
-                {success && (
-                    <Typography sx={styles.settingsSuccessText}>
-                        Notification settings saved.
-                    </Typography>
+                        <Box sx={styles.settingsButtonRow}>
+                            <Box
+                                component="button"
+                                onClick={handleCancel}
+                                sx={styles.settingsCancelButton}
+                            >
+                                CANCEL
+                            </Box>
+                            <Box
+                                component="button"
+                                onClick={() => setStep("end")}
+                                sx={styles.settingsOkButton}
+                            >
+                                SET START TIME
+                            </Box>
+                        </Box>
+                    </>
                 )}
 
-                {error && (
-                    <Typography sx={styles.settingsErrorText}>
-                        {error}
-                    </Typography>
+                {/* Step: Set End Time */}
+                {step === "end" && (
+                    <>
+                        <Typography sx={styles.quietTimeStepLabel}>
+                            Set end time
+                        </Typography>
+
+                        <StaticTimePicker
+                            value={silentEnd}
+                            onChange={clockChange}
+                            slotProps={{
+                                actionBar: { sx: { display: "none" } },
+                                toolbar:   { sx: { display: "none" } },
+                            }}
+                            sx={clockSx}
+                        />
+
+                        <Box sx={styles.settingsButtonRow}>
+                            <Box
+                                component="button"
+                                onClick={() => setStep("start")}
+                                sx={styles.settingsCancelButton}
+                            >
+                                BACK
+                            </Box>
+                            <Box
+                                component="button"
+                                onClick={() => setStep("confirm")}
+                                sx={styles.settingsOkButton}
+                            >
+                                SET END TIME
+                            </Box>
+                        </Box>
+                    </>
+                )}
+
+                {/* Step: Confirm */}
+                {step === "confirm" && (
+                    <>
+                        <Typography sx={styles.quietTimeStepLabel}>
+                            Confirm quiet hours
+                        </Typography>
+
+                        <Box sx={styles.quietTimeRow}>
+                            <Box sx={styles.clickableTimeBox}>
+                                <Typography sx={styles.timeText(true)}>
+                                    {formatDisplay(silentStart)}
+                                </Typography>
+                                <Typography sx={{ ...styles.amPmText(true), fontSize: "0.75rem", color: "text.secondary" }}>
+                                    Start
+                                </Typography>
+                            </Box>
+
+                            <Typography sx={styles.quietTimeArrow}>→</Typography>
+
+                            <Box sx={styles.clickableTimeBox}>
+                                <Typography sx={styles.timeText(true)}>
+                                    {formatDisplay(silentEnd)}
+                                </Typography>
+                                <Typography sx={{ ...styles.amPmText(true), fontSize: "0.75rem", color: "text.secondary" }}>
+                                    End
+                                </Typography>
+                            </Box>
+                        </Box>
+
+                        <Box sx={styles.settingsButtonRow}>
+                            <Box
+                                component="button"
+                                onClick={() => setStep("end")}
+                                disabled={submitting}
+                                sx={styles.settingsCancelButton}
+                            >
+                                BACK
+                            </Box>
+                            <Box
+                                component="button"
+                                onClick={handleSubmit}
+                                disabled={submitting}
+                                sx={styles.settingsOkButton}
+                            >
+                                {submitting ? "SAVING..." : "OK"}
+                            </Box>
+                        </Box>
+
+                        {success && (
+                            <Typography sx={styles.settingsSuccessText}>
+                                Notification settings saved.
+                            </Typography>
+                        )}
+                        {error && (
+                            <Typography sx={styles.settingsErrorText}>
+                                {error}
+                            </Typography>
+                        )}
+                    </>
                 )}
             </Box>
         </LocalizationProvider>
     );
 }
+
+const clockSx = {
+    "& .MuiClock-pin":                    { backgroundColor: DefaultColours.redPrimary },
+    "& .MuiClockPointer-root":            { backgroundColor: DefaultColours.redPrimary },
+    "& .MuiClockPointer-thumb":           { backgroundColor: DefaultColours.redPrimary, borderColor: DefaultColours.redPrimary },
+    "& .MuiClockNumber-root.Mui-selected": { backgroundColor: DefaultColours.redPrimary },
+    "& .MuiPickersToolbar-root":          { display: "none" },
+};
 
 // Third Tab (Security)
 

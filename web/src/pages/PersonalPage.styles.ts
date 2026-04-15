@@ -406,4 +406,8 @@ export const personalPageStyles = {
     },
 
     hideActionBar: { display: "none" },
+
+    quietTimeStepLabel: {
+
+    }
 };
