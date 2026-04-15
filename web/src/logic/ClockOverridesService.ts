@@ -196,6 +196,19 @@ export async function searchAccounts(
     return response.json();
 }
 
+/**
+ * Fetches the number of clock-in records that currently have an employee report attached.
+ * Used by pages that need the badge count without loading the full list.
+ *
+ * @param authService the authentication service used to make the request
+ */
+export async function fetchReportedClockInCount(
+    authService: AuthenticationService,
+): Promise<number> {
+    const data = await fetchAllClockIns(authService);
+    return data.filter((r) => r.report !== null).length;
+}
+
 // Formatting helpers
 
 /**

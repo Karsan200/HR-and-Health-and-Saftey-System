@@ -20,6 +20,7 @@ import {
 } from "../logic/LeaveTypeService";
 import { pendingRequestsPageStyles as styles } from "./PendingRequestsPage.styles";
 import {DefaultColours} from "../theme/colours";
+import { fetchReportedClockInCount } from "../logic/ClockOverridesService";
 
 interface LeaveRequestCardProps {
     request: PendingLeaveRequest;
@@ -145,6 +146,7 @@ export function PendingRequestsPage() {
     const [leaveTypes, setLeaveTypes] = useState<ResolvedLeaveType[]>([]);
     const [loading, setLoading]       = useState(false);
     const [error, setError]           = useState<string | null>(null);
+    const [reportedCount, setReportedCount] = useState<number>(0);
 
     // Fetch leave types once on mount for colours and icons
     const loadLeaveTypes = useCallback(async () => {
@@ -177,6 +179,20 @@ export function PendingRequestsPage() {
         loadRequests();
     }, [loadRequests]);
 
+    // Fetch the reported clock-in count once on mount for the nav badge
+    const loadReportedCount = useCallback(async () => {
+        try {
+            const count = await fetchReportedClockInCount(authenticationService);
+            setReportedCount(count);
+        } catch {
+            // Non-critical — badge stays at 0 if the request fails
+        }
+    }, [authenticationService]);
+
+    useEffect(() => {
+        loadReportedCount();
+    }, [loadReportedCount]);
+
     async function handleApprove(leaveId: number, reason: string) {
         await approveLeaveRequest(leaveId, reason, authenticationService);
         setRequests((prev) => prev.filter((r) => r.leaveId !== leaveId));
@@ -190,7 +206,7 @@ export function PendingRequestsPage() {
     const calendarTabs: SectionNavTab[] = [
         { label: "Calendar View",    route: "/calendar" },
         { label: "Pending Requests", route: "/calendar/requests", alert: true, count: requests.length },
-        { label: "Clock Overrides",  route: "/calendar/overrides" },
+        { label: "Clock Overrides",  route: "/calendar/overrides", count: reportedCount },
     ];
 
     return (

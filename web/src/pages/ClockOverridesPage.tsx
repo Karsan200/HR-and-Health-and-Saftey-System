@@ -35,12 +35,14 @@ import {
     formatTime,
     formatDateHeading,
     toBackendTime,
+    fetchReportedClockInCount,
     type ClockInRecord,
     type AccountSearchResult,
 } from "../logic/ClockOverridesService";
 import { clockOverridesPageStyles as styles } from "./ClockOverridesPage.styles";
 import { DefaultColours } from "../theme/colours";
 import { FontSize, TextStyles, BorderRadius } from "../theme/theme";
+import { fetchPendingLeaveCount } from "../logic/PendingRequestsService";
 
 function todayISO(): string {
     return new Date().toISOString().split("T")[0];
@@ -772,6 +774,8 @@ export function ClockOverridesPage() {
     const [addModalOpen, setAddModalOpen]         = useState(false);
     const [deletingRecord, setDeletingRecord]     = useState<ClockInRecord | null>(null);
     const [deleteModalOpen, setDeleteModalOpen]   = useState(false);
+    const [pendingCount, setPendingCount]         = useState<number>(0);
+    const [totalReportedCount, setTotalReportedCount] = useState<number>(0);
 
     const loadRecords = useCallback(async () => {
         setLoading(true);
@@ -791,6 +795,35 @@ export function ClockOverridesPage() {
     useEffect(() => {
         void loadRecords();
     }, [loadRecords]);
+
+    // Fetch the pending request count once on mount for the nav badge
+    const loadPendingCount = useCallback(async () => {
+        try {
+            const count = await fetchPendingLeaveCount(authenticationService);
+            setPendingCount(count);
+        } catch {
+            // Non-critical — badge stays at 0 if the request fails
+        }
+    }, [authenticationService]);
+
+    useEffect(() => {
+        loadPendingCount();
+    }, [loadPendingCount]);
+
+    // Fetch the total reported count once on mount for the nav badge — independent of
+    // the active date filter and employee filter so it always reflects the full picture
+    const loadTotalReportedCount = useCallback(async () => {
+        try {
+            const count = await fetchReportedClockInCount(authenticationService);
+            setTotalReportedCount(count);
+        } catch {
+            // Non-critical — badge stays at 0 if the request fails
+        }
+    }, [authenticationService]);
+
+    useEffect(() => {
+        loadTotalReportedCount();
+    }, [loadTotalReportedCount]);
 
     const filteredAndSorted = useMemo(() => {
         let result = [...records];
@@ -835,6 +868,8 @@ export function ClockOverridesPage() {
                     : r
             )
         );
+        // Keep the nav badge in sync when a report is dismissed via the edit modal
+        if (removeReport) setTotalReportedCount((n) => Math.max(0, n - 1));
     }
 
     function handleAdded(record: ClockInRecord) {
@@ -842,15 +877,20 @@ export function ClockOverridesPage() {
     }
 
     function handleDeleted(clockId: string) {
+        const wasReported = records.find((r) => r.clockId === clockId)?.report !== null;
         setRecords((prev) => prev.filter((r) => r.clockId !== clockId));
+        // Keep the nav badge in sync when a reported record is deleted
+        if (wasReported) setTotalReportedCount((n) => Math.max(0, n - 1));
     }
 
+    // reportedCount drives the "N reported" summary text inside the filters bar,
+    // scoped to the currently loaded records only (intentional — it reflects what's visible)
     const reportedCount = records.filter((r) => r.report !== null).length;
 
     const calendarTabs: SectionNavTab[] = [
         { label: "Calendar View",    route: "/calendar" },
-        { label: "Pending Requests", route: "/calendar/requests" },
-        { label: "Clock Overrides",  route: "/calendar/overrides", alert: true, count: reportedCount },
+        { label: "Pending Requests", route: "/calendar/requests", count: pendingCount },
+        { label: "Clock Overrides",  route: "/calendar/overrides", alert: true, count: totalReportedCount },
     ];
 
     const filterSx = { ...styles.filterField, minWidth: "160px" };
