@@ -49,6 +49,9 @@ public class AdminEmployeeOverviewService {
     /** Maximum phone number length after sanitisation. */
     private static final int MAX_PHONE_NUMBER_LENGTH = 17;
 
+    /** Minimum phone number length after sanitisation. */
+    private static final int MIN_PHONE_NUMBER_LENGTH = 8;
+
     /** Maximum username length. */
     private static final int MAX_USERNAME_LENGTH = 32;
 
@@ -415,19 +418,23 @@ public class AdminEmployeeOverviewService {
         if (phoneNumber == null) {
             throw new IllegalArgumentException("Phone number is required.");
         }
-
         String trimmed = phoneNumber.trim();
-        if (trimmed.isBlank()) {
-            throw new IllegalArgumentException("Phone number is required.");
-        }
 
         if (!PHONE_INPUT_PATTERN.matcher(trimmed).matches()) {
+            throw new IllegalArgumentException("Phone number contains invalid characters.");
+        }
+
+        if (trimmed.isBlank()) {
             throw new IllegalArgumentException("Phone number contains invalid characters.");
         }
 
         String sanitised = trimmed.replaceAll("[()\\-\\s]", "");
         if (sanitised.length() > MAX_PHONE_NUMBER_LENGTH) {
             throw new IllegalArgumentException("Phone number is too long.");
+        }
+
+        if (sanitised.length() < MIN_PHONE_NUMBER_LENGTH) {
+            throw new IllegalArgumentException("Phone number does not contain enough valid numbers.");
         }
 
         return sanitised;
