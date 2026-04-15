@@ -82,11 +82,11 @@ public class PayslipService {
         UUID fileId = file.getFileId();
 
         // Upload to storage
-//        storageService.uploadFile(
-//                fileId.toString(),
-//                new ByteArrayInputStream(fileBytes),
-//                "pdf"
-//        );
+        storageService.uploadFile(
+                fileId.toString(),
+                new ByteArrayInputStream(fileBytes),
+                "pdf"
+        );
 
         // Create payslip record
         PayslipsTable payslip = new PayslipsTable();
