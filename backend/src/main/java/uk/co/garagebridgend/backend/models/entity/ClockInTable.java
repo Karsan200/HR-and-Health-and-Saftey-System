@@ -49,8 +49,11 @@ public class ClockInTable {
     @Column(name = "clock_out")
     private LocalTime clockOutTime;
 
+    /** Flag indicating if the clock-in time was adjusted by an admin. */
+    @Column(columnDefinition = "bit NOT NULL DEFAULT 0", name = "is_admin_adjusted", nullable = false)
+    private boolean isAdminAdjusted;
+
     /** Creation timestamp (auto-populated, not updatable). */
-    @CreationTimestamp
-    @Column(name = "created", nullable = false, updatable = false)
+    @Column(columnDefinition = "DATETIME(6) NOT NULL DEFAULT NOW()", name = "created", nullable = false)
     private LocalDateTime created;
 }

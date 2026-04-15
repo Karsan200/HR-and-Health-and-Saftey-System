@@ -38,3 +38,9 @@ create table iot_device_table
     access_token      text            not null
 )
     collate = utf8mb4_uca1400_ai_ci;
+
+alter table clock_in_table
+    alter column created set default (current_timestamp(6));
+
+alter table clock_in_table
+    add is_admin_adjusted bit default b'0' not null after clock_out;
