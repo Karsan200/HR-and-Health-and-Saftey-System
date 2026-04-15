@@ -11,8 +11,17 @@ import uk.co.garagebridgend.backend.repository.IotDeviceRepository;
 
 import java.util.UUID;
 
+/**
+ * Service class for handling IoT device interactions, including authorisation and attendance registration.
+ */
 @Service
 public class IotService {
+    /** The number of days after which clock-in events are considered expired and should be ignored.*/
+    private static final int ATTENDANCE_RECORD_EXPIRY_DAYS = 7;
+
+    /** The minimum number of minutes that must elapse between clock-in events for the same account.*/
+    private static final int MINUTES_BETWEEN_CLOCK_INS = 1;
+
     /** Repository for managing IoT devices. */
     private final IotDeviceRepository iotDeviceRepository;
 
@@ -60,6 +69,11 @@ public class IotService {
      * @param body the request containing attendance data, including BLE signatures and timestamps
      */
     public void registerAttendance(final IotAttendanceUploadRequest body) {
+        // Check the timestamp of the attendance record is within the last 7 days, otherwise drop the request
+        if (body.getTimestamp().isBefore(java.time.LocalDateTime.now().minusDays(ATTENDANCE_RECORD_EXPIRY_DAYS))) {
+            return;
+        }
+
         // Iterate through the attendance records in the request body and process them
         for (var record : body.getSignatures()) {
             // Find the account associated with the BLE signature
@@ -67,6 +81,15 @@ public class IotService {
                     .orElse(null);
 
             if (account != null) {
+                // If a clock-in event has been registered within the last minute, drop the entry
+                if (clockInEventRepository.countByEventTimeBetween(
+                        account.getAccountId(),
+                        body.getTimestamp().minusMinutes(MINUTES_BETWEEN_CLOCK_INS),
+                        body.getTimestamp()
+                ) > 0) {
+                    continue;
+                }
+
                 // Create a new clock-in event
                 var clockIn = new ClockInEventTable();
                 clockIn.setAccount(account);

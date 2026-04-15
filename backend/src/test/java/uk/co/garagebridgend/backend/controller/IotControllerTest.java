@@ -17,6 +17,7 @@ import uk.co.garagebridgend.backend.logic.IotService;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.IotDeviceTable;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
+import uk.co.garagebridgend.backend.repository.ClockInEventRepository;
 import uk.co.garagebridgend.backend.repository.IotDeviceRepository;
 
 import java.util.UUID;
@@ -36,6 +37,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class IotControllerTest {
     @Autowired
     private IotDeviceRepository iotDeviceRepository;
+
+    @Autowired
+    private ClockInEventRepository clockInEventRepository;
 
     @Autowired
     private AccountRepository accountRepository;
@@ -92,6 +96,54 @@ public class IotControllerTest {
                         "signatures": ["%s", "%s"],
                         "timestamp": "2026-04-13T14:30:00"
                     }""".formatted(accountBleId, UUID.randomUUID()))).andExpect(status().isOk());
+    }
+
+    @Test
+    public void testUploadOldAttendanceData() throws Exception {
+        mockMvc.perform(post("/api/iot/attendance/upload")
+                        .header("X-Device-Id", deviceId)
+                        .header("X-Device-Token", "123456")
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "signatures": ["%s"],
+                        "timestamp": "2020-01-01T00:00:00"
+                    }""".formatted(accountBleId))).andExpect(status().isOk());
+
+        // Verify that no clock-in event was created for the old timestamp
+        var events = clockInEventRepository.findAll();
+        Assertions.assertTrue(events.isEmpty(), "Expected no clock-in events to be created for old attendance data");
+    }
+
+    @Test
+    public void testUploadDuplicateAttendanceData() throws Exception {
+        String timestamp = "2026-04-13T14:30:00";
+
+        // First upload should succeed
+        mockMvc.perform(post("/api/iot/attendance/upload")
+                        .header("X-Device-Id", deviceId)
+                        .header("X-Device-Token", "123456")
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "signatures": ["%s"],
+                        "timestamp": "%s"
+                    }""".formatted(accountBleId, timestamp))).andExpect(status().isOk());
+
+        // Second upload with the same timestamp should also succeed but not create a duplicate event
+        mockMvc.perform(post("/api/iot/attendance/upload")
+                        .header("X-Device-Id", deviceId)
+                        .header("X-Device-Token", "123456")
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content("""
+                    {
+                        "signatures": ["%s"],
+                        "timestamp": "%s"
+                    }""".formatted(accountBleId, timestamp))).andExpect(status().isOk());
+
+        // Verify that only one clock-in event was created for the duplicate timestamp
+        var events = clockInEventRepository.findAll();
+        Assertions.assertEquals(1, events.size(), "Expected only one clock-in event to be created for duplicate attendance data");
     }
 
     @Test
