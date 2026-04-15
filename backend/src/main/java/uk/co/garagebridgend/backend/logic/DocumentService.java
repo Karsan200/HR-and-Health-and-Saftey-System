@@ -48,6 +48,7 @@ public class DocumentService {
 
         return documentRepository.findAllByOrderByCreatedDesc()
                 .stream()
+                .filter(document -> documentRecipientRepository.existsByDocumentAndAccount(document, account))
                 .map(document -> new DocumentResponse(
                         document.getDocumentId(),
                         document.getTitle(),
