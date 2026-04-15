@@ -330,6 +330,67 @@ describe('SettingsScreen', () => {
     });
   });
 
+  it('uses default colour values directly when custom colours match defaults', async () => {
+    (getSettings as jest.Mock).mockResolvedValue({
+      ...defaultSettings,
+      themePreset: null,
+      accentColour: DefaultColours.redPrimary,
+      textColour: DefaultColours.black,
+      backgroundColour: DefaultColours.greyBackground,
+    });
+
+    render(<SettingsScreen />);
+
+    await waitFor(() => {
+      expect(mockUpdateTheme).toHaveBeenCalledWith(
+          expect.objectContaining({
+            redPrimary: DefaultColours.redPrimary,
+            redTextDark: DefaultColours.redTextDark,
+            redBackgroundLight: DefaultColours.redBackgroundLight,
+            black: DefaultColours.black,
+            greyBackground: DefaultColours.greyBackground,
+          })
+      );
+    });
+  });
+
+  it('generates colour set for custom text colour', async () => {
+    (getSettings as jest.Mock).mockResolvedValue({
+      ...defaultSettings,
+      themePreset: null,
+      accentColour: DefaultColours.redPrimary,
+      textColour: '#123456',
+      backgroundColour: DefaultColours.greyBackground,
+    });
+
+    render(<SettingsScreen />);
+
+    await waitFor(() => {
+      expect(mockUpdateTheme).toHaveBeenCalledWith(
+          expect.objectContaining({ black: expect.any(String) })
+      );
+    });
+  });
+
+
+  it('generates colour set for custom background colour', async () => {
+    (getSettings as jest.Mock).mockResolvedValue({
+      ...defaultSettings,
+      themePreset: null,
+      accentColour: DefaultColours.redPrimary,
+      textColour: DefaultColours.black,
+      backgroundColour: '#abcdef',
+    });
+
+    render(<SettingsScreen />);
+
+    await waitFor(() => {
+      expect(mockUpdateTheme).toHaveBeenCalledWith(
+          expect.objectContaining({ greyBackground: '#abcdef' })
+      );
+    });
+  });
+
   it('loads settings on mount and applies custom colours when no preset', async () => {
     (getSettings as jest.Mock).mockResolvedValue({
       ...defaultSettings,
