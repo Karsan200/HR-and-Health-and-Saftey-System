@@ -125,7 +125,7 @@ public class DocumentService {
 
         UUID fileId = file.getFileId();
 
-        // Upload to MinIO using that ID REMEMBER TO UNCOMMENT THIS BEFORE MERGE
+        // Upload to MinIO using that ID
         storageService.uploadFile(
                 fileId.toString(),
                 new ByteArrayInputStream(fileBytes),

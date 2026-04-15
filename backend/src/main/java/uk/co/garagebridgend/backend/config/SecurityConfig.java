@@ -93,6 +93,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/permissions/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MANAGER")
                         .requestMatchers("/api/leave/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MANAGER")
+                        .requestMatchers("/api/documents/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MANAGER")
+                        .requestMatchers("/api/payslips/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MANAGER")
 
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
