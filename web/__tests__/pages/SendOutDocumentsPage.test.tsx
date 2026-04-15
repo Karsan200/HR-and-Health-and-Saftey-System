@@ -301,6 +301,110 @@ describe("SendOutDocumentsPage", () => {
         expect(employeeDropdown).toHaveTextContent("Alice, Bob");
     });
 
+    describe("file validation", () => {
+        it("shows an error when a non-PDF file is dropped onto the drop zone", async () => {
+            renderPage();
 
+            const dropZone = screen
+                .getByText(/click to upload or drag and drop/i)
+                .closest("div")!;
 
+            const nonPdfFile = new File(["content"], "image.png", { type: "image/png" });
+
+            fireEvent.drop(dropZone, {
+                dataTransfer: {
+                    files: [nonPdfFile],
+                    items: [{ kind: "file", type: nonPdfFile.type, getAsFile: () => nonPdfFile }],
+                },
+            });
+
+            expect(
+                await screen.findByText(/only pdf files are accepted/i)
+            ).toBeInTheDocument();
+        });
+    });
+
+    describe("submit without file", () => {
+        it("shows an error when submitting with no file selected", async () => {
+            renderPage();
+
+            // Type a title so the only missing thing is the file
+            await userEvent.type(screen.getByLabelText(/document title/i), "Fire Safety Policy");
+
+            await userEvent.click(
+                screen.getByRole("button", { name: /upload and send now/i })
+            );
+
+            expect(
+                await screen.findByText(/please select a file to upload/i)
+            ).toBeInTheDocument();
+        });
+    });
+
+    describe("require signature checkbox and upload section rendering", () => {
+        it("renders the require signature checkbox and it is enabled by default for non-handbook categories", () => {
+            renderPage();
+
+            const checkbox = screen.getByRole("checkbox");
+            expect(checkbox).toBeInTheDocument();
+            expect(checkbox).not.toBeDisabled();
+            expect(checkbox).toBeChecked();
+        });
+
+        it("unchecking the require signature checkbox updates its state", async () => {
+            renderPage();
+
+            const checkbox = screen.getByRole("checkbox");
+            await userEvent.click(checkbox);
+
+            expect(checkbox).not.toBeChecked();
+        });
+
+        it("renders the Upload File label", () => {
+            renderPage();
+            expect(screen.getByText(/upload file/i)).toBeInTheDocument();
+        });
+
+        it("renders the drop zone with click-to-upload prompt", () => {
+            renderPage();
+            expect(
+                screen.getByText(/click to upload or drag and drop/i)
+            ).toBeInTheDocument();
+        });
+
+        it("clicking the drop zone triggers the hidden file input", async () => {
+            renderPage();
+
+            const fileInput = document.querySelector<HTMLInputElement>("input[type='file']")!;
+            const clickSpy = jest.spyOn(fileInput, "click");
+
+            const dropZone = screen
+                .getByText(/click to upload or drag and drop/i)
+                .closest("div")!;
+
+            await userEvent.click(dropZone);
+
+            expect(clickSpy).toHaveBeenCalled();
+        });
+
+        it("shows filename and size after a valid file is dropped", async () => {
+            renderPage();
+
+            const dropZone = screen
+                .getByText(/click to upload or drag and drop/i)
+                .closest("div")!;
+
+            const file = new File(["x".repeat(1024)], "manual.pdf", { type: "application/pdf" });
+
+            fireEvent.drop(dropZone, {
+                dataTransfer: {
+                    files: [file],
+                    items: [{ kind: "file", type: file.type, getAsFile: () => file }],
+                },
+            });
+
+            expect(await screen.findByText("manual.pdf")).toBeInTheDocument();
+            expect(await screen.findByText(/mb/i)).toBeInTheDocument();
+        });
+    });
 });
