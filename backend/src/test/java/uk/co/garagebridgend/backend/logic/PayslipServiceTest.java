@@ -11,9 +11,13 @@ import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.FilesTable;
 import uk.co.garagebridgend.backend.models.entity.PayslipsTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
+import uk.co.garagebridgend.backend.models.request.UploadPayslipRequest;
 import uk.co.garagebridgend.backend.models.response.PayslipResponse;
+import uk.co.garagebridgend.backend.repository.AccountRepository;
+import uk.co.garagebridgend.backend.repository.FilesRepository;
 import uk.co.garagebridgend.backend.repository.PayslipRepository;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,6 +37,12 @@ class PayslipServiceTest {
 
     @Mock
     private AuthenticationService authenticationService;
+
+    @Mock
+    private FilesRepository filesRepository;
+
+    @Mock
+    private AccountRepository accountRepository;
 
     @InjectMocks
     private PayslipService payslipService;
@@ -111,5 +121,117 @@ class PayslipServiceTest {
                 payslipService.getPayslipsForCurrentUser();
 
         assertTrue(result.isEmpty());
+    }
+
+    /**
+     * Tests successful payslip upload flow.
+     */
+    @Test
+    void testUploadPayslipSuccess() {
+
+        AccountTable account = new AccountTable();
+        account.setAccountId(1L);
+
+        UploadPayslipRequest request = new UploadPayslipRequest(
+                1L, 1, 2026, false, "base64content", "payslip.pdf"
+        );
+
+        when(accountRepository.findById(1L)).thenReturn(java.util.Optional.of(account));
+        when(authenticationService.getCurrentUser()).thenReturn(account);
+        when(storageService.decodeBase64("base64content")).thenReturn(new byte[]{1, 2, 3});
+
+        when(filesRepository.save(any(FilesTable.class))).thenAnswer(invocation -> {
+            FilesTable file = invocation.getArgument(0);
+            file.setFileId(UUID.randomUUID());
+            return file;
+        });
+
+        payslipService.uploadPayslip(request);
+
+        verify(storageService).uploadFile(
+                anyString(),
+                any(ByteArrayInputStream.class),
+                eq("pdf")
+        );
+
+        verify(payslipRepository).save(any(PayslipsTable.class));
+    }
+
+    /**
+     * Tests upload flow when account is not found.
+     */
+    @Test
+    void testUploadPayslipAccountNotFound() {
+
+        UploadPayslipRequest request = new UploadPayslipRequest(
+                99L, 1, 2026, false, "base64content", "payslip.pdf"
+        );
+
+        when(accountRepository.findById(99L)).thenReturn(java.util.Optional.empty());
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> payslipService.uploadPayslip(request)
+        );
+
+        verify(payslipRepository, never()).save(any());
+    }
+
+    /**
+     * Tests upload flow when authenticated user cannot be found.
+     */
+    @Test
+    void testUploadPayslipUnauthenticatedUser() {
+
+        UploadPayslipRequest request = new UploadPayslipRequest(
+                1L, 1, 2026, false, "base64content", "payslip.pdf"
+        );
+
+        AccountTable account = new AccountTable();
+        account.setAccountId(1L);
+
+        when(accountRepository.findById(1L)).thenReturn(java.util.Optional.of(account));
+        when(authenticationService.getCurrentUser())
+                .thenThrow(new AuthenticatedAccountNotFoundException());
+
+        assertThrows(
+                AuthenticatedAccountNotFoundException.class,
+                () -> payslipService.uploadPayslip(request)
+        );
+    }
+
+    /**
+     * Tests upload flow when storage service fails to upload file.
+     */
+    @Test
+    void testUploadPayslipStorageFailure() {
+
+        AccountTable account = new AccountTable();
+        account.setAccountId(1L);
+
+        UploadPayslipRequest request = new UploadPayslipRequest(
+                1L, 1, 2026, false, "base64content", "payslip.pdf"
+        );
+
+        when(accountRepository.findById(1L)).thenReturn(java.util.Optional.of(account));
+        when(authenticationService.getCurrentUser()).thenReturn(account);
+        when(storageService.decodeBase64(any())).thenReturn(new byte[]{1, 2, 3});
+
+        when(filesRepository.save(any(FilesTable.class))).thenAnswer(invocation -> {
+            FilesTable file = invocation.getArgument(0);
+            file.setFileId(UUID.randomUUID());
+            return file;
+        });
+
+        doThrow(new RuntimeException("S3 failure"))
+                .when(storageService)
+                .uploadFile(anyString(), any(), anyString());
+
+        assertThrows(
+                RuntimeException.class,
+                () -> payslipService.uploadPayslip(request)
+        );
+
+        verify(payslipRepository, never()).save(any());
     }
 }

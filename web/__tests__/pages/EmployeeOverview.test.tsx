@@ -18,7 +18,9 @@ const mockGetEmployees = getEmployees as jest.Mock;
 const mockGetEmployeeOverview = getEmployeeOverview as jest.Mock;
 const mockSanitiseEmployeeSearch = sanitiseEmployeeSearch as jest.Mock;
 
-const mockAuthenticationService = {};
+const mockAuthenticationService: { fetch: jest.Mock } = {
+    fetch: jest.fn(),
+};
 
 function currentMonthLabel() {
     return new Date().toLocaleDateString("en-GB", {
@@ -655,6 +657,222 @@ describe("EmployeeOverview", () => {
 
             // Then the component should not update the state and the test should complete without error
             expect(mockGetEmployeeOverview).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    it("toggles the P60 checkbox", async () => {
+        mockGetEmployees.mockResolvedValueOnce([
+            { accountId: 1, fullName: "John Doe", position: "Admin" },
+        ]);
+        mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
+
+        renderEmployeeOverview();
+
+        await screen.findByText("Payslip Management");
+
+        const checkbox = screen.getByRole("checkbox");
+
+        expect(checkbox).not.toBeChecked();
+
+        await userEvent.click(checkbox);
+
+        expect(checkbox).toBeChecked();
+    });
+
+    it("selects a payslip file and displays filename", async () => {
+        mockGetEmployees.mockResolvedValueOnce([
+            { accountId: 1, fullName: "John Doe", position: "Admin" },
+        ]);
+        mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
+
+        renderEmployeeOverview();
+
+        await screen.findByText("Payslip Management");
+
+        const file = new File(["dummy"], "payslip.pdf", {
+            type: "application/pdf",
+        });
+
+        const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+        await userEvent.upload(input, file);
+
+        expect(await screen.findByText(/Selected: payslip\.pdf/i)).toBeInTheDocument();
+    });
+
+    it("shows error when uploading without file", async () => {
+        mockGetEmployees.mockResolvedValueOnce([
+            { accountId: 1, fullName: "John Doe", position: "Admin" },
+        ]);
+        mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
+
+        renderEmployeeOverview();
+
+        await screen.findByRole("button", { name: /upload/i });
+
+        await userEvent.click(screen.getByRole("button", { name: /upload/i }));
+
+        expect(await screen.findByText(/please select a pdf file/i)).toBeInTheDocument();
+    });
+
+    it("successfully uploads a payslip", async () => {
+        const fetchMock = jest.fn().mockResolvedValue({
+            ok: true,
+        });
+
+        mockGetEmployees.mockResolvedValueOnce([
+            { accountId: 1, fullName: "John Doe", position: "Admin" },
+        ]);
+
+        mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
+
+        renderEmployeeOverview();
+
+        await screen.findByText("Payslip Management");
+
+        const file = new File(["pdf"], "payslip.pdf", {
+            type: "application/pdf",
+        });
+
+        const input = document.querySelector(
+            'input[type="file"]'
+        ) as HTMLInputElement;
+
+        await userEvent.upload(input, file);
+
+        // inject file into component state already handled via upload
+
+        // mock authenticationService.fetch
+        const auth = mockUseAuth();
+        auth.authenticationService.fetch = fetchMock;
+
+        await userEvent.click(screen.getByRole("button", { name: /upload/i }));
+
+        await waitFor(() => {
+            expect(fetchMock).toHaveBeenCalled();
+            expect(screen.getByText(/uploaded successfully/i)).toBeInTheDocument();
+        });
+    });
+
+    it("triggers hidden file input click", async () => {
+        mockGetEmployees.mockResolvedValueOnce([
+            { accountId: 1, fullName: "John Doe", position: "Admin" },
+        ]);
+
+        mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
+
+        renderEmployeeOverview();
+
+        await screen.findByText("Payslip Management");
+
+        const input = document.querySelector(
+            'input[type="file"]'
+        ) as HTMLInputElement;
+
+        const clickSpy = jest.spyOn(input, "click");
+
+        await userEvent.click(screen.getByText(/upload file/i));
+
+        expect(clickSpy).toHaveBeenCalled();
+    });
+
+    describe("payslip upload - uncovered branches", () => {
+
+        async function renderWithEmployee() {
+            mockGetEmployees.mockResolvedValueOnce([
+                { accountId: 1, fullName: "John Doe", position: "Admin" },
+            ]);
+            mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
+            renderEmployeeOverview();
+            await screen.findByText("Payslip Management");
+        }
+
+        async function uploadPdfFile(filename = "payslip.pdf") {
+            const file = new File(["pdf-content"], filename, { type: "application/pdf" });
+            const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+            await userEvent.upload(input, file);
+            return file;
+        }
+
+        // Line 162: setSelectedEmployee(null) — triggered when getEmployees returns empty list
+        // This is already partially covered, but this explicitly asserts setSelectedEmployee(null)
+        // by checking the empty state card is shown when the list becomes empty after a search.
+        it("clears the selected employee when the employee list becomes empty after a search", async () => {
+            mockGetEmployees
+                .mockResolvedValueOnce([{ accountId: 1, fullName: "John Doe", position: "Admin" }])
+                .mockResolvedValueOnce([]);
+
+            mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
+
+            renderEmployeeOverview();
+
+            await screen.findByText("john@example.com");
+
+            // When a search returns no results
+            await userEvent.type(screen.getByPlaceholderText(/search employees/i), "zzz");
+
+            // Then the selected employee should be cleared and the empty state shown
+            await waitFor(() =>
+                expect(screen.getAllByText(/select an employee/i)[0]).toBeInTheDocument()
+            );
+            expect(screen.queryByText("john@example.com")).not.toBeInTheDocument();
+        });
+
+        it("shows the server error message when the upload response is not ok", async () => {
+            await renderWithEmployee();
+            await uploadPdfFile();
+
+            mockAuthenticationService.fetch = jest.fn().mockResolvedValue({
+                ok: false,
+                text: jest.fn().mockResolvedValue("Payslip already exists for this month"),
+            });
+
+            await userEvent.click(screen.getByRole("button", { name: /upload/i }));
+
+            expect(
+                await screen.findByText("Payslip already exists for this month")
+            ).toBeInTheDocument();
+        });
+
+        it("clears a previous success message and shows the error when upload fails with an Error", async () => {
+            const fetchMock = jest.fn()
+                // First call succeeds
+                .mockResolvedValueOnce({ ok: true })
+                // Second call fails with a non-ok response
+                .mockResolvedValueOnce({
+                    ok: false,
+                    text: jest.fn().mockResolvedValue("Server rejected the file"),
+                });
+
+            await renderWithEmployee();
+
+            mockAuthenticationService.fetch = fetchMock;
+
+            // First upload — succeeds and sets payslipSuccess
+            await uploadPdfFile("first.pdf");
+            await userEvent.click(screen.getByRole("button", { name: /upload/i }));
+            expect(await screen.findByText(/uploaded successfully/i)).toBeInTheDocument();
+
+            // Second upload — fails, should clear success and show error
+            await uploadPdfFile("second.pdf");
+            await userEvent.click(screen.getByRole("button", { name: /upload/i }));
+
+            await waitFor(() =>
+                expect(screen.queryByText(/uploaded successfully/i)).not.toBeInTheDocument()
+            );
+            expect(await screen.findByText("Server rejected the file")).toBeInTheDocument();
+        });
+
+        it("shows 'Upload failed' when the upload throws a non-Error value", async () => {
+            await renderWithEmployee();
+            await uploadPdfFile();
+
+            // Throw a plain object (not an Error instance) to hit the ternary's false branch
+            mockAuthenticationService.fetch = jest.fn().mockRejectedValue("plain string rejection");
+
+            await userEvent.click(screen.getByRole("button", { name: /upload/i }));
+
+            expect(await screen.findByText("Upload failed")).toBeInTheDocument();
         });
     });
 });

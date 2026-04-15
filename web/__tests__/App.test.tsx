@@ -19,6 +19,10 @@ jest.mock("../src/pages/EmployeeOverview", () => ({
     EmployeeOverview: () => <div data-testid="employee-overview" />,
 }));
 
+jest.mock("../src/pages/SendOutDocumentsPage", () => ({
+    SendOutDocumentsPage: () => <div data-testid="send-out-documents-page" />,
+}));
+
 function setWindowWidth(width: number) {
     Object.defineProperty(window, "innerWidth", { writable: true, configurable: true, value: width });
     act(() => { window.dispatchEvent(new Event("resize")); });

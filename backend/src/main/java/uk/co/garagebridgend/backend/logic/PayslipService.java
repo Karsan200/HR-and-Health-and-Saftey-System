@@ -2,11 +2,18 @@ package uk.co.garagebridgend.backend.logic;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uk.co.garagebridgend.backend.models.entity.FilesTable;
+import uk.co.garagebridgend.backend.models.entity.PayslipsTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
+import uk.co.garagebridgend.backend.models.request.UploadPayslipRequest;
 import uk.co.garagebridgend.backend.models.response.PayslipResponse;
+import uk.co.garagebridgend.backend.repository.AccountRepository;
+import uk.co.garagebridgend.backend.repository.FilesRepository;
 import uk.co.garagebridgend.backend.repository.PayslipRepository;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service class for handling payslip-related operations.
@@ -23,6 +30,12 @@ public class PayslipService {
 
     /** Service for handling authentication and retrieving the current user. */
     private final AuthenticationService authenticationService;
+
+    /** Repository for accessing file data. */
+    private final FilesRepository filesRepository;
+
+    /** Repository for accessing account data. */
+    private final AccountRepository accountRepository;
 
     /**
      * Retrieves all payslips for the currently authenticated user,
@@ -51,5 +64,45 @@ public class PayslipService {
                         )
                 ))
                 .toList();
+    }
+
+    /**
+     * Uploads a new payslip for the specified account. This involves:
+     * @param request the request containing the account ID, file name, year,
+     * month, isPSixty flag, and base64-encoded PDF content
+     */
+    public void uploadPayslip(final UploadPayslipRequest request) {
+
+        var account = accountRepository.findById(request.getAccountId())
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+
+        byte[] fileBytes = storageService.decodeBase64(request.getContent());
+
+        // Create file record
+        FilesTable file = new FilesTable();
+        file.setAccount(account);
+        file.setCreatedBy(authenticationService.getCurrentUser());
+        file.setName(request.getFileName());
+        file.setExtension("pdf");
+
+        filesRepository.save(file);
+
+        UUID fileId = file.getFileId();
+
+        // Upload to storage
+        storageService.uploadFile(
+                fileId.toString(),
+                new ByteArrayInputStream(fileBytes),
+                "pdf"
+        );
+
+        // Create payslip record
+        PayslipsTable payslip = new PayslipsTable();
+        payslip.setFile(file);
+        payslip.setMonth(request.getMonth());
+        payslip.setYear(request.getYear());
+        payslip.setPSixty(request.isP60());
+
+        payslipRepository.save(payslip);
     }
 }
