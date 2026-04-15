@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.ClockInAdminService;
 import uk.co.garagebridgend.backend.models.request.ClockInCreateRequest;
 import uk.co.garagebridgend.backend.models.request.ClockInOverrideRequest;
+import uk.co.garagebridgend.backend.models.response.AccountSearchResponse;
 import uk.co.garagebridgend.backend.models.response.ClockInAdminResponse;
 
 import java.time.LocalDate;
@@ -147,4 +148,24 @@ public class ClockInAdminController {
         }
     }
 
+    /**
+     * Searches for employee accounts whose name contains the given query string
+     * (case-insensitive). Returns up to 10 results ordered alphabetically.
+     * Used by the admin clock-in autocomplete dropdown.
+     *
+     * @param query the partial name to search for
+     * @return a list of matching account summaries
+     */
+    @GetMapping("/accounts/search")
+    public List<AccountSearchResponse> searchAccounts(@RequestParam final String query) {
+        try {
+            return clockInAdminService.searchAccounts(query);
+        } catch (Exception e) {
+            LOG.error("Error searching accounts with query '{}'", query, e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal server error."
+            );
+        }
+    }
 }

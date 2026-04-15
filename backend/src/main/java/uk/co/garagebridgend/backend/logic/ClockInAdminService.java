@@ -8,6 +8,7 @@ import uk.co.garagebridgend.backend.models.entity.ClockInReportTable;
 import uk.co.garagebridgend.backend.models.entity.ClockInTable;
 import uk.co.garagebridgend.backend.models.request.ClockInCreateRequest;
 import uk.co.garagebridgend.backend.models.request.ClockInOverrideRequest;
+import uk.co.garagebridgend.backend.models.response.AccountSearchResponse;
 import uk.co.garagebridgend.backend.models.response.ClockInAdminResponse;
 import uk.co.garagebridgend.backend.repository.ClockInReportRepository;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
@@ -22,7 +23,8 @@ import java.util.stream.Collectors;
 
 /**
  * Service handling admin-only clock-in operations: retrieving all clock-ins
- * for a given date and applying manual time overrides.
+ * for a given date, applying manual time overrides, and searching for employees
+ * by name to populate autocomplete fields.
  */
 @Service
 @RequiredArgsConstructor
@@ -100,26 +102,42 @@ public class ClockInAdminService {
 
     /**
      * Creates a new clock-in record for a specific employee on a given date.
-     * The record is created with the supplied times; either may be null.
+     * The record is first inserted (allowing {@code @CreationTimestamp} to fire),
+     * then immediately backdated to the start of the requested date within the
+     * same transaction so that date-range queries find it correctly.
      *
      * @param request the details of the clock-in record to create
-     * @throws IllegalArgumentException if no account exists for the given accountId
+     * @throws IllegalArgumentException if no account exists for the given accountId,
+     *                                  or if a clock-in already exists for that
+     *                                  employee on the requested date
      */
     @Transactional
     public void createClockIn(final ClockInCreateRequest request) {
         AccountTable account = accountRepository.findById(request.accountId())
                 .orElseThrow(() -> new IllegalArgumentException("Account not found."));
 
+        LocalDateTime startOfDay = request.date().atStartOfDay();
+        LocalDateTime endOfDay   = request.date().atTime(LocalTime.MAX);
+
+        boolean alreadyExists = clockInRepository.existsByAccountAndDate(
+                request.accountId(), startOfDay, endOfDay
+        );
+
+        if (alreadyExists) {
+            throw new IllegalArgumentException(
+                    "A clock-in record already exists for this employee on " + request.date() + "."
+            );
+        }
+
         ClockInTable record = new ClockInTable();
         record.setAccount(account);
         record.setClockInTime(request.clockInTime());
         record.setClockOutTime(request.clockOutTime());
 
-        // Set the created timestamp to the start of the requested date so the
-        // record is discoverable by the findAllForDate query
-        record.setCreated(request.date().atStartOfDay());
-
-        clockInRepository.save(record);
+        // Save first so @CreationTimestamp populates the id and created fields,
+        // then immediately overwrite created with the admin-selected date.
+        ClockInTable saved = clockInRepository.saveAndFlush(record);
+        clockInRepository.backdateCreated(saved.getClockInId(), startOfDay);
     }
 
     /**
@@ -138,6 +156,28 @@ public class ClockInAdminService {
                 .ifPresent(clockInReportRepository::delete);
 
         clockInRepository.delete(record);
+    }
+
+    /**
+     * Searches for employee accounts whose first or last name contains the
+     * given query string (case-insensitive). Returns up to 10 results ordered
+     * alphabetically. Used by the admin clock-in autocomplete dropdown.
+     *
+     * @param query the partial name to search for
+     * @return a list of matching account summaries, or an empty list if the query is blank
+     */
+    public List<AccountSearchResponse> searchAccounts(final String query) {
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+
+        return accountRepository.searchByName(query.trim())
+                .stream()
+                .map(account -> new AccountSearchResponse(
+                        account.getAccountId(),
+                        account.getFirstName() + " " + account.getLastName()
+                ))
+                .collect(Collectors.toList());
     }
 
     /**

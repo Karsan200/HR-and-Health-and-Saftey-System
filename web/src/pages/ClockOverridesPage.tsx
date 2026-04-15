@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
     Box,
     Typography,
@@ -13,6 +13,7 @@ import {
     FormControl,
     Checkbox,
     FormControlLabel,
+    Paper,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -20,6 +21,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberOutlined from "@mui/icons-material/WarningAmberOutlined";
 import CalendarTodayOutlined from "@mui/icons-material/CalendarTodayOutlined";
+import PersonSearchOutlinedIcon from "@mui/icons-material/PersonSearchOutlined";
 
 import { SectionNavBar, type SectionNavTab } from "../components/SectionNavbar";
 import { useAuth } from "../AuthContext";
@@ -29,10 +31,12 @@ import {
     submitClockOverride,
     createClockIn,
     deleteClockIn,
+    searchAccounts,
     formatTime,
     formatDateHeading,
     toBackendTime,
     type ClockInRecord,
+    type AccountSearchResult,
 } from "../logic/ClockOverridesService";
 import { clockOverridesPageStyles as styles } from "./ClockOverridesPage.styles";
 import { DefaultColours } from "../theme/colours";
@@ -200,6 +204,208 @@ function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
     );
 }
 
+// Employee name autocomplete field
+
+interface EmployeeAutocompleteProps {
+    value: AccountSearchResult | null;
+    onChange: (result: AccountSearchResult | null) => void;
+    disabled: boolean;
+}
+
+function EmployeeAutocomplete({ value, onChange, disabled }: EmployeeAutocompleteProps) {
+    const { authenticationService } = useAuth();
+
+    const [inputValue, setInputValue]     = useState<string>("");
+    const [suggestions, setSuggestions]   = useState<AccountSearchResult[]>([]);
+    const [open, setOpen]                 = useState(false);
+    const [searching, setSearching]       = useState(false);
+    const debounceRef                     = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const wrapperRef                      = useRef<HTMLDivElement>(null);
+
+    // When a value is selected externally (e.g. reset on modal open), sync the input
+    useEffect(() => {
+        if (value === null) {
+            setInputValue("");
+            setSuggestions([]);
+            setOpen(false);
+        }
+    }, [value]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+                setOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const raw = e.target.value;
+        setInputValue(raw);
+
+        // Clear the confirmed selection whenever the user edits the field
+        if (value !== null) {
+            onChange(null);
+        }
+
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+
+        if (!raw.trim()) {
+            setSuggestions([]);
+            setOpen(false);
+            return;
+        }
+
+        debounceRef.current = setTimeout(async () => {
+            setSearching(true);
+            try {
+                const results = await searchAccounts(raw, authenticationService);
+                setSuggestions(results);
+                setOpen(results.length > 0);
+            } catch {
+                setSuggestions([]);
+                setOpen(false);
+            } finally {
+                setSearching(false);
+            }
+        }, 250);
+    }
+
+    function handleSelect(result: AccountSearchResult) {
+        onChange(result);
+        setInputValue(result.fullName);
+        setSuggestions([]);
+        setOpen(false);
+    }
+
+    const isConfirmed = value !== null && inputValue === value.fullName;
+
+    return (
+        <Box ref={wrapperRef} sx={{ position: "relative", width: "100%" }}>
+            <TextField
+                value={inputValue}
+                onChange={handleInputChange}
+                onFocus={() => { if (suggestions.length > 0) setOpen(true); }}
+                disabled={disabled}
+                size="small"
+                fullWidth
+                placeholder="Search by name..."
+                autoComplete="off"
+                InputProps={{
+                    endAdornment: searching ? (
+                        <CircularProgress size={16} sx={{ color: DefaultColours.greyIconLight, mr: "4px" }} />
+                    ) : isConfirmed ? (
+                        <Box sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            pr: "4px",
+                        }}>
+                            <Box sx={{
+                                width: "8px",
+                                height: "8px",
+                                borderRadius: "50%",
+                                backgroundColor: DefaultColours.greenPrimary,
+                                flexShrink: 0,
+                            }} />
+                            <Typography sx={{
+                                ...TextStyles.regular,
+                                fontSize: FontSize.xs14,
+                                color: DefaultColours.greyPrimaryMainText,
+                                whiteSpace: "nowrap",
+                            }}>
+                                ID {value.accountId}
+                            </Typography>
+                        </Box>
+                    ) : (
+                        <PersonSearchOutlinedIcon sx={{ fontSize: "18px", color: DefaultColours.greyIconLight, mr: "4px" }} />
+                    ),
+                }}
+                sx={{
+                    ...styles.timeTextField,
+                    "& .MuiOutlinedInput-root": {
+                        ...styles.timeTextField["& .MuiOutlinedInput-root"],
+                        ...(isConfirmed && {
+                            "& fieldset": {
+                                borderColor: DefaultColours.greenPrimary,
+                                borderWidth: "1px",
+                            },
+                            "&:hover fieldset": {
+                                borderColor: DefaultColours.greenTextDark,
+                            },
+                            "&.Mui-focused fieldset": {
+                                borderColor: DefaultColours.greenPrimary,
+                                borderWidth: "1px",
+                            },
+                        }),
+                    },
+                }}
+            />
+
+            {open && suggestions.length > 0 && (
+                <Paper
+                    elevation={4}
+                    sx={{
+                        position: "absolute",
+                        top: "calc(100% + 4px)",
+                        left: 0,
+                        right: 0,
+                        zIndex: 1400,
+                        borderRadius: `${BorderRadius.mediumNotification}px`,
+                        overflow: "hidden",
+                        border: `1px solid ${DefaultColours.greyIconLight}`,
+                        boxShadow: "0px 4px 16px rgba(0, 0, 0, 0.10)",
+                    }}
+                >
+                    {suggestions.map((result, index) => (
+                        <Box
+                            key={result.accountId}
+                            onMouseDown={(e) => {
+                                // Prevent the input's onBlur from firing before onClick
+                                e.preventDefault();
+                                handleSelect(result);
+                            }}
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                padding: "12px 16px",
+                                cursor: "pointer",
+                                borderBottom: index < suggestions.length - 1
+                                    ? `1px solid ${DefaultColours.greyBackground}`
+                                    : "none",
+                                backgroundColor: DefaultColours.white,
+                                "&:hover": {
+                                    backgroundColor: DefaultColours.greyBackground,
+                                },
+                                transition: "background-color 0.12s ease",
+                            }}
+                        >
+                            <Typography sx={{
+                                ...TextStyles.medium,
+                                fontSize: FontSize.s16,
+                                color: DefaultColours.black,
+                            }}>
+                                {result.fullName}
+                            </Typography>
+                            <Typography sx={{
+                                ...TextStyles.regular,
+                                fontSize: FontSize.xs14,
+                                color: DefaultColours.greyPrimaryMainText,
+                            }}>
+                                ID {result.accountId}
+                            </Typography>
+                        </Box>
+                    ))}
+                </Paper>
+            )}
+        </Box>
+    );
+}
+
 // Add clock-in modal
 
 interface AddModalProps {
@@ -212,16 +418,16 @@ interface AddModalProps {
 function AddClockInModal({ open, defaultDate, onClose, onAdded }: AddModalProps) {
     const { authenticationService } = useAuth();
 
-    const [accountId, setAccountId] = useState<string>("");
-    const [date, setDate]           = useState<string>(defaultDate);
-    const [clockIn, setClockIn]     = useState<string>("");
-    const [clockOut, setClockOut]   = useState<string>("");
-    const [saving, setSaving]       = useState(false);
-    const [error, setError]         = useState<string | null>(null);
+    const [selectedEmployee, setSelectedEmployee] = useState<AccountSearchResult | null>(null);
+    const [date, setDate]                         = useState<string>(defaultDate);
+    const [clockIn, setClockIn]                   = useState<string>("");
+    const [clockOut, setClockOut]                 = useState<string>("");
+    const [saving, setSaving]                     = useState(false);
+    const [error, setError]                       = useState<string | null>(null);
 
     useEffect(() => {
         if (!open) return;
-        setAccountId("");
+        setSelectedEmployee(null);
         setDate(defaultDate);
         setClockIn("");
         setClockOut("");
@@ -229,8 +435,8 @@ function AddClockInModal({ open, defaultDate, onClose, onAdded }: AddModalProps)
     }, [open, defaultDate]);
 
     async function handleAdd() {
-        if (!accountId.trim()) {
-            setError("Employee ID is required.");
+        if (!selectedEmployee) {
+            setError("Please select an employee from the suggestions.");
             return;
         }
         if (!date) {
@@ -241,22 +447,20 @@ function AddClockInModal({ open, defaultDate, onClose, onAdded }: AddModalProps)
         setError(null);
         try {
             await createClockIn({
-                accountId: Number(accountId),
+                accountId:   selectedEmployee.accountId,
                 date,
                 clockInTime:  toBackendTime(clockIn  || null),
                 clockOutTime: toBackendTime(clockOut || null),
             }, authenticationService);
 
-            // Optimistically add a placeholder card so the list updates immediately.
-            // The real record (with correct clockId) will load on the next fetch.
             onAdded({
-                clockId:     crypto.randomUUID(),
-                employeeName: `Account ${accountId}`,
-                accountId:   Number(accountId),
-                clockInTime: toBackendTime(clockIn  || null),
+                clockId:      crypto.randomUUID(),
+                employeeName: selectedEmployee.fullName,
+                accountId:    selectedEmployee.accountId,
+                clockInTime:  toBackendTime(clockIn  || null),
                 clockOutTime: toBackendTime(clockOut || null),
-                created:     `${date}T00:00:00`,
-                report:      null,
+                created:      `${date}T00:00:00`,
+                report:       null,
             });
             onClose();
         } catch (err) {
@@ -282,20 +486,17 @@ function AddClockInModal({ open, defaultDate, onClose, onAdded }: AddModalProps)
                     </IconButton>
                 </Box>
 
+                {/* Employee search */}
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <Typography sx={styles.clockPickerLabel}>Employee ID</Typography>
-                    <TextField
-                        type="number"
-                        placeholder="Enter account ID..."
-                        value={accountId}
-                        onChange={(e) => setAccountId(e.target.value)}
+                    <Typography sx={styles.clockPickerLabel}>Employee</Typography>
+                    <EmployeeAutocomplete
+                        value={selectedEmployee}
+                        onChange={setSelectedEmployee}
                         disabled={saving}
-                        size="small"
-                        fullWidth
-                        sx={styles.timeTextField}
                     />
                 </Box>
 
+                {/* Date */}
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     <Typography sx={styles.clockPickerLabel}>Date</Typography>
                     <TextField
@@ -309,6 +510,7 @@ function AddClockInModal({ open, defaultDate, onClose, onAdded }: AddModalProps)
                     />
                 </Box>
 
+                {/* Times */}
                 <Box sx={styles.clockPickersRow}>
                     <Box sx={styles.clockPickerWrapper}>
                         <Typography sx={styles.clockPickerLabel}>Clock In (optional)</Typography>
@@ -348,7 +550,7 @@ function AddClockInModal({ open, defaultDate, onClose, onAdded }: AddModalProps)
                     <Button
                         variant="contained"
                         onClick={handleAdd}
-                        disabled={saving}
+                        disabled={saving || !selectedEmployee}
                         startIcon={saving ? <CircularProgress size={16} sx={{ color: DefaultColours.white }} /> : undefined}
                         sx={styles.saveButton}
                     >

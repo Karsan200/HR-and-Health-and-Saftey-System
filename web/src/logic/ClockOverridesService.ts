@@ -20,6 +20,11 @@ export interface ClockInRecord {
     report: ClockInReport | null;
 }
 
+/** A lightweight account summary returned by the employee search endpoint */
+export interface AccountSearchResult {
+    accountId: number;
+    fullName: string;
+}
 
 /** Payload for manually creating a clock-in record */
 export interface ClockInCreateRequest {
@@ -159,6 +164,36 @@ export async function deleteClockIn(
         console.error(`Clock-in delete failed — status: ${response.status}, body: ${body}`);
         throw new Error(body || `Delete failed: ${response.status}`);
     }
+}
+
+/**
+ * Searches for employee accounts whose name contains the given query string.
+ * Returns up to 10 results. Used by the admin clock-in autocomplete.
+ *
+ * @param query the partial name to search for
+ * @param authService the authentication service used to make the request
+ */
+export async function searchAccounts(
+    query: string,
+    authService: AuthenticationService,
+): Promise<AccountSearchResult[]> {
+    if (!query.trim()) return [];
+
+    const response = await authService.fetch(
+        `/api/admin/accounts/search?query=${encodeURIComponent(query.trim())}`,
+        {
+            method: "GET",
+            credentials: "include",
+        },
+    );
+
+    if (!response.ok) {
+        const body = await response.text();
+        console.error(`Account search failed — status: ${response.status}, body: ${body}`);
+        throw new Error(`Account search failed: ${response.status}`);
+    }
+
+    return response.json();
 }
 
 // Formatting helpers
