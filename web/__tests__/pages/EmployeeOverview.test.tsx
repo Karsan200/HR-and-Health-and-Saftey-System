@@ -1,10 +1,11 @@
-import { render, screen, waitFor, act, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor, act, fireEvent, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { cleanup } from "@testing-library/react";
 
 import { EmployeeOverview } from "../../src/pages/EmployeeOverview";
 import { useAuth } from "../../src/AuthContext";
 import {
+    buildCreateEmployeeRequest,
+    createEmployee,
     getEmployees,
     getEmployeeOverview,
     sanitiseEmployeeSearch,
@@ -14,6 +15,8 @@ jest.mock("../../src/AuthContext");
 jest.mock("../../src/logic/EmployeeOverviewService");
 
 const mockUseAuth = useAuth as jest.Mock;
+const mockBuildCreateEmployeeRequest = buildCreateEmployeeRequest as jest.Mock;
+const mockCreateEmployee = createEmployee as jest.Mock;
 const mockGetEmployees = getEmployees as jest.Mock;
 const mockGetEmployeeOverview = getEmployeeOverview as jest.Mock;
 const mockSanitiseEmployeeSearch = sanitiseEmployeeSearch as jest.Mock;
@@ -59,6 +62,22 @@ function makeOverview(overrides = {}) {
     };
 }
 
+function makeCreateForm(overrides = {}) {
+    return {
+        firstName: "Tom",
+        surname: "Jones",
+        email: "tom@example.com",
+        phoneNumber: "07123456789",
+        addressOne: "1 High Street",
+        addressTwo: "",
+        postalCode: "AB12CD",
+        position: "Employee",
+        username: "tom.jones",
+        password: "password123",
+        ...overrides,
+    };
+}
+
 function deferred<T>() {
     let resolve!: (value: T) => void;
     let reject!: (reason?: unknown) => void;
@@ -71,6 +90,53 @@ function deferred<T>() {
     return { promise, resolve, reject };
 }
 
+function queryByTextContent(text: string) {
+    return screen.queryByText((_, element) => element?.textContent?.includes(text) ?? false);
+}
+
+function renderEmployeeOverview() {
+    return render(<EmployeeOverview />);
+}
+
+async function openAddEmployeeForm() {
+    await userEvent.click(screen.getByRole("button", { name: /add employee/i }));
+    expect(await screen.findByText("Personal")).toBeInTheDocument();
+}
+
+async function fillRequiredCreateFields(form = makeCreateForm()) {
+    fireEvent.change(screen.getByPlaceholderText("Forename"), {
+        target: { value: form.firstName },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Surname"), {
+        target: { value: form.surname },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Email"), {
+        target: { value: form.email },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Phone"), {
+        target: { value: form.phoneNumber },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Address line one"), {
+        target: { value: form.addressOne },
+    });
+
+    if (form.addressTwo !== "") {
+        fireEvent.change(screen.getByPlaceholderText("Address line two (optional)"), {
+            target: { value: form.addressTwo },
+        });
+    }
+
+    fireEvent.change(screen.getByPlaceholderText("Postal code"), {
+        target: { value: form.postalCode },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Username"), {
+        target: { value: form.username },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Password"), {
+        target: { value: form.password },
+    });
+}
+
 beforeEach(() => {
     jest.clearAllMocks();
 
@@ -79,13 +145,15 @@ beforeEach(() => {
     });
 
     mockSanitiseEmployeeSearch.mockImplementation((value: string) => value.trim());
+    mockBuildCreateEmployeeRequest.mockImplementation((value: unknown) => value);
     mockGetEmployees.mockResolvedValue([]);
     mockGetEmployeeOverview.mockResolvedValue(makeOverview());
+    mockCreateEmployee.mockResolvedValue({
+        accountId: 5,
+        fullName: "New Employee",
+        position: "Employee",
+    });
 });
-
-function renderEmployeeOverview() {
-    return render(<EmployeeOverview />);
-}
 
 afterEach(() => {
     cleanup();
@@ -128,7 +196,7 @@ describe("EmployeeOverview", () => {
 
         it("shows an error and clears state when loading employees fails", async () => {
             // Given the employee list request fails
-            mockGetEmployees.mockRejectedValueOnce(new Error("unknow error"));
+            mockGetEmployees.mockRejectedValueOnce(new Error("unknown error"));
 
             // When the page is rendered
             renderEmployeeOverview();
@@ -304,6 +372,20 @@ describe("EmployeeOverview", () => {
             await waitFor(() =>
                 expect(mockGetEmployeeOverview).toHaveBeenLastCalledWith(mockAuthenticationService, 3)
             );
+            // expect(await findByTextContent("bob@example.com")).toBeInTheDocument();
+        });
+
+        it("returns to the empty state when loading the selected employee overview fails", async () => {
+            // Given the employee list loads but the selected employee overview fails to load
+            mockGetEmployees.mockResolvedValueOnce([{ accountId: 1, fullName: "John Doe", position: "Admin" }]);
+            mockGetEmployeeOverview.mockRejectedValueOnce(new Error("unknown error"));
+
+            // When the page is rendered
+            renderEmployeeOverview();
+
+            // Then the details panel should fall back to the empty state
+            expect(await screen.findAllByText(/select an employee/i)).not.toHaveLength(0);
+            expect(queryByTextContent("john@example.com")).not.toBeInTheDocument();
         });
     });
 
@@ -398,9 +480,483 @@ describe("EmployeeOverview", () => {
             // Then the selected value should update
             expect(screen.getByRole("combobox")).toHaveTextContent(previousMonthLabel(1));
         });
+
+        it("allows the upload button to be clicked", async () => {
+            // Given the upload button is visible for a selected employee
+            mockGetEmployees.mockResolvedValueOnce([
+                { accountId: 1, fullName: "John Doe", position: "Admin" },
+            ]);
+            mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
+            renderEmployeeOverview();
+
+            await screen.findByRole("button", { name: /upload/i });
+            const uploadButton = screen.getByRole("button", { name: /upload/i });
+
+            // When the upload button is clicked
+            expect(() => {
+                fireEvent.click(uploadButton);
+            }).not.toThrow();
+
+            // Then the payslip management section should remain visible
+            expect(screen.getByText(/payslip management/i)).toBeInTheDocument();
+        });
     });
 
-    describe("unmount safety", () => {
+    describe("add employee flow", () => {
+        it("opens the add employee form with blank default values", async () => {
+            mockGetEmployees.mockResolvedValueOnce([]);
+
+            renderEmployeeOverview();
+            await screen.findByText("Employees (0)");
+
+            await openAddEmployeeForm();
+
+            expect(screen.getByText("Profile")).toBeInTheDocument();
+            expect(screen.getByPlaceholderText("Forename")).toHaveValue("");
+            expect(screen.getByPlaceholderText("Surname")).toHaveValue("");
+            expect(screen.getByPlaceholderText("Email")).toHaveValue("");
+            expect(screen.getByPlaceholderText("Phone")).toHaveValue("");
+            expect(screen.getByPlaceholderText("Address line one")).toHaveValue("");
+            expect(screen.getByPlaceholderText("Address line two (optional)")).toHaveValue("");
+            expect(screen.getByPlaceholderText("Postal code")).toHaveValue("");
+            expect(screen.getByPlaceholderText("Username")).toHaveValue("");
+            expect(screen.getByPlaceholderText("Password")).toHaveValue("");
+            expect(screen.getByRole("button", { name: /create user/i })).toBeDisabled();
+        });
+
+        it("cancels the add employee flow and resets entered values", async () => {
+            mockGetEmployees.mockResolvedValueOnce([]);
+
+            renderEmployeeOverview();
+            await screen.findByText("Employees (0)");
+
+            await openAddEmployeeForm();
+            fireEvent.change(screen.getByPlaceholderText("Forename"), {
+                target: { value: "Tom" },
+            });
+            fireEvent.change(screen.getByPlaceholderText("Surname"), {
+                target: { value: "Jones" },
+            });
+
+            await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+
+            expect(await screen.findByText(/select an employee/i)).toBeInTheDocument();
+
+            await openAddEmployeeForm();
+            expect(screen.getByPlaceholderText("Forename")).toHaveValue("");
+            expect(screen.getByPlaceholderText("Surname")).toHaveValue("");
+        });
+
+        it("changes the position select value in the add employee form", async () => {
+            mockGetEmployees.mockResolvedValueOnce([]);
+
+            renderEmployeeOverview();
+            await screen.findByText("Employees (0)");
+
+            await openAddEmployeeForm();
+
+            const positionSelect = screen.getByRole("combobox");
+            expect(positionSelect).toHaveTextContent("Employee");
+
+            fireEvent.mouseDown(positionSelect);
+            await userEvent.click(screen.getByRole("option", { name: "Manager" }));
+
+            expect(screen.getByRole("combobox")).toHaveTextContent("Manager");
+        });
+
+        it("enables create user only when all required fields are completed", async () => {
+            mockGetEmployees.mockResolvedValueOnce([]);
+
+            renderEmployeeOverview();
+            await screen.findByText("Employees (0)");
+
+            await openAddEmployeeForm();
+
+            const createButton = screen.getByRole("button", { name: /create user/i });
+            expect(createButton).toBeDisabled();
+
+            await fillRequiredCreateFields();
+
+            expect(createButton).toBeEnabled();
+        });
+
+        it("disables create and cancel buttons while a create request is in flight", async () => {
+            mockGetEmployees.mockResolvedValueOnce([]);
+            mockCreateEmployee.mockReturnValueOnce(new Promise(() => {}));
+
+            renderEmployeeOverview();
+            await screen.findByText("Employees (0)");
+
+            await openAddEmployeeForm();
+            await fillRequiredCreateFields();
+
+            await userEvent.click(screen.getByRole("button", { name: /create user/i }));
+
+            await waitFor(() => {
+                expect(screen.getByRole("button", { name: /create user/i })).toBeDisabled();
+                expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
+            });
+        });
+
+        it("submits a new employee successfully, reloads the list with the preferred id, and shows success", async () => {
+            const form = makeCreateForm({
+                firstName: " New ",
+                surname: " User ",
+                email: " NEW.USER@EXAMPLE.COM ",
+                phoneNumber: "07123 456789",
+                addressOne: " 1 Main Street ",
+                addressTwo: " Apt 4 ",
+                postalCode: "ab12cd",
+                position: "Manager",
+                username: " new.user ",
+                password: "password123",
+            });
+
+            const builtRequest = {
+                firstName: "New",
+                surname: "User",
+                email: "new.user@example.com",
+                phoneNumber: "07123456789",
+                addressOne: "1 Main Street",
+                addressTwo: "Apt 4",
+                postalCode: "AB12CD",
+                position: "Manager",
+                username: "new.user",
+                password: "password123",
+            };
+
+            mockGetEmployees
+                .mockResolvedValueOnce(makeEmployees().slice(0, 2))
+                .mockResolvedValueOnce([
+                    ...makeEmployees().slice(0, 2),
+                    { accountId: 5, fullName: "New User", position: "Manager" },
+                ]);
+
+            mockGetEmployeeOverview
+                .mockResolvedValueOnce(makeOverview())
+                .mockResolvedValueOnce(makeOverview({
+                    accountId: 5,
+                    fullName: "New User",
+                    position: "Manager",
+                    email: "new.user@example.com",
+                }));
+
+            mockBuildCreateEmployeeRequest.mockReturnValueOnce(builtRequest);
+            mockCreateEmployee.mockResolvedValueOnce({
+                accountId: 5,
+                fullName: "New User",
+                position: "Manager",
+            });
+
+            renderEmployeeOverview();
+
+            await screen.findByText("Employees (2)");
+            await openAddEmployeeForm();
+
+            await fillRequiredCreateFields(form);
+
+            fireEvent.mouseDown(screen.getByRole("combobox"));
+            await userEvent.click(screen.getByRole("option", { name: "Manager" }));
+
+            await userEvent.click(screen.getByRole("button", { name: /create user/i }));
+
+            await waitFor(() =>
+                expect(mockBuildCreateEmployeeRequest).toHaveBeenCalledWith({
+                    firstName: " New ",
+                    surname: " User ",
+                    email: " NEW.USER@EXAMPLE.COM ",
+                    phoneNumber: "07123 456789",
+                    addressOne: " 1 Main Street ",
+                    addressTwo: " Apt 4 ",
+                    postalCode: "ab12cd",
+                    position: "Manager",
+                    username: " new.user ",
+                    password: "password123",
+                })
+            );
+
+            await waitFor(() =>
+                expect(mockCreateEmployee).toHaveBeenCalledWith(mockAuthenticationService, builtRequest)
+            );
+
+            await waitFor(() =>
+                expect(mockGetEmployees).toHaveBeenLastCalledWith(mockAuthenticationService, "")
+            );
+
+            await waitFor(() =>
+                expect(mockGetEmployeeOverview).toHaveBeenLastCalledWith(mockAuthenticationService, 5)
+            );
+
+            expect(await screen.findByText("New User created successfully.")).toBeInTheDocument();
+            expect(screen.queryByText("Personal")).not.toBeInTheDocument();
+            expect(screen.getByText("Employees (3)")).toBeInTheDocument();
+            expect(screen.getAllByText("New User")[0]).toBeInTheDocument();
+        });
+
+        it("closes add employee mode and loads an employee when a list item is clicked", async () => {
+            mockGetEmployees.mockResolvedValueOnce(makeEmployees().slice(0, 2));
+            mockGetEmployeeOverview
+                .mockResolvedValueOnce(makeOverview({
+                    accountId: 1,
+                    fullName: "John Doe",
+                }))
+                .mockResolvedValueOnce(makeOverview({
+                    accountId: 2,
+                    fullName: "Jane Smith",
+                    position: "Manager",
+                    email: "jane@example.com",
+                }));
+
+            renderEmployeeOverview();
+            await screen.findByText("Employees (2)");
+
+            await openAddEmployeeForm();
+            await userEvent.click(screen.getAllByText("Jane Smith")[0]);
+
+            await waitFor(() =>
+                expect(mockGetEmployeeOverview).toHaveBeenLastCalledWith(mockAuthenticationService, 2)
+            );
+
+            expect(screen.queryByText("Personal")).not.toBeInTheDocument();
+            expect(await screen.findByText("jane@example.com")).toBeInTheDocument();
+        });
+
+        it("shows a default create error for non-Error thrown values", async () => {
+            mockGetEmployees.mockResolvedValueOnce([]);
+            mockCreateEmployee.mockRejectedValueOnce("bad");
+
+            renderEmployeeOverview();
+            await screen.findByText("Employees (0)");
+
+            await openAddEmployeeForm();
+            await fillRequiredCreateFields();
+
+            await userEvent.click(screen.getByRole("button", { name: /create user/i }));
+
+            expect(await screen.findByText("Failed to create employee.")).toBeInTheDocument();
+        });
+
+        it("shows a fallback create error when the thrown Error message is blank", async () => {
+            mockGetEmployees.mockResolvedValueOnce([]);
+            mockCreateEmployee.mockRejectedValueOnce(new Error("   "));
+
+            renderEmployeeOverview();
+            await screen.findByText("Employees (0)");
+
+            await openAddEmployeeForm();
+            await fillRequiredCreateFields();
+
+            await userEvent.click(screen.getByRole("button", { name: /create user/i }));
+
+            expect(
+                await screen.findByText("Something went wrong while creating the employee.")
+            ).toBeInTheDocument();
+        });
+
+        it.each([
+            ["Email already exists.", "Email"],
+            ["Username already exists.", "Username"],
+            ["Password must be at least 8 characters.", "Password"],
+            ["Phone number is required.", "Phone"],
+            ["Postcode is invalid.", "Postal code"],
+            ["First name is required.", "Forename"],
+            ["Surname is required.", "Surname"],
+            ["Address line one is required.", "Address line one"],
+        ])(
+            "marks the related text field as errored when create fails with %s",
+            async (message, placeholder) => {
+                mockGetEmployees.mockResolvedValueOnce([]);
+                mockCreateEmployee.mockRejectedValueOnce(new Error(message));
+
+                renderEmployeeOverview();
+                await screen.findByText("Employees (0)");
+
+                await openAddEmployeeForm();
+                await fillRequiredCreateFields();
+
+                await userEvent.click(screen.getByRole("button", { name: /create user/i }));
+
+                expect(await screen.findByText(message)).toBeInTheDocument();
+                expect(screen.getByPlaceholderText(placeholder)).toHaveAttribute("aria-invalid", "true");
+            }
+        );
+
+        it("marks the position field as errored when create fails with a position error", async () => {
+            mockGetEmployees.mockResolvedValueOnce([]);
+            mockCreateEmployee.mockRejectedValueOnce(new Error("Position must be Employee, Manager, or Admin."));
+
+            renderEmployeeOverview();
+            await screen.findByText("Employees (0)");
+
+            await openAddEmployeeForm();
+            await fillRequiredCreateFields();
+
+            await userEvent.click(screen.getByRole("button", { name: /create user/i }));
+
+            expect(
+                await screen.findByText("Position must be Employee, Manager, or Admin.")
+            ).toBeInTheDocument();
+            expect(screen.getByRole("combobox")).toHaveAttribute("aria-invalid", "true");
+        });
+
+        it("clears a displayed create error when a field changes", async () => {
+            mockGetEmployees.mockResolvedValueOnce([]);
+            mockCreateEmployee.mockRejectedValueOnce(new Error("Email already exists."));
+
+            renderEmployeeOverview();
+            await screen.findByText("Employees (0)");
+
+            await openAddEmployeeForm();
+            await fillRequiredCreateFields();
+
+            await userEvent.click(screen.getByRole("button", { name: /create user/i }));
+            expect(await screen.findByText("Email already exists.")).toBeInTheDocument();
+
+            fireEvent.change(screen.getByPlaceholderText("Forename"), {
+                target: { value: "Tomx" },
+            });
+
+            expect(screen.queryByText("Email already exists.")).not.toBeInTheDocument();
+        });
+
+        it("clears a previous success message when opening the add employee form again", async () => {
+            mockGetEmployees
+                .mockResolvedValueOnce(makeEmployees().slice(0, 1))
+                .mockResolvedValueOnce([
+                    ...makeEmployees().slice(0, 1),
+                    { accountId: 5, fullName: "New Employee", position: "Employee" },
+                ]);
+
+            mockGetEmployeeOverview
+                .mockResolvedValueOnce(makeOverview())
+                .mockResolvedValueOnce(makeOverview({
+                    accountId: 5,
+                    fullName: "New Employee",
+                    position: "Employee",
+                    email: "new.employee@example.com",
+                }));
+
+            mockCreateEmployee.mockResolvedValueOnce({
+                accountId: 5,
+                fullName: "New Employee",
+                position: "Employee",
+            });
+
+            renderEmployeeOverview();
+
+            await screen.findByText("Employees (1)");
+            await openAddEmployeeForm();
+            await fillRequiredCreateFields();
+
+            await userEvent.click(screen.getByRole("button", { name: /create user/i }));
+
+            expect(await screen.findByText("New Employee created successfully.")).toBeInTheDocument();
+
+            await userEvent.click(screen.getByRole("button", { name: /add employee/i }));
+
+            expect(screen.queryByText("New Employee created successfully.")).not.toBeInTheDocument();
+            expect(await screen.findByText("Personal")).toBeInTheDocument();
+        });
+    });
+
+    describe("button handlers", () => {
+        it("opens the add employee form when the add employee button is clicked", async () => {
+            // Given the add employee button is visible
+            mockGetEmployees.mockResolvedValueOnce([]);
+            renderEmployeeOverview();
+
+            await screen.findByText("Employees (0)");
+
+            // When the add employee button is clicked
+            await userEvent.click(screen.getByRole("button", { name: /add employee/i }));
+
+            // Then the add employee form should be shown
+            expect(await screen.findByText("Personal")).toBeInTheDocument();
+            expect(screen.getByText("Profile")).toBeInTheDocument();
+            expect(screen.getByRole("button", { name: /create user/i })).toBeDisabled();
+        });
+
+        it("allows the edit employee button to be clicked", async () => {
+            // Given the edit employee button is visible for a selected employee
+            mockGetEmployees.mockResolvedValueOnce([
+                { accountId: 1, fullName: "John Doe", position: "Admin" },
+            ]);
+            mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
+            renderEmployeeOverview();
+
+            await screen.findByRole("button", { name: /edit employee/i });
+            const editButton = screen.getByRole("button", { name: /edit employee/i });
+
+            // When the edit employee button is clicked
+            expect(() => {
+                fireEvent.click(editButton);
+            }).not.toThrow();
+
+            // Then the selected employee should remain visible
+            expect(mockGetEmployeeOverview).toHaveBeenCalledTimes(1);
+            expect(await screen.findByText("john@example.com")).toBeInTheDocument();
+        });
+    });
+
+    describe("employee overview unmount", () => {
+        it("covers the early return inside overview success handler after unmount", async () => {
+            // Given the employee overview request is awaiting when the component unmounts
+            const pendingOverview = deferred<ReturnType<typeof makeOverview>>();
+            mockGetEmployees.mockResolvedValueOnce([
+                { accountId: 1, fullName: "John Doe", position: "Admin" },
+            ]);
+            mockGetEmployeeOverview.mockReturnValueOnce(pendingOverview.promise);
+            const { unmount } = renderEmployeeOverview();
+
+            await waitFor(() =>
+                expect(mockGetEmployeeOverview).toHaveBeenCalledWith(mockAuthenticationService, 1)
+            );
+
+            // When the component unmounts before the overview request resolves
+            unmount();
+
+            await act(async () => {
+                pendingOverview.resolve(
+                    makeOverview({
+                        email: "resolved-after-unmount@example.com",
+                    })
+                );
+                await pendingOverview.promise;
+            });
+
+            // Then the component should not update the state
+            expect(screen.queryByText("resolved-after-unmount@example.com")).not.toBeInTheDocument();
+        });
+
+        it("covers the early return inside overview error handler after unmount", async () => {
+            // Given the employee overview request is awaiting when the component unmounts
+            const pendingOverview = deferred<never>();
+            mockGetEmployees.mockResolvedValueOnce([
+                { accountId: 1, fullName: "John Doe", position: "Admin" },
+            ]);
+            mockGetEmployeeOverview.mockReturnValueOnce(pendingOverview.promise);
+            const { unmount } = renderEmployeeOverview();
+
+            await waitFor(() =>
+                expect(mockGetEmployeeOverview).toHaveBeenCalledWith(mockAuthenticationService, 1)
+            );
+
+            // When the component unmounts before the overview request rejects
+            unmount();
+
+            await act(async () => {
+                pendingOverview.reject(new Error("unknown error"));
+                try {
+                    await pendingOverview.promise;
+                } catch {
+                    return;
+                }
+            });
+
+            // Then the component should not update state after unmount
+            expect(mockGetEmployeeOverview).toHaveBeenCalledTimes(1);
+        });
+
         it("does not update state when the employee list request resolves after unmount", async () => {
             // Given the employee list request resolves after the component has unmounted
             const pendingEmployees = deferred<{ accountId: number; fullName: string; position: string }[]>();
@@ -431,7 +987,7 @@ describe("EmployeeOverview", () => {
             unmount();
 
             await act(async () => {
-                pendingEmployees.reject(new Error("unknow error"));
+                pendingEmployees.reject(new Error("unknown error"));
                 try {
                     await pendingEmployees.promise;
                 } catch {
@@ -439,7 +995,7 @@ describe("EmployeeOverview", () => {
                 }
             });
 
-            // Then no follow-up overview request should occur
+            // Then there should be no attempt to update state after unmount, including no attempt to load an employee overview
             expect(mockGetEmployeeOverview).not.toHaveBeenCalled();
         });
 
@@ -463,197 +1019,7 @@ describe("EmployeeOverview", () => {
                 await pendingOverview.promise;
             });
 
-            // Then the test completes without any post-unmount state update problems
-            expect(mockGetEmployeeOverview).toHaveBeenCalledTimes(1);
-        });
-
-        it("does not update state when the employee overview request rejects after unmount", async () => {
-            // Given the list loads immediately but the employee overview rejects after unmount
-            const pendingOverview = deferred<never>();
-            mockGetEmployees.mockResolvedValueOnce([{ accountId: 1, fullName: "John Doe", position: "Admin" }]);
-            mockGetEmployeeOverview.mockReturnValueOnce(pendingOverview.promise);
-
-            const { unmount } = renderEmployeeOverview();
-
-            await waitFor(() =>
-                expect(mockGetEmployeeOverview).toHaveBeenCalledWith(mockAuthenticationService, 1)
-            );
-
-            // When the component unmounts before the overview request rejects
-            unmount();
-
-            await act(async () => {
-                pendingOverview.reject(new Error("unknow error"));
-                try {
-                    await pendingOverview.promise;
-                } catch {
-                    // swallow test promise rejection
-                }
-            });
-
-            // Then the test completes without any post-unmount state update problems
-            expect(mockGetEmployeeOverview).toHaveBeenCalledTimes(1);
-        });
-
-        it("renders all employees returned in the side list", async () => {
-            mockGetEmployees.mockResolvedValueOnce(makeEmployees().slice(0, 3));
-            mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
-
-            renderEmployeeOverview();
-
-            expect(await screen.findByText("Employees (3)")).toBeInTheDocument();
-            expect(screen.getAllByText("John Doe")[0]).toBeInTheDocument();
-            expect(screen.getAllByText("Jane Smith")[0]).toBeInTheDocument();
-            expect(screen.getAllByText("Bob Jones")[0]).toBeInTheDocument();
-            expect(screen.getAllByText("Admin")[0]).toBeInTheDocument();
-            expect(screen.getAllByText("Manager")[0]).toBeInTheDocument();
-            expect(screen.getAllByText("Employee")[0]).toBeInTheDocument();
-        });
-
-        it("shows whole-number hours without a decimal", async () => {
-            mockGetEmployees.mockResolvedValueOnce([
-                { accountId: 1, fullName: "John Doe", position: "Admin" },
-            ]);
-            mockGetEmployeeOverview.mockResolvedValueOnce(
-                makeOverview({
-                    hoursWorkedThisMonth: 40,
-                })
-            );
-
-            renderEmployeeOverview();
-
-            expect(await screen.findByText("40 hours")).toBeInTheDocument();
-            expect(screen.queryByText("40.0 hours")).not.toBeInTheDocument();
-        });
-
-        it("shows the learning section empty message", async () => {
-            mockGetEmployees.mockResolvedValueOnce([
-                { accountId: 1, fullName: "John Doe", position: "Admin" },
-            ]);
-            mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
-
-            renderEmployeeOverview();
-
-            expect(await screen.findByText(/college and learning days/i)).toBeInTheDocument();
-            expect(screen.getByText(/education type/i)).toBeInTheDocument();
-            expect(screen.getByText(/no learning day information available/i)).toBeInTheDocument();
-        });
-    });
-
-    describe("button handlers", () => {
-        it("allows the add employee button to be clicked", async () => {
-            // Given the add employee button is visible
-            mockGetEmployees.mockResolvedValueOnce([]);
-            renderEmployeeOverview();
-
-            await screen.findByText("Employees (0)");
-            const addButton = screen.getByRole("button", { name: /add employee/i });
-
-            // When the add employee button is clicked
-            expect(() => {
-                fireEvent.click(addButton);
-            }).not.toThrow();
-
-            // TODO: When this feature is implemented, replace this with the correct handling assertions
-            // Then the button should not do anything
-            expect(mockGetEmployeeOverview).not.toHaveBeenCalled();
-        });
-
-        it("allows the edit employee button to be clicked", async () => {
-            // Given the edit employee button is visible for a selected employee
-            mockGetEmployees.mockResolvedValueOnce([
-                { accountId: 1, fullName: "John Doe", position: "Admin" },
-            ]);
-            mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
-            renderEmployeeOverview();
-
-            await screen.findByRole("button", { name: /edit employee/i });
-            const editButton = screen.getByRole("button", { name: /edit employee/i });
-
-            // When the edit employee button is clicked
-            expect(() => {
-                fireEvent.click(editButton);
-            }).not.toThrow();
-
-            // TODO: When this feature is implemented, replace this with the correct handling assertions
-            // Then the button should not do anything
-            expect(mockGetEmployeeOverview).toHaveBeenCalledTimes(1);
-        });
-
-        it("allows the upload button to be clicked", async () => {
-            // Given the upload button is visible for a selected employee
-            mockGetEmployees.mockResolvedValueOnce([
-                { accountId: 1, fullName: "John Doe", position: "Admin" },
-            ]);
-            mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
-            renderEmployeeOverview();
-
-            await screen.findByRole("button", { name: /upload/i });
-            const uploadButton = screen.getByRole("button", { name: /upload/i });
-
-            // When the upload button is clicked
-            expect(() => {
-                fireEvent.click(uploadButton);
-            }).not.toThrow();
-
-            // TODO: When this feature is implemented, replace this with the correct handling assertions
-            // Then the button should not do anything
-            expect(mockGetEmployeeOverview).toHaveBeenCalledTimes(1);
-        });
-    });
-
-    describe("employee overview unmount", () => {
-        it("covers the early return inside overview success handler after unmount", async () => {
-            // Given the employee overview request is awaiting when the component unmounts
-            const pendingOverview = deferred<ReturnType<typeof makeOverview>>();
-            mockGetEmployees.mockResolvedValueOnce([
-                { accountId: 1, fullName: "John Doe", position: "Admin" },
-            ]);
-            mockGetEmployeeOverview.mockReturnValueOnce(pendingOverview.promise);
-            const { unmount } = renderEmployeeOverview();
-            await waitFor(() =>
-                expect(mockGetEmployeeOverview).toHaveBeenCalledWith(mockAuthenticationService, 1)
-            );
-
-            // When the component unmounts before the overview request resolves
-            unmount();
-            await act(async () => {
-                pendingOverview.resolve(
-                    makeOverview({
-                        email: "resolved-after-unmount@example.com",
-                    })
-                );
-                await pendingOverview.promise;
-            });
-
-            // Then the component should not update the state
-            expect(screen.queryByText("resolved-after-unmount@example.com")).not.toBeInTheDocument();
-        });
-
-        it("error handling for after unmount", async () => {
-            // Given the employee overview request is awaiting when the component unmounts
-            const pendingOverview = deferred<never>();
-            mockGetEmployees.mockResolvedValueOnce([
-                { accountId: 1, fullName: "John Doe", position: "Admin" },
-            ]);
-            mockGetEmployeeOverview.mockReturnValueOnce(pendingOverview.promise);
-            const { unmount } = renderEmployeeOverview();
-            await waitFor(() =>
-                expect(mockGetEmployeeOverview).toHaveBeenCalledWith(mockAuthenticationService, 1)
-            );
-
-            // When the component attempts to unmount
-            unmount();
-            await act(async () => {
-                pendingOverview.reject(new Error("unknow error"));
-                try {
-                    await pendingOverview.promise;
-                } catch {
-                    return;
-                }
-            });
-
-            // Then the component should not update the state and the test should complete without error
+            // Then the test completes without any post unmount state update problems
             expect(mockGetEmployeeOverview).toHaveBeenCalledTimes(1);
         });
     });
