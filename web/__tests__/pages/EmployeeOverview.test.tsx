@@ -657,4 +657,120 @@ describe("EmployeeOverview", () => {
             expect(mockGetEmployeeOverview).toHaveBeenCalledTimes(1);
         });
     });
+
+    it("toggles the P60 checkbox", async () => {
+        mockGetEmployees.mockResolvedValueOnce([
+            { accountId: 1, fullName: "John Doe", position: "Admin" },
+        ]);
+        mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
+
+        renderEmployeeOverview();
+
+        await screen.findByText("Payslip Management");
+
+        const checkbox = screen.getByRole("checkbox");
+
+        expect(checkbox).not.toBeChecked();
+
+        await userEvent.click(checkbox);
+
+        expect(checkbox).toBeChecked();
+    });
+
+    it("selects a payslip file and displays filename", async () => {
+        mockGetEmployees.mockResolvedValueOnce([
+            { accountId: 1, fullName: "John Doe", position: "Admin" },
+        ]);
+        mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
+
+        renderEmployeeOverview();
+
+        await screen.findByText("Payslip Management");
+
+        const file = new File(["dummy"], "payslip.pdf", {
+            type: "application/pdf",
+        });
+
+        const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+        await userEvent.upload(input, file);
+
+        expect(await screen.findByText(/Selected: payslip\.pdf/i)).toBeInTheDocument();
+    });
+
+    it("shows error when uploading without file", async () => {
+        mockGetEmployees.mockResolvedValueOnce([
+            { accountId: 1, fullName: "John Doe", position: "Admin" },
+        ]);
+        mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
+
+        renderEmployeeOverview();
+
+        await screen.findByRole("button", { name: /upload/i });
+
+        await userEvent.click(screen.getByRole("button", { name: /upload/i }));
+
+        expect(await screen.findByText(/please select a pdf file/i)).toBeInTheDocument();
+    });
+
+    it("successfully uploads a payslip", async () => {
+        const fetchMock = jest.fn().mockResolvedValue({
+            ok: true,
+        });
+
+        mockGetEmployees.mockResolvedValueOnce([
+            { accountId: 1, fullName: "John Doe", position: "Admin" },
+        ]);
+
+        mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
+
+        renderEmployeeOverview();
+
+        await screen.findByText("Payslip Management");
+
+        const file = new File(["pdf"], "payslip.pdf", {
+            type: "application/pdf",
+        });
+
+        const input = document.querySelector(
+            'input[type="file"]'
+        ) as HTMLInputElement;
+
+        await userEvent.upload(input, file);
+
+        // inject file into component state already handled via upload
+
+        // mock authenticationService.fetch
+        const auth = mockUseAuth();
+        auth.authenticationService.fetch = fetchMock;
+
+        await userEvent.click(screen.getByRole("button", { name: /upload/i }));
+
+        await waitFor(() => {
+            expect(fetchMock).toHaveBeenCalled();
+            expect(screen.getByText(/uploaded successfully/i)).toBeInTheDocument();
+        });
+    });
+
+    it("triggers hidden file input click", async () => {
+        mockGetEmployees.mockResolvedValueOnce([
+            { accountId: 1, fullName: "John Doe", position: "Admin" },
+        ]);
+
+        mockGetEmployeeOverview.mockResolvedValueOnce(makeOverview());
+
+        renderEmployeeOverview();
+
+        await screen.findByText("Payslip Management");
+
+        const input = document.querySelector(
+            'input[type="file"]'
+        ) as HTMLInputElement;
+
+        const clickSpy = jest.spyOn(input, "click");
+
+        await userEvent.click(screen.getByText(/upload file/i));
+
+        expect(clickSpy).toHaveBeenCalled();
+    });
 });
