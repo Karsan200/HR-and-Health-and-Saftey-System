@@ -22,7 +22,7 @@ import {
 } from "../logic/SendOutDocumentsService";
 import { sendOutDocumentsStyles as styles, getDropZoneStyle } from "./SendOutDocumentsPage.styles";
 import { SectionNavBar} from "../components/SectionNavbar";
-import {type EmployeeListItemResponse, getEmployees} from "../logic/EmployeeOverviewService.ts";
+import {type EmployeeListItemResponse, getEmployees} from "../logic/EmployeeOverviewService";
 
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -327,7 +327,7 @@ export function SendOutDocumentsPage() {
                 <input
                     ref={fileInputRef}
                     type="file"
-                    accept="application/pdf"
+                    accept=".pdf"
                     style={{ display: "none" }}
                     onChange={handleFileInputChange}
                 />

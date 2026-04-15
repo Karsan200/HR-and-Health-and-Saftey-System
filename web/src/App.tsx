@@ -11,7 +11,7 @@ import {CalendarPage} from "./pages/CalendarPage";
 import {PendingRequestsPage} from "./pages/PendingRequestsPage";
 import { PersonalPage } from "./pages/PersonalPage";
 import { EmployeeOverview } from "./pages/EmployeeOverview";
-import { SendOutDocumentsPage} from "./pages/SendOutDocumentsPage.tsx";
+import { SendOutDocumentsPage} from "./pages/SendOutDocumentsPage";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
