@@ -2,10 +2,12 @@ import type { AuthenticationService } from "./AuthenticationService";
 import type { CalendarEvent } from "../models/CalendarTypes";
 
 interface LeaveCalendarItemResponse {
-    date: string;
+    date:        string;
     employeeName: string;
-    leaveType: string;
-    notes: string | null;
+    leaveType:   string;
+    notes:       string | null;
+    startTime:   string | null;
+    endTime:     string | null;
 }
 
 export async function fetchCalendarEvents(
@@ -30,10 +32,12 @@ export async function fetchCalendarEvents(
     const data: LeaveCalendarItemResponse[] = await response.json();
 
     return data.map((item, index) => ({
-        id:    `${item.date}-${item.employeeName}-${index}`,
-        date:  item.date,
-        type:  item.leaveType,
-        label: item.employeeName,
-        notes: item.notes ?? undefined,
+        id:        `${item.date}-${item.employeeName}-${index}`,
+        date:      item.date,
+        type:      item.leaveType,
+        label:     item.employeeName,
+        notes:     item.notes      ?? undefined,
+        startTime: item.startTime  ?? undefined,
+        endTime:   item.endTime    ?? undefined,
     }));
 }
