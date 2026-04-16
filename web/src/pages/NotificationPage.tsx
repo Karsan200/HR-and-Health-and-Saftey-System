@@ -2,7 +2,7 @@ import { Box, Typography, Button } from "@mui/material";
 import { notificationPageStyles as styles } from "./NotificationPage.styles";
 import { getRecentActivity, type RecentActivityItemResponse } from "../logic/DashboardService";
 import { useEffect, useState } from "react";
-import { useAuth } from "../AuthContext.tsx";
+import { useAuth } from "../AuthContext";
 
 const getActivityDisplay = (type: string): { label: string; colorKey: "leave" | "signed" | "late" | "hazard" | "default" } => {
     switch (type) {

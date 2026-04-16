@@ -1,5 +1,5 @@
-﻿import {DefaultColours} from "../theme/colours.ts";
-import {BorderRadius, FontSize, TextStyles} from "../theme/theme.ts";
+﻿import {DefaultColours} from "../theme/colours";
+import {BorderRadius, FontSize, TextStyles} from "../theme/theme";
 
 const typeLabelColors = {
     leave:   { color: DefaultColours.amberPrimary, background: DefaultColours.amberBackgroundLight },
