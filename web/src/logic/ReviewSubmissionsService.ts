@@ -37,7 +37,7 @@ export interface RiskAssessmentItem {
     title: string;
     hazardCount: number;
     created: string;
-    hasDrafts: boolean;
+    allActionsComplete: boolean;
 }
 
 export async function getRiskAssessments(

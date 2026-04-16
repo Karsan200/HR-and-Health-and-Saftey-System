@@ -28,4 +28,6 @@ public class RiskAssessmentResponse {
 
     /** Whether the risk assessment is saved as a draft. */
     private boolean hasDrafts;
+
+    private boolean allActionsComplete;
 }

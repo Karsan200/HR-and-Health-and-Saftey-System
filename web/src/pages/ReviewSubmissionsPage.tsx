@@ -151,8 +151,7 @@ export function ReviewSubmissionsPage() {
                             </Box>
                         ) : (
                             riskAssessments.map((item) => {
-                                const hasOpenActions = item.hasDrafts;
-
+                                const hasOpenActions = !item.allActionsComplete;
                                 return (
                                     <Box
                                         key={item.riskAssessmentId}

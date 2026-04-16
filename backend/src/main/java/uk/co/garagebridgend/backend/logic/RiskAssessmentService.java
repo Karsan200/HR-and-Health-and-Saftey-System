@@ -82,12 +82,16 @@ public class RiskAssessmentService {
                                                     .equals(currentUser.getAccountId())
                             );
 
+                    boolean allActionsComplete = joins.stream()
+                            .allMatch(j -> j.getHazard().getActionComplete() != null);
+
                     return new RiskAssessmentResponse(
                             ra.getRiskAssessmentId(),
                             ra.getTitle(),
                             joins.size(),
                             ra.getCreated(),
-                            hasDrafts
+                            hasDrafts,
+                            allActionsComplete
                     );
                 })
                 .collect(Collectors.toList());
