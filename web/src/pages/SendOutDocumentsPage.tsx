@@ -189,7 +189,7 @@ export function SendOutDocumentsPage() {
             <SectionNavBar
                 tabs={[
                     { label: "Upload and Send Documents", route: "/health-and-safety/send-out" },
-                    { label: "Review Submissions", route: "/documents/review" },
+                    { label: "Review Submissions", route: "/health-and-safety/review" },
                 ]}
             />
 

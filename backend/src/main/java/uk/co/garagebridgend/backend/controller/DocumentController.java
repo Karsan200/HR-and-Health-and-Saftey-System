@@ -10,6 +10,7 @@ import uk.co.garagebridgend.backend.logic.DocumentService;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.request.SendOutDocumentRequest;
 import uk.co.garagebridgend.backend.models.response.DocumentResponse;
+import uk.co.garagebridgend.backend.models.response.PendingSignatureResponse;
 
 import java.util.List;
 
@@ -70,6 +71,24 @@ public class DocumentController {
         } catch (Exception e) {
             LOG.error("Error sending out document", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+        }
+    }
+
+    /**
+     * Returns all (account, document) pairs where a signature is required but
+     * has not yet been provided.*
+     * @return list of {@link PendingSignatureResponse} items
+     */
+    @GetMapping("/admin/pending-signatures")
+    public List<PendingSignatureResponse> getPendingSignatures() {
+        try {
+            return documentService.getPendingSignatures();
+        } catch (Exception e) {
+            LOG.error("Error retrieving pending signatures", e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal server error"
+            );
         }
     }
 }

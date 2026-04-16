@@ -12,6 +12,7 @@ import {PendingRequestsPage} from "./pages/PendingRequestsPage";
 import { PersonalPage } from "./pages/PersonalPage";
 import { EmployeeOverview } from "./pages/EmployeeOverview";
 import { SendOutDocumentsPage} from "./pages/SendOutDocumentsPage";
+import { ReviewSubmissionsPage} from "./pages/ReviewSubmissionsPage";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
@@ -67,10 +68,10 @@ function AppContent() {
                     <Route path="/health-and-safety/send-out/safety-alert" element={<></>} />
                     <Route path="calendar/requests" element={<PendingRequestsPage />} />
                     <Route path="/health-and-safety/send-out" element={<SendOutDocumentsPage />} />
+                    <Route path="/health-and-safety/review" element={<ReviewSubmissionsPage />} />
                 </Routes>
             </BrowserRouter>
         </>
     )
 }
-
 export default App

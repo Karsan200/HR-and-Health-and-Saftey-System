@@ -6,6 +6,7 @@ import uk.co.garagebridgend.backend.models.entity.*;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.request.SendOutDocumentRequest;
 import uk.co.garagebridgend.backend.models.response.DocumentResponse;
+import uk.co.garagebridgend.backend.models.response.PendingSignatureResponse;
 import uk.co.garagebridgend.backend.repository.*;
 
 import java.io.ByteArrayInputStream;
@@ -152,5 +153,51 @@ public class DocumentService {
             recipientRecord.setAccount(recipient);
             documentRecipientRepository.save(recipientRecord);
         }
+    }
+
+    /**
+     * Returns every (account, document) pair where:
+     *  - the document requires a signature, AND
+     *  - the account is a recipient of the document, AND
+     *  - the account has NOT yet signed the document.
+     * @return list of pending signature items, ordered by sentDate descending
+     */
+    public List<PendingSignatureResponse> getPendingSignatures() {
+
+        // Find all documents that require a signature
+        List<DocumentTable> signatureRequiredDocs =
+                documentRepository.findAllBySignatureRequiredTrue();
+
+        List<PendingSignatureResponse> pendingItems = new java.util.ArrayList<>();
+
+        for (DocumentTable document : signatureRequiredDocs) {
+
+            // Find everyone who received this document
+            List<DocumentRecipientTable> recipients =
+                    documentRecipientRepository.findAllByDocument(document);
+
+            for (DocumentRecipientTable recipient : recipients) {
+                AccountTable account = recipient.getAccount();
+
+                // Check if this account has already signed
+                boolean hasSigned = signatureRepository
+                        .existsByAccountAndDocument(account, document);
+
+                if (!hasSigned) {
+                    pendingItems.add(new PendingSignatureResponse(
+                            account.getAccountId(),
+                            account.getFirstName() + " " + account.getLastName(),
+                            document.getDocumentId(),
+                            document.getTitle(),
+                            recipient.getCreated()   // when the doc was sent to them
+                    ));
+                }
+            }
+        }
+
+        // Sort by sentDate descending (most recently sent first)
+        pendingItems.sort((a, b) -> b.getSentDate().compareTo(a.getSentDate()));
+
+        return pendingItems;
     }
 }
