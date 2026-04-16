@@ -1,3 +1,12 @@
+## [V0.4.0] - TBD
+
+### Added
+- BLE advertisement on the mobile app to allow the app to broadcast a BLE advertisement with a specific UUID for the user so it is detectable by the Raspberry Pi Pico firmware
+- Full implementation of the BLE firmware for the Raspberry Pi Pico to detect BLE advertisements and record and upload data to the backend
+- Backend implementation for the BLE firmware, including API endpoints to receive data from the firmware and store it in the database
+- Backend implementation for a background task that runs through clock in events and uses it to update or create new attendance records for employees
+- V0.4.0 flyway database migration (V6) to account for changes in this version
+
 ## [V0.3.1] - 2026-04-13
 
 ### Added

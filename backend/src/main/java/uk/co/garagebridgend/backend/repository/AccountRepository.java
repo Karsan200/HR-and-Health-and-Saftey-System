@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * JPA repository for managing {@link AccountTable} entities.
@@ -22,6 +23,14 @@ public interface AccountRepository extends JpaRepository<AccountTable, Long> {
      * @return an Optional containing the found account, or empty if not found
      */
     Optional<AccountTable> findByUsername(String username);
+
+    /**
+     * Finds an account using its associated Bluetooth signature.
+     *
+     * @param bleSignature the Bluetooth signature to search for
+     * @return an Optional containing the found account, or empty if not found
+     */
+    Optional<AccountTable> findByBleSignature(UUID bleSignature);
 
     /**
      * Retrieves all accounts ordered by first name and last name.
@@ -47,4 +56,20 @@ public interface AccountRepository extends JpaRepository<AccountTable, Long> {
         ORDER BY a.firstName ASC, a.lastName ASC
     """)
     List<AccountTable> searchForEmployeeOverview(@Param("search") String search);
+
+    /**
+     * Finds an account by email ignoring case sensitivity.
+     *
+     * @param email the email to search for
+     * @return optional matching account
+     */
+    Optional<AccountTable> findByEmailIgnoreCase(String email);
+
+    /**
+     * Finds an account by username ignoring case sensitivity.
+     *
+     * @param username the username to search for
+     * @return optional matching account
+     */
+    Optional<AccountTable> findByUsernameIgnoreCase(String username);
 }

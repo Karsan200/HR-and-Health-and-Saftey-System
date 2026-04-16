@@ -4,12 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.PayslipService;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
+import uk.co.garagebridgend.backend.models.request.UploadPayslipRequest;
 import uk.co.garagebridgend.backend.models.response.PayslipResponse;
 
 import java.util.List;
@@ -46,6 +45,38 @@ public class PayslipController {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error"
+            );
+        }
+    }
+
+    /**
+     * Endpoint for uploading a new payslip. Accepts a base64-encoded PDF along with metadata
+     * (name, year, month, isPSixty).
+     *
+     * @param request the request body containing payslip metadata and file content
+     */
+    @PostMapping("/admin/upload")
+    public void uploadPayslip(final @RequestBody UploadPayslipRequest request) {
+        try {
+            payslipService.uploadPayslip(request);
+
+        } catch (AuthenticatedAccountNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Authenticated account not found."
+            );
+
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    e.getMessage()
+            );
+
+        } catch (Exception e) {
+            LOG.error("Error uploading payslip", e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Upload failed"
             );
         }
     }
