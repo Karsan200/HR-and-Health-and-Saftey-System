@@ -58,6 +58,22 @@ public interface AccountRepository extends JpaRepository<AccountTable, Long> {
     List<AccountTable> searchForEmployeeOverview(@Param("search") String search);
 
     /**
+     * Finds an account by email ignoring case sensitivity.
+     *
+     * @param email the email to search for
+     * @return optional matching account
+     */
+    Optional<AccountTable> findByEmailIgnoreCase(String email);
+
+    /**
+     * Finds an account by username ignoring case sensitivity.
+     *
+     * @param username the username to search for
+     * @return optional matching account
+     */
+    Optional<AccountTable> findByUsernameIgnoreCase(String username);
+
+    /**
      * Searches for accounts whose first name or last name contains the given
      * query string (case-insensitive). Returns up to 10 results ordered
      * alphabetically by last name then first name. Used by the admin clock-in
