@@ -27,13 +27,19 @@ def connect_wifi(wlan, settings):
             ntptime.host = "time.cloudflare.com"
             ntptime.timeout = 5
 
-            try:
-                ntptime.settime()  # fetches time and sets the RTC to UTC
-                print("RTC synced:", time.gmtime())
-                return True
-            except Exception as e:
-                print("RTC sync failed:", e)
-                return False
+            ntp_attempts = 0
+
+            while ntp_attempts < 5:
+                try:
+                    ntptime.settime()  # fetches time and sets the RTC to UTC
+                    print("RTC synced:", time.gmtime())
+                    ntp_attempts = 5
+                except Exception as e:
+                    print("RTC sync failed:", e)
+                    ntp_attempts += 1
+                    time.sleep(_WIFI_RETRY_DELAY)
+
+            return True
         print("WiFi attempt {}/{} failed".format(attempt, _MAX_WIFI_RETRIES))
 
     print("WiFi unavailable after {} attempts, skipping upload".format(_MAX_WIFI_RETRIES))
