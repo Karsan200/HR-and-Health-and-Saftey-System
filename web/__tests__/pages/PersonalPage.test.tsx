@@ -521,7 +521,6 @@ describe("PersonalPage", () => {
     });
 
     // Tab navigation
-    // TODO: THESE TESTS WILL NEED TO BE REMOVED/EDITED WHEN THE OTHER TABS ARE FILLED OUT!
 
     describe("tab navigation", () => {
         it("shows the settings placeholder when the Settings tab is clicked", async () => {
@@ -530,7 +529,7 @@ describe("PersonalPage", () => {
                 expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
             );
             await userEvent.click(screen.getByText("Settings"));
-            expect(screen.getByText("Settings TBC")).toBeInTheDocument();
+            expect(screen.getByText("Notification Settings")).toBeInTheDocument();
         });
 
         it("returns to the profile tab when Profile Information is clicked after switching", async () => {

@@ -286,17 +286,22 @@ function SettingsTab({ settings }: { settings: SettingsResponse }) {
                             </Box>
                         </Box>
 
-                        {success && (
-                            <Typography sx={styles.settingsSuccessText}>
-                                Notification settings saved.
-                            </Typography>
-                        )}
+                        {/*{success && (*/}
+                        {/*    <Typography sx={styles.settingsSuccessText}>*/}
+                        {/*        Notification settings saved.*/}
+                        {/*    </Typography>*/}
+                        {/*)}*/}
                         {error && (
                             <Typography sx={styles.settingsErrorText}>
                                 {error}
                             </Typography>
                         )}
                     </>
+                )}
+                {success && (
+                    <Typography sx={styles.settingsSuccessText}>
+                        Notification settings saved.
+                    </Typography>
                 )}
             </Box>
         </LocalizationProvider>
