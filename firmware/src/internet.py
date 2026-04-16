@@ -30,10 +30,10 @@ def connect_wifi(wlan, settings):
             try:
                 ntptime.settime()  # fetches time and sets the RTC to UTC
                 print("RTC synced:", time.gmtime())
+                return True
             except Exception as e:
                 print("RTC sync failed:", e)
-
-            return True
+                return False
         print("WiFi attempt {}/{} failed".format(attempt, _MAX_WIFI_RETRIES))
 
     print("WiFi unavailable after {} attempts, skipping upload".format(_MAX_WIFI_RETRIES))
