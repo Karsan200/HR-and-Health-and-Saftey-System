@@ -114,6 +114,40 @@ public class AuthenticationController {
         }
     }
 
+    /** Logs out a user by invalidating the refresh token and clearing the cookie.
+        * @param request The HTTP request containing the refresh token cookie to invalidate.
+        * @param response The HTTP response to clear the refresh token cookie on.
+        * */
+    @GetMapping("/logout")
+    public void logout(final HttpServletRequest request, final HttpServletResponse response) {
+        // Get refresh token from cookie
+        String refreshToken = extractRefreshToken(request);
+        if (refreshToken == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Refresh token not found in cookies"
+            );
+        }
+
+        try {
+            authenticationService.logout(refreshToken);
+
+            // Clear the refresh token cookie
+            Cookie refreshTokenCookie = new Cookie("refreshToken", null);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setMaxAge(0); // Expire the cookie immediately
+
+            response.addCookie(refreshTokenCookie);
+        } catch (Exception e) {
+            LOG.error("Error during logout", e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Internal sever error"
+            );
+        }
+    }
+
     /** Authorises a user for MFA by validating the provided TOTP code.
      * @param body The request body containing the TOTP code for MFA authorisation.
      * @param request The HTTP request containing the refresh token cookie for validating the session.
