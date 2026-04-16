@@ -1,4 +1,7 @@
 
+INSERT INTO iot_device_table (created, last_activity, device_id, access_token)
+VALUE (CURRENT_TIMESTAMP, NULL, '9b4cfe01-3835-11f1-b008-18c04d1acf19', '$2a$10$4t/QTRfV5jAHO2KQOOaph.2OXDtK19qh4NE1mB0n/f2dQFo1SQELi');
+
 INSERT INTO account_table (
     account_id,
     first_name,
