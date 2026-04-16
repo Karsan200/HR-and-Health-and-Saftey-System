@@ -2,7 +2,8 @@ import os
 import ujson
 import urequests
 import network
-import time
+
+from internet import connect_wifi
 
 def convert_timestamp(s):
     date_part, time_part = s.split("_")
@@ -14,30 +15,6 @@ def convert_timestamp(s):
     ss = time_part[4:6]
     return "{}-{}-{}T{}:{}:{}".format(yyyy, mm, dd, hh, mi, ss)
 
-_MAX_WIFI_RETRIES = 5
-_WIFI_RETRY_DELAY = 5  # seconds
-
-def _connect_wifi(wlan, settings):
-    """
-    Attempt to connect to WiFi. Returns True on success, False after
-    _MAX_WIFI_RETRIES failed attempts.
-    """
-    if wlan.isconnected():
-        return True
-
-    print("Connecting to WiFi...")
-    wlan.connect(settings["ssid"], settings["password"])
-
-    for attempt in range(1, _MAX_WIFI_RETRIES + 1):
-        time.sleep(_WIFI_RETRY_DELAY)
-        if wlan.isconnected():
-            print("Connected! IP:", wlan.ifconfig()[0])
-            return True
-        print("WiFi attempt {}/{} failed".format(attempt, _MAX_WIFI_RETRIES))
-
-    print("WiFi unavailable after {} attempts, skipping upload".format(_MAX_WIFI_RETRIES))
-    return False
-
 def upload(radio_lock):
     with radio_lock:
         with open("config.json") as f:
@@ -45,7 +22,7 @@ def upload(radio_lock):
 
         wlan = network.WLAN(network.STA_IF)
 
-        if not _connect_wifi(wlan, settings):
+        if not connect_wifi(wlan, settings):
             return
 
         for item in os.listdir("/cache"):

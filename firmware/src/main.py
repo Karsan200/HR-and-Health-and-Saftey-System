@@ -4,6 +4,7 @@ import ujson
 import _thread
 import network
 
+from internet import connect_wifi
 from upload import upload
 from scan import scan
 
@@ -35,6 +36,11 @@ with open("config.json") as f:
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
+
+connected = False
+# Connect to Wi-Fi
+while not connected:
+    connected = connect_wifi(wlan, settings)
 
 def upload_loop(interval):
     while True:
