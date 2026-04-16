@@ -15,6 +15,7 @@ import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlin
 import ContentPasteOutlinedIcon from "@mui/icons-material/ContentPasteOutlined";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import { Button } from "@mui/material";
+import {useNavigate} from "react-router-dom";
 
 /** Format an ISO date string as "Sent: 5 February 2026" */
 function formatSentDate(iso: string): string {
@@ -47,6 +48,7 @@ export function ReviewSubmissionsPage() {
     const [riskAssessments, setRiskAssessments] = useState<RiskAssessmentItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     const loadData = useCallback(async () => {
         setLoading(true);
@@ -199,6 +201,7 @@ export function ReviewSubmissionsPage() {
                                                     ? styles.riskButtonRed
                                                     : styles.riskButtonGrey),
                                             }}
+                                            onClick={() => navigate(`/health-and-safety/review/risk-assessment/${item.riskAssessmentId}`)}
                                         >
                                             {hasOpenActions ? "Review now" : "Read again"}
                                         </Button>

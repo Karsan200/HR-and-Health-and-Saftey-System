@@ -54,3 +54,33 @@ export async function getRiskAssessments(
 
     return response.json();
 }
+
+/**
+ * Represents a single hazard item in the list of hazards for a specific risk assessment.
+ * Contains the id, title, creator, creation date, and status flags (draft/closed).
+ */
+export interface HazardItem {
+    hazardId: number;
+    title: string;
+    createdBy: string;
+    draft: boolean;
+    closed: boolean;
+    created: string;
+    ownedByCurrentUser: boolean;
+}
+
+export async function getHazardsForRiskAssessment(
+    authenticationService: AuthenticationService,
+    riskAssessmentId: number
+): Promise<HazardItem[]> {
+    const response = await authenticationService.fetch(
+        `/api/risk-assessment/${riskAssessmentId}/hazards`,
+        { method: "GET" }
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch hazards: ${response.status}`);
+    }
+
+    return response.json();
+}
