@@ -1,5 +1,7 @@
 ﻿import { DefaultColours } from "../theme/colours";
-import {BorderRadius, FontSize, TextStyles} from "../theme/theme";
+import { BorderRadius, FontSize, TextStyles } from "../theme/theme";
+
+const cardBorders = `1px solid ${DefaultColours.greyIconLight}55`
 
 export const personalPageStyles = {
     page: {
@@ -84,7 +86,7 @@ export const personalPageStyles = {
 
     sectionCard: {
         background: DefaultColours.white,
-        border: `0.5px solid ${DefaultColours.greyBackground}`,
+        border: cardBorders,
         borderRadius: BorderRadius.smallTextBackground,
         padding: "1.25rem",
         marginBottom: "1rem",
@@ -214,7 +216,7 @@ export const personalPageStyles = {
     // Security tab
     securityCard: {
         background: DefaultColours.white,
-        border: `0.5px solid ${DefaultColours.greyBackground}`,
+        border: cardBorders,
         borderRadius: BorderRadius.smallTextBackground,
         padding: "1.25rem",
         marginBottom: "1rem",
@@ -231,7 +233,7 @@ export const personalPageStyles = {
         width: "100%",
         padding: "14px 16px",
         fontSize: FontSize.xs14,
-        border: `0.5px solid ${DefaultColours.greyBackground}`,
+        border: cardBorders,
         borderRadius: BorderRadius.smallTextField,
         marginBottom: "12px",
         outline: "none",
@@ -286,7 +288,7 @@ export const personalPageStyles = {
     // Settings tab
     settingsCard: {
         background: DefaultColours.white,
-        border: `0.5px solid ${DefaultColours.greyBackground}`,
+        border: cardBorders,
         borderRadius: BorderRadius.smallTextBackground,
         padding: "1.25rem",
         marginBottom: "1rem",

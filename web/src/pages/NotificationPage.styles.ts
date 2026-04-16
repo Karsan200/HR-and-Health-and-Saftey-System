@@ -2,11 +2,11 @@
 import {BorderRadius, FontSize, TextStyles} from "../theme/theme.ts";
 
 const typeLabelColors = {
-    leave:   { color: DefaultColours.amberBackgroundLight, background: DefaultColours.amberPrimary },
-    signed:  { color: DefaultColours.greenBackgroundLight, background: DefaultColours.greenPrimary },
-    late:    { color: DefaultColours.redBackgroundLight, background: DefaultColours.redPrimary },
-    hazard:  { color: DefaultColours.redBackgroundLight, background: DefaultColours.redPrimary },
-    default: { color: DefaultColours.greyBackground, background: DefaultColours.greyPrimaryMainText },
+    leave:   { color: DefaultColours.amberPrimary, background: DefaultColours.amberBackgroundLight },
+    signed:  { color: DefaultColours.greenPrimary, background: DefaultColours.greenBackgroundLight },
+    late:    { color: DefaultColours.redPrimary, background: DefaultColours.redBackgroundLight },
+    hazard:  { color: DefaultColours.redPrimary, background: DefaultColours.redBackgroundLight },
+    default: { color: DefaultColours.greyPrimaryMainText, background: DefaultColours.greyBackground },
 };
 
 export const notificationPageStyles = {
@@ -41,16 +41,17 @@ export const notificationPageStyles = {
     },
 
     markAllButton: {
-        backgroundColor: DefaultColours.redPrimary,
-        color: DefaultColours.white,
+        backgroundColor: DefaultColours.redBackgroundLight,
+        color: DefaultColours.redTextDark,
         textTransform: "none",
         borderRadius: BorderRadius.smallTextBackground,
         padding: "8px 16px",
         fontSize: FontSize.xs14,
-        fontFamily: TextStyles.regular,
+        fontFamily: TextStyles.semiBold,
         flexShrink: 0,
         "&:hover": {
             backgroundColor: DefaultColours.redTextDark,
+            color: DefaultColours.white,
         },
     },
 
@@ -65,14 +66,14 @@ export const notificationPageStyles = {
         display: "flex",
         flexDirection: "column",
         gap: "1px",
-        border: "1px solid DefaultColours.black",
-        borderRadius: "8px",
         overflow: "hidden",
-        backgroundColor: DefaultColours.white, // acts as divider colour between cards
     },
 
     notificationCard: {
         backgroundColor: DefaultColours.white,
+        border: `1px solid ${DefaultColours.greyIconLight}55`,
+        borderRadius: BorderRadius.smallTextField,
+        margin: "8px",
         padding: "16px 20px",
         display: "flex",
         flexDirection: "column",
