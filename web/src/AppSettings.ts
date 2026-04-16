@@ -8,7 +8,7 @@ export const AppSettings = {
   API_URL: 'http://localhost:8080',
   
   // CDN URL for static assets
-  CDN_URL: 'http://localhost:8080',
+  CDN_URL: 'https://cdn-ltp.tomsw.uk',
 
   // Name of the company
   COMPANY_NAME: 'Rent-A-Tech',

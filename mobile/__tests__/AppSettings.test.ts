@@ -30,7 +30,7 @@ describe('AppSettings', () => {
 
   describe('configuration structure', () => {
     it('should only contain expected properties', () => {
-      const expectedKeys = ['API_URL', 'CDN_URL', 'BLE_SERVICE_UUID', 'BLE_CHARACTERISTIC_UUID'];
+      const expectedKeys = ['API_URL', 'CDN_URL', 'BLE_SERVICE_UUID'];
       const actualKeys = Object.keys(AppSettings);
       expect(actualKeys).toEqual(expectedKeys);
     });

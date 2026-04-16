@@ -577,4 +577,38 @@ export const employeeOverviewStyles = {
         color: DefaultColours.greyPrimaryMainText,
         lineHeight: 1.3,
     },
+
+    uploadHintText: {
+        marginTop: 1,
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular.fontFamily,
+        fontWeight: TextStyles.regular.fontWeight,
+        color: DefaultColours.greyPrimaryMainText,
+        cursor: "pointer",
+    },
+
+    selectedFileText: {
+        marginTop: 0.5,
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular.fontFamily,
+        fontWeight: TextStyles.regular.fontWeight,
+        color: DefaultColours.black,
+    },
+
+    payslipErrorText: {
+        marginTop: 0.5,
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular.fontFamily,
+        fontWeight: TextStyles.regular.fontWeight,
+        color: DefaultColours.redPrimary,
+    },
+
+    payslipSuccessText: {
+        marginTop: 0.5,
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular.fontFamily,
+        fontWeight: TextStyles.regular.fontWeight,
+        color: DefaultColours.greenPrimary,
+        lineHeight: 1.3,
+    },
 } as const;

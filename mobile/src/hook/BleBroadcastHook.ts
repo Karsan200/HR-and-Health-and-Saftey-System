@@ -1,32 +1,22 @@
-import { startAdvertising, setServices } from 'munim-bluetooth';
+import { startAdvertising } from 'munim-bluetooth';
 import { AppSettings } from '../AppSettings.ts';
 
 export interface BleBroadcastTaskArgs {
   broadcastId: string | null; // the Service UUID to advertise
 }
 
+function broadcastIdToManufacturerData(broadcastId: string): string {
+  return broadcastId.replace(/-/g, '');
+}
+
 async function startBleAdvertising(broadcastId: string) {
   startAdvertising({
     serviceUUIDs: [AppSettings.BLE_SERVICE_UUID],
     advertisingData: {
-      shortenedLocalName: "R.A.T Signal",
-      completeLocalName: `R.A.T ${broadcastId}`,
+      manufacturerData: broadcastIdToManufacturerData(broadcastId),
     }
   });
-  console.log('Broadcasting as:', `R.A.T ${broadcastId}`);
-
-  setServices([
-    {
-      uuid: AppSettings.BLE_SERVICE_UUID,
-      characteristics: [
-        {
-          uuid: AppSettings.BLE_CHARACTERISTIC_UUID,
-          properties: ['read', 'notify'],
-          value: broadcastId,
-        },
-      ],
-    },
-  ]);
+  console.log('Broadcasting as:', broadcastIdToManufacturerData(broadcastId));
 }
 
 export const BleBroadcastHook = async (

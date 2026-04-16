@@ -10,9 +10,9 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Represents a clock-in event for an account.
@@ -27,9 +27,9 @@ import java.time.LocalDateTime;
 public class ClockInEventTable {
     /** Primary key (auto-generated). */
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "clock_in_event_id")
-    private Long clockInEventId;
+    private UUID clockInEventId;
 
     /**
      * Account that owns this clock in event. References {@code account_id} in the
@@ -39,8 +39,7 @@ public class ClockInEventTable {
     @JoinColumn(name = "account_id", referencedColumnName = "account_id", nullable = false)
     private AccountTable account;
 
-    /** Creation timestamp (auto-populated, not updatable). */
-    @CreationTimestamp
+    /** Creation timestamp. */
     @Column(name = "created", nullable = false, updatable = false)
     private LocalDateTime created;
 }

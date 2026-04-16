@@ -12,6 +12,7 @@ import {PendingRequestsPage} from "./pages/PendingRequestsPage";
 import { PersonalPage } from "./pages/PersonalPage";
 import { EmployeeOverview } from "./pages/EmployeeOverview";
 import { ClockOverridesPage} from "./pages/ClockOverridesPage";
+import { SendOutDocumentsPage} from "./pages/SendOutDocumentsPage";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
@@ -68,6 +69,7 @@ function AppContent() {
                 <Route path="/health-and-safety/send-out/safety-alert" element={<></>} />
                 <Route path="calendar/requests" element={<PendingRequestsPage />} />
                 <Route path="calendar/overrides" element={<ClockOverridesPage/>} />
+                <Route path="/health-and-safety/send-out" element={<SendOutDocumentsPage />} />
             </Routes>
         </BrowserRouter>
         </>
