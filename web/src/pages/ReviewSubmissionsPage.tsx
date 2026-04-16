@@ -182,7 +182,7 @@ export function ReviewSubmissionsPage() {
                                                 {item.title}
                                             </Typography>
                                             <Typography sx={styles.documentTitle}>
-                                                {item.hazardCount} hazards identified
+                                                {item.activeHazardCount} hazards identified
                                             </Typography>
                                             <Typography sx={styles.sentDate}>
                                                 {formatSubmittedDate(item.created)}

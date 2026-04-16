@@ -83,12 +83,23 @@ public class RiskAssessmentService {
                             );
 
                     boolean allActionsComplete = joins.stream()
-                            .allMatch(j -> j.getHazard().getActionComplete() != null);
+                            .allMatch(j ->
+                                    j.getHazard().getActionComplete() != null
+                            );
+
+                    // Mobile count (includes drafts)
+                    int hazardCount = joins.size();
+
+                    // Admin count (excludes drafts)
+                    int activeHazardCount = (int) joins.stream()
+                            .filter(j -> !j.getHazard().isDraft())
+                            .count();
 
                     return new RiskAssessmentResponse(
                             ra.getRiskAssessmentId(),
                             ra.getTitle(),
-                            joins.size(),
+                            hazardCount,          // mobile
+                            activeHazardCount,    // admin
                             ra.getCreated(),
                             hasDrafts,
                             allActionsComplete

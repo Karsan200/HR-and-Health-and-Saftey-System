@@ -35,7 +35,7 @@ export async function getPendingSignatures(
 export interface RiskAssessmentItem {
     riskAssessmentId: number;
     title: string;
-    hazardCount: number;
+    activeHazardCount: number;
     created: string;
     allActionsComplete: boolean;
 }

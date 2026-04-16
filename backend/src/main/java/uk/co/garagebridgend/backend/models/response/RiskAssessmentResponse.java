@@ -23,6 +23,8 @@ public class RiskAssessmentResponse {
     /** The number of hazards linked to this risk assessment. */
     private int hazardCount;
 
+    private int activeHazardCount;
+
     /** The creation timestamp of the risk assessment. */
     private LocalDateTime created;
 
