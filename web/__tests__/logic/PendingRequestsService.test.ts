@@ -320,9 +320,9 @@ describe("declineLeaveRequest", () => {
 });
 
 describe("formatDateRange", () => {
-    it("returns a single date when start and end are the same day", () => {
+    it("returns a single date with times when start and end are the same day", () => {
         expect(formatDateRange("2026-02-10T08:00:00", "2026-02-10T17:00:00"))
-            .toBe("10 February 2026");
+            .toBe("10 February 2026, 08:00 – 17:00");
     });
 
     it("returns a range when start and end are different days", () => {
@@ -345,9 +345,14 @@ describe("formatDateRange", () => {
             .toBe("30 January – 3 February 2026");
     });
 
-    it("returns a single date for a single day in January", () => {
+    it("returns a single date with times for a single day in January", () => {
         expect(formatDateRange("2026-01-01T08:00:00", "2026-01-01T17:00:00"))
-            .toBe("1 January 2026");
+            .toBe("1 January 2026, 08:00 – 17:00");
+    });
+
+    it("shows times when start and end are the same day but different times", () => {
+        expect(formatDateRange("2026-05-10T09:30:00", "2026-05-10T14:45:00"))
+            .toBe("10 May 2026, 09:30 – 14:45");
     });
 });
 
