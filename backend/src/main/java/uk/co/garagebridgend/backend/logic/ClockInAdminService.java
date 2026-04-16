@@ -63,6 +63,7 @@ public class ClockInAdminService {
      * Either value may be null to clear that field.
      * If the request includes removeReport=true and a report exists for this
      * record, it will also be deleted.
+     * The isAdminAdjusted flag is set to true unconditionally on any override.
      *
      * @param clockId  the UUID of the clock-in record to update
      * @param override the new times to apply and whether to remove the report
@@ -75,6 +76,7 @@ public class ClockInAdminService {
 
         record.setClockInTime(override.clockInTime());
         record.setClockOutTime(override.clockOutTime());
+        record.setAdminAdjusted(true);
 
         clockInRepository.save(record);
 
@@ -105,6 +107,7 @@ public class ClockInAdminService {
      * The record is first inserted (allowing {@code @CreationTimestamp} to fire),
      * then immediately backdated to the start of the requested date within the
      * same transaction so that date-range queries find it correctly.
+     * The isAdminAdjusted flag is set to true as this record is created manually.
      *
      * @param request the details of the clock-in record to create
      * @throws IllegalArgumentException if no account exists for the given accountId,
@@ -133,9 +136,11 @@ public class ClockInAdminService {
         record.setAccount(account);
         record.setClockInTime(request.clockInTime());
         record.setClockOutTime(request.clockOutTime());
+        record.setAdminAdjusted(true);
+        record.setCreated(LocalDateTime.now()); // satisfy Hibernate's nullability check
 
-        // Save first so @CreationTimestamp populates the id and created fields,
-        // then immediately overwrite created with the admin-selected date.
+        // Save first so the id is generated, then immediately backdate created
+        // to the start of the requested date so date-range queries find it correctly.
         ClockInTable saved = clockInRepository.saveAndFlush(record);
         clockInRepository.backdateCreated(saved.getClockInId(), startOfDay);
     }
@@ -200,6 +205,7 @@ public class ClockInAdminService {
                 record.getClockInTime(),
                 record.getClockOutTime(),
                 record.getCreated(),
+                record.isAdminAdjusted(),
                 reportSummary
         );
     }

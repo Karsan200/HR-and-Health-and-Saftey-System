@@ -17,6 +17,7 @@ export interface ClockInRecord {
     clockInTime: string | null;
     clockOutTime: string | null;
     created: string;
+    isAdminAdjusted: boolean;
     report: ClockInReport | null;
 }
 

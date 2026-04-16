@@ -62,11 +62,11 @@ interface EditModalProps {
 function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
     const { authenticationService } = useAuth();
 
-    const [clockIn, setClockIn]               = useState<string>("");
-    const [clockOut, setClockOut]             = useState<string>("");
-    const [dismissReport, setDismissReport]   = useState<boolean>(true);
-    const [saving, setSaving]                 = useState(false);
-    const [error, setError]                   = useState<string | null>(null);
+    const [clockIn, setClockIn]             = useState<string>("");
+    const [clockOut, setClockOut]           = useState<string>("");
+    const [dismissReport, setDismissReport] = useState<boolean>(true);
+    const [saving, setSaving]               = useState(false);
+    const [error, setError]                 = useState<string | null>(null);
 
     useEffect(() => {
         if (!record) return;
@@ -217,12 +217,12 @@ interface EmployeeAutocompleteProps {
 function EmployeeAutocomplete({ value, onChange, disabled }: EmployeeAutocompleteProps) {
     const { authenticationService } = useAuth();
 
-    const [inputValue, setInputValue]     = useState<string>("");
-    const [suggestions, setSuggestions]   = useState<AccountSearchResult[]>([]);
-    const [open, setOpen]                 = useState(false);
-    const [searching, setSearching]       = useState(false);
-    const debounceRef                     = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const wrapperRef                      = useRef<HTMLDivElement>(null);
+    const [inputValue, setInputValue]   = useState<string>("");
+    const [suggestions, setSuggestions] = useState<AccountSearchResult[]>([]);
+    const [open, setOpen]               = useState(false);
+    const [searching, setSearching]     = useState(false);
+    const debounceRef                   = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const wrapperRef                    = useRef<HTMLDivElement>(null);
 
     // When a value is selected externally (e.g. reset on modal open), sync the input
     useEffect(() => {
@@ -449,20 +449,21 @@ function AddClockInModal({ open, defaultDate, onClose, onAdded }: AddModalProps)
         setError(null);
         try {
             await createClockIn({
-                accountId:   selectedEmployee.accountId,
+                accountId:    selectedEmployee.accountId,
                 date,
                 clockInTime:  toBackendTime(clockIn  || null),
                 clockOutTime: toBackendTime(clockOut || null),
             }, authenticationService);
 
             onAdded({
-                clockId:      crypto.randomUUID(),
-                employeeName: selectedEmployee.fullName,
-                accountId:    selectedEmployee.accountId,
-                clockInTime:  toBackendTime(clockIn  || null),
-                clockOutTime: toBackendTime(clockOut || null),
-                created:      `${date}T00:00:00`,
-                report:       null,
+                clockId:         crypto.randomUUID(),
+                employeeName:    selectedEmployee.fullName,
+                accountId:       selectedEmployee.accountId,
+                clockInTime:     toBackendTime(clockIn  || null),
+                clockOutTime:    toBackendTime(clockOut || null),
+                created:         `${date}T00:00:00`,
+                isAdminAdjusted: true,
+                report:          null,
             });
             onClose();
         } catch (err) {
@@ -674,9 +675,10 @@ interface ClockInCardProps {
 }
 
 function ClockInCard({ record, onEdit, onDelete }: ClockInCardProps) {
-    const hasReport = record.report !== null;
-    const clockIn   = formatTime(record.clockInTime);
-    const clockOut  = formatTime(record.clockOutTime);
+    const hasReport       = record.report !== null;
+    const isAdminAdjusted = record.isAdminAdjusted;
+    const clockIn         = formatTime(record.clockInTime);
+    const clockOut        = formatTime(record.clockOutTime);
 
     const createdDate = new Date(record.created).toLocaleDateString("en-GB", {
         day: "numeric",
@@ -703,6 +705,31 @@ function ClockInCard({ record, onEdit, onDelete }: ClockInCardProps) {
                             </Box>
                         )}
                     </Box>
+
+                    {isAdminAdjusted && (
+                        <Box sx={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            padding: "6px 12px",
+                            backgroundColor: DefaultColours.greyBackground,
+                            borderRadius: `${BorderRadius.mediumNotification}px`,
+                            border: `1px solid ${DefaultColours.greyIconLight}`,
+                            alignSelf: "flex-start",
+                            flexShrink: 0,
+                        }}>
+                            <EditIcon sx={{ fontSize: "14px", color: DefaultColours.greyPrimaryMainText }} />
+                            <Typography sx={{
+                                ...TextStyles.medium,
+                                fontSize: FontSize.xs14,
+                                color: DefaultColours.greyPrimaryMainText,
+                                lineHeight: "143%",
+                                letterSpacing: "0.17px",
+                            }}>
+                                Admin adjusted
+                            </Typography>
+                        </Box>
+                    )}
                 </Box>
 
                 {hasReport && (
@@ -864,7 +891,13 @@ export function ClockOverridesPage() {
         setRecords((prev) =>
             prev.map((r) =>
                 r.clockId === clockId
-                    ? { ...r, clockInTime: newIn, clockOutTime: newOut, report: removeReport ? null : r.report }
+                    ? {
+                        ...r,
+                        clockInTime:     newIn,
+                        clockOutTime:    newOut,
+                        isAdminAdjusted: true,
+                        report:          removeReport ? null : r.report,
+                    }
                     : r
             )
         );

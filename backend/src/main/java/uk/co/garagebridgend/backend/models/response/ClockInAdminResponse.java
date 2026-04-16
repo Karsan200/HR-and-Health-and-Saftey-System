@@ -23,6 +23,7 @@ public record ClockInAdminResponse(
         LocalTime clockInTime,
         LocalTime clockOutTime,
         java.time.LocalDateTime created,
+        boolean isAdminAdjusted,
         ClockInReportSummary report
 ) {
     /**
