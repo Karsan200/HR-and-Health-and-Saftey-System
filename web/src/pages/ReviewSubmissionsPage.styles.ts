@@ -171,4 +171,53 @@ export const reviewSubmissionsStyles = {
         padding: "16px 0",
         textAlign: "center" as const,
     },
+
+    // Risk assessment icon
+    riskIconWrapper: {
+        width: "60px",
+        height: "60px",
+        borderRadius: "8px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+    },
+
+    riskIconAmber: {
+        backgroundColor: DefaultColours.amberBackgroundLight,
+    },
+
+    riskIconGreen: {
+        backgroundColor: DefaultColours.greenBackgroundLight,
+    },
+
+    riskIcon: {
+        fontSize: "50px",
+    },
+
+    riskIconAmberColor: {
+        color: DefaultColours.amberPrimary,
+    },
+
+    riskIconGreenColor: {
+        color: DefaultColours.greenPrimary,
+    },
+
+// Action button
+    riskButton: {
+        textTransform: "none" as const,
+        borderRadius: "8px",
+        flexShrink: 0,
+        color: DefaultColours.white,
+            ...TextStyles.medium,
+        fontSize: FontSize.m20
+    },
+
+    riskButtonRed: {
+        backgroundColor: DefaultColours.redPrimary,
+    },
+
+    riskButtonGrey: {
+        backgroundColor: DefaultColours.greyPrimaryMainText,
+    },
 } as const;

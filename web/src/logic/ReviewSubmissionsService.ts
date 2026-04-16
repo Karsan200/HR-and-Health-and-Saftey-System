@@ -27,3 +27,30 @@ export async function getPendingSignatures(
 
     return response.json();
 }
+
+/**
+ * Represents a single risk assessment item in the list of all risk assessments.
+ * Contains the id, title, hazard count, creation date and whether it has drafts.
+ */
+export interface RiskAssessmentItem {
+    riskAssessmentId: number;
+    title: string;
+    hazardCount: number;
+    created: string;
+    hasDrafts: boolean;
+}
+
+export async function getRiskAssessments(
+    authenticationService: AuthenticationService
+): Promise<RiskAssessmentItem[]> {
+    const response = await authenticationService.fetch(
+        "/api/risk-assessment/all",
+        { method: "GET" }
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch risk assessments: ${response.status}`);
+    }
+
+    return response.json();
+}

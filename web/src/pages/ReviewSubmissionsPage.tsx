@@ -3,21 +3,32 @@ import {
     Box,
     Typography,
 } from "@mui/material";
-import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
-
 import { SectionNavBar, type SectionNavTab } from "../components/SectionNavbar";
 import { useAuth } from "../AuthContext";
 import {
-    getPendingSignatures,
-    type PendingSignatureItem,
+    getPendingSignatures, getRiskAssessments,
+    type PendingSignatureItem, type RiskAssessmentItem,
 } from "../logic/ReviewSubmissionsService";
 import { reviewSubmissionsStyles as styles } from "./ReviewSubmissionsPage.styles";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import ContentPasteOutlinedIcon from "@mui/icons-material/ContentPasteOutlined";
+import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
+import { Button } from "@mui/material";
 
 /** Format an ISO date string as "Sent: 5 February 2026" */
 function formatSentDate(iso: string): string {
     const date = new Date(iso);
     return `Sent: ${date.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    })}`;
+}
+
+function formatSubmittedDate(iso: string): string {
+    const date = new Date(iso);
+    return `Submitted: ${date.toLocaleDateString("en-GB", {
         day: "numeric",
         month: "long",
         year: "numeric",
@@ -33,25 +44,31 @@ export function ReviewSubmissionsPage() {
     const { authenticationService } = useAuth();
 
     const [pendingSignatures, setPendingSignatures] = useState<PendingSignatureItem[]>([]);
+    const [riskAssessments, setRiskAssessments] = useState<RiskAssessmentItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const loadPendingSignatures = useCallback(async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const data = await getPendingSignatures(authenticationService);
-            setPendingSignatures(data);
+            const [signatures, assessments] = await Promise.all([
+                getPendingSignatures(authenticationService),
+                getRiskAssessments(authenticationService),
+            ]);
+
+            setPendingSignatures(signatures);
+            setRiskAssessments(assessments);
         } catch {
-            setError("Failed to load pending signatures. Please try again.");
+            setError("Failed to load data. Please try again.");
         } finally {
             setLoading(false);
         }
     }, [authenticationService]);
 
     useEffect(() => {
-        loadPendingSignatures();
-    }, [loadPendingSignatures]);
+        loadData();
+    }, [loadData]);
 
     return (
         <Box sx={styles.pageContainer}>
@@ -112,6 +129,83 @@ export function ReviewSubmissionsPage() {
                                     </Box>
                                 </Box>
                             ))
+                        )}
+                    </Box>
+                )}
+            </Box>
+
+            {/* ── Risk Assessments card ── */}
+            <Box sx={styles.sectionCard}>
+                <Typography sx={styles.sectionTitle}>
+                    Risk Assessments
+                </Typography>
+
+                {!loading && error === null && (
+                    <Box sx={styles.scrollList}>
+                        {riskAssessments.length === 0 ? (
+                            <Box sx={styles.emptyState}>
+                                <CheckCircleOutlineRoundedIcon sx={styles.emptyStateIcon} />
+                                <Typography sx={styles.emptyStateText}>
+                                    No risk assessments found
+                                </Typography>
+                            </Box>
+                        ) : (
+                            riskAssessments.map((item) => {
+                                const hasOpenActions = item.hasDrafts;
+
+                                return (
+                                    <Box
+                                        key={item.riskAssessmentId}
+                                        sx={styles.signatureRow}
+                                    >
+                                        {/* Clipboard icon */}
+                                        <Box
+                                            sx={{
+                                                ...styles.riskIconWrapper,
+                                                ...(hasOpenActions
+                                                    ? styles.riskIconAmber
+                                                    : styles.riskIconGreen),
+                                            }}
+                                        >
+                                            <ContentPasteOutlinedIcon
+                                                sx={{
+                                                    ...styles.riskIcon,
+                                                    ...(hasOpenActions
+                                                        ? styles.riskIconAmberColor
+                                                        : styles.riskIconGreenColor),
+                                                }}
+                                            />
+                                        </Box>
+
+                                        {/* Text */}
+                                        <Box sx={styles.textBlock}>
+                                            <Typography sx={styles.personName}>
+                                                {item.title}
+                                            </Typography>
+                                            <Typography sx={styles.documentTitle}>
+                                                {item.hazardCount} hazards identified
+                                            </Typography>
+                                            <Typography sx={styles.sentDate}>
+                                                {formatSubmittedDate(item.created)}
+                                            </Typography>
+                                        </Box>
+
+                                        {/* Action button */}
+                                        <Button
+                                            variant="contained"
+                                            startIcon={<RemoveRedEyeOutlinedIcon />}
+                                            sx={{
+                                                ...styles.riskButton,
+                                                ...(hasOpenActions
+                                                    ? styles.riskButtonRed
+                                                    : styles.riskButtonGrey),
+                                            }}
+                                        >
+                                            {hasOpenActions ? "Review now" : "Read again"}
+                                        </Button>
+                                    </Box>
+                                );
+                            })
                         )}
                     </Box>
                 )}
