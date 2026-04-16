@@ -8,13 +8,14 @@ import java.util.UUID;
  * Includes the employee's name, their clock-in and clock-out times, and an optional
  * report if the employee has flagged an issue with this record.
  *
- * @param clockId      the UUID of the clock-in record
- * @param employeeName the full name of the employee
- * @param accountId    the account ID of the employee
- * @param clockInTime  the recorded clock-in time, or null if not set
- * @param clockOutTime the recorded clock-out time, or null if not set
- * @param created      the timestamp when this clock-in record was created
- * @param report       an optional report submitted by the employee, or null if none exists
+ * @param clockId         the UUID of the clock-in record
+ * @param employeeName    the full name of the employee
+ * @param accountId       the account ID of the employee
+ * @param clockInTime     the recorded clock-in time, or null if not set
+ * @param clockOutTime    the recorded clock-out time, or null if not set
+ * @param created         the timestamp when this clock-in record was created
+ * @param isAdminAdjusted a bool which tracks if a clock in record has been adjusted
+ * @param report          an optional report submitted by the employee, or null if none exists
  */
 public record ClockInAdminResponse(
         UUID clockId,

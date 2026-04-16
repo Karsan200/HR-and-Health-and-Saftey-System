@@ -67,6 +67,7 @@ public class ClockInAdminControllerTest {
                 LocalTime.of(8, 0),
                 LocalTime.of(17, 0),
                 LocalDateTime.now(),
+                false,
                 null
         );
     }
