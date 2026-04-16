@@ -30,6 +30,7 @@ function makeRecord(overrides: Partial<ClockInRecord> = {}): ClockInRecord {
         clockInTime: "08:00:00",
         clockOutTime: "17:00:00",
         created: "2026-04-07T08:00:00",
+        isAdminAdjusted: false,
         report: null,
         ...overrides,
     };

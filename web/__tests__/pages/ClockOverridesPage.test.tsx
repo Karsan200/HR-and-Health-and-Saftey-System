@@ -49,7 +49,6 @@ const mockFetchPendingCount       = fetchPendingLeaveCount as jest.Mock;
 
 const mockAuthService = { fetch: jest.fn() };
 
-// ── Fixtures ──────────────────────────────────────────────────────────────────
 
 function makeRecord(overrides: Partial<ClockInRecord> = {}): ClockInRecord {
     return {
@@ -59,6 +58,7 @@ function makeRecord(overrides: Partial<ClockInRecord> = {}): ClockInRecord {
         clockInTime: "08:00:00",
         clockOutTime: "17:00:00",
         created: "2026-04-07T08:00:00",
+        isAdminAdjusted: false,
         report: null,
         ...overrides,
     };
@@ -81,8 +81,6 @@ const recordTwo = makeRecord({
     clockOutTime: "18:00:00",
     created: "2026-04-07T09:00:00",
 });
-
-// ── Setup ─────────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
     jest.clearAllMocks();
@@ -114,7 +112,6 @@ function getBadgeInTab(tabLabel: string) {
     return tab?.querySelector('[data-testid="nav-badge"]');
 }
 
-// ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe("ClockOverridesPage", () => {
 
