@@ -23,6 +23,18 @@ jest.mock("../src/pages/SendOutDocumentsPage", () => ({
     SendOutDocumentsPage: () => <div data-testid="send-out-documents-page" />,
 }));
 
+jest.mock( "../src/pages/ReviewSubmissionsPage",() => ({
+    ReviewSubmissionsPage: () => <div data-testid="review-submissions-page" />,
+}));
+
+jest.mock("../src/pages/RiskAssessmentHazardsPage", () => ({
+    RiskAssessmentHazardsPage: () => <div data-testid="risk-assessment-hazards-page" />,
+}));
+
+jest.mock("../src/pages/HazardViewPage", () => ({
+    HazardViewPage: () => <div data-testid="hazard-view-page" />,
+}));
+
 function setWindowWidth(width: number) {
     Object.defineProperty(window, "innerWidth", { writable: true, configurable: true, value: width });
     act(() => { window.dispatchEvent(new Event("resize")); });
