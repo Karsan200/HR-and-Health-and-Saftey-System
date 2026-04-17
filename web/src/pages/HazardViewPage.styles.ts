@@ -1,8 +1,6 @@
 import { BorderRadius, FontSize, TextStyles } from "../theme/theme";
 import { DefaultColours } from "../theme/colours";
 
-const cardBorder = `1px solid ${DefaultColours.greyIconLight}55`;
-
 export const hazardViewStyles = {
     pageContainer: {
         paddingTop: "24px",
@@ -19,8 +17,7 @@ export const hazardViewStyles = {
     sectionCard: {
         backgroundColor: DefaultColours.white,
         borderRadius: BorderRadius.mediumNotification,
-        border: cardBorder,
-        boxShadow: `0px 0px 4px ${DefaultColours.greyIconLight}33`,
+        boxShadow: `0px 0px 4px ${DefaultColours.greyIconLight}`,
         paddingY: "32px",
         paddingX: "24px",
         display: "flex",
@@ -46,7 +43,7 @@ export const hazardViewStyles = {
 
     sectionTitle: {
         ...TextStyles.semiBold,
-        fontSize: FontSize.xl32,
+        fontSize: FontSize.l24,
         color: DefaultColours.black,
     },
 
@@ -77,7 +74,7 @@ export const hazardViewStyles = {
 
     fieldValue: {
         ...TextStyles.regular,
-        fontSize: FontSize.m20,
+        fontSize: FontSize.s16,
         color: DefaultColours.greyPrimaryMainText,
     },
 
@@ -122,7 +119,7 @@ export const hazardViewStyles = {
 
     checkboxIcon: {
         fontSize: "28px",
-        color: DefaultColours.greenPrimary,
+        color: DefaultColours.redTrafficPrimary,
     },
 
     checkboxIconUnchecked: {

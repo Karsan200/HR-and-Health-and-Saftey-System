@@ -1,8 +1,6 @@
 import { BorderRadius, FontSize, TextStyles } from "../theme/theme";
 import { DefaultColours } from "../theme/colours";
 
-const cardBorder = `1px solid ${DefaultColours.greyIconLight}55`;
-
 export const reviewSubmissionsStyles = {
     // Page Shell
     pageContainer: {
@@ -21,8 +19,7 @@ export const reviewSubmissionsStyles = {
     sectionCard: {
         backgroundColor: DefaultColours.white,
         borderRadius: BorderRadius.mediumNotification,
-        border: cardBorder,
-        boxShadow: `0px 0px 4px ${DefaultColours.greyIconLight}33`,
+        boxShadow: `0px 0px 4px ${DefaultColours.greyIconLight}`,
         paddingY: "32px",
         paddingX: "24px",
         display: "flex",
@@ -33,7 +30,7 @@ export const reviewSubmissionsStyles = {
     // Section heading
     sectionTitle: {
         ...TextStyles.semiBold,
-        fontSize: FontSize.xl32,
+        fontSize: FontSize.l24,
         color: DefaultColours.black,
         marginBottom: "16px",
         paddingLeft: "12px",
@@ -45,7 +42,7 @@ export const reviewSubmissionsStyles = {
         flexDirection: "column" as const,
         gap: "24px",
         overflowY: "auto" as const,
-        maxHeight: "420px",
+        maxHeight: "400px",
         paddingBottom: "28px",
         paddingX: "12px",
         paddingTop:"12px",
@@ -91,7 +88,7 @@ export const reviewSubmissionsStyles = {
 
     personName: {
         ...TextStyles.medium,
-        fontSize: FontSize.l24,
+        fontSize: FontSize.m20,
         color: DefaultColours.black,
         whiteSpace: "nowrap" as const,
         overflow: "hidden",
@@ -100,7 +97,7 @@ export const reviewSubmissionsStyles = {
 
     documentTitle: {
         ...TextStyles.regular,
-        fontSize: FontSize.m20,
+        fontSize: FontSize.s16,
         color: DefaultColours.greyPrimaryMainText,
         whiteSpace: "nowrap" as const,
         overflow: "hidden",
@@ -109,7 +106,7 @@ export const reviewSubmissionsStyles = {
 
     sentDate: {
         ...TextStyles.regular,
-        fontSize: FontSize.s16,
+        fontSize: FontSize.xs14,
         color: DefaultColours.greyIconLight,
         marginTop: "2px",
     },
@@ -130,7 +127,7 @@ export const reviewSubmissionsStyles = {
 
     pendingBadgeText: {
         ...TextStyles.medium,
-        fontSize: FontSize.m20,
+        fontSize: FontSize.s16,
         color: DefaultColours.amberTextDark,
         letterSpacing: "0.2px",
     },
@@ -210,7 +207,7 @@ export const reviewSubmissionsStyles = {
         flexShrink: 0,
         color: DefaultColours.white,
             ...TextStyles.medium,
-        fontSize: FontSize.m20
+        fontSize: FontSize.s16
     },
 
     riskButtonRed: {
