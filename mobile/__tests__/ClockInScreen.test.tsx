@@ -733,4 +733,93 @@ describe('ClockInScreen', () => {
       expect(getByText('Friday, 11 April, 2026  08:00 – -')).toBeTruthy();
     });
   });
+  // Today's Clock-In Banner
+
+  it('shows clocked-in banner with time when todayClockIn is populated', async () => {
+    fetchMock.mockResolvedValueOnce({
+      json: async () => ({ ...mockStatus, todayClockIn: '08:30' }),
+    });
+
+    const { getByText } = render(<ClockInScreen />);
+
+    await waitFor(() => {
+      expect(getByText('Clocked in today at 08:30')).toBeTruthy();
+    });
+  });
+
+  it('shows not clocked in banner when todayClockIn is null', async () => {
+    fetchMock.mockResolvedValueOnce({
+      json: async () => ({ ...mockStatus, todayClockIn: null }),
+    });
+
+    const { getByText } = render(<ClockInScreen />);
+
+    await waitFor(() => {
+      expect(getByText('Not yet clocked in today')).toBeTruthy();
+    });
+  });
+
+  it('shows the check-circle icon when clocked in today', async () => {
+    fetchMock.mockResolvedValueOnce({
+      json: async () => ({ ...mockStatus, todayClockIn: '08:30' }),
+    });
+
+    const { getByTestId } = render(<ClockInScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('icon-check-circle-outline')).toBeTruthy();
+    });
+  });
+
+  it('shows the clock-alert icon when not clocked in today', async () => {
+    fetchMock.mockResolvedValueOnce({
+      json: async () => ({ ...mockStatus, todayClockIn: null }),
+    });
+
+    const { getByTestId } = render(<ClockInScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('icon-clock-alert-outline')).toBeTruthy();
+    });
+  });
+
+  it('updates the banner after pull-to-refresh clocks the user in', async () => {
+    fetchMock
+      .mockResolvedValueOnce({
+        json: async () => ({ ...mockStatus, todayClockIn: null }),
+      })
+      .mockResolvedValueOnce({
+        json: async () => ({ ...mockStatus, todayClockIn: '09:00' }),
+      });
+
+    const { getByText, UNSAFE_getByType } = render(<ClockInScreen />);
+
+    await waitFor(() => {
+      expect(getByText('Not yet clocked in today')).toBeTruthy();
+    });
+
+    await waitFor(async () => {
+      const scrollView = UNSAFE_getByType(ScrollView);
+      await act(async () => {
+        await scrollView.props.refreshControl.props.onRefresh();
+      });
+    });
+
+    await waitFor(() => {
+      expect(getByText('Clocked in today at 09:00')).toBeTruthy();
+    });
+  });
+
+  it('banner still renders not clocked in after a failed status fetch', async () => {
+    fetchMock.mockRejectedValueOnce(new Error('Network error'));
+
+    const { queryByText } = render(<ClockInScreen />);
+
+    await waitFor(() => {
+      // Status is null after a failed fetch so todayClockIn is falsy —
+      // the banner should fall through to the not-clocked-in state
+      expect(queryByText('Not yet clocked in today')).toBeTruthy();
+    });
+  });
+
 });
