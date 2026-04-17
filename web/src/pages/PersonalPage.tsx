@@ -173,6 +173,17 @@ function SettingsTab({ settings }: { settings: SettingsResponse }) {
                             Set start time
                         </Typography>
 
+                        <Box sx={styles.quietTimeRow}>
+                            <Box sx={styles.clickableTimeBox}>
+                                <Typography sx={styles.timeText(true)}>
+                                    {formatDisplay(silentStart)}
+                                </Typography>
+                                <Typography sx={{ ...styles.amPmText(true), fontSize: "0.75rem", color: "text.secondary" }}>
+                                    Start
+                                </Typography>
+                            </Box>
+                        </Box>
+
                         <StaticTimePicker
                             value={silentStart}
                             onChange={clockChange}
@@ -208,6 +219,28 @@ function SettingsTab({ settings }: { settings: SettingsResponse }) {
                         <Typography sx={styles.quietTimeStepLabel}>
                             Set end time
                         </Typography>
+
+                        <Box sx={styles.quietTimeRow}>
+                            <Box sx={styles.clickableTimeBox}>
+                                <Typography sx={styles.timeText(true)}>
+                                    {formatDisplay(silentStart)}
+                                </Typography>
+                                <Typography sx={{ ...styles.amPmText(true), fontSize: "0.75rem", color: "text.secondary" }}>
+                                    Start
+                                </Typography>
+                            </Box>
+
+                            <Typography sx={styles.quietTimeArrow}>→</Typography>
+
+                            <Box sx={styles.clickableTimeBox}>
+                                <Typography sx={styles.timeText(true)}>
+                                    {formatDisplay(silentEnd)}
+                                </Typography>
+                                <Typography sx={{ ...styles.amPmText(true), fontSize: "0.75rem", color: "text.secondary" }}>
+                                    End
+                                </Typography>
+                            </Box>
+                        </Box>
 
                         <StaticTimePicker
                             value={silentEnd}
