@@ -78,6 +78,13 @@ function EditClockInModal({ record, open, onClose, onSaved }: EditModalProps) {
 
     async function handleSave() {
         if (!record) return;
+
+        // Validate times before hitting the API
+        if (clockIn && clockOut && clockIn >= clockOut) {
+            setError("Clock-in time must be earlier than clock-out time.");
+            return;
+        }
+
         setSaving(true);
         setError(null);
         try {
@@ -445,6 +452,13 @@ function AddClockInModal({ open, defaultDate, onClose, onAdded }: AddModalProps)
             setError("Date is required.");
             return;
         }
+
+        // Validate times before hitting the API
+        if (clockIn && clockOut && clockIn >= clockOut) {
+            setError("Clock-in time must be earlier than clock-out time.");
+            return;
+        }
+
         setSaving(true);
         setError(null);
         try {
