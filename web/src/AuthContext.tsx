@@ -14,6 +14,7 @@ export type AuthContextType = {
 
     accessToken: string | null;
     setAccessToken: React.Dispatch<React.SetStateAction<string | null>>;
+    setMfaSecret: React.Dispatch<React.SetStateAction<string | null>>;
 
     isAuthenticated: boolean | null;
     setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean | null>>;
@@ -79,18 +80,7 @@ export function AuthProvider(
                         document.cookie = `mfaSecret=; path=/; samesite=strict; max-age=0`;
                     }
                     else {
-                        // Check the cookie for the MFA secret
-                        const cookies = document.cookie.split(";").reduce((acc: Record<string, string>, cookie) => {
-                            const eqIdx = cookie.indexOf("=");
-                            const key = cookie.slice(0, eqIdx).trim();
-                            const value = decodeURIComponent(cookie.slice(eqIdx + 1).trim());
-                            acc[key] = value;
-                            return acc;
-                        }, {});
-
-                        if (cookies.mfaSecret) {
-                            setMfaSecret(cookies.mfaSecret);
-                        }
+                        setMfaSecret(AuthenticationService.extractMfaCookie)
                     }
                 }
             } else {
@@ -103,7 +93,7 @@ export function AuthProvider(
 
     return (
         <AuthContext.Provider value={
-        { authenticationService, accessToken, setAccessToken, isAuthenticated, setIsAuthenticated, isMfaAuthenticated, setIsMfaAuthenticated }
+        { authenticationService, accessToken, setAccessToken, setMfaSecret, isAuthenticated, setIsAuthenticated, isMfaAuthenticated, setIsMfaAuthenticated }
         }>
             {isAuthenticated === null ? <ActivityLoader /> :
             isAuthenticated ?

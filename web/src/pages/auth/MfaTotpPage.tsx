@@ -1,8 +1,9 @@
 ﻿import {loginPageStyles as styles} from "./LoginPage.styles";
 import {Alert, Box, Button, Container, TextField} from "@mui/material";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useAuth} from "../../AuthContext";
 import {HttpException} from "../../models/HttpException";
+import {AuthenticationService} from "../../logic/AuthenticationService.ts";
 
 export function MfaTotpPage() {
     const [totpCode, setTotpCode] = useState('');
@@ -10,6 +11,27 @@ export function MfaTotpPage() {
     const [loading, setLoading] = useState(false);
 
     const auth = useAuth();
+
+    // Check the cookie for the MFA secret
+    const cookie = AuthenticationService.extractMfaCookie()
+
+    // Countdown to return to TOTP setup
+    const [count, setCount] = useState(cookie !== null ? 60 : -1);
+
+    useEffect(() => {
+        if (count == -1) return;
+
+        // Remove the cookie when the countdown reaches 0
+        if (count == 0) {
+            document.cookie = `mfaSecret=; path=/; samesite=strict; max-age=0`;
+            setCount(count - 1);
+        }
+
+        const interval = setInterval(() => {
+            setCount(count - 1);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [count]);
 
     async function handleTotp() {
         // check if totp code is 6 digits
@@ -59,6 +81,12 @@ export function MfaTotpPage() {
                         loading={loading} onClick={() => handleTotp()}>
                     Verify
                 </Button>
+                {count > 0 && (
+                    <Button sx={styles.buttonContainer} fullWidth size="large" variant="outlined"
+                            loading={loading} onClick={() => auth.setMfaSecret(cookie)}>
+                        ← Back to MFA setup ({count})
+                    </Button>
+                )}
             </Container>
         </Box>
     )
