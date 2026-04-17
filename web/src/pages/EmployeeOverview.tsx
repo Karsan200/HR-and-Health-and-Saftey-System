@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useCallback , useEffect, useMemo, useRef, useState} from "react";
 import {
     Box,
     Button, Checkbox, FormControlLabel,
@@ -24,13 +24,18 @@ import UploadRoundedIcon from "@mui/icons-material/UploadRounded";
 
 import { useAuth } from "../AuthContext";
 import {
+    buildCreateEmployeeRequest,
+    createEmployee,
     getEmployees,
     getEmployeeOverview,
     sanitiseEmployeeSearch,
+    type CreateEmployeeRequest,
     type EmployeeListItemResponse,
     type EmployeeOverviewResponse,
 } from "../logic/EmployeeOverviewService";
 import { employeeOverviewStyles as styles } from "./EmployeeOverview.style";
+
+const POSITION_OPTIONS = ["Employee", "Manager", "Admin"] as const;
 
 const formatDateRange = (startDate: string, endDate: string): string => {
     const start = new Date(startDate);
@@ -72,6 +77,19 @@ const buildPayslipMonthOptions = (numberOfMonths: number): string[] => {
     return options;
 };
 
+const buildInitialCreateForm = (): CreateEmployeeRequest => ({
+    firstName: "",
+    surname: "",
+    email: "",
+    phoneNumber: "",
+    addressOne: "",
+    addressTwo: "",
+    postalCode: "",
+    position: "Employee",
+    username: "",
+    password: "",
+});
+
 export function EmployeeOverview() {
     const { authenticationService } = useAuth();
 
@@ -86,6 +104,12 @@ export function EmployeeOverview() {
     const [isP60, setIsP60] = useState(false);
     const [payslipSuccess, setPayslipSuccess] = useState<string | null>(null);
 
+    const [isAddingEmployee, setIsAddingEmployee] = useState(false);
+    const [createForm, setCreateForm] = useState<CreateEmployeeRequest>(buildInitialCreateForm);
+    const [createError, setCreateError] = useState<string | null>(null);
+    const [createSuccess, setCreateSuccess] = useState<string | null>(null);
+    const [isCreatingEmployee, setIsCreatingEmployee] = useState(false);
+
     const sanitisedSearch = useMemo(() => sanitiseEmployeeSearch(search), [search]);
 
     const payslipMonthOptions = useMemo(() => buildPayslipMonthOptions(12), []);
@@ -93,36 +117,55 @@ export function EmployeeOverview() {
         () => payslipMonthOptions[0] ?? ""
     );
 
+    const isFormValid = useMemo(() => {
+        return (
+            createForm.firstName.trim() !== "" &&
+            createForm.surname.trim() !== "" &&
+            createForm.email.trim() !== "" &&
+            createForm.phoneNumber.trim() !== "" &&
+            createForm.addressOne.trim() !== "" &&
+            createForm.postalCode.trim() !== "" &&
+            createForm.position.trim() !== "" &&
+            createForm.username.trim() !== "" &&
+            createForm.password.trim() !== ""
+        );
+    }, [createForm]);
+
+    const loadEmployees = useCallback(async (preferredEmployeeId?: number) => {
+        const response = await getEmployees(authenticationService, sanitisedSearch);
+        const safeEmployees = response ?? [];
+
+        setEmployees(safeEmployees);
+        setListError(null);
+
+        if (safeEmployees.length === 0) {
+            setSelectedEmployeeId(null);
+            setSelectedEmployee(null);
+            return;
+        }
+
+        setSelectedEmployeeId((currentSelectedEmployeeId) => {
+            if (
+                preferredEmployeeId !== undefined &&
+                safeEmployees.some((employee) => employee.accountId === preferredEmployeeId)
+            ) {
+                return preferredEmployeeId;
+            }
+
+            const selectedStillExists = safeEmployees.some(
+                (employee) => employee.accountId === currentSelectedEmployeeId
+            );
+
+            return selectedStillExists
+                ? currentSelectedEmployeeId
+                : safeEmployees[0].accountId;
+        });
+    }, [authenticationService, sanitisedSearch]);
+
     useEffect(() => {
         let isMounted = true;
 
-        getEmployees(authenticationService, sanitisedSearch)
-            .then((response) => {
-                if (!isMounted) {
-                    return;
-                }
-
-                const safeEmployees = response ?? [];
-
-                setEmployees(safeEmployees);
-                setListError(null);
-
-                if (safeEmployees.length === 0) {
-                    setSelectedEmployeeId(null);
-                    setSelectedEmployee(null);
-                    return;
-                }
-
-                setSelectedEmployeeId((currentSelectedEmployeeId) => {
-                    const selectedStillExists = safeEmployees.some(
-                        (employee) => employee.accountId === currentSelectedEmployeeId
-                    );
-
-                    return selectedStillExists
-                        ? currentSelectedEmployeeId
-                        : safeEmployees[0].accountId;
-                });
-            })
+        loadEmployees()
             .catch(() => {
                 if (!isMounted) {
                     return;
@@ -137,10 +180,10 @@ export function EmployeeOverview() {
         return () => {
             isMounted = false;
         };
-    }, [authenticationService, sanitisedSearch]);
+    }, [loadEmployees]);
 
     useEffect(() => {
-        if (selectedEmployeeId === null) {
+        if (selectedEmployeeId === null || isAddingEmployee) {
             return;
         }
 
@@ -165,7 +208,7 @@ export function EmployeeOverview() {
         return () => {
             isMounted = false;
         };
-    }, [authenticationService, selectedEmployeeId]);
+    }, [authenticationService, selectedEmployeeId, isAddingEmployee]);
 
     const handlePayslipMonthChange = (event: SelectChangeEvent) => {
         setSelectedPayslipMonth(event.target.value);
@@ -267,6 +310,85 @@ export function EmployeeOverview() {
     const handleUploadClick = () => {
         fileInputRef.current?.click();
     };
+    const handleOpenAddEmployee = () => {
+        setIsAddingEmployee(true);
+        setCreateError(null);
+        setCreateSuccess(null);
+        setCreateForm(buildInitialCreateForm());
+    };
+
+    const handleCancelAddEmployee = () => {
+        setIsAddingEmployee(false);
+        setCreateError(null);
+        setCreateSuccess(null);
+        setCreateForm(buildInitialCreateForm());
+    };
+
+    const handleFormChange = <K extends keyof CreateEmployeeRequest>(
+        field: K,
+        value: CreateEmployeeRequest[K]
+    ) => {
+        setCreateSuccess(null);
+        setCreateError(null);
+
+        setCreateForm((current) => ({
+            ...current,
+            [field]: value,
+        }));
+    };
+
+    const handleSubmitCreateEmployee = async () => {
+        setCreateError(null);
+        setCreateSuccess(null);
+        setIsCreatingEmployee(true);
+
+        try {
+            const createdEmployee = await createEmployee(
+                authenticationService,
+                buildCreateEmployeeRequest(createForm)
+            );
+
+            await loadEmployees(createdEmployee.accountId);
+
+            setSelectedEmployeeId(createdEmployee.accountId);
+            setIsAddingEmployee(false);
+            setCreateForm(buildInitialCreateForm());
+            setCreateSuccess(`${createdEmployee.fullName} created successfully.`);
+        } catch (error) {
+            let message = "Failed to create employee.";
+
+            if (error instanceof Error) {
+                message = error.message.trim();
+                if (message === "") {
+                    message = "Something went wrong while creating the employee.";
+                }
+            }
+
+            setCreateError(message);
+        } finally {
+            setIsCreatingEmployee(false);
+        }
+    };
+
+    const fieldHasError = (field: string): boolean => {
+        if (!createError) return false;
+
+        const msg = createError.toLowerCase();
+
+        return (
+            (field === "email" && msg.includes("email")) ||
+            (field === "username" && msg.includes("username")) ||
+            (field === "password" && msg.includes("password")) ||
+            (field === "phone" && msg.includes("phone")) ||
+            (field === "postalCode" && (msg.includes("postal") || msg.includes("postcode"))) ||
+            (field === "firstName" && msg.includes("first")) ||
+            (field === "surname" && msg.includes("surname")) ||
+            (field === "addressOne" && msg.includes("address")) ||
+            (field === "position" && msg.includes("position"))
+        );
+    };
+
+    const showCreateError = createError !== null && createError.trim() !== "";
 
     return (
         <Box sx={styles.pageContainer}>
@@ -280,7 +402,7 @@ export function EmployeeOverview() {
 
                             <IconButton
                                 aria-label="Add employee"
-                                onClick={() => void 0}
+                                onClick={handleOpenAddEmployee}
                                 sx={styles.addEmployeeButton}
                             >
                                 <AddRoundedIcon sx={styles.addEmployeeButtonIcon} />
@@ -310,6 +432,12 @@ export function EmployeeOverview() {
                             </Typography>
                         )}
 
+                        {createSuccess !== null && (
+                            <Typography sx={styles.addEmployeeSuccessText}>
+                                {createSuccess}
+                            </Typography>
+                        )}
+
                         <Box sx={styles.employeeListContainer}>
                             {employees.length === 0 ? (
                                 <Typography sx={styles.emptyListText}>
@@ -318,12 +446,16 @@ export function EmployeeOverview() {
                             ) : (
                                 <Box sx={styles.employeeList}>
                                     {employees.map((employee) => {
-                                        const isSelected = employee.accountId === selectedEmployeeId;
+                                        const isSelected =
+                                            !isAddingEmployee && employee.accountId === selectedEmployeeId;
 
                                         return (
                                             <Box
                                                 key={employee.accountId}
-                                                onClick={() => setSelectedEmployeeId(employee.accountId)}
+                                                onClick={() => {
+                                                    setIsAddingEmployee(false);
+                                                    setSelectedEmployeeId(employee.accountId);
+                                                }}
                                                 sx={[
                                                     styles.employeeListItem,
                                                     isSelected && styles.employeeListItemSelected,
@@ -359,7 +491,183 @@ export function EmployeeOverview() {
                         </Box>
                     </Paper>
 
-                    {selectedEmployeeId === null || selectedEmployee === null ? (
+                    {isAddingEmployee ? (
+                        <Paper elevation={0} sx={styles.addEmployeeFormCard}>
+                            <Box sx={styles.addEmployeeFormScroll}>
+                                <Box sx={styles.addEmployeeSection}>
+                                    <Typography sx={styles.addEmployeeSectionTitle}>
+                                        Personal
+                                    </Typography>
+
+                                    <Box sx={styles.addEmployeeFieldGridTwo}>
+                                        <TextField
+                                            fullWidth
+                                            placeholder="Forename"
+                                            value={createForm.firstName}
+                                            onChange={(event) =>
+                                                handleFormChange("firstName", event.target.value)
+                                            }
+                                            error={fieldHasError("firstName")}
+                                            sx={styles.addEmployeeTextField}
+                                        />
+
+                                        <TextField
+                                            fullWidth
+                                            placeholder="Surname"
+                                            value={createForm.surname}
+                                            onChange={(event) =>
+                                                handleFormChange("surname", event.target.value)
+                                            }
+                                            error={fieldHasError("surname")}
+                                            sx={styles.addEmployeeTextField}
+                                        />
+                                    </Box>
+
+                                    <Box sx={styles.addEmployeeFieldGridTwo}>
+                                        <TextField
+                                            fullWidth
+                                            placeholder="Email"
+                                            value={createForm.email}
+                                            onChange={(event) =>
+                                                handleFormChange("email", event.target.value)
+                                            }
+                                            error={fieldHasError("email")}
+                                            sx={styles.addEmployeeTextField}
+                                        />
+
+                                        <TextField
+                                            fullWidth
+                                            placeholder="Phone"
+                                            value={createForm.phoneNumber}
+                                            onChange={(event) =>
+                                                handleFormChange("phoneNumber", event.target.value)
+                                            }
+                                            error={fieldHasError("phone")}
+                                            sx={styles.addEmployeeTextField}
+                                        />
+                                    </Box>
+
+                                    <Box sx={styles.addEmployeeFieldGridOne}>
+                                        <TextField
+                                            fullWidth
+                                            placeholder="Address line one"
+                                            value={createForm.addressOne}
+                                            onChange={(event) =>
+                                                handleFormChange("addressOne", event.target.value)
+                                            }
+                                            error={fieldHasError("addressOne")}
+                                            sx={styles.addEmployeeTextField}
+                                        />
+                                    </Box>
+
+                                    <Box sx={styles.addEmployeeFieldGridTwo}>
+                                        <TextField
+                                            fullWidth
+                                            placeholder="Address line two (optional)"
+                                            value={createForm.addressTwo}
+                                            onChange={(event) =>
+                                                handleFormChange("addressTwo", event.target.value)
+                                            }
+                                            sx={styles.addEmployeeTextField}
+                                        />
+
+                                        <TextField
+                                            fullWidth
+                                            placeholder="Postal code"
+                                            value={createForm.postalCode}
+                                            onChange={(event) =>
+                                                handleFormChange("postalCode", event.target.value)
+                                            }
+                                            error={fieldHasError("postalCode")}
+                                            sx={styles.addEmployeeTextField}
+                                        />
+                                    </Box>
+
+                                    <Box sx={styles.addEmployeeFieldGridOne}>
+                                        <Select
+                                            fullWidth
+                                            displayEmpty
+                                            value={createForm.position}
+                                            onChange={(event: SelectChangeEvent) =>
+                                                handleFormChange("position", event.target.value)
+                                            }
+                                            error={fieldHasError("position")}
+                                            sx={styles.addEmployeeSelect}
+                                        >
+                                            {POSITION_OPTIONS.map((positionOption) => (
+                                                <MenuItem key={positionOption} value={positionOption}>
+                                                    {positionOption}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </Box>
+                                </Box>
+
+                                <Box sx={styles.addEmployeeSection}>
+                                    <Typography sx={styles.addEmployeeSectionTitle}>
+                                        Profile
+                                    </Typography>
+
+                                    <Box sx={styles.addEmployeeFieldGridOne}>
+                                        <TextField
+                                            fullWidth
+                                            placeholder="Username"
+                                            value={createForm.username}
+                                            onChange={(event) =>
+                                                handleFormChange("username", event.target.value)
+                                            }
+                                            error={fieldHasError("username")}
+                                            sx={styles.addEmployeeTextField}
+                                        />
+
+                                        <TextField
+                                            fullWidth
+                                            type="password"
+                                            placeholder="Password"
+                                            value={createForm.password}
+                                            onChange={(event) =>
+                                                handleFormChange("password", event.target.value)
+                                            }
+                                            error={fieldHasError("password")}
+                                            sx={styles.addEmployeeTextField}
+                                        />
+                                    </Box>
+                                </Box>
+
+                                {showCreateError && (
+                                    <Typography
+                                        sx={{
+                                            ...styles.errorText,
+                                            fontWeight: 500,
+                                            marginBottom: 2,
+                                        }}
+                                    >
+                                        {createError}
+                                    </Typography>
+                                )}
+
+                                <Box sx={styles.addEmployeeButtonRow}>
+                                    <Button
+                                        variant="outlined"
+                                        onClick={handleCancelAddEmployee}
+                                        disabled={isCreatingEmployee}
+                                        sx={styles.addEmployeeCancelButton}
+                                    >
+                                        Cancel
+                                    </Button>
+
+                                    <Button
+                                        variant="contained"
+                                        onClick={handleSubmitCreateEmployee}
+                                        disabled={isCreatingEmployee || !isFormValid}
+                                        sx={styles.addEmployeeSubmitButton}
+                                    >
+                                        Create User
+                                    </Button>
+                                </Box>
+                            </Box>
+                        </Paper>
+                    ) : selectedEmployeeId === null || selectedEmployee === null ? (
                         <Paper elevation={0} sx={styles.emptyStateCard}>
                             <Box sx={styles.emptyStateContent}>
                                 <PersonOutlineRoundedIcon sx={styles.emptyStateIcon} />

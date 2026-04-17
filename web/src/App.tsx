@@ -7,11 +7,12 @@ import { IncompatibleScreen } from "./components/IncompatibleScreen";
 import { AuthProvider } from "./AuthContext";
 import { Navbar } from "./components/Navbar";
 import { Dashboard } from "./pages/Dashboard";
-import {CalendarPage} from "./pages/CalendarPage";
-import {PendingRequestsPage} from "./pages/PendingRequestsPage";
+import { CalendarPage } from "./pages/CalendarPage";
+import { PendingRequestsPage } from "./pages/PendingRequestsPage";
 import { PersonalPage } from "./pages/PersonalPage";
 import { EmployeeOverview } from "./pages/EmployeeOverview";
 import { SendOutDocumentsPage} from "./pages/SendOutDocumentsPage";
+import { NotificationPage } from "./pages/NotificationPage";
 import { ReviewSubmissionsPage} from "./pages/ReviewSubmissionsPage";
 import { RiskAssessmentHazardsPage } from "./pages/RiskAssessmentHazardsPage";
 import { HazardViewPage } from "./pages/HazardViewPage";
@@ -66,7 +67,7 @@ function AppContent() {
                     <Route path="/employee-overview" element={<></>} />
                     <Route path="/employee/overview" element={<EmployeeOverview />} />
                     <Route path="/health-and-safety" element={<></>} />
-                    <Route path="/notifications" element={<></>} />
+                    <Route path="/notifications" element={<NotificationPage/>} />
                     <Route path="/health-and-safety/send-out/safety-alert" element={<></>} />
                     <Route path="calendar/requests" element={<PendingRequestsPage />} />
                     <Route path="/health-and-safety/send-out" element={<SendOutDocumentsPage />} />

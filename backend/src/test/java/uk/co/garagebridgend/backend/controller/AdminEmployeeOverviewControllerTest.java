@@ -2,15 +2,18 @@ package uk.co.garagebridgend.backend.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.AdminEmployeeOverviewService;
 import uk.co.garagebridgend.backend.models.exception.NotFoundException;
+import uk.co.garagebridgend.backend.models.request.AdminCreateEmployeeRequest;
 import uk.co.garagebridgend.backend.models.response.AdminEmployeeListItemResponse;
 import uk.co.garagebridgend.backend.models.response.AdminEmployeeOverviewResponse;
 import uk.co.garagebridgend.backend.models.response.AdminEmployeeUpcomingLeaveResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -156,5 +159,110 @@ class AdminEmployeeOverviewControllerTest {
         // Then the controller should return HTTP 500
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
         assertEquals("Internal server error", exception.getReason());
+    }
+
+    @Test
+    void testCreateEmployeeSuccess() {
+
+        // Given a valid employee creation request and the service creates the employee successfully
+        AdminCreateEmployeeRequest request = new AdminCreateEmployeeRequest(
+                "Craig",
+                "Sheppard",
+                "craig@test.com",
+                "07700900123",
+                "1 Test Street",
+                null,
+                "CF31 1AA",
+                "Employee",
+                "craig.s",
+                "Password123"
+        );
+
+        AdminEmployeeListItemResponse mockResponse =
+                new AdminEmployeeListItemResponse(20L, "Craig Sheppard", "Employee");
+
+        when(adminEmployeeOverviewService.createEmployee(request)).thenReturn(mockResponse);
+
+        // When the controller create employee endpoint is called
+        ResponseEntity<?> response = adminEmployeeOverviewController.createEmployee(request);
+
+        // Then the controller should return HTTP 201 with the created employee
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertInstanceOf(AdminEmployeeListItemResponse.class, response.getBody());
+
+        AdminEmployeeListItemResponse body = (AdminEmployeeListItemResponse) response.getBody();
+        assertNotNull(body);
+        assertEquals(20L, body.getAccountId());
+        assertEquals("Craig Sheppard", body.getFullName());
+        assertEquals("Employee", body.getPosition());
+    }
+
+    @Test
+    void testCreateEmployeeBadRequest() {
+
+        // Given the service rejects the supplied request as invalid
+        AdminCreateEmployeeRequest request = new AdminCreateEmployeeRequest();
+
+        when(adminEmployeeOverviewService.createEmployee(request))
+                .thenThrow(new IllegalArgumentException("Email is required."));
+
+        // When the controller create employee endpoint is called
+        ResponseEntity<?> response = adminEmployeeOverviewController.createEmployee(request);
+
+        // Then the controller should return HTTP 400 with the validation message
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+
+        Object body = response.getBody();
+        assertInstanceOf(Map.class, body);
+
+        Map<?, ?> map = (Map<?, ?>) body;
+        assertEquals("Email is required.", map.get("message"));
+    }
+
+    @Test
+    void testCreateEmployeeForbidden() {
+
+        // Given the service rejects the request because the user lacks permission
+        AdminCreateEmployeeRequest request = new AdminCreateEmployeeRequest();
+
+        when(adminEmployeeOverviewService.createEmployee(request))
+                .thenThrow(new SecurityException("Only admins can give admin permissions to a new account."));
+
+        // When the controller create employee endpoint is called
+        ResponseEntity<?> response = adminEmployeeOverviewController.createEmployee(request);
+
+        // Then the controller should return HTTP 403 with the security message
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+
+        Object body = response.getBody();
+        assertInstanceOf(Map.class, body);
+
+        Map<?, ?> map = (Map<?, ?>) body;
+        assertEquals(
+                "Only admins can give admin permissions to a new account.",
+                map.get("message")
+        );
+    }
+
+    @Test
+    void testCreateEmployeeInternalServerError() {
+
+        // Given the service throws an unexpected exception
+        AdminCreateEmployeeRequest request = new AdminCreateEmployeeRequest();
+
+        when(adminEmployeeOverviewService.createEmployee(request))
+                .thenThrow(new RuntimeException("unexpected error"));
+
+        // When the controller create employee endpoint is called
+        ResponseEntity<?> response = adminEmployeeOverviewController.createEmployee(request);
+
+        // Then the controller should return HTTP 500 with the generic error message
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+
+        Object body = response.getBody();
+        assertInstanceOf(Map.class, body);
+
+        Map<?, ?> map = (Map<?, ?>) body;
+        assertEquals("Internal server error.", map.get("message"));
     }
 }
