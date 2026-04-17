@@ -11,6 +11,7 @@ import uk.co.garagebridgend.backend.models.entity.*;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.request.SendOutDocumentRequest;
 import uk.co.garagebridgend.backend.models.response.DocumentResponse;
+import uk.co.garagebridgend.backend.models.response.PendingSignatureResponse;
 import uk.co.garagebridgend.backend.repository.*;
 
 import java.util.List;
@@ -276,5 +277,116 @@ class DocumentServiceTest {
                 AuthenticatedAccountNotFoundException.class,
                 () -> documentService.sendOutDocument(request)
         );
+    }
+
+    /**
+     * Tests for getPendingSignatures() method, which should return all (account, document) pairs
+     * where a signature is required but has not yet been provided.
+     */
+
+    @Test
+    void testGetPendingSignaturesReturnsPendingItems() {
+        AccountTable account = new AccountTable();
+        account.setAccountId(1L);
+        account.setFirstName("John");
+        account.setLastName("Doe");
+
+        DocumentTable document = new DocumentTable();
+        document.setDocumentId(10L);
+        document.setTitle("Fire Safety Policy");
+        document.setSignatureRequired(true);
+
+        DocumentRecipientTable recipient = new DocumentRecipientTable();
+        recipient.setAccount(account);
+        recipient.setDocument(document);
+        recipient.setCreated(java.time.LocalDateTime.now());
+
+        when(documentRepository.findAllBySignatureRequiredTrue()).thenReturn(List.of(document));
+        when(documentRecipientRepository.findAllByDocument(document)).thenReturn(List.of(recipient));
+        when(signatureRepository.existsByAccountAndDocument(account, document)).thenReturn(false);
+
+        List<PendingSignatureResponse> result = documentService.getPendingSignatures();
+
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).getAccountId());
+        assertEquals("John Doe", result.get(0).getFullName());
+        assertEquals(10L, result.get(0).getDocumentId());
+        assertEquals("Fire Safety Policy", result.get(0).getDocumentTitle());
+    }
+
+    @Test
+    void testGetPendingSignaturesExcludesAlreadySigned() {
+        AccountTable account = new AccountTable();
+        account.setAccountId(1L);
+        account.setFirstName("Jane");
+        account.setLastName("Smith");
+
+        DocumentTable document = new DocumentTable();
+        document.setDocumentId(11L);
+        document.setTitle("Employee Handbook");
+        document.setSignatureRequired(true);
+
+        DocumentRecipientTable recipient = new DocumentRecipientTable();
+        recipient.setAccount(account);
+        recipient.setDocument(document);
+        recipient.setCreated(java.time.LocalDateTime.now());
+
+        when(documentRepository.findAllBySignatureRequiredTrue()).thenReturn(List.of(document));
+        when(documentRecipientRepository.findAllByDocument(document)).thenReturn(List.of(recipient));
+        when(signatureRepository.existsByAccountAndDocument(account, document)).thenReturn(true);
+
+        List<PendingSignatureResponse> result = documentService.getPendingSignatures();
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetPendingSignaturesReturnsEmptyWhenNoSignatureRequiredDocs() {
+        when(documentRepository.findAllBySignatureRequiredTrue()).thenReturn(List.of());
+
+        List<PendingSignatureResponse> result = documentService.getPendingSignatures();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetPendingSignaturesSortedBySentDateDescending() {
+        AccountTable account1 = new AccountTable();
+        account1.setAccountId(1L);
+        account1.setFirstName("Alice");
+        account1.setLastName("A");
+
+        AccountTable account2 = new AccountTable();
+        account2.setAccountId(2L);
+        account2.setFirstName("Bob");
+        account2.setLastName("B");
+
+        DocumentTable document = new DocumentTable();
+        document.setDocumentId(10L);
+        document.setTitle("Policy");
+        document.setSignatureRequired(true);
+
+        java.time.LocalDateTime earlier = java.time.LocalDateTime.now().minusDays(2);
+        java.time.LocalDateTime later = java.time.LocalDateTime.now();
+
+        DocumentRecipientTable recipient1 = new DocumentRecipientTable();
+        recipient1.setAccount(account1);
+        recipient1.setDocument(document);
+        recipient1.setCreated(earlier);
+
+        DocumentRecipientTable recipient2 = new DocumentRecipientTable();
+        recipient2.setAccount(account2);
+        recipient2.setDocument(document);
+        recipient2.setCreated(later);
+
+        when(documentRepository.findAllBySignatureRequiredTrue()).thenReturn(List.of(document));
+        when(documentRecipientRepository.findAllByDocument(document)).thenReturn(List.of(recipient1, recipient2));
+        when(signatureRepository.existsByAccountAndDocument(any(), any())).thenReturn(false);
+
+        List<PendingSignatureResponse> result = documentService.getPendingSignatures();
+
+        assertEquals(2, result.size());
+        assertTrue(result.get(0).getSentDate().isAfter(result.get(1).getSentDate()));
     }
 }
