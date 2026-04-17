@@ -64,9 +64,34 @@ export function AuthProvider(
                 const data = await response.json();
                 setIsMfaAuthenticated(data.mfaAuthorised);
                 if (data.secret !== null) {
-                    setMfaSecret(
-                    `otpauth://totp/${AppSettings.COMPANY_NAME}:${data.username}?secret=${data.secret}&issuer=${AppSettings.COMPANY_NAME}`
-                    );
+                    const totpUrl = `otpauth://totp/${AppSettings.COMPANY_NAME}:${data.username}?secret=${data.secret}&issuer=${AppSettings.COMPANY_NAME}`;
+                    setMfaSecret(totpUrl);
+
+                    // Set the MFA secret in a secure cookie for later use if the page is refreshed
+                    const isSecure = window.location.protocol === 'https:';
+                    const secureFlag = isSecure ? '; secure' : '';
+
+                    document.cookie = `mfaSecret=${totpUrl}; path=/; samesite=strict; max-age=600${secureFlag}`;
+                }
+                else {
+                    if (data.mfaAuthorised) {
+                        // Clear the MFA secret cookie as the user is MFA authenticated
+                        document.cookie = `mfaSecret=; path=/; samesite=strict; max-age=0`;
+                    }
+                    else {
+                        // Check the cookie for the MFA secret
+                        const cookies = document.cookie.split(";").reduce((acc: Record<string, string>, cookie) => {
+                            const eqIdx = cookie.indexOf("=");
+                            const key = cookie.slice(0, eqIdx).trim();
+                            const value = decodeURIComponent(cookie.slice(eqIdx + 1).trim());
+                            acc[key] = value;
+                            return acc;
+                        }, {});
+
+                        if (cookies.mfaSecret) {
+                            setMfaSecret(cookies.mfaSecret);
+                        }
+                    }
                 }
             } else {
                 setIsMfaAuthenticated(false);
