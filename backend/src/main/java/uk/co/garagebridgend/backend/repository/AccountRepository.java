@@ -72,4 +72,23 @@ public interface AccountRepository extends JpaRepository<AccountTable, Long> {
      * @return optional matching account
      */
     Optional<AccountTable> findByUsernameIgnoreCase(String username);
+
+    /**
+     * Searches for accounts whose first name or last name contains the given
+     * query string (case-insensitive). Returns up to 10 results ordered
+     * alphabetically by last name then first name. Used by the admin clock-in
+     * page autocomplete to look up employees by name.
+     *
+     * @param query the partial name to search for
+     * @return a list of matching accounts, limited to 10 results
+     */
+    @Query("""
+        SELECT a FROM AccountTable a
+        WHERE LOWER(a.firstName) LIKE LOWER(CONCAT('%', :query, '%'))
+           OR LOWER(a.lastName)  LIKE LOWER(CONCAT('%', :query, '%'))
+           OR LOWER(CONCAT(a.firstName, ' ', a.lastName)) LIKE LOWER(CONCAT('%', :query, '%'))
+        ORDER BY a.lastName ASC, a.firstName ASC
+        LIMIT 10
+    """)
+    List<AccountTable> searchByName(@Param("query") String query);
 }

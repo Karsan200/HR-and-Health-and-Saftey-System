@@ -70,7 +70,9 @@ public class LeaveControllerTest {
                         LocalDate.of(2026, 4, 1),
                         "John Doe",
                         "Holiday",
-                        "Annual leave"
+                        "Annual leave",
+                        null,
+                        null
                 )
         );
 

@@ -11,6 +11,7 @@ import { CalendarPage } from "./pages/CalendarPage";
 import { PendingRequestsPage } from "./pages/PendingRequestsPage";
 import { PersonalPage } from "./pages/PersonalPage";
 import { EmployeeOverview } from "./pages/EmployeeOverview";
+import { ClockOverridesPage} from "./pages/ClockOverridesPage";
 import { SendOutDocumentsPage} from "./pages/SendOutDocumentsPage";
 import { NotificationPage } from "./pages/NotificationPage";
 import { ReviewSubmissionsPage} from "./pages/ReviewSubmissionsPage";
@@ -69,8 +70,9 @@ function AppContent() {
                     <Route path="/health-and-safety" element={<></>} />
                     <Route path="/notifications" element={<NotificationPage/>} />
                     <Route path="/health-and-safety/send-out/safety-alert" element={<></>} />
-                    <Route path="calendar/requests" element={<PendingRequestsPage />} />
                     <Route path="/health-and-safety/send-out" element={<SendOutDocumentsPage />} />
+                    <Route path="calendar/requests" element={<PendingRequestsPage />} />
+                    <Route path="calendar/overrides" element={<ClockOverridesPage/>} />
                     <Route path="/health-and-safety/review" element={<ReviewSubmissionsPage />} />
                     <Route path="/health-and-safety/review/risk-assessment/:id" element={<RiskAssessmentHazardsPage />} />
                     <Route path="/health-and-safety/review/hazard/:id" element={<HazardViewPage />} />

@@ -10,11 +10,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
+import uk.co.garagebridgend.backend.models.entity.ClockInEventTable;
 import uk.co.garagebridgend.backend.models.entity.ClockInReportTable;
 import uk.co.garagebridgend.backend.models.entity.ClockInTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.ClockInRecordResponse;
 import uk.co.garagebridgend.backend.models.response.ClockInStatusResponse;
+import uk.co.garagebridgend.backend.repository.ClockInEventRepository;
 import uk.co.garagebridgend.backend.repository.ClockInReportRepository;
 import uk.co.garagebridgend.backend.repository.ClockInRepository;
 
@@ -27,6 +29,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -45,6 +48,9 @@ public class ClockInServiceTest {
     @Mock
     private ClockInReportRepository clockInReportRepository;
 
+    @Mock
+    private ClockInEventRepository clockInEventRepository;
+
     @InjectMocks
     private ClockInService clockInService;
 
@@ -56,6 +62,11 @@ public class ClockInServiceTest {
         ReflectionTestUtils.setField(clockInService, "mondayToThursdayEndTime", LocalTime.of(17, 0));
         ReflectionTestUtils.setField(clockInService, "fridayStartTime", LocalTime.of(8, 0));
         ReflectionTestUtils.setField(clockInService, "fridayEndTime", LocalTime.of(12, 0));
+
+        // Default stub — not clocked in today unless a test overrides this
+        when(clockInEventRepository.findFirstByAccountAndCreatedBetweenOrderByCreatedAsc(
+                any(), any(), any()))
+                .thenReturn(Optional.empty());
     }
 
     // Helpers
@@ -80,7 +91,13 @@ public class ClockInServiceTest {
         return record;
     }
 
-    // getStatus
+    private ClockInEventTable buildEvent(final AccountTable account, final LocalDateTime created) {
+        ClockInEventTable event = new ClockInEventTable();
+        event.setClockInEventId(UUID.randomUUID());
+        event.setAccount(account);
+        event.setCreated(created);
+        return event;
+    }
 
     @Test
     void testGetStatusYesterdayTimesPopulated() {
@@ -325,6 +342,73 @@ public class ClockInServiceTest {
         assertThrows(AuthenticatedAccountNotFoundException.class, () ->
                 clockInService.getStatus()
         );
+    }
+
+    // getStatus — todayClockIn banner
+
+    @Test
+    void testGetStatusTodayClockInPopulatedWhenEventExists() {
+
+        // Given a clock-in event exists for today at 08:30
+        AccountTable account = buildAccount(1L);
+        LocalDateTime todayClockInTime = LocalDate.now().atTime(LocalTime.of(8, 30));
+        ClockInEventTable event = buildEvent(account, todayClockInTime);
+
+        when(authenticationService.getCurrentUser()).thenReturn(account);
+        when(clockInRepository.findByAccountAndCreatedBetweenOrderByCreatedDesc(
+                eq(account), any(), any()))
+                .thenReturn(List.of());
+        when(clockInEventRepository.findFirstByAccountAndCreatedBetweenOrderByCreatedAsc(
+                eq(account), any(), any()))
+                .thenReturn(Optional.of(event));
+
+        // When status is requested
+        ClockInStatusResponse response = clockInService.getStatus();
+
+        // Then todayClockIn should reflect the event time
+        assertEquals("08:30", response.getTodayClockIn());
+    }
+
+    @Test
+    void testGetStatusTodayClockInNullWhenNoEventExists() {
+
+        // Given no clock-in event exists for today
+        AccountTable account = buildAccount(1L);
+
+        when(authenticationService.getCurrentUser()).thenReturn(account);
+        when(clockInRepository.findByAccountAndCreatedBetweenOrderByCreatedDesc(
+                eq(account), any(), any()))
+                .thenReturn(List.of());
+        // clockInEventRepository already returns Optional.empty() from @BeforeEach
+
+        // When status is requested
+        ClockInStatusResponse response = clockInService.getStatus();
+
+        // Then todayClockIn should be null
+        assertNull(response.getTodayClockIn());
+    }
+
+    @Test
+    void testGetStatusTodayClockInUsesEarliestEvent() {
+
+        // Given two clock-in events today — the earliest should win
+        AccountTable account = buildAccount(1L);
+        LocalDate today = LocalDate.now();
+        ClockInEventTable earliestEvent = buildEvent(account, today.atTime(LocalTime.of(7, 55)));
+
+        when(authenticationService.getCurrentUser()).thenReturn(account);
+        when(clockInRepository.findByAccountAndCreatedBetweenOrderByCreatedDesc(
+                eq(account), any(), any()))
+                .thenReturn(List.of());
+        when(clockInEventRepository.findFirstByAccountAndCreatedBetweenOrderByCreatedAsc(
+                eq(account), any(), any()))
+                .thenReturn(Optional.of(earliestEvent));
+
+        // When status is requested
+        ClockInStatusResponse response = clockInService.getStatus();
+
+        // Then todayClockIn should reflect the earliest event
+        assertEquals("07:55", response.getTodayClockIn());
     }
 
     // getRecentRecords

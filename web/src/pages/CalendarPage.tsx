@@ -20,6 +20,7 @@ import { fetchLeaveTypes, type ResolvedLeaveType } from "../logic/LeaveTypeServi
 import { useAuth } from "../AuthContext";
 import { DayDetailOverlay } from "../components/DayDetailOverlay";
 import { type CalendarEvent, eventConfigForType } from "../models/CalendarTypes";
+import { fetchReportedClockInCount } from "../logic/ClockOverridesService";
 
 const DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
@@ -148,6 +149,7 @@ export function CalendarPage({ onEventClick }: CalendarPageProps) {
 
     const [leaveTypes, setLeaveTypes] = useState<ResolvedLeaveType[]>([]);
     const [pendingCount, setPendingCount] = useState<number>(0);
+    const [reportedCount, setReportedCount] = useState<number>(0);
 
     const [overlayDate, setOverlayDate] = useState<string | null>(null);
     const [overlayOpen, setOverlayOpen] = useState(false);
@@ -200,6 +202,20 @@ export function CalendarPage({ onEventClick }: CalendarPageProps) {
         loadPendingCount();
     }, [loadPendingCount]);
 
+    // Fetch the reported clock-in count once on mount for the nav badge
+    const loadReportedCount = useCallback(async () => {
+        try {
+            const count = await fetchReportedClockInCount(auth.authenticationService);
+            setReportedCount(count);
+        } catch {
+            // Non-critical — badge stays at 0 if the request fails
+        }
+    }, [auth.authenticationService]);
+
+    useEffect(() => {
+        loadReportedCount();
+    }, [loadReportedCount]);
+
     // Index events by date string for fast lookup per day cell
     const eventsByDate = useMemo(() => {
         const map = new Map<string, CalendarEvent[]>();
@@ -233,11 +249,11 @@ export function CalendarPage({ onEventClick }: CalendarPageProps) {
 
     const todayISO = toISODate(today.getFullYear(), today.getMonth(), today.getDate());
 
-    // Built inside the component so pendingCount stays live
+    // Built inside the component so pendingCount and reportedCount stay live
     const calendarTabs: SectionNavTab[] = [
         { label: "Calendar View",    route: "/calendar", alert: true },
         { label: "Pending Requests", route: "/calendar/requests", count: pendingCount },
-        { label: "Clock Overrides",  route: "/calendar/overrides" },
+        { label: "Clock Overrides",  route: "/calendar/overrides", count: reportedCount },
     ];
 
     return (
