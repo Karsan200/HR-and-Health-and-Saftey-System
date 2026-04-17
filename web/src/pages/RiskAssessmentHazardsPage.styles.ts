@@ -138,7 +138,7 @@ export const riskAssessmentHazardsStyles = {
         marginTop: "2px",
     },
 
-    // Status badge — mirrors pendingBadge from ReviewSubmissionsPage
+    // Status badge
     statusBadge: {
         display: "flex",
         alignItems: "center",
