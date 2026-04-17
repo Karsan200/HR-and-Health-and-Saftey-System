@@ -9,6 +9,7 @@ import uk.co.garagebridgend.backend.models.entity.ClockInTable;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.response.ClockInRecordResponse;
 import uk.co.garagebridgend.backend.models.response.ClockInStatusResponse;
+import uk.co.garagebridgend.backend.repository.ClockInEventRepository;
 import uk.co.garagebridgend.backend.repository.ClockInReportRepository;
 import uk.co.garagebridgend.backend.repository.ClockInRepository;
 
@@ -81,10 +82,13 @@ public class ClockInService {
     /** Repository for persisting clock-in issue reports. */
     private final ClockInReportRepository clockInReportRepository;
 
+    /** Repository for accessing clock-in events. */
+    private final ClockInEventRepository clockInEventRepository;
+
     /**
-     * Retrieves yesterday's clock-in activity and the current year's statistics
-     * for the authenticated user.
-     * @return a ClockInStatusResponse containing yesterday's times and yearly stats
+     * Retrieves yesterday's clock-in activity, today's clock-in status,
+     * and the current year's statistics for the authenticated user.
+     * @return a ClockInStatusResponse containing yesterday's times, today's status, and yearly stats
      * @throws AuthenticatedAccountNotFoundException if no authenticated user is found
      */
     public ClockInStatusResponse getStatus() throws AuthenticatedAccountNotFoundException {
@@ -115,6 +119,17 @@ public class ClockInService {
                 yesterdayClockOut = record.getClockOutTime().format(TIME_FORMATTER);
             }
         }
+
+        // Fetch today's earliest clock-in event to determine if the user has clocked in
+        LocalDateTime startOfToday = today.atStartOfDay();
+        LocalDateTime endOfToday = today.atTime(LocalTime.MAX);
+
+        String todayClockIn = clockInEventRepository
+                .findFirstByAccountAndCreatedBetweenOrderByCreatedAsc(
+                        account, startOfToday, endOfToday
+                )
+                .map(event -> event.getCreated().toLocalTime().format(TIME_FORMATTER))
+                .orElse(null);
 
         // Fetch this year's records for stats (1st Jan to 31st Dec)
         LocalDateTime startOfYear = today.withDayOfYear(1).atStartOfDay();
@@ -174,7 +189,8 @@ public class ClockInService {
                 totalLates,
                 onTimePercent,
                 avgHoursPerDay,
-                daysWorked
+                daysWorked,
+                todayClockIn
         );
     }
 
