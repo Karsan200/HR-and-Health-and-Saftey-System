@@ -23,6 +23,7 @@ public class RiskAssessmentResponse {
     /** The number of hazards linked to this risk assessment. */
     private int hazardCount;
 
+    /** The number of active (open) hazards linked to this risk assessment. */
     private int activeHazardCount;
 
     /** The creation timestamp of the risk assessment. */
@@ -31,5 +32,6 @@ public class RiskAssessmentResponse {
     /** Whether the risk assessment is saved as a draft. */
     private boolean hasDrafts;
 
+    /** Whether all actions linked to this risk assessment are complete (closed). */
     private boolean allActionsComplete;
 }

@@ -75,7 +75,7 @@ public class DocumentController {
     }
 
     /**
-     * Returns all (account, document) pairs where a signature is required but
+     * Returns all (account, document) pairs where a signature is required but.
      * has not yet been provided.*
      * @return list of {@link PendingSignatureResponse} items
      */
