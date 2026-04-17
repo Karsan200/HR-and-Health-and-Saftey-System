@@ -164,4 +164,35 @@ describe("HazardViewPage", () => {
             expect(mockNavigate).toHaveBeenCalledWith(-1);
         });
     });
+
+    it("shows checked checkbox when action is complete", async () => {
+        mockGetHazardById.mockResolvedValue({
+            ...mockHazard,
+            closed: true,
+        });
+
+        renderPage();
+
+        await screen.findByText("Action completed");
+
+        expect(screen.getByTestId("CheckBoxRoundedIcon")).toBeInTheDocument();
+    });
+
+    function renderWithoutId() {
+        return render(
+            <MemoryRouter initialEntries={["/health-and-safety/review/hazard/"]}>
+                <Routes>
+                    <Route path="/health-and-safety/review/hazard/" element={<HazardViewPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+    }
+
+    it("does not call getHazardById when id is missing", async () => {
+        renderWithoutId();
+
+        await waitFor(() => {
+            expect(mockGetHazardById).not.toHaveBeenCalled();
+        });
+    });
 });
