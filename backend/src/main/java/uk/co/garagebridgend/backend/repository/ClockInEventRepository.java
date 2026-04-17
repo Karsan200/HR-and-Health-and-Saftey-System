@@ -6,11 +6,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import uk.co.garagebridgend.backend.models.entity.AccountTable;
 import uk.co.garagebridgend.backend.models.entity.ClockInEventTable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -74,5 +76,20 @@ public interface ClockInEventRepository extends JpaRepository<ClockInEventTable,
     void deleteByDateAndAccountId(
             @Param("date") LocalDate date,
             @Param("accountId") Long accountId
+    );
+
+    /**
+     * Finds the earliest clock-in event for the given account on a given date.
+     * Used to determine today's clock-in time for the status banner.
+     *
+     * @param account the account to filter by
+     * @param start the start of the day (00:00:00)
+     * @param end the end of the day (23:59:59)
+     * @return the earliest ClockInEventTable entry within the range, if any
+     */
+    Optional<ClockInEventTable> findFirstByAccountAndCreatedBetweenOrderByCreatedAsc(
+            AccountTable account,
+            LocalDateTime start,
+            LocalDateTime end
     );
 }

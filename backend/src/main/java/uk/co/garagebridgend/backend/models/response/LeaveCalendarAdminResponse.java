@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 /**
  * Response model representing a single leave entry for display on the calendar.
@@ -30,4 +31,16 @@ public class LeaveCalendarAdminResponse {
 
     /** Optional notes left on the leave request. */
     private String notes;
+
+    /**
+     * Clock-in time for partial-day leave. Only populated when the leave
+     * spans a single day; null for multi-day bookings.
+     */
+    private LocalTime startTime;
+
+    /**
+     * Clock-out time for partial-day leave. Only populated when the leave
+     * spans a single day; null for multi-day bookings.
+     */
+    private LocalTime endTime;
 }

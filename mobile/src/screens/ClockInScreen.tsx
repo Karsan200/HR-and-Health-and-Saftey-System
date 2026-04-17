@@ -29,6 +29,7 @@ type ClockStatus = {
   onTimePercent: number;
   avgHoursPerDay: number;
   daysWorked: number;
+  todayClockIn: string | null;
 };
 
 type ClockRecord = {
@@ -171,6 +172,42 @@ const ClockInScreen: React.FC = () => {
         }
         contentContainerStyle={themedStyles.scrollContent}
       >
+        {/* Today's Clock-In Banner */}
+        <View
+          style={[
+            themedStyles.todayBanner,
+            status?.todayClockIn
+              ? themedStyles.todayBannerIn
+              : themedStyles.todayBannerOut,
+          ]}
+        >
+          <Icon
+            source={
+              status?.todayClockIn
+                ? 'check-circle-outline'
+                : 'clock-alert-outline'
+            }
+            size={22}
+            color={
+              status?.todayClockIn
+                ? theme.greenPrimary
+                : theme.redTrafficPrimary
+            }
+          />
+          <Text
+            style={[
+              themedStyles.todayBannerText,
+              status?.todayClockIn
+                ? themedStyles.todayBannerTextIn
+                : themedStyles.todayBannerTextOut,
+            ]}
+          >
+            {status?.todayClockIn
+              ? `Clocked in today at ${status.todayClockIn}`
+              : 'Not yet clocked in today'}
+          </Text>
+        </View>
+
         {/* Yesterday's Activity */}
         <View style={themedStyles.activityCard}>
           <View style={themedStyles.activityHeader}>

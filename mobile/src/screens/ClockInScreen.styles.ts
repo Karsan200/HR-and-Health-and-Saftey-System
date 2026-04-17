@@ -35,6 +35,42 @@ export const clockInScreenStyles = (
       justifyContent: 'center',
     },
 
+    // Today's Clock-In Banner
+    todayBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      borderRadius: BorderRadius.largeButtonsAndOutlines,
+      paddingVertical: Spacing.smallPadding + 4,
+      paddingHorizontal: Spacing.mediumPadding,
+      borderWidth: 1.5,
+    },
+
+    todayBannerIn: {
+      backgroundColor: theme.greenBackgroundLight,
+      borderColor: theme.greenPrimary,
+    },
+
+    todayBannerOut: {
+      backgroundColor: theme.redBackgroundLight,
+      borderColor: theme.redTrafficPrimary,
+    },
+
+    todayBannerText: {
+      fontFamily: fontFamilies.semiBold,
+      fontWeight: TextStyles.semiBold.fontWeight,
+      fontSize: FontSize.s16 * fontScale,
+      letterSpacing: 0.17,
+    },
+
+    todayBannerTextIn: {
+      color: theme.greenPrimary,
+    },
+
+    todayBannerTextOut: {
+      color: theme.redTrafficPrimary,
+    },
+
     // Yesterday's Activity Card
     activityCard: {
       backgroundColor: theme.white,
