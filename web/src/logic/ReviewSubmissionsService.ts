@@ -84,3 +84,41 @@ export async function getHazardsForRiskAssessment(
 
     return response.json();
 }
+
+/**
+ * Represents the detailed information of a single hazard report, used in the hazard view screen.
+ * Contains all questions and answers, status flags, creator info, creation date, and associated file URLs.
+ */
+
+export interface HazardReportItem {
+    hazardId: number;
+    title: string;
+    questionOne: string;
+    questionTwo: string;
+    questionThree: string;
+    questionFour: string;
+    questionFive: string;
+    questionSix: string | null;
+    isDraft: boolean;
+    isClosed: boolean;
+    closed: boolean;
+    createdBy: string;
+    created: string;
+    fileUrls: string[];
+}
+
+export async function getHazardById(
+    authenticationService: AuthenticationService,
+    hazardId: number
+): Promise<HazardReportItem> {
+    const response = await authenticationService.fetch(
+        `/api/risk-assessment/hazard/${hazardId}`,
+        { method: "GET" }
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch hazard: ${response.status}`);
+    }
+
+    return response.json();
+}

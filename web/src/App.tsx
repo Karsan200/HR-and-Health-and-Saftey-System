@@ -14,6 +14,7 @@ import { EmployeeOverview } from "./pages/EmployeeOverview";
 import { SendOutDocumentsPage} from "./pages/SendOutDocumentsPage";
 import { ReviewSubmissionsPage} from "./pages/ReviewSubmissionsPage";
 import { RiskAssessmentHazardsPage } from "./pages/RiskAssessmentHazardsPage";
+import { HazardViewPage } from "./pages/HazardViewPage";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
@@ -71,6 +72,7 @@ function AppContent() {
                     <Route path="/health-and-safety/send-out" element={<SendOutDocumentsPage />} />
                     <Route path="/health-and-safety/review" element={<ReviewSubmissionsPage />} />
                     <Route path="/health-and-safety/review/risk-assessment/:id" element={<RiskAssessmentHazardsPage />} />
+                    <Route path="/health-and-safety/review/hazard/:id" element={<HazardViewPage />} />
                 </Routes>
             </BrowserRouter>
         </>
