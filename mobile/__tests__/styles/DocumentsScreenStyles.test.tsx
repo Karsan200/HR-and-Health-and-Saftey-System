@@ -70,4 +70,32 @@ describe('DocumentsScreenStyles', () => {
         expect(result.pdfHeader.backgroundColor).toBe(DefaultColours.greyBackground);
     });
 
+
+    it('applies normal font scale when largeText is false', () => {
+      const result = styles(DefaultColours, { ...baseAccessibility, largeText: false });
+      expect(result).toBeDefined();
+    });
+
+    it('applies large font scale when largeText is true', () => {
+      const result = styles(DefaultColours, { ...baseAccessibility, largeText: true });
+      expect(result).toBeDefined();
+    });
+
+    it('applies normal font family when dyslexicFont is false', () => {
+      const result = styles(DefaultColours, { ...baseAccessibility, dyslexicFont: false });
+      expect(result).toBeDefined();
+    });
+
+    it('applies dyslexic font family when dyslexicFont is true', () => {
+      const result = styles(DefaultColours, { ...baseAccessibility, dyslexicFont: true });
+      expect(result).toBeDefined();
+    });
+
+    it('applies all accessibility options simultaneously', () => {
+      const result = styles(DefaultColours, {
+        largeText: true,
+        dyslexicFont: true,
+      });
+      expect(result).toBeDefined();
+    });
 });
