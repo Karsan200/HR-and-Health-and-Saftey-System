@@ -80,7 +80,7 @@ export function AuthProvider(
                         document.cookie = `mfaSecret=; path=/; samesite=strict; max-age=0`;
                     }
                     else {
-                        setMfaSecret(AuthenticationService.extractMfaCookie)
+                        setMfaSecret(AuthenticationService.extractMfaCookie())
                     }
                 }
             } else {

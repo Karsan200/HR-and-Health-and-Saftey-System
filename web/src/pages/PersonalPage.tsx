@@ -11,6 +11,7 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
 import ShieldIcon from "@mui/icons-material/Shield";
+import LogoutIcon from '@mui/icons-material/Logout';
 import { personalPageStyles as styles } from "./PersonalPage.styles";
 import { useAuth } from "../AuthContext";
 import { fetchPersonalData, type ProfileResponse, type SettingsResponse } from "../logic/PersonalService";
@@ -24,7 +25,7 @@ const TABS: { key: Tab; label: string }[] = [
     { key: "security",  label: "Security" },
 ];
 
-// Settup for the rows of information
+// Setup for the rows of information
 
 interface InfoRowProps {
     icon: React.ReactNode;
@@ -233,7 +234,7 @@ function SecurityTab() {
 }
 
 export function PersonalPage() {
-    const { authenticationService } = useAuth();
+    const auth = useAuth();
 
     const [profile, setProfile] = useState<ProfileResponse | null>(null);
     const [settings, setSettings] = useState<SettingsResponse | null>(null);
@@ -241,11 +242,33 @@ export function PersonalPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+    async function handleLogout() {
+        setIsLoggingOut(true);
+
+        // Log the user out on the server
+        try {
+            await auth.authenticationService.fetch("/auth/logout", {
+                method: "GET",
+                credentials: 'include' as RequestCredentials
+            })
+        }
+        catch {
+            // Ignore errors
+        }
+        finally {
+            // Log the user out on the client regardless of server response
+            auth.setIsMfaAuthenticated(false);
+            auth.setIsAuthenticated(false);
+        }
+    }
+
     const loadProfile = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const { profile, settings } = await fetchPersonalData(authenticationService);
+            const { profile, settings } = await fetchPersonalData(auth.authenticationService);
             setProfile(profile);
             setSettings(settings);
         } catch {
@@ -253,7 +276,7 @@ export function PersonalPage() {
         } finally {
             setLoading(false);
         }
-    }, [authenticationService]);
+    }, [auth.authenticationService]);
 
     useEffect(() => {
         loadProfile();
@@ -265,7 +288,7 @@ export function PersonalPage() {
             {profile && (
                 <Box sx={styles.headerCard}>
                     <Box sx={styles.avatarCircle}>
-                        <PersonOutlineIcon sx={styles.avatarIcon} />
+                        <PersonOutlineIcon sx={styles.avatarIcon}/>
                     </Box>
                     <Box sx={styles.headerInfo}>
                         <Typography sx={styles.headerName}>
@@ -274,14 +297,14 @@ export function PersonalPage() {
                         <Typography sx={styles.headerEmail}>{profile.email}</Typography>
                     </Box>
                     <Box sx={styles.adminBadge}>
-                        <ShieldIcon sx={styles.adminBadgeIcon} />
+                        <ShieldIcon sx={styles.adminBadgeIcon}/>
                     </Box>
                 </Box>
             )}
 
             {/* Tabs */}
             <Box sx={styles.tabsRow}>
-                {TABS.map(({ key, label }) => (
+                {TABS.map(({key, label}) => (
                     <Box
                         key={key}
                         sx={styles.tab(activeTab === key)}
@@ -295,7 +318,7 @@ export function PersonalPage() {
             {/* Content */}
             {loading && (
                 <Box sx={styles.loadingContainer}>
-                    <CircularProgress size={32} sx={styles.loadingSpinner} />
+                    <CircularProgress size={32} sx={styles.loadingSpinner}/>
                 </Box>
             )}
 
@@ -305,11 +328,20 @@ export function PersonalPage() {
 
             {!loading && !error && profile && settings && (
                 <>
-                    {activeTab === "profile"  && <ProfileTab profile={profile} settings={settings} />}
-                    {activeTab === "settings" && <SettingsTab label="Settings" />}
+                    {activeTab === "profile" && <ProfileTab profile={profile} settings={settings}/>}
+                    {activeTab === "settings" && <SettingsTab label="Settings"/>}
                     {activeTab === "security" && <SecurityTab/>}
                 </>
             )}
+            <Box
+                component="button"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                sx={styles.securityButton}
+            >
+                <LogoutIcon sx={{ fontSize: 16 }} />
+                {isLoggingOut ? "Logging Out..." : "Logout"}
+            </Box>
         </Box>
     );
 }
