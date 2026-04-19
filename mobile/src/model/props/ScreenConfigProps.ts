@@ -6,6 +6,7 @@ export type ScreenConfigProps = {
   setSection: React.Dispatch<React.SetStateAction<AppSection>>;
   currentScreen: ScreenKey;
   setCurrentScreen: React.Dispatch<React.SetStateAction<ScreenKey>>;
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean | null>>;
 
   selectedDate: string | null;
   setSelectedDate: React.Dispatch<React.SetStateAction<string | null>>;

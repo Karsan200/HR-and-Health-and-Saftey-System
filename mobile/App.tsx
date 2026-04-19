@@ -5,7 +5,7 @@
  * @format
  */
 
-import React, {useContext, useEffect, useState} from 'react';
+import React, { Dispatch, SetStateAction, useContext, useEffect, useState} from 'react';
 import { StatusBar, useColorScheme, View } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 import BackgroundService from 'react-native-background-actions';
@@ -106,7 +106,7 @@ function App() {
             showPinCodeScreen ? (
               <PinCodeAuthScreen isAuth={setShowPinCodeScreen} />
             ) : (
-              <AppContent />
+              <AppContent isAuth={setIsAuthenticated} />
             )
           ) : (
             <PasswordAuthScreen isAuth={setIsAuthenticated} />
@@ -116,41 +116,46 @@ function App() {
     );
 }
 
-function AppContent() {
-    const [section, setSection] = useState<AppSection>(null);
-    const [currentScreen, setCurrentScreen] = useState<ScreenKey>('home');
-    const [selectedDate, setSelectedDate] = useState<string | null>(null);
+function AppContent(props: {
+  isAuth: Dispatch<SetStateAction<boolean | null>>;
+}) {
+  const [section, setSection] = useState<AppSection>(null);
+  const [currentScreen, setCurrentScreen] = useState<ScreenKey>('home');
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-    // Used for general navigation - pass in a screen (If it's new, add to ScreenKey and add a case handle in renderScreen)
-    const handleNavigate = (screen: ScreenKey) => {
-        if (screen === 'home') {
-            setSection(null);
-            setCurrentScreen('home');
-            return;
-        }
+  // Used for general navigation - pass in a screen (If it's new, add to ScreenKey and add a case handle in renderScreen)
+  const handleNavigate = (screen: ScreenKey) => {
+    if (screen === 'home') {
+      setSection(null);
+      setCurrentScreen('home');
+      return;
+    }
 
-        setCurrentScreen(screen);
-    };
+    setCurrentScreen(screen);
+  };
 
-    // returning the main content and the bottom navbar
-    return (
-      <>
-        <View style={styles.content}>{ScreenConfig({
-            section: section,
-            setSection: setSection,
-            currentScreen: currentScreen,
-            setCurrentScreen: setCurrentScreen,
+  // returning the main content and the bottom navbar
+  return (
+    <>
+      <View style={styles.content}>
+        {ScreenConfig({
+          section: section,
+          setSection: setSection,
+          currentScreen: currentScreen,
+          setCurrentScreen: setCurrentScreen,
+          setIsAuthenticated: props.isAuth,
 
-            selectedDate: selectedDate,
-            setSelectedDate: setSelectedDate,
-        })}</View>
-        <BottomNavBar
-          section={section}
-          currentScreen={currentScreen}
-          onNavigate={handleNavigate}
-        />
-      </>
-    );
+          selectedDate: selectedDate,
+          setSelectedDate: setSelectedDate,
+        })}
+      </View>
+      <BottomNavBar
+        section={section}
+        currentScreen={currentScreen}
+        onNavigate={handleNavigate}
+      />
+    </>
+  );
 }
 
 export default App;

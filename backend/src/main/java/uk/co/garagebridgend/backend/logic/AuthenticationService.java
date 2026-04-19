@@ -132,6 +132,20 @@ public class AuthenticationService {
     }
 
     /**
+     * Logs out a user by invalidating the provided refresh token. If a session is found with the given refresh token,
+     * it is deleted from the database, effectively revoking the token and preventing further use for authentication.
+     * @param refreshToken the refresh token to invalidate and log out the user
+     */
+    public void logout(final String refreshToken) {
+        Optional<SessionTable> sessionOpt = sessionRepository.findByRefreshToken(refreshToken);
+        if (sessionOpt.isEmpty()) {
+            return;
+        }
+
+        sessionRepository.delete(sessionOpt.get());
+    }
+
+    /**
      * Authenticates a user for multifactor authentication (MFA) using a provided TOTP code and refresh token.
      * Validates the TOTP code against the user's 2FA secret, updates the session it's MFA authorised.
      * and returns a new access token with updated claims.

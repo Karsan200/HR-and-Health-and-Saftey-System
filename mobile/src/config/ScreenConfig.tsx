@@ -316,9 +316,9 @@ export function ScreenConfig(body: ScreenConfigProps) {
           onSelectHr={handleSelectHr}
           onSelectHealthSafety={handleSelectHealthSafety}
           onSelectSettings={() => handleNavigate('settings')}
-          onSelectLogout={() => handleNavigate('logout')}
           onSelectProfile={() => handleNavigate('profile')}
           onSelectNotifications={() => handleNavigate('notifications')}
+          setIsAuthenticated={body.setIsAuthenticated}
         />
       );
   }

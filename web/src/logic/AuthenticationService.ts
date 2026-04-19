@@ -133,4 +133,20 @@ export class AuthenticationService {
             throw new HttpException(response.status, response.statusText);
         }
     }
+
+    static extractMfaCookie(): string | null {
+        // Check the cookie for the MFA secret
+        const cookies = document.cookie.split(";").reduce((acc: Record<string, string>, cookie) => {
+            const eqIdx = cookie.indexOf("=");
+            const key = cookie.slice(0, eqIdx).trim();
+            const value = decodeURIComponent(cookie.slice(eqIdx + 1).trim());
+            acc[key] = value;
+            return acc;
+        }, {});
+
+        if (cookies.mfaSecret) {
+            return cookies.mfaSecret
+        }
+        return null;
+    }
 }
