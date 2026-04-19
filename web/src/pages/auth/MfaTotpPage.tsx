@@ -3,7 +3,7 @@ import {Alert, Box, Button, Container, TextField} from "@mui/material";
 import {useEffect, useState} from "react";
 import {useAuth} from "../../AuthContext";
 import {HttpException} from "../../models/HttpException";
-import {AuthenticationService} from "../../logic/AuthenticationService.ts";
+import {AuthenticationService} from "../../logic/AuthenticationService";
 
 export function MfaTotpPage() {
     const [totpCode, setTotpCode] = useState('');
