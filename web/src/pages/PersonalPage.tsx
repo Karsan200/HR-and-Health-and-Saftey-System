@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect, useCallback } from "react";
+import dayjs, { type Dayjs } from "dayjs";
 import {
     Box,
     Typography,
@@ -11,10 +12,13 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
 import ShieldIcon from "@mui/icons-material/Shield";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
 import LogoutIcon from '@mui/icons-material/Logout';
 import { personalPageStyles as styles } from "./PersonalPage.styles";
 import { useAuth } from "../AuthContext";
-import { fetchPersonalData, type ProfileResponse, type SettingsResponse } from "../logic/PersonalService";
+import { fetchPersonalData, updateNotificationSettings, type ProfileResponse, type SettingsResponse } from "../logic/PersonalService";
 import { changePassword } from "../logic/PersonalSecurityService";
 
 type Tab = "profile" | "settings" | "security";
@@ -105,13 +109,236 @@ function ProfileTab({ profile, settings }: { profile: ProfileResponse, settings:
 }
 
 // Second Tab (Settings)
-// TODO: Complete the Settings Tab
+type Step = "start" | "end" | "confirm";
 
-function SettingsTab({ label }: { label: string }) {
+function SettingsTab({ settings }: { settings: SettingsResponse }) {
+    const { authenticationService } = useAuth();
+
+    // Parse existing silent times from "HH:mm:ss" strings or default to 5am/6am
+    const parseTime = (t: string | null): Dayjs =>
+        t ? dayjs(`2000-01-01T${t}`) : dayjs("2000-01-01T05:00:00");
+
+    const [silentStart, setSilentStart] = useState<Dayjs>(parseTime(settings.silentStart));
+    const [silentEnd, setSilentEnd]     = useState<Dayjs>(parseTime(settings.silentEnd));
+    const [step, setStep]               = useState<Step>("start");
+    const [submitting, setSubmitting]   = useState(false);
+    const [success, setSuccess]         = useState(false);
+    const [error, setError]             = useState<string | null>(null);
+
+    function formatDisplay(t: Dayjs): string {
+        return t.format("hh:mm A");
+    }
+
+    async function handleSubmit() {
+        setError(null);
+        setSuccess(false);
+        setSubmitting(true);
+        try {
+            await updateNotificationSettings(authenticationService, {
+                silentStart: silentStart.format("HH:mm:ss"),
+                silentEnd: silentEnd.format("HH:mm:ss"),
+            });
+            setSuccess(true);
+            setStep("start");
+        } catch {
+            setError("Failed to save notification settings. Please try again.");
+        } finally {
+            setSubmitting(false);
+        }
+    }
+
+    function handleCancel() {
+        setSilentStart(parseTime(settings.silentStart));
+        setSilentEnd(parseTime(settings.silentEnd));
+        setError(null);
+        setSuccess(false);
+        setStep("start");
+    }
+
+    const clockChange = (newValue: Dayjs | null) => {
+        if (!newValue) return;
+        if (step === "start") setSilentStart(newValue);
+        else setSilentEnd(newValue);
+    };
+
     return (
-        <Box sx={{ ...styles.sectionCard, ...styles.placeHolderCard }}>
-            <Typography sx={styles.infoLabel}>{label} TBC </Typography>
-        </Box>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Box sx={styles.settingsCard}>
+                <Typography sx={styles.settingsTitle}>Notification Settings</Typography>
+                <Typography sx={styles.quietTimeLabel}>NOTIFICATION QUIET TIME</Typography>
+
+                {/* Step: Set Start Time */}
+                {step === "start" && (
+                    <>
+                        <Typography sx={styles.quietTimeStepLabel}>
+                            Set start time
+                        </Typography>
+
+                        <Box sx={styles.quietTimeRow}>
+                            <Box sx={styles.clickableTimeBox}>
+                                <Typography sx={styles.timeText(true)}>
+                                    {formatDisplay(silentStart)}
+                                </Typography>
+                                <Typography sx={{ ...styles.amPmText(true), fontSize: "0.75rem", color: "text.secondary" }}>
+                                    Start
+                                </Typography>
+                            </Box>
+                        </Box>
+
+                        <StaticTimePicker
+                            value={silentStart}
+                            onChange={clockChange}
+                            slotProps={{
+                                actionBar: { sx: { display: "none" } },
+                                toolbar:   { sx: { display: "none" } },
+                            }}
+                            sx={styles.timePicker}
+                        />
+
+                        <Box sx={styles.settingsButtonRow}>
+                            <Box
+                                component="button"
+                                onClick={handleCancel}
+                                sx={styles.settingsCancelButton}
+                            >
+                                CANCEL
+                            </Box>
+                            <Box
+                                component="button"
+                                onClick={() => setStep("end")}
+                                sx={styles.settingsOkButton}
+                            >
+                                SET START TIME
+                            </Box>
+                        </Box>
+                    </>
+                )}
+
+                {/* Step: Set End Time */}
+                {step === "end" && (
+                    <>
+                        <Typography sx={styles.quietTimeStepLabel}>
+                            Set end time
+                        </Typography>
+
+                        <Box sx={styles.quietTimeRow}>
+                            <Box sx={styles.clickableTimeBox}>
+                                <Typography sx={styles.timeText(true)}>
+                                    {formatDisplay(silentStart)}
+                                </Typography>
+                                <Typography sx={{ ...styles.amPmText(true), fontSize: "0.75rem", color: "text.secondary" }}>
+                                    Start
+                                </Typography>
+                            </Box>
+
+                            <Typography sx={styles.quietTimeArrow}>→</Typography>
+
+                            <Box sx={styles.clickableTimeBox}>
+                                <Typography sx={styles.timeText(true)}>
+                                    {formatDisplay(silentEnd)}
+                                </Typography>
+                                <Typography sx={{ ...styles.amPmText(true), fontSize: "0.75rem", color: "text.secondary" }}>
+                                    End
+                                </Typography>
+                            </Box>
+                        </Box>
+
+                        <StaticTimePicker
+                            value={silentEnd}
+                            onChange={clockChange}
+                            slotProps={{
+                                actionBar: { sx: { display: "none" } },
+                                toolbar:   { sx: { display: "none" } },
+                            }}
+                            sx={styles.timePicker}
+                        />
+
+                        <Box sx={styles.settingsButtonRow}>
+                            <Box
+                                component="button"
+                                onClick={() => setStep("start")}
+                                sx={styles.settingsCancelButton}
+                            >
+                                BACK
+                            </Box>
+                            <Box
+                                component="button"
+                                onClick={() => setStep("confirm")}
+                                sx={styles.settingsOkButton}
+                            >
+                                SET END TIME
+                            </Box>
+                        </Box>
+                    </>
+                )}
+
+                {/* Step: Confirm */}
+                {step === "confirm" && (
+                    <>
+                        <Typography sx={styles.quietTimeStepLabel}>
+                            Confirm quiet hours
+                        </Typography>
+
+                        <Box sx={styles.quietTimeRow}>
+                            <Box sx={styles.clickableTimeBox}>
+                                <Typography sx={styles.timeText(true)}>
+                                    {formatDisplay(silentStart)}
+                                </Typography>
+                                <Typography sx={{ ...styles.amPmText(true), fontSize: "0.75rem", color: "text.secondary" }}>
+                                    Start
+                                </Typography>
+                            </Box>
+
+                            <Typography sx={styles.quietTimeArrow}>→</Typography>
+
+                            <Box sx={styles.clickableTimeBox}>
+                                <Typography sx={styles.timeText(true)}>
+                                    {formatDisplay(silentEnd)}
+                                </Typography>
+                                <Typography sx={{ ...styles.amPmText(true), fontSize: "0.75rem", color: "text.secondary" }}>
+                                    End
+                                </Typography>
+                            </Box>
+                        </Box>
+
+                        <Box sx={styles.settingsButtonRow}>
+                            <Box
+                                component="button"
+                                onClick={() => setStep("end")}
+                                disabled={submitting}
+                                sx={styles.settingsCancelButton}
+                            >
+                                BACK
+                            </Box>
+                            <Box
+                                component="button"
+                                onClick={handleSubmit}
+                                disabled={submitting}
+                                sx={styles.settingsOkButton}
+                            >
+                                {submitting ? "SAVING..." : "OK"}
+                            </Box>
+                        </Box>
+
+                        {/*{success && (*/}
+                        {/*    <Typography sx={styles.settingsSuccessText}>*/}
+                        {/*        Notification settings saved.*/}
+                        {/*    </Typography>*/}
+                        {/*)}*/}
+                        {error && (
+                            <Typography sx={styles.settingsErrorText}>
+                                {error}
+                            </Typography>
+                        )}
+                    </>
+                )}
+                {success && (
+                    <Typography sx={styles.settingsSuccessText}>
+                        Notification settings saved.
+                    </Typography>
+                )}
+            </Box>
+        </LocalizationProvider>
     );
 }
 
@@ -283,7 +510,8 @@ export function PersonalPage() {
     }, [loadProfile]);
 
     return (
-        <Box sx={styles.pageContainer}>
+        <Box sx={styles.page}>
+            <Box sx={styles.pageContainer}>
 
             {profile && (
                 <Box sx={styles.headerCard}>
@@ -301,6 +529,22 @@ export function PersonalPage() {
                     </Box>
                 </Box>
             )}
+                {profile && (
+                    <Box sx={styles.headerCard}>
+                        <Box sx={styles.avatarCircle}>
+                            <PersonOutlineIcon sx={styles.avatarIcon} />
+                        </Box>
+                        <Box sx={styles.headerInfo}>
+                            <Typography sx={styles.headerName}>
+                                {profile.firstName} {profile.lastName}
+                            </Typography>
+                            <Typography sx={styles.headerEmail}>{profile.email}</Typography>
+                        </Box>
+                        <Box sx={styles.adminBadge}>
+                            <ShieldIcon sx={styles.adminBadgeIcon} />
+                        </Box>
+                    </Box>
+                )}
 
             {/* Tabs */}
             <Box sx={styles.tabsRow}>
@@ -314,6 +558,18 @@ export function PersonalPage() {
                     </Box>
                 ))}
             </Box>
+                {/* Tabs */}
+                <Box sx={styles.tabsRow}>
+                    {TABS.map(({ key, label }) => (
+                        <Box
+                            key={key}
+                            sx={styles.tab(activeTab === key)}
+                            onClick={() => setActiveTab(key)}
+                        >
+                            {label}
+                        </Box>
+                    ))}
+                </Box>
 
             {/* Content */}
             {loading && (
@@ -321,10 +577,16 @@ export function PersonalPage() {
                     <CircularProgress size={32} sx={styles.loadingSpinner}/>
                 </Box>
             )}
+                {/* Content */}
+                {loading && (
+                    <Box sx={styles.loadingContainer}>
+                        <CircularProgress size={32} sx={styles.loadingSpinner} />
+                    </Box>
+                )}
 
-            {!loading && error && (
-                <Typography sx={styles.errorText}>{error}</Typography>
-            )}
+                {!loading && error && (
+                    <Typography sx={styles.errorText}>{error}</Typography>
+                )}
 
             {!loading && !error && profile && settings && (
                 <>
@@ -341,6 +603,14 @@ export function PersonalPage() {
             >
                 <LogoutIcon sx={{ fontSize: 16 }} />
                 {isLoggingOut ? "Logging Out..." : "Logout"}
+            </Box>
+                {!loading && !error && profile && settings && (
+                    <>
+                        {activeTab === "profile"  && <ProfileTab profile={profile} settings={settings} />}
+                        {activeTab === "settings" && <SettingsTab settings={settings} />}
+                        {activeTab === "security" && <SecurityTab/>}
+                    </>
+                )}
             </Box>
         </Box>
     );

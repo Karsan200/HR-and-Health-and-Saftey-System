@@ -7,6 +7,7 @@ import uk.co.garagebridgend.backend.logic.DocumentService;
 import uk.co.garagebridgend.backend.models.exception.AuthenticatedAccountNotFoundException;
 import uk.co.garagebridgend.backend.models.request.SendOutDocumentRequest;
 import uk.co.garagebridgend.backend.models.response.DocumentResponse;
+import uk.co.garagebridgend.backend.models.response.PendingSignatureResponse;
 
 import java.util.List;
 
@@ -152,6 +153,37 @@ class DocumentControllerTest {
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
                 () -> documentController.sendOutDocument(request)
+        );
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+        assertEquals("Internal server error", exception.getReason());
+    }
+
+    /**
+     * Tests for the getPendingSignatures endpoint, covering both successful retrieval and internal server error scenarios.
+     */
+    @Test
+    void testGetPendingSignaturesSuccess() {
+        List<PendingSignatureResponse> mockResponse = List.of(
+                new PendingSignatureResponse(1L, "John Doe", 10L, "Fire Safety Policy", java.time.LocalDateTime.now())
+        );
+
+        when(documentService.getPendingSignatures()).thenReturn(mockResponse);
+
+        List<PendingSignatureResponse> result = documentController.getPendingSignatures();
+
+        assertEquals(1, result.size());
+        assertEquals("John Doe", result.get(0).getFullName());
+        assertEquals("Fire Safety Policy", result.get(0).getDocumentTitle());
+    }
+
+    @Test
+    void testGetPendingSignaturesInternalServerError() {
+        when(documentService.getPendingSignatures()).thenThrow(new RuntimeException());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> documentController.getPendingSignatures()
         );
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());

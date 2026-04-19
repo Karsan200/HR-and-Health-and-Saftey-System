@@ -7,11 +7,16 @@ import { IncompatibleScreen } from "./components/IncompatibleScreen";
 import { AuthProvider } from "./AuthContext";
 import { Navbar } from "./components/Navbar";
 import { Dashboard } from "./pages/Dashboard";
-import {CalendarPage} from "./pages/CalendarPage";
-import {PendingRequestsPage} from "./pages/PendingRequestsPage";
+import { CalendarPage } from "./pages/CalendarPage";
+import { PendingRequestsPage } from "./pages/PendingRequestsPage";
 import { PersonalPage } from "./pages/PersonalPage";
 import { EmployeeOverview } from "./pages/EmployeeOverview";
+import { ClockOverridesPage} from "./pages/ClockOverridesPage";
 import { SendOutDocumentsPage} from "./pages/SendOutDocumentsPage";
+import { NotificationPage } from "./pages/NotificationPage";
+import { ReviewSubmissionsPage} from "./pages/ReviewSubmissionsPage";
+import { RiskAssessmentHazardsPage } from "./pages/RiskAssessmentHazardsPage";
+import { HazardViewPage } from "./pages/HazardViewPage";
 
 function App() {
     const [screenSize, setScreenSize] = useState(window.innerWidth);
@@ -63,14 +68,17 @@ function AppContent() {
                     <Route path="/employee-overview" element={<></>} />
                     <Route path="/employee/overview" element={<EmployeeOverview />} />
                     <Route path="/health-and-safety" element={<></>} />
-                    <Route path="/notifications" element={<></>} />
+                    <Route path="/notifications" element={<NotificationPage/>} />
                     <Route path="/health-and-safety/send-out/safety-alert" element={<></>} />
-                    <Route path="calendar/requests" element={<PendingRequestsPage />} />
                     <Route path="/health-and-safety/send-out" element={<SendOutDocumentsPage />} />
+                    <Route path="calendar/requests" element={<PendingRequestsPage />} />
+                    <Route path="calendar/overrides" element={<ClockOverridesPage/>} />
+                    <Route path="/health-and-safety/review" element={<ReviewSubmissionsPage />} />
+                    <Route path="/health-and-safety/review/risk-assessment/:id" element={<RiskAssessmentHazardsPage />} />
+                    <Route path="/health-and-safety/review/hazard/:id" element={<HazardViewPage />} />
                 </Routes>
             </BrowserRouter>
         </>
     )
 }
-
 export default App

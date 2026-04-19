@@ -26,8 +26,8 @@ class RiskAssessmentControllerTest {
     @Test
     void testGetAllRiskAssessmentsSuccess() {
         List<RiskAssessmentResponse> mockResponse = List.of(
-                new RiskAssessmentResponse(1L, "Fire Safety", 3, LocalDateTime.now(), false),
-                new RiskAssessmentResponse(2L, "Chemical Handling", 5, LocalDateTime.now(), true)
+                new RiskAssessmentResponse(1L, "Fire Safety", 3, 2, LocalDateTime.now(), false, false),
+                new RiskAssessmentResponse(2L, "Chemical Handling", 5, 5, LocalDateTime.now(), true, true)
         );
 
         when(riskAssessmentService.getAllRiskAssessments()).thenReturn(mockResponse);

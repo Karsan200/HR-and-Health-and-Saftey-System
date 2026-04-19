@@ -1,0 +1,124 @@
+import type { AuthenticationService } from "./AuthenticationService";
+
+/**
+ * Represents a single pending document signature.
+ * Contains the account (person who hasn't signed) and the document details.
+ */
+export interface PendingSignatureItem {
+    accountId: number;
+    fullName: string;
+    documentId: number;
+    documentTitle: string;
+    sentDate: string;
+}
+
+// Fetches all pending document signatures.
+export async function getPendingSignatures(
+    authenticationService: AuthenticationService
+): Promise<PendingSignatureItem[]> {
+    const response = await authenticationService.fetch(
+        "/api/documents/admin/pending-signatures",
+        { method: "GET" }
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch pending signatures: ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Represents a single risk assessment item in the list of all risk assessments.
+ * Contains the id, title, hazard count, creation date and whether it has drafts.
+ */
+export interface RiskAssessmentItem {
+    riskAssessmentId: number;
+    title: string;
+    activeHazardCount: number;
+    created: string;
+    allActionsComplete: boolean;
+}
+
+export async function getRiskAssessments(
+    authenticationService: AuthenticationService
+): Promise<RiskAssessmentItem[]> {
+    const response = await authenticationService.fetch(
+        "/api/risk-assessment/all",
+        { method: "GET" }
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch risk assessments: ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Represents a single hazard item in the list of hazards for a specific risk assessment.
+ * Contains the id, title, creator, creation date, and status flags (draft/closed).
+ */
+export interface HazardItem {
+    hazardId: number;
+    title: string;
+    createdBy: string;
+    draft: boolean;
+    closed: boolean;
+    created: string;
+    ownedByCurrentUser: boolean;
+}
+
+export async function getHazardsForRiskAssessment(
+    authenticationService: AuthenticationService,
+    riskAssessmentId: number
+): Promise<HazardItem[]> {
+    const response = await authenticationService.fetch(
+        `/api/risk-assessment/${riskAssessmentId}/hazards`,
+        { method: "GET" }
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch hazards: ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Represents the detailed information of a single hazard report, used in the hazard view screen.
+ * Contains all questions and answers, status flags, creator info, creation date, and associated file URLs.
+ */
+
+export interface HazardReportItem {
+    hazardId: number;
+    title: string;
+    questionOne: string;
+    questionTwo: string;
+    questionThree: string;
+    questionFour: string;
+    questionFive: string;
+    questionSix: string | null;
+    isDraft: boolean;
+    isClosed: boolean;
+    closed: boolean;
+    createdBy: string;
+    created: string;
+    fileUrls: string[];
+}
+
+export async function getHazardById(
+    authenticationService: AuthenticationService,
+    hazardId: number
+): Promise<HazardReportItem> {
+    const response = await authenticationService.fetch(
+        `/api/risk-assessment/hazard/${hazardId}`,
+        { method: "GET" }
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch hazard: ${response.status}`);
+    }
+
+    return response.json();
+}

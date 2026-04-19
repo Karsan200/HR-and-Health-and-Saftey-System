@@ -76,6 +76,7 @@ class RiskAssessmentServiceTest {
         assertEquals(1, result.size());
         assertEquals("Fire Safety", result.get(0).getTitle());
         assertEquals(1, result.get(0).getHazardCount());
+        assertEquals(1, result.get(0).getActiveHazardCount());
         assertFalse(result.get(0).isHasDrafts());
     }
 
@@ -534,5 +535,44 @@ class RiskAssessmentServiceTest {
         );
 
         verify(hazardRepository, never()).save(any());
+    }
+
+    /**
+     * Test that the active hazard count in the risk assessment response correctly excludes draft hazards,
+     * while the total hazard count includes them. This ensures that the frontend can display both counts accurately.
+     */
+    @Test
+    void testGetAllRiskAssessmentsActiveHazardCountExcludesDrafts() {
+        AccountTable account = new AccountTable();
+        account.setAccountId(1L);
+
+        RiskAssessmentTable ra = new RiskAssessmentTable();
+        ra.setRiskAssessmentId(1L);
+        ra.setTitle("Manual Handling");
+        ra.setCreated(LocalDateTime.now());
+
+        HazardTable activeHazard = new HazardTable();
+        activeHazard.setDraft(false);
+        activeHazard.setAccount(account);
+
+        HazardTable draftHazard = new HazardTable();
+        draftHazard.setDraft(true);
+        draftHazard.setAccount(account);
+
+        RiskAssessmentHazardTable join1 = new RiskAssessmentHazardTable();
+        join1.setHazard(activeHazard);
+
+        RiskAssessmentHazardTable join2 = new RiskAssessmentHazardTable();
+        join2.setHazard(draftHazard);
+
+        when(authenticationService.getCurrentUser()).thenReturn(account);
+        when(riskAssessmentRepository.findAll()).thenReturn(List.of(ra));
+        when(riskAssessmentHazardRepository.findByRiskAssessment(ra)).thenReturn(List.of(join1, join2));
+
+        List<RiskAssessmentResponse> result = riskAssessmentService.getAllRiskAssessments();
+
+        assertEquals(1, result.size());
+        assertEquals(2, result.get(0).getHazardCount());      // includes draft
+        assertEquals(1, result.get(0).getActiveHazardCount()); // excludes draft
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * JPA repository for managing {@link AccountTable} entities.
@@ -22,6 +23,14 @@ public interface AccountRepository extends JpaRepository<AccountTable, Long> {
      * @return an Optional containing the found account, or empty if not found
      */
     Optional<AccountTable> findByUsername(String username);
+
+    /**
+     * Finds an account using its associated Bluetooth signature.
+     *
+     * @param bleSignature the Bluetooth signature to search for
+     * @return an Optional containing the found account, or empty if not found
+     */
+    Optional<AccountTable> findByBleSignature(UUID bleSignature);
 
     /**
      * Retrieves all accounts ordered by first name and last name.
@@ -47,4 +56,39 @@ public interface AccountRepository extends JpaRepository<AccountTable, Long> {
         ORDER BY a.firstName ASC, a.lastName ASC
     """)
     List<AccountTable> searchForEmployeeOverview(@Param("search") String search);
+
+    /**
+     * Finds an account by email ignoring case sensitivity.
+     *
+     * @param email the email to search for
+     * @return optional matching account
+     */
+    Optional<AccountTable> findByEmailIgnoreCase(String email);
+
+    /**
+     * Finds an account by username ignoring case sensitivity.
+     *
+     * @param username the username to search for
+     * @return optional matching account
+     */
+    Optional<AccountTable> findByUsernameIgnoreCase(String username);
+
+    /**
+     * Searches for accounts whose first name or last name contains the given
+     * query string (case-insensitive). Returns up to 10 results ordered
+     * alphabetically by last name then first name. Used by the admin clock-in
+     * page autocomplete to look up employees by name.
+     *
+     * @param query the partial name to search for
+     * @return a list of matching accounts, limited to 10 results
+     */
+    @Query("""
+        SELECT a FROM AccountTable a
+        WHERE LOWER(a.firstName) LIKE LOWER(CONCAT('%', :query, '%'))
+           OR LOWER(a.lastName)  LIKE LOWER(CONCAT('%', :query, '%'))
+           OR LOWER(CONCAT(a.firstName, ' ', a.lastName)) LIKE LOWER(CONCAT('%', :query, '%'))
+        ORDER BY a.lastName ASC, a.firstName ASC
+        LIMIT 10
+    """)
+    List<AccountTable> searchByName(@Param("query") String query);
 }

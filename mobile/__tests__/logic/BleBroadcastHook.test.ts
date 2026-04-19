@@ -1,4 +1,4 @@
-import { startAdvertising, setServices } from 'munim-bluetooth';
+import { startAdvertising } from 'munim-bluetooth';
 import { BleBroadcastHook, BleBroadcastTaskArgs } from '../../src/hook/BleBroadcastHook.ts';
 import { AppSettings } from '../../src/AppSettings.ts';
 
@@ -8,7 +8,6 @@ jest.mock('munim-bluetooth', () => ({
 }));
 
 const mockStartAdvertising = startAdvertising as jest.Mock;
-const mockSetServices = setServices as jest.Mock;
 
 describe('BleBroadcastHook', () => {
   beforeEach(() => {
@@ -38,7 +37,6 @@ describe('BleBroadcastHook', () => {
     it('should not call startAdvertising or setServices', async () => {
       await BleBroadcastHook(undefined);
       expect(mockStartAdvertising).not.toHaveBeenCalled();
-      expect(mockSetServices).not.toHaveBeenCalled();
     });
   });
 
@@ -52,35 +50,16 @@ describe('BleBroadcastHook', () => {
       expect(mockStartAdvertising).toHaveBeenCalledWith({
         serviceUUIDs: [AppSettings.BLE_SERVICE_UUID],
         advertisingData: {
-          shortenedLocalName: 'R.A.T Signal',
-          completeLocalName: 'R.A.T device-123',
+          manufacturerData: 'device123'
         },
       });
-    });
-
-    it('should call setServices with the correct arguments', async () => {
-      BleBroadcastHook(args);
-      await Promise.resolve();
-
-      expect(mockSetServices).toHaveBeenCalledWith([
-        {
-          uuid: AppSettings.BLE_SERVICE_UUID,
-          characteristics: [
-            {
-              uuid: AppSettings.BLE_CHARACTERISTIC_UUID,
-              properties: ['read', 'notify'],
-              value: 'device-123',
-            },
-          ],
-        },
-      ]);
     });
 
     it('should log the broadcastId being used', async () => {
       BleBroadcastHook(args);
       await Promise.resolve();
 
-      expect(console.log).toHaveBeenCalledWith('Broadcasting as:', 'R.A.T device-123');
+      expect(console.log).toHaveBeenCalledWith('Broadcasting as:', 'device123');
     });
   });
 });

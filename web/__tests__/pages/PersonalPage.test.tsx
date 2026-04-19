@@ -4,12 +4,17 @@ import { MemoryRouter } from "react-router-dom";
 
 import { PersonalPage } from "../../src/pages/PersonalPage";
 import { useAuth } from "../../src/AuthContext";
-import { fetchPersonalData } from "../../src/logic/PersonalService";
+import { fetchPersonalData, updateNotificationSettings } from "../../src/logic/PersonalService";
 import { changePassword } from "../../src/logic/PersonalSecurityService";
 
 
 jest.mock("../../src/logic/PersonalSecurityService", () => ({
     changePassword: jest.fn(),
+}));
+
+jest.mock("../../src/logic/PersonalService", () => ({
+    fetchPersonalData: jest.fn(),
+    updateNotificationSettings: jest.fn(),
 }));
 
 jest.mock("../../src/AuthContext");
@@ -18,6 +23,7 @@ jest.mock("../../src/logic/PersonalService");
 const mockUseAuth = useAuth as jest.Mock;
 const mockFetchPersonalData = fetchPersonalData as jest.Mock;
 const mockChangePassword = changePassword as jest.Mock;
+const mockUpdateNotificationSettings = updateNotificationSettings as jest.Mock;
 
 const mockAuthService = { getToken: jest.fn() };
 
@@ -50,6 +56,7 @@ beforeEach(() => {
         profile: mockProfile,
         settings: mockSettings,
     });
+    mockUpdateNotificationSettings.mockResolvedValue(undefined);
 });
 
 function renderPersonalPage() {
@@ -340,8 +347,180 @@ describe("PersonalPage", () => {
         });
     });
 
+    describe("settings tab", () => {
+
+        async function openSettingsTab() {
+            renderPersonalPage();
+
+            await waitFor(() =>
+                expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
+            );
+
+            await userEvent.click(screen.getByText("Settings"));
+        }
+
+        beforeEach(() => {
+            mockFetchPersonalData.mockResolvedValue({
+                profile: mockProfile,
+                settings: mockSettings,
+            });
+        });
+
+        // Initial render
+
+        it("renders the Notification Settings title", async () => {
+            await openSettingsTab();
+            expect(screen.getByText("Notification Settings")).toBeInTheDocument();
+        });
+
+        it("renders the NOTIFICATION QUIET TIME label", async () => {
+            await openSettingsTab();
+            expect(screen.getByText("NOTIFICATION QUIET TIME")).toBeInTheDocument();
+        });
+
+        it("renders the set start time step by default", async () => {
+            await openSettingsTab();
+            expect(screen.getByText("Set start time")).toBeInTheDocument();
+        });
+
+        it("renders the SET START TIME button on the first step", async () => {
+            await openSettingsTab();
+            expect(screen.getByText("SET START TIME")).toBeInTheDocument();
+        });
+
+        it("renders the CANCEL button on the first step", async () => {
+            await openSettingsTab();
+            expect(screen.getByText("CANCEL")).toBeInTheDocument();
+        });
+
+        // Step navigation
+
+        it("advances to the set end time step when SET START TIME is clicked", async () => {
+            await openSettingsTab();
+            await userEvent.click(screen.getByText("SET START TIME"));
+            expect(screen.getByText("Set end time")).toBeInTheDocument();
+        });
+
+        it("renders the SET END TIME button on the second step", async () => {
+            await openSettingsTab();
+            await userEvent.click(screen.getByText("SET START TIME"));
+            expect(screen.getByText("SET END TIME")).toBeInTheDocument();
+        });
+
+        it("renders the BACK button on the set end time step", async () => {
+            await openSettingsTab();
+            await userEvent.click(screen.getByText("SET START TIME"));
+            expect(screen.getByText("BACK")).toBeInTheDocument();
+        });
+
+        it("goes back to set start time step when BACK is clicked on the end time step", async () => {
+            await openSettingsTab();
+            await userEvent.click(screen.getByText("SET START TIME"));
+            await userEvent.click(screen.getByText("BACK"));
+            expect(screen.getByText("Set start time")).toBeInTheDocument();
+        });
+
+        it("advances to the confirm step when SET END TIME is clicked", async () => {
+            await openSettingsTab();
+            await userEvent.click(screen.getByText("SET START TIME"));
+            await userEvent.click(screen.getByText("SET END TIME"));
+            expect(screen.getByText("Confirm quiet hours")).toBeInTheDocument();
+        });
+
+        it("renders the OK button on the confirm step", async () => {
+            await openSettingsTab();
+            await userEvent.click(screen.getByText("SET START TIME"));
+            await userEvent.click(screen.getByText("SET END TIME"));
+            expect(screen.getByText("OK")).toBeInTheDocument();
+        });
+
+        it("renders the BACK button on the confirm step", async () => {
+            await openSettingsTab();
+            await userEvent.click(screen.getByText("SET START TIME"));
+            await userEvent.click(screen.getByText("SET END TIME"));
+            expect(screen.getByText("BACK")).toBeInTheDocument();
+        });
+
+        it("goes back to the set end time step when BACK is clicked on the confirm step", async () => {
+            await openSettingsTab();
+            await userEvent.click(screen.getByText("SET START TIME"));
+            await userEvent.click(screen.getByText("SET END TIME"));
+            await userEvent.click(screen.getByText("BACK"));
+            expect(screen.getByText("Set end time")).toBeInTheDocument();
+        });
+
+        it("resets to the start time step when CANCEL is clicked", async () => {
+            await openSettingsTab();
+            await userEvent.click(screen.getByText("SET START TIME"));
+            await userEvent.click(screen.getByText("BACK"));
+            await userEvent.click(screen.getByText("CANCEL"));
+            expect(screen.getByText("Set start time")).toBeInTheDocument();
+        });
+
+        // Submission
+
+        it("calls updateNotificationSettings with correct payload on valid submit", async () => {
+            const { updateNotificationSettings } = await import("../../src/logic/PersonalService");
+            const mockUpdate = updateNotificationSettings as jest.Mock;
+            mockUpdate.mockResolvedValueOnce(undefined);
+
+            await openSettingsTab();
+            await userEvent.click(screen.getByText("SET START TIME"));
+            await userEvent.click(screen.getByText("SET END TIME"));
+            await userEvent.click(screen.getByText("OK"));
+
+            await waitFor(() =>
+                expect(mockUpdate).toHaveBeenCalledWith(
+                    mockAuthService,
+                    expect.objectContaining({
+                        silentStart: expect.stringMatching(/^\d{2}:\d{2}:\d{2}$/),
+                        silentEnd: expect.stringMatching(/^\d{2}:\d{2}:\d{2}$/),
+                    })
+                )
+            );
+        });
+
+        it("shows success message after a successful save", async () => {
+            await openSettingsTab();
+            await userEvent.click(screen.getByText("SET START TIME"));
+            await userEvent.click(screen.getByText("SET END TIME"));
+            await userEvent.click(screen.getByText("OK"));
+
+            await waitFor(() =>
+                expect(screen.getByText("Notification settings saved.")).toBeInTheDocument()
+            );
+        });
+
+        it("returns to the start step after a successful save", async () => {
+            const { updateNotificationSettings } = await import("../../src/logic/PersonalService");
+            (updateNotificationSettings as jest.Mock).mockResolvedValueOnce(undefined);
+
+            await openSettingsTab();
+            await userEvent.click(screen.getByText("SET START TIME"));
+            await userEvent.click(screen.getByText("SET END TIME"));
+            await userEvent.click(screen.getByText("OK"));
+
+            await waitFor(() =>
+                expect(screen.getByText("Set start time")).toBeInTheDocument()
+            );
+        });
+
+        it("shows error message when the API call fails", async () => {
+            const { updateNotificationSettings } = await import("../../src/logic/PersonalService");
+            (updateNotificationSettings as jest.Mock).mockRejectedValueOnce(new Error("fail"));
+
+            await openSettingsTab();
+            await userEvent.click(screen.getByText("SET START TIME"));
+            await userEvent.click(screen.getByText("SET END TIME"));
+            await userEvent.click(screen.getByText("OK"));
+
+            expect(
+                await screen.findByText("Failed to save notification settings. Please try again.")
+            ).toBeInTheDocument();
+        });
+    });
+
     // Tab navigation
-    // TODO: THESE TESTS WILL NEED TO BE REMOVED/EDITED WHEN THE OTHER TABS ARE FILLED OUT!
 
     describe("tab navigation", () => {
         it("shows the settings placeholder when the Settings tab is clicked", async () => {
@@ -350,7 +529,7 @@ describe("PersonalPage", () => {
                 expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
             );
             await userEvent.click(screen.getByText("Settings"));
-            expect(screen.getByText("Settings TBC")).toBeInTheDocument();
+            expect(screen.getByText("Notification Settings")).toBeInTheDocument();
         });
 
         it("returns to the profile tab when Profile Information is clicked after switching", async () => {

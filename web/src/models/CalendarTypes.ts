@@ -6,11 +6,13 @@ import { toHex } from "../logic/LeaveTypeService";
 export type CalendarEventType = string;
 
 export interface CalendarEvent {
-    id: string;
-    date: string;
-    type: CalendarEventType;
-    label: string;
-    notes?: string;
+    id:         string;
+    date:       string;
+    type:       string;
+    label:      string;
+    notes?:     string;
+    startTime?: string;
+    endTime?:   string;
 }
 
 export interface EventVisualConfig {

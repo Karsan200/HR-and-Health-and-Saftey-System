@@ -93,25 +93,28 @@ export async function declineLeaveRequest(
  * human-readable date range label for display on the request card.
  *
  * Examples:
- *   same day   → "10 February 2026"
+ *   same day   → "10 February 2026, 08:00 – 17:00"
  *   date range → "01 March – 03 March 2026"
  */
 export function formatDateRange(startDate: string, endDate: string): string {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    const fmt = (d: Date) =>
+    const fmtDate = (d: Date) =>
         d.toLocaleDateString("en-GB", { day: "numeric", month: "long" });
 
-    const startStr = fmt(start);
-    const endStr = fmt(end);
-    const year = end.getFullYear();
+    const fmtTime = (d: Date) =>
+        d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
-    if (startStr === endStr) {
-        return `${startStr} ${year}`;
+    const startDateStr = fmtDate(start);
+    const endDateStr   = fmtDate(end);
+    const year         = end.getFullYear();
+
+    if (startDateStr === endDateStr) {
+        return `${startDateStr} ${year}, ${fmtTime(start)} – ${fmtTime(end)}`;
     }
 
-    return `${startStr} – ${endStr} ${year}`;
+    return `${startDateStr} – ${endDateStr} ${year}`;
 }
 
 /**
