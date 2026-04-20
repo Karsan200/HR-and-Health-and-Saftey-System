@@ -1,9 +1,9 @@
-import React, {useContext, useMemo, useState} from 'react';
+import React, {useContext, useEffect, useMemo, useState} from 'react';
 import {ScrollView, View, Text, Alert,} from 'react-native';
 
 import {TextInput, Checkbox, Button} from 'react-native-paper';
 import { ThemeContext } from '../theme/colourController.tsx';
-import { FontSize } from '../theme/theme';
+import {Fonts, FontSize} from '../theme/theme';
 import { JSX } from 'react/jsx-runtime';
 import { DatePickerInput} from "react-native-paper-dates";
 import ButtonActionBar from '../components/ButtonActionBar.tsx';
@@ -14,6 +14,17 @@ import AuthenticationService from "../logic/AuthenticationService.ts";
 
 type Props = {
     onDone?: () => void;
+    hazardId?: number;
+    initialData?: {
+        title: string;
+        questionOne: string;
+        questionTwo: string;
+        questionThree: string;
+        questionFour: string;
+        questionFive: string;
+        questionSix: string | null;
+        isCompleted: boolean;
+    };
 }
 
 //represents the photo being uploaded from a phones library
@@ -27,22 +38,24 @@ const UploadIcon = ({ color }: { color: string }) => (
     <Icon source="upload" size={20} color={color} />
 );
 
-export default function HazardForm({ onDone }: Props): JSX.Element {
+export default function HazardForm({ onDone, hazardId, initialData }: Props): JSX.Element {
 
     //form state for date and text fields and errors
     const { theme, accessibility } = useContext(ThemeContext);
     const styles = baseStyles(theme, accessibility); // themed styles
-    const [inputDate, setInputDate] = React.useState<Date | undefined>(undefined);
-    const [title, setTitle] = useState<string>('');
-    const [hazardDesc, setHazardDesc] = useState<string>('');
-    const [whoHarmed, setWhoHarmed] = useState<string>('');
-    const [controlMeasures, setControlMeasures] = useState<string>('');
-    const [furtherActions, setFurtherActions] = useState<string>('');
-    const [whoAction, setWhoAction] = useState<string>('');
-    const [actionCompleted, setActionCompleted] = useState<boolean>(false);
+    const [inputDate, setInputDate] = useState<Date | undefined>(
+        initialData?.questionSix ? new Date(initialData.questionSix) : undefined
+    );
+    const [title, setTitle] = useState<string>(initialData?.title ?? '');
+    const [hazardDesc, setHazardDesc] = useState<string>(initialData?.questionOne ?? '');
+    const [whoHarmed, setWhoHarmed] = useState<string>(initialData?.questionTwo ?? '');
+    const [controlMeasures, setControlMeasures] = useState<string>(initialData?.questionThree ?? '');
+    const [furtherActions, setFurtherActions] = useState<string>(initialData?.questionFour ?? '');
+    const [whoAction, setWhoAction] = useState<string>(initialData?.questionFive ?? '');
+    const [actionCompleted, setActionCompleted] = useState<boolean>(initialData?.isCompleted ?? false);
     const [photos, setPhotos] = useState<Photo[]>([]);
     const [isDraft, setIsDraft] = useState<boolean>(false);
-    const [errors, setErrors] = useState<Record<string, string>>({}); //validation error mapping
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     //used to calculate the earliest date that can be selected in the date picker which is the same day
     const minDate = useMemo(() => {
@@ -50,6 +63,26 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
         d.setHours(0, 0, 0, 0);
         return d;
     }, []);
+
+    useEffect(() => {
+        if (!hazardId) return; // New form, nothing to fetch
+
+        const fetchDraft = async () => {
+            const response = await AuthenticationService.fetch(`/api/risk-assessment/hazard/${hazardId}`);
+            const data = await response.json();
+            setTitle(data.title);
+            setHazardDesc(data.questionOne);
+            setWhoHarmed(data.questionTwo);
+            setControlMeasures(data.questionThree);
+            setFurtherActions(data.questionFour);
+            setWhoAction(data.questionFive);
+            setInputDate(data.questionSix ? new Date(data.questionSix) : undefined);
+            // Jackson serialises isClosed → "closed", not "isCompleted"
+            setActionCompleted(!!data.closed);
+        };
+
+        fetchDraft();
+    }, [hazardId]);
 
     //Submit function which builds payload and POSTs to backend. Deals with regular submissions and drafts
     async function handleSubmit(draft?: boolean) {
@@ -65,11 +98,18 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
             return {
                 name: nameParts.join('.') || `image-${index}`,
                 extension: extension,
-                content:p.base64
-        };
+                content: p.base64
+            };
         });
 
-        //buids payload for backend submission
+        // Serialise the date as a local date string (no timezone offset) so the
+        // backend receives exactly the date/time the user selected.
+        const formatDateForBackend = (date: Date): string => {
+            const pad = (n: number) => String(n).padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        };
+
+        //builds payload for backend submission
         const payload = {
             title,
             questionOne: hazardDesc,
@@ -77,18 +117,23 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
             questionThree: controlMeasures,
             questionFour: furtherActions,
             questionFive: whoAction,
-            questionSix: inputDate ? inputDate.toISOString().slice(0, 19) : null, // backend expects ISO format without milliseconds
-            isDraft: draft ?? isDraft,
+            questionSix: inputDate ? formatDateForBackend(inputDate) : null,
+            isDraft: isDraftFlag,
             isCompleted: actionCompleted,
             files,
         };
+
+        // URL and method chosen based on whether we're editing a draft
+        const url = hazardId ? `/api/hazard/report/${hazardId}` : '/api/hazard/report';
+        const method = hazardId ? 'PUT' : 'POST';
+
         console.log('Payload:', payload);
 
         try {
             //using authentication service to make the POST request
-            const response = await AuthenticationService.fetch('/api/hazard/report', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json',},
+            const response = await AuthenticationService.fetch(url, {
+                method,
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload),
             });
 
@@ -119,7 +164,7 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
                 ],
                 {cancelable: true}
             );
-        }catch (error) {
+        } catch (error) {
             //show error message if there is an unexpected error
             console.error('Error submitting hazard:', error);
             Alert.alert(
@@ -132,7 +177,7 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
     }
 
     // handler for save draft button which validates and calls the submit handle as draft
-    const handleSaveDraft= async () => {
+    const handleSaveDraft = async () => {
 
         if (!validate()) {
             // show a popup alert when validation fails
@@ -154,8 +199,8 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
             Alert.alert(
                 'Incomplete fields',
                 'Please complete all required fields before submitting.',
-                [{ text: 'OK' }],
-                { cancelable: true }
+                [{text: 'OK'}],
+                {cancelable: true}
             );
             return;
         }
@@ -164,7 +209,6 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
 
     //create styles with current theme
     const commonInputProps = getCommonInputProps(theme, accessibility);
-
 
     const MAX_TOTAL = 5; // maximum images per hazard form
 
@@ -185,19 +229,14 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
         launchImageLibrary(options, (response) => {
             console.log('ImagePicker response:', response);
 
-            if (response?.didCancel) {
-                console.log('User cancelled image picker');
-                return;
-            }
+            if (response?.didCancel) return;
             if (response?.errorCode) {
                 console.log('ImagePicker Error:', response.errorMessage ?? response.errorCode);
                 return;
             }
 
             const assets = response?.assets ?? [];
-            if (assets.length === 0) {
-                return;
-            }
+            if (assets.length === 0) return;
 
             // mapping the selected assets to the Photo format expected in state, using base64 for content and providing defaults for filename and type if missing
             const mapped = assets.map((a, i) => ({
@@ -252,7 +291,6 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
                 {/*Hazard Information Card*/}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Hazard Information</Text>
-
                     <Text style={styles.fieldLabel}>
                         Hazard Title
                         <Text style={styles.required}> *</Text>
@@ -265,7 +303,6 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
                         multiline={false}
                         style={[styles.input]}
                         error={!!errors.title}
-
                     />
                     {/*checking for errors*/}
                     {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
@@ -306,7 +343,6 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
                         {...commonInputProps}
                         style={[styles.input, styles.multiline]}
                         error={!!errors.whoHarmed}
-
                     />
                     {errors.whoHarmed && <Text style={styles.errorText}>{errors.whoHarmed}</Text>}
 
@@ -365,15 +401,19 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
                         When is the action needed by?
                         <Text style={styles.required}> *</Text>
                     </Text>
-
                     <DatePickerInput
-                            locale="en-GB"
-                            value={inputDate}
-                            onChange={(d) => { setInputDate(d); clearError('inputDate'); }}
-                            inputMode="start"
-                            validRange={{ startDate: minDate }}
-                            {...commonInputProps}
-                            contentStyle={{ fontSize: FontSize.xs14 }}
+                        locale="en-GB"
+                        value={inputDate}
+                        onChange={(d) => { setInputDate(d); clearError('inputDate'); }}
+                        inputMode="start"
+                        validRange={{ startDate: minDate }}
+                        {...commonInputProps}
+                        contentStyle={{
+                            fontSize: FontSize.xs14 * (accessibility.largeText ? 1.3 : 1),
+                            fontFamily: accessibility.dyslexicFont
+                                ? Fonts.dyslexic.regular
+                                : Fonts.poppins.regular,
+                        }}
                     />
                     {errors.inputDate && <Text style={styles.errorText}>{errors.inputDate}</Text>}
 
@@ -406,15 +446,14 @@ export default function HazardForm({ onDone }: Props): JSX.Element {
                         />
                         <Text style={styles.checkboxLabel}>Action completed</Text>
                     </View>
-
                 </View>
 
                 <View style={styles.bottomSpacer} />
-        </ScrollView>
+            </ScrollView>
             <ButtonActionBar
                 onSaveDraft={handleSaveDraft}
                 onSubmit={handleSubmitPress}
-                />
+            />
         </View>
     );
 }

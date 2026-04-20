@@ -2,14 +2,12 @@ package uk.co.garagebridgend.backend.models.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Response model for yesterday's clock-in activity and running stats.
  */
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class ClockInStatusResponse {
 
     /**
@@ -46,4 +44,7 @@ public class ClockInStatusResponse {
      * Total number of days worked in the current month.
      */
     private int daysWorked;
+
+    /** Today's earliest clock-in time formatted as HH:mm, or null if not yet clocked in. */
+    private String todayClockIn;
 }

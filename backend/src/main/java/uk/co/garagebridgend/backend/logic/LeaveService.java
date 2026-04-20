@@ -102,7 +102,12 @@ public class LeaveService {
             String leaveType = leave.getLeaveType().getName();
             String notes = leave.getNotes();
 
-            // Expand each leave record into one item per calendar day it covers
+            // Single-day booking — surface the specific start/end times
+            boolean isSingleDay = leave.getStartDate().toLocalDate()
+                    .equals(leave.getEndDate().toLocalDate());
+            LocalTime startTime = isSingleDay ? leave.getStartDate().toLocalTime() : null;
+            LocalTime endTime   = isSingleDay ? leave.getEndDate().toLocalTime()   : null;
+
             LocalDate current = leave.getStartDate().toLocalDate();
             LocalDate end = leave.getEndDate().toLocalDate();
 
@@ -111,7 +116,9 @@ public class LeaveService {
                 if (current.getYear() == year
                         && current.getMonthValue() == month
                         && !isWeekend(current)) {
-                    items.add(new LeaveCalendarAdminResponse(current, employeeName, leaveType, notes));
+                    items.add(new LeaveCalendarAdminResponse(
+                            current, employeeName, leaveType, notes, startTime, endTime
+                    ));
                 }
                 current = current.plusDays(1);
             }

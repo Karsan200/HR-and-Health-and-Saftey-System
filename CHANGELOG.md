@@ -1,3 +1,28 @@
+## [V0.4.0] - 2026-04-20
+
+### Added
+- Implemented logout for the desktop admin panel and mobile app, which invalidates the user's refresh token and clears the authentication cookie
+- Improved MFA setup flow, it now stores the secret key in a secure cookie for 10 minutes in case the user needs to refresh the page during setup
+- Ability to view clock ins and clock outs for employees in the desktop admin panel, with filtering options
+- Functionality to override/add clock ins and clock outs for employees in the desktop admin panel, which updates the attendance records accordingly
+- Document distribution system on the desktop admin panel, allowing admins to upload documents and assign them to specific employees or the whole company, with support for policies, SOPs, handbooks and payslips
+- Functionality to add employees on the desktop admin panel
+- Settings to set silent hours for notifications for admins on the desktop admin panel
+- Notification page on the desktop admin panel to demonstrate recent activity such as leave requests
+- Functionality to view and manage risk assessment and hazard report on the desktop admin panel
+- Ability to review signatures for documents sent out on the desktop admin panel
+- BLE advertisement on the mobile app to allow the app to broadcast a BLE advertisement with a specific UUID for the user so it is detectable by the Raspberry Pi Pico firmware
+- Full implementation of the BLE firmware for the Raspberry Pi Pico to detect BLE advertisements and record and upload data to the backend
+- Backend implementation for the BLE firmware, including API endpoints to receive data from the firmware and store it in the database
+- Backend implementation for a background task that runs through clock in events and uses it to update or create new attendance records for employees
+- Banner to clock in page on the mobile app which features the user's earliest clock in event for that day
+- V0.4.0 flyway database migration (V6) to account for changes in this version
+
+### Fixed
+- Issue where themes were not being applied correctly in the backend if less than 3 custom theme colours were selected in the mobile app
+- Issue where specific leave times did not show for leave details on the desktop calendar
+- Various QoL improvements to the mobile app
+
 ## [V0.3.1] - 2026-04-13
 
 ### Added

@@ -13,6 +13,21 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
+jest.mock('react-native-background-actions', () => ({
+  start: jest.fn(),
+  isRunning: jest.fn().mockResolvedValue(true),
+  stop: jest.fn(),
+}));
+
+jest.mock('react-native-device-info', () => ({
+  isEmulator: jest.fn().mockResolvedValue(false),
+}));
+
+jest.mock('munim-bluetooth', () => ({
+  startAdvertising: jest.fn(),
+  setServices: jest.fn(),
+}));
+
 jest.mock('../src/theme/paperTheme', () => ({
   paperTheme: () => ({}),
 }));
@@ -89,6 +104,28 @@ jest.mock('../src/screens/PersonalScreen', () => {
           View,
           null,
           require('react').createElement(Text, null, 'Personal Screen')
+      );
+});
+
+jest.mock('../src/screens/HazardList', () => {
+  const { View, Text } = require('react-native');
+
+  return () =>
+      require('react').createElement(
+          View,
+          null,
+          require('react').createElement(Text, null, 'Hazard List Screen')
+      );
+});
+
+jest.mock('../src/screens/HazardView', () => {
+  const { View, Text } = require('react-native');
+
+  return () =>
+      require('react').createElement(
+          View,
+          null,
+          require('react').createElement(Text, null, 'Hazard View Screen')
       );
 });
 

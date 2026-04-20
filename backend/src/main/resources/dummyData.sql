@@ -1,4 +1,7 @@
 
+INSERT INTO iot_device_table (created, last_activity, device_id, access_token)
+VALUE (CURRENT_TIMESTAMP, NULL, '9b4cfe01-3835-11f1-b008-18c04d1acf19', '$2a$10$4t/QTRfV5jAHO2KQOOaph.2OXDtK19qh4NE1mB0n/f2dQFo1SQELi');
+
 INSERT INTO account_table (
     account_id,
     first_name,
@@ -13,11 +16,12 @@ INSERT INTO account_table (
     postal_code,
     two_factor_secret,
     mobile_pin,
+    ble_signature,
     created
 ) VALUES
       (
           1,
-       'Maggie',
+          'Maggie',
           'May',
           'MMay',
           'MMay@test.com',
@@ -29,11 +33,12 @@ INSERT INTO account_table (
           'CF31 1AA',
           '532MDCTNSUJLFXJ2TJTLRSSJKQCR5LFD',
           NULL,
+          UUID(),
           '2025-02-14 09:12:00'
       ),
       (
           2,
-       'Craig',
+          'Craig',
           'Sheppard',
           'CSheppard',
           'CSheppard@test.com',
@@ -45,11 +50,12 @@ INSERT INTO account_table (
           'CF32 9RQ',
           NULL,
           NULL,
+          UUID(),
           '2020-03-02 10:45:00'
       ),
       (
           3,
-       'Mark',
+          'Mark',
           'Hughes',
           'MHughes',
           'mark.hughes@test.com',
@@ -61,11 +67,12 @@ INSERT INTO account_table (
           'CF31 2AD',
           NULL,
           NULL,
+          UUID(),
           '2025-05-29 11:03:00'
       ),
       (
           4,
-       'Emily',
+          'Emily',
           'Jones',
           'EJones',
           'emily.jones@test.com',
@@ -77,11 +84,12 @@ INSERT INTO account_table (
           'CF32 9AF',
           NULL,
           NULL,
+          UUID(),
           '2025-07-12 08:51:00'
       ),
       (
           5,
-       'Daniel',
+          'Daniel',
           'Roberts',
           'DRoberts',
           'daniel.roberts@test.com',
@@ -93,11 +101,12 @@ INSERT INTO account_table (
           'CF31 4JD',
           NULL,
           NULL,
+          UUID(),
           '2025-08-20 16:17:00'
       ),
       (
           6,
-       'Laura',
+          'Laura',
           'Williams',
           'LWilliams',
           'laura.williams@test.com',
@@ -109,11 +118,12 @@ INSERT INTO account_table (
           'CF31 5HG',
           NULL,
           NULL,
+          UUID(),
           '2025-09-15 13:05:00'
       ),
       (
           7,
-       'Olivia',
+          'Olivia',
           'Davies',
           'ODavies',
           'olivia.davies@test.com',
@@ -125,11 +135,12 @@ INSERT INTO account_table (
           'CF31 2TR',
           NULL,
           NULL,
+          UUID(),
           '2025-12-06 12:11:00'
       ),
       (
           8,
-       'Ryan',
+          'Ryan',
           'Price',
           'RPrice',
           'ryan.price@test.com',
@@ -141,6 +152,7 @@ INSERT INTO account_table (
           'CF31 1PL',
           NULL,
           NULL,
+          UUID(),
           '2026-01-11 09:34:00'
       );
 
@@ -155,14 +167,21 @@ INSERT INTO files_table (
       ('d1b2c3d4-e5f6-7890-dcba-ef1234567890', 1, 1,
        'safety_policy', 'pdf', '2025-02-14 10:00:00'),
 
-      ('3cc58063-df14-4e45-bce0-15f30f5d08ff', 1, 2,
-       'driving_licence_mmay', 'pdf', '2026-01-15 10:00:00'),
-
       ('b1c2d3e4-f5a6-7890-bcde-123456abcdef', 1, 1,
        'employee_handbook', 'pdf', '2026-03-24 10:00:00'),
 
       ('c1b2c3d4-e5f6-7890-dcba-ef1234567891', 1, 1,
        'sop_fire_safety', 'pdf', '2025-02-14 10:10:00'),
+
+      ('3cc58063-df14-4e45-bce0-15f30f5d08ff', 1, 2,
+       'driving_licence_mmay', 'pdf', '2026-01-15 10:00:00'),
+
+      ('eb683333-a195-4a93-ba59-6134846e6a17', 2, 2,
+       'oil_spill_photo_1', 'jpg', CURRENT_TIMESTAMP),
+
+
+      ('177da04a-35f2-4bd5-b6f4-92a0756a71bc', 2, 2,
+       'oil_spill_photo_3', 'jpg', CURRENT_TIMESTAMP),
 
       (UUID(), 1, 1,
        'sop_equipment_procedures', 'pdf', '2025-02-14 10:15:00'),
@@ -356,7 +375,8 @@ INSERT INTO hazard_table (
        'Hose removed from service',
        'Replace damaged hose and inspect others',
        'Maintenance Technician',
-       '2026-04-02 11:30:00', FALSE, 4, NULL, CURRENT_TIMESTAMP),
+       '2026-04-02 11:30:00',
+       FALSE, 4, NULL, CURRENT_TIMESTAMP),
 
       (4, 'Loose Wheel Nuts',
        'Wheel nuts not torqued correctly after service',
@@ -403,7 +423,7 @@ INSERT INTO hazard_table (
        'Clean area and repair leak',
        'Workshop Technician',
        '2026-04-04 08:00:00',
-       FALSE, 2, '2026-04-04 09:00:00', CURRENT_TIMESTAMP),
+       TRUE, 2, '2026-04-04 09:00:00', CURRENT_TIMESTAMP),
 
       (4, 'Battery Acid Leak',
        'Vehicle battery leaking acid',
@@ -520,7 +540,7 @@ INSERT INTO hazard_table (
        'IT inspection required',
        'IT Support',
        '2026-04-08 09:00:00',
-       TRUE, 1, NULL, CURRENT_TIMESTAMP),
+       FALSE, 1, NULL, CURRENT_TIMESTAMP),
 
       (5, 'Oil Filter Disposal Overflow',
        'Waste oil filter bin overflowing',
@@ -537,7 +557,8 @@ INSERT INTO hazard_table (
        'Vehicle secured',
        'Replace windshield safely',
        'Technician',
-       '2026-04-08 10:30:00', FALSE, 3, NULL, CURRENT_TIMESTAMP),
+       '2026-04-08 10:30:00',
+       FALSE, 3, NULL, CURRENT_TIMESTAMP),
 
       (1, 'Glove Shortage',
        'Protective gloves running low',
@@ -600,7 +621,7 @@ INSERT INTO hazard_table (
        'Repair door mechanism',
        'Facilities Manager',
        '2026-04-10 11:00:00',
-       FALSE, 3, NULL, CURRENT_TIMESTAMP);
+       TRUE, 3, NULL, CURRENT_TIMESTAMP);
 
 INSERT INTO signature_table (
     signature_id,
@@ -678,38 +699,40 @@ INSERT INTO signature_table (
        '2025-10-30 18:20:00');
 
 INSERT INTO risk_assessment_table (
-   risk_assessment_id,
-   file_id,
-   title,
-   created
+    risk_assessment_id,
+    file_id,
+    title,
+    created
 ) VALUES
-    (1,
-     (SELECT file_id FROM files_table WHERE name = 'safety_policy'),
-     'Risk Assessment for Safety Policy',
-     '2025-02-14 10:45:00'),
+      (1,
+       (SELECT file_id FROM files_table WHERE name = 'safety_policy'),
+       'Safety Policy',
+       '2025-02-14 10:45:00'),
 
-    (2,
-     (SELECT file_id FROM files_table WHERE name = 'fire_safety'),
-     'Risk Assessment for Fire Safety',
-     '2025-02-14 10:50:00'),
+      (2,
+       (SELECT file_id FROM files_table WHERE name = 'fire_safety'),
+       'Fire Safety',
+       '2025-02-14 10:50:00'),
 
-    (3,
-     (SELECT file_id FROM files_table WHERE name = 'training_manual'),
-     'Risk Assessment for Training Manual', '2025-03-02 11:30:00'),
+      (3,
+       (SELECT file_id FROM files_table WHERE name = 'training_manual'),
+       'Training Manual',
+       '2025-03-02 11:30:00'),
 
-    (4,
-     (SELECT file_id FROM files_table WHERE name = 'hr_guidelines'),
-     'Risk Assessment for HR Guidelines', '2025-04-18 15:30:00'),
+      (4,
+       (SELECT file_id FROM files_table WHERE name = 'hr_guidelines'),
+       'HR Guidelines',
+       '2025-04-18 15:30:00'),
 
-    (5,
-     (SELECT file_id FROM files_table WHERE name = 'hazard_report_template'),
-     'Risk Assessment for Hazard Report Template',
-     '2025-05-29 12:30:00'),
+      (5,
+       (SELECT file_id FROM files_table WHERE name = 'hazard_report_template'),
+       'Hazard Reporting',
+       '2025-05-29 12:30:00'),
 
-    (6,
-     (SELECT file_id FROM files_table WHERE name = 'equipment_safety'),
-     'Risk Assessment for Equipment Safety',
-     '2025-07-12 09:30:00');
+      (6,
+       (SELECT file_id FROM files_table WHERE name = 'equipment_safety'),
+       'Workshop Equipment Safety',
+       '2025-07-12 09:30:00');
 
 
 INSERT INTO risk_assessment_hazard_table (
@@ -717,42 +740,42 @@ INSERT INTO risk_assessment_hazard_table (
     hazard_id,
     created
 ) VALUES
-      (1, 13, CURRENT_TIMESTAMP),
-      (1, 18, CURRENT_TIMESTAMP),
-      (1, 19, CURRENT_TIMESTAMP),
-      (1, 28, CURRENT_TIMESTAMP),
+      (1, 3, CURRENT_TIMESTAMP),
+      (1, 5, CURRENT_TIMESTAMP),
+      (1, 9, CURRENT_TIMESTAMP),
+      (1, 16, CURRENT_TIMESTAMP),
+      (1, 24, CURRENT_TIMESTAMP),
 
-      (2, 7, CURRENT_TIMESTAMP),
-      (2, 21, CURRENT_TIMESTAMP),
-      (2, 31, CURRENT_TIMESTAMP),
+      (2, 1, CURRENT_TIMESTAMP),
+      (2, 4, CURRENT_TIMESTAMP),
+      (2, 6, CURRENT_TIMESTAMP),
+      (2, 10, CURRENT_TIMESTAMP),
+      (2, 14, CURRENT_TIMESTAMP),
 
-      (3, 1, CURRENT_TIMESTAMP),
-      (3, 2, CURRENT_TIMESTAMP),
-      (3, 5, CURRENT_TIMESTAMP),
-      (3, 15, CURRENT_TIMESTAMP),
-      (3, 17, CURRENT_TIMESTAMP),
-      (3, 20, CURRENT_TIMESTAMP),
+      (3, 22, CURRENT_TIMESTAMP),
+      (3, 25, CURRENT_TIMESTAMP),
 
-      (4, 22, CURRENT_TIMESTAMP),
-      (4, 25, CURRENT_TIMESTAMP),
-      (4, 27, CURRENT_TIMESTAMP),
+      (4, 2, CURRENT_TIMESTAMP),
+      (4, 7, CURRENT_TIMESTAMP),
+      (4, 13, CURRENT_TIMESTAMP),
+      (4, 18, CURRENT_TIMESTAMP),
+      (4, 28, CURRENT_TIMESTAMP),
 
-      (5, 3, CURRENT_TIMESTAMP),
       (5, 8, CURRENT_TIMESTAMP),
       (5, 11, CURRENT_TIMESTAMP),
-      (5, 24, CURRENT_TIMESTAMP),
+      (5, 17, CURRENT_TIMESTAMP),
+      (5, 20, CURRENT_TIMESTAMP),
       (5, 30, CURRENT_TIMESTAMP),
 
-      (6, 4, CURRENT_TIMESTAMP),
-      (6, 6, CURRENT_TIMESTAMP),
-      (6, 9, CURRENT_TIMESTAMP),
-      (6, 10, CURRENT_TIMESTAMP),
       (6, 12, CURRENT_TIMESTAMP),
-      (6, 14, CURRENT_TIMESTAMP),
-      (6, 16, CURRENT_TIMESTAMP),
+      (6, 15, CURRENT_TIMESTAMP),
+      (6, 19, CURRENT_TIMESTAMP),
+      (6, 21, CURRENT_TIMESTAMP),
       (6, 23, CURRENT_TIMESTAMP),
       (6, 26, CURRENT_TIMESTAMP),
-      (6, 29, CURRENT_TIMESTAMP);
+      (6, 27, CURRENT_TIMESTAMP),
+      (6, 29, CURRENT_TIMESTAMP),
+      (6, 31, CURRENT_TIMESTAMP);
 
 INSERT INTO hazard_files_table (
     file_id,
@@ -762,6 +785,10 @@ INSERT INTO hazard_files_table (
       ((SELECT file_id FROM files_table WHERE name = 'oil_spill_lift_photo'),
        (SELECT hazard_id FROM hazard_table WHERE title = 'Oil Spill Near Lift'),
        CURRENT_TIMESTAMP),
+
+      ('eb683333-a195-4a93-ba59-6134846e6a17', 3, CURRENT_TIMESTAMP),
+      ('3cc58063-df14-4e45-bce0-15f30f5d08ff', 3, CURRENT_TIMESTAMP),
+      ('177da04a-35f2-4bd5-b6f4-92a0756a71bc', 3, CURRENT_TIMESTAMP),
 
       ((SELECT file_id FROM files_table WHERE name = 'damaged_air_hose_photo'),
        (SELECT hazard_id FROM hazard_table WHERE title = 'Damaged Air Hose'),
@@ -877,36 +904,36 @@ INSERT INTO leave_table (
     created
 ) VALUES
       (2, 1,
-      '2026-06-01 00:00:00',
-      '2026-06-07 00:00:00',
-      TRUE,
-      'Family holiday booked earlier this year.',
-      'Approved by manager.',
-      CURRENT_TIMESTAMP),
+       '2026-06-01 00:00:00',
+       '2026-06-07 00:00:00',
+       TRUE,
+       'Family holiday booked earlier this year.',
+       'Approved by manager.',
+       CURRENT_TIMESTAMP),
 
       (3,2,
-      '2026-04-12 00:00:00',
-      '2026-04-14 00:00:00',
-      TRUE,
-      'Flu symptoms and doctor advised rest.',
-      'Get well soon.',
-      CURRENT_TIMESTAMP),
+       '2026-04-12 00:00:00',
+       '2026-04-14 00:00:00',
+       TRUE,
+       'Flu symptoms and doctor advised rest.',
+       'Get well soon.',
+       CURRENT_TIMESTAMP),
 
       (4,1,
-      '2026-07-20 00:00:00',
-      '2026-07-25 00:00:00',
-      FALSE,
-      'Trip abroad planned.',
-      'Rejected due to staffing shortage that week.',
-      CURRENT_TIMESTAMP),
+       '2026-07-20 00:00:00',
+       '2026-07-25 00:00:00',
+       FALSE,
+       'Trip abroad planned.',
+       'Rejected due to staffing shortage that week.',
+       CURRENT_TIMESTAMP),
 
       (5,3,
-      '2026-05-10 00:00:00',
-      '2026-05-11 00:00:00',
-      TRUE,
-      'Family emergency.',
-      'Approved immediately.',
-      CURRENT_TIMESTAMP),
+       '2026-05-10 00:00:00',
+       '2026-05-11 00:00:00',
+       TRUE,
+       'Family emergency.',
+       'Approved immediately.',
+       CURRENT_TIMESTAMP),
 
       (1,3,
        '2026-05-10 00:00:00',
@@ -917,12 +944,12 @@ INSERT INTO leave_table (
        CURRENT_TIMESTAMP),
 
       (6,4,
-      '2026-08-01 00:00:00',
-      '2026-08-10 00:00:00',
-      FALSE,
-      'Personal time off requested.',
-      NULL,
-      CURRENT_TIMESTAMP);
+       '2026-08-01 00:00:00',
+       '2026-08-10 00:00:00',
+       FALSE,
+       'Personal time off requested.',
+       'Pending review.',
+       CURRENT_TIMESTAMP);
 
 INSERT INTO clock_in_table (
     clock_id,
@@ -943,21 +970,6 @@ INSERT INTO clock_in_table (
       (UUID(), 3, '08:00:00', '16:55:00', '2026-04-02 08:00:00'),
       (UUID(), 4, '09:05:00', '17:40:00', '2026-04-02 09:05:00');
 
-INSERT INTO clock_in_event_table (
-    account_id,
-    created
-) VALUES
-      (1, '2026-04-01 08:00:00'),
-      (2, '2026-04-01 08:15:00'),
-      (3, '2026-04-01 08:05:00'),
-      (4, '2026-04-01 09:00:00'),
-      (5, '2026-04-01 08:20:00'),
-      (6, '2026-04-01 08:10:00'),
-
-      (1, '2026-04-02 08:02:00'),
-      (2, '2026-04-02 08:18:00'),
-      (3, '2026-04-02 08:00:00'),
-      (4, '2026-04-02 09:05:00');
 
 INSERT INTO admin_notifications_table (
     account_id,
@@ -1038,38 +1050,150 @@ INSERT INTO qualifications_table (
     details,
     created
 ) VALUES
-        (1,
-        (SELECT file_id FROM files_table WHERE name = 'safety_policy'),
-         'Workshop Safety Training',
-         'Internal safety training covering workshop hazards and procedures.',
-         '2024-06-12 10:05:00'),
+      (1,
+       (SELECT file_id FROM files_table WHERE name = 'safety_policy'),
+       'Workshop Safety Training',
+       'Internal safety training covering workshop hazards and procedures.',
+       '2024-06-12 10:05:00'),
 
       (5,
-      (SELECT file_id FROM files_table WHERE name = 'nvq_level3_motor_vehicle_droberts'),
-      'NVQ Level 3 Motor Vehicle Maintenance',
-      'Level 3 qualification in diagnosing and repairing light vehicles.',
-      '2024-06-12 10:05:00'),
+       (SELECT file_id FROM files_table WHERE name = 'nvq_level3_motor_vehicle_droberts'),
+       'NVQ Level 3 Motor Vehicle Maintenance',
+       'Level 3 qualification in diagnosing and repairing light vehicles.',
+       '2024-06-12 10:05:00'),
 
       (5,
-      (SELECT file_id FROM files_table WHERE name = 'mot_tester_certificate_droberts'),
-      'DVSA MOT Tester Certification',
-      'Authorised MOT tester certification issued by DVSA.',
-      '2023-11-10 16:10:00'),
+       (SELECT file_id FROM files_table WHERE name = 'mot_tester_certificate_droberts'),
+       'DVSA MOT Tester Certification',
+       'Authorised MOT tester certification issued by DVSA.',
+       '2023-11-10 16:10:00'),
 
       (6,
-      (SELECT file_id FROM files_table WHERE name = 'health_safety_certificate_lwilliams'),
-      'Health and Safety in the Workplace',
-      'Certified course covering workplace hazard awareness and risk management.',
-      '2024-09-18 09:45:00'),
+       (SELECT file_id FROM files_table WHERE name = 'health_safety_certificate_lwilliams'),
+       'Health and Safety in the Workplace',
+       'Certified course covering workplace hazard awareness and risk management.',
+       '2024-09-18 09:45:00'),
 
       (7,
-      (SELECT file_id FROM files_table WHERE name = 'first_aid_at_work_odavies'),
-      'First Aid at Work',
-      'Three day emergency first aid training including CPR and AED use.',
-      '2025-01-20 14:15:00'),
+       (SELECT file_id FROM files_table WHERE name = 'first_aid_at_work_odavies'),
+       'First Aid at Work',
+       'Three day emergency first aid training including CPR and AED use.',
+       '2025-01-20 14:15:00'),
 
       (8,
-      (SELECT file_id FROM files_table WHERE name = 'hybrid_vehicle_training_rprice'),
-      'Hybrid and Electric Vehicle Awareness',
-      'Training course on safe servicing of hybrid and electric vehicles.',
-      '2025-03-05 11:30:00');
+       (SELECT file_id FROM files_table WHERE name = 'hybrid_vehicle_training_rprice'),
+       'Hybrid and Electric Vehicle Awareness',
+       'Training course on safe servicing of hybrid and electric vehicles.',
+       '2025-03-05 11:30:00');
+
+INSERT INTO document_recipient_table (
+    document_id,
+    account_id,
+    created
+) VALUES
+-- Company Safety Policy v2.1 everyone (accounts 1–8)
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 1, '2025-02-14 10:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 2, '2025-02-14 10:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 3, '2025-02-14 10:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 4, '2025-02-14 10:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 5, '2025-02-14 10:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 6, '2025-02-14 10:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 7, '2025-02-14 10:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Company Safety Policy v2.1'), 8, '2025-02-14 10:00:00'),
+
+-- Employee Handbook everyone
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 1, '2026-03-24 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 2, '2026-03-24 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 3, '2026-03-24 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 4, '2026-03-24 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 5, '2026-03-24 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 6, '2026-03-24 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 7, '2026-03-24 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Handbook'), 8, '2026-03-24 10:05:00'),
+
+-- SOP: Fire Safety Procedures everyone
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 1, '2025-02-14 10:10:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 2, '2025-02-14 10:10:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 3, '2025-02-14 10:10:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 4, '2025-02-14 10:10:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 5, '2025-02-14 10:10:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 6, '2025-02-14 10:10:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 7, '2025-02-14 10:10:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Fire Safety Procedures v5'), 8, '2025-02-14 10:10:00'),
+
+-- SOP: Equipment Handling technicians only (3, 4, 5, 6)
+((SELECT document_id FROM document_table WHERE title = 'SOP: Equipment Handling Instructions'), 3, '2025-02-14 10:15:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Equipment Handling Instructions'), 4, '2025-02-14 10:15:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Equipment Handling Instructions'), 5, '2025-02-14 10:15:00'),
+((SELECT document_id FROM document_table WHERE title = 'SOP: Equipment Handling Instructions'), 6, '2025-02-14 10:15:00'),
+
+-- Fire Safety Guidelines everyone
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 1, '2025-02-14 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 2, '2025-02-14 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 3, '2025-02-14 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 4, '2025-02-14 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 5, '2025-02-14 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 6, '2025-02-14 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 7, '2025-02-14 10:05:00'),
+((SELECT document_id FROM document_table WHERE title = 'Fire Safety Guidelines'), 8, '2025-02-14 10:05:00'),
+
+-- Employee Training Manual all except admins (3–8)
+((SELECT document_id FROM document_table WHERE title = 'Employee Training Manual v3.0'), 3, '2025-03-02 11:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Training Manual v3.0'), 4, '2025-03-02 11:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Training Manual v3.0'), 5, '2025-03-02 11:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Training Manual v3.0'), 6, '2025-03-02 11:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Training Manual v3.0'), 7, '2025-03-02 11:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Employee Training Manual v3.0'), 8, '2025-03-02 11:00:00'),
+
+-- HR Guidelines managers only (1, 2, 3, 4)
+((SELECT document_id FROM document_table WHERE title = 'HR Guidelines'), 1, '2025-04-18 15:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'HR Guidelines'), 2, '2025-04-18 15:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'HR Guidelines'), 3, '2025-04-18 15:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'HR Guidelines'), 4, '2025-04-18 15:00:00'),
+
+-- Hazard Report Template everyone
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 1, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 2, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 3, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 4, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 5, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 6, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 7, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+((SELECT document_id FROM document_table WHERE title = 'Hazard Report Template v1'), 8, CURRENT_TIMESTAMP - INTERVAL 1 MONTH),
+
+-- Equipment Safety Procedures workshop staff (3, 4, 5, 6, 8)
+((SELECT document_id FROM document_table WHERE title = 'Equipment Safety Procedures'), 3, '2025-07-12 09:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Equipment Safety Procedures'), 4, '2025-07-12 09:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Equipment Safety Procedures'), 5, '2025-07-12 09:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Equipment Safety Procedures'), 6, '2025-07-12 09:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Equipment Safety Procedures'), 8, '2025-07-12 09:00:00'),
+
+-- Workshop Rules everyone
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 1, '2025-08-20 17:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 2, '2025-08-20 17:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 3, '2025-08-20 17:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 4, '2025-08-20 17:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 5, '2025-08-20 17:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 6, '2025-08-20 17:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 7, '2025-08-20 17:00:00'),
+((SELECT document_id FROM document_table WHERE title = 'Workshop Rules v4.3'), 8, '2025-08-20 17:00:00'),
+
+-- Health and Safety Policy everyone
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 1, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 2, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 3, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 4, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 5, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 6, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 7, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+((SELECT document_id FROM document_table WHERE title = 'Health and Safety Policy'), 8, CURRENT_TIMESTAMP - INTERVAL 1 WEEK),
+
+-- Emergency Procedures everyone
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 1, CURRENT_TIMESTAMP),
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 2, CURRENT_TIMESTAMP),
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 3, CURRENT_TIMESTAMP),
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 4, CURRENT_TIMESTAMP),
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 5, CURRENT_TIMESTAMP),
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 6, CURRENT_TIMESTAMP),
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 7, CURRENT_TIMESTAMP),
+((SELECT document_id FROM document_table WHERE title = 'Emergency Procedures'), 8, CURRENT_TIMESTAMP);

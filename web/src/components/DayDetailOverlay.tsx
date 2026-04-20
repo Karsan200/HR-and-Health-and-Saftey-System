@@ -19,7 +19,12 @@ interface DayDetailOverlayProps {
     onClose: () => void;
 }
 
-// Formats an ISO date string like "2024-11-09" into "Thursday, November 9th"
+// Trims seconds from a LocalTime string, "08:00:00" to "08:00"
+function formatLocalTime(t: string): string {
+    return t.slice(0, 5);
+}
+
+// Formats an ISO date string like "2024-11-09" into "Thursday November 9th"
 function formatDate(iso: string): string {
     const [year, month, day] = iso.split("-").map(Number);
     const d = new Date(year, month - 1, day);
@@ -48,10 +53,15 @@ function EventRow({ event, leaveTypes }: { event: CalendarEvent; leaveTypes: Res
     const matchedType = findLeaveTypeByName(leaveTypes, event.type);
     const typeLabel = matchedType?.name ?? event.type;
 
+    const hasTime = event.startTime != null && event.endTime != null;
+    const timeLabel = hasTime
+        ? `${formatLocalTime(event.startTime!)} – ${formatLocalTime(event.endTime!)}`
+        : null;
+
     return (
         <Box sx={styles.eventRow}>
             <Box sx={styles.eventRowInner}>
-                {/* Left: coloured dot + name badge + notes */}
+                {/* Left: coloured dot + name badge + time + notes */}
                 <Box sx={styles.eventPrimary}>
                     <Box sx={styles.eventTitleRow}>
                         <Box sx={styles.eventDot(iconCircleBg)} />
@@ -61,6 +71,18 @@ function EventRow({ event, leaveTypes }: { event: CalendarEvent; leaveTypes: Res
                             </Typography>
                         </Box>
                     </Box>
+
+                    {timeLabel && (
+                        <Box sx={styles.eventNotesRow}>
+                            <Typography sx={{
+                                ...styles.eventNotesText,
+                                color: DefaultColours.greyPrimaryMainText,
+                            }}>
+                                {timeLabel}
+                            </Typography>
+                        </Box>
+                    )}
+
                     {event.notes && (
                         <Box sx={styles.eventNotesRow}>
                             <Typography sx={styles.eventNotesText}>

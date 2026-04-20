@@ -6,15 +6,21 @@ export const PinCodeAuthScreen = (theme: any, accessibility: { largeText: boolea
   const fontFamilies = accessibility.dyslexicFont ? Fonts.dyslexic : Fonts.poppins;
 
   return StyleSheet.create({
+    scrollView: {
+      flex: 1,
+    },
+
     container: {
+      flexGrow: 1,
       paddingHorizontal: Spacing.largePadding,
       paddingTop: 40,
       paddingBottom: 40,
       backgroundColor: theme.white,
+      justifyContent: 'center'
     },
 
     welcomeBackTextContainer: {
-      paddingTop: 40,
+      paddingTop:70,
     },
 
     welcomeBackText: {

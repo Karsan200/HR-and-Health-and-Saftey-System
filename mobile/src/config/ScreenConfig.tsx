@@ -17,7 +17,9 @@ import RiskAssessments from "../screens/RiskAssessments.tsx";
 import PayslipScreen from '../screens/PayslipScreen.tsx';
 import DocumentsScreen from '../screens/DocumentsScreen.tsx';
 import HandbookScreen from "../screens/HandbookScreen.tsx";
-import PersonalScreen from '../screens/PersonalScreen.tsx';
+import PersonalScreen from "../screens/PersonalScreen.tsx";
+import HazardView from "../screens/HazardView.tsx";
+import HazardList from "../screens/HazardList.tsx";
 import ClockInScreen from '../screens/ClockInScreen.tsx';
 
 export function ScreenConfig(body: ScreenConfigProps) {
@@ -43,6 +45,10 @@ export function ScreenConfig(body: ScreenConfigProps) {
         body.setSection(null);
         body.setCurrentScreen('hazardForm');
         return;
+    } else if (screen === 'risk') {
+        body.setSection('health-safety');
+        body.setCurrentScreen('risk');
+        return;
     } else if (screen === 'profile') {
       body.setSection(null);
       body.setCurrentScreen('profile');
@@ -61,6 +67,21 @@ export function ScreenConfig(body: ScreenConfigProps) {
     body.setSelectedDate(date);
     body.setCurrentScreen('dateDetails');
   };
+
+    const [selectedRiskAssessmentId, setSelectedRiskAssessmentId] = React.useState<number | null>(null);
+    const [selectedRiskAssessmentTitle, setSelectedRiskAssessmentTitle] = React.useState<string>('');
+    const [selectedHazardId, setSelectedHazardId] = React.useState<number | null>(null);
+
+    const handleViewHazards = (riskAssessmentId: number, title: string) => {
+        setSelectedRiskAssessmentId(riskAssessmentId);
+        setSelectedRiskAssessmentTitle(title);
+        body.setCurrentScreen('hazardList');
+    };
+
+    const handleViewHazard = (hazardId: number) => {
+        setSelectedHazardId(hazardId);
+        body.setCurrentScreen('viewHazard');
+    };
 
   switch (body.currentScreen) {
     case 'calendar':
@@ -122,7 +143,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
         <>
           <TopNavBar title="Overview" />
           <View style={styles.content}>
-            <HsOverview />
+              <HsOverview onOpenRiskAssessment={() => handleNavigate('hazardForm')} />
           </View>
         </>
       );
@@ -140,16 +161,65 @@ export function ScreenConfig(body: ScreenConfigProps) {
       );
 
       case 'risk':
-      return (
-        <>
-          <TopNavBar title="Risk" />
-          <View style={styles.content}>
-            <RiskAssessments
-              onStartAssessment={() => handleNavigate('hazardForm')}
-            />
-          </View>
-        </>
-      );
+          return (
+              <>
+                  <TopNavBar title="Risk" />
+                  <View style={styles.content}>
+                      <RiskAssessments
+                          onViewHazards={handleViewHazards}
+                          onStartAssessment={() => handleNavigate('hazardForm')}
+                          onEditDraftHazard={(hazardId) => {
+                              setSelectedHazardId(hazardId);
+                              handleNavigate('hazardForm');
+                          }}
+                      />
+                  </View>
+              </>
+          );
+
+      case 'hazardList':
+          return (
+              <>
+                  <TopNavBar
+                      title="Hazards"
+                      showBackButton={true}
+                      onBackPress={() => handleNavigate('risk')}
+                  />
+                  <View style={styles.content}>
+                      {selectedRiskAssessmentId && (
+                          <HazardList
+                              riskAssessmentId={selectedRiskAssessmentId}
+                              riskAssessmentTitle={selectedRiskAssessmentTitle}
+                              onViewHazard={handleViewHazard}
+                              onEditDraft={(id) => {
+                                  setSelectedHazardId(id);
+                                  handleNavigate('hazardForm');
+                              }}
+                              onBack={() => handleNavigate('risk')}
+                          />
+                      )}
+                  </View>
+              </>
+          );
+
+      case 'viewHazard':
+          return (
+              <>
+                  <TopNavBar
+                      title="Hazard"
+                      showBackButton={true}
+                      onBackPress={() => handleNavigate('hazardList')}
+                  />
+                  <View style={styles.content}>
+                      {selectedHazardId && (
+                          <HazardView
+                              hazardId={selectedHazardId}
+                              onBack={() => handleNavigate('hazardList')}
+                          />
+                      )}
+                  </View>
+              </>
+          );
 
     case 'hazardForm':
       return (
@@ -160,7 +230,10 @@ export function ScreenConfig(body: ScreenConfigProps) {
             onBackPress={() => handleNavigate('risk')}
           />
           <View style={styles.content}>
-            <HazardForm onDone={() => handleNavigate('risk')} />
+            <HazardForm
+                hazardId={selectedHazardId ?? undefined}
+                onDone={() => handleNavigate('risk')}
+            />
           </View>
         </>
       );

@@ -4,6 +4,7 @@ import { ThemeContextType } from '../model/ThemeContextType.ts';
 import { getSettings } from '../logic/SettingsService.ts';
 import AuthenticationService from '../logic/AuthenticationService.ts';
 import {generateColorSet} from "../screens/personal/SettingsScreen.tsx";
+import { HttpException } from '../exception/HttpException.ts';
 
 const defaultAccessibility = {
   largeText: false,
@@ -44,10 +45,6 @@ export function ThemeProvider({ children }: any) {
         await AuthenticationService.extractClaims(); // will throw if not logged in
 
         const data = await getSettings();
-
-        const accentSet = generateColorSet(data.accentColour);
-        const textSet = generateColorSet(data.textColour);
-        const backgroundSet = generateColorSet(data.backgroundColour);
 
         // Update accessibility settings
         setAccessibility({
@@ -98,6 +95,57 @@ export function ThemeProvider({ children }: any) {
           }
         } else {
 
+
+          let textSet;
+          if(data.textColour !== DefaultColours.black) {
+            textSet = generateColorSet(data.textColour);
+          } else {
+            textSet = {
+              primary: DefaultColours.greyPrimaryMainText,
+              dark: DefaultColours.black,
+              light: DefaultColours.greyIconLight
+            }
+          }
+
+          let backgroundSet;
+          if(data.backgroundColour !== DefaultColours.greyBackground) {
+            backgroundSet = generateColorSet(data.backgroundColour);
+          } else {
+            backgroundSet = {
+              primary: DefaultColours.greyBackground,
+              light: DefaultColours.white,
+            }
+          }
+
+          let accentSet;
+          if (data.accentColour === DefaultColours.redPrimary) {
+            accentSet = {
+              primary: DefaultColours.redPrimary,
+              dark: DefaultColours.redTextDark,
+              light: DefaultColours.redBackgroundLight
+            }
+          } else if (data.accentColour === "#0066FF") {
+            accentSet = {
+              primary: "#0066FF",
+              dark: "#003A99",
+              light: "#DCE8FF"
+            }
+          } else if (data.accentColour === "#2E7D32") {
+            accentSet = {
+              primary: "#2E7D32",
+              dark: "#1B5E20",
+              light: "#C8E6C9"
+            }
+          } else if (data.accentColour === "#D20413") {
+            accentSet = {
+              primary: '#D20413',
+              dark: '#F6CDD0',
+              light: '#AE010B',
+            }
+          } else {
+            accentSet = generateColorSet(data.accentColour);
+          }
+
           // Update theme settings
           setTheme((prev) => ({
             ...prev,
@@ -118,7 +166,12 @@ export function ThemeProvider({ children }: any) {
         }
 
       } catch (err) {
-        console.error('Failed to load settings:', err);
+        if (err instanceof HttpException && err.statusCode === 401) {
+          console.warn(err.message);
+        }
+        else {
+          console.error('Failed to load settings:', err);
+        }
       }
     }
 

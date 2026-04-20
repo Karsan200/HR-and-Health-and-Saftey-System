@@ -1,7 +1,14 @@
 ﻿import { DefaultColours } from "../theme/colours";
-import {BorderRadius, FontSize, TextStyles} from "../theme/theme";
+import { BorderRadius, FontSize, TextStyles } from "../theme/theme";
+
+const cardBorders = `1px solid ${DefaultColours.greyIconLight}55`
 
 export const personalPageStyles = {
+    page: {
+        backgroundColor: DefaultColours.greyBackground,
+        minHeight: "100vh",
+    },
+
     pageContainer: {
         maxWidth: "1200px",
         margin: "0 auto",
@@ -64,8 +71,8 @@ export const personalPageStyles = {
 
     tab: (active: boolean) => ({
         padding: "10px 24px",
-        fontSize: FontSize.xs14,
-        fontFamily: TextStyles.regular,
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.bold,
         color: active ? DefaultColours.redPrimary : DefaultColours.greyPrimaryMainText,
         cursor: "pointer",
         borderBottom: active ? `2px solid ${DefaultColours.redPrimary}` : "2px solid transparent",
@@ -79,15 +86,15 @@ export const personalPageStyles = {
 
     sectionCard: {
         background: DefaultColours.white,
-        border: `0.5px solid ${DefaultColours.greyBackground}`,
-        borderRadius: "12px",
+        border: cardBorders,
+        borderRadius: BorderRadius.smallTextBackground,
         padding: "1.25rem",
         marginBottom: "1rem",
     },
 
     sectionTitle: {
-        fontSize: FontSize.xs14,
-        fontFamily: TextStyles.regular,
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.medium,
         color: DefaultColours.black,
         marginBottom: "1rem",
     },
@@ -204,5 +211,215 @@ export const personalPageStyles = {
         fontSize: FontSize.xl32,
         fontFamily: TextStyles.bold,
         color: DefaultColours.white,
+    },
+
+    // Security tab
+    securityCard: {
+        background: DefaultColours.white,
+        border: cardBorders,
+        borderRadius: BorderRadius.smallTextBackground,
+        padding: "1.25rem",
+        marginBottom: "1rem",
+    },
+
+    securityTitle: {
+        fontSize: FontSize.m20,
+        fontFamily: TextStyles.medium,
+        color: DefaultColours.black,
+        marginBottom: "1.25rem",
+    },
+
+    securityInput: {
+        width: "100%",
+        padding: "14px 16px",
+        fontSize: FontSize.xs14,
+        border: cardBorders,
+        borderRadius: BorderRadius.smallTextField,
+        marginBottom: "12px",
+        outline: "none",
+        fontFamily: "inherit",
+        color: DefaultColours.black,
+        backgroundColor: DefaultColours.white,
+        boxSizing: "border-box" as const,
+        "&:focus": {
+            borderColor: DefaultColours.redPrimary,
+        },
+    },
+
+    securityButtonRow: {
+        display: "flex",
+        justifyContent: "flex-end",
+        marginTop: "4px",
+    },
+
+    securityButton: {
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        background: DefaultColours.redPrimary,
+        color: DefaultColours.white,
+        border: "none",
+        borderRadius: BorderRadius.smallTextField,
+        padding: "12px 20px",
+        fontSize: FontSize.xs14,
+        cursor: "pointer",
+        fontFamily: TextStyles.medium,
+        "&:hover": {
+            background: DefaultColours.redTextDark,
+        },
+    },
+
+    securitySuccessText: {
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular,
+        color: DefaultColours.greenPrimary,
+        textAlign: "right" as const,
+        marginTop: "8px",
+    },
+
+    securityErrorText: {
+        fontSize: FontSize.s16,
+        fontFamily: TextStyles.regular,
+        color: DefaultColours.redPrimary,
+        textAlign: "right" as const,
+        marginTop: "8px",
+    },
+
+    // Settings tab
+    settingsCard: {
+        background: DefaultColours.white,
+        border: cardBorders,
+        borderRadius: BorderRadius.smallTextBackground,
+        padding: "1.25rem",
+        marginBottom: "1rem",
+    },
+
+    settingsTitle: {
+        fontSize: FontSize.m20,
+        fontFamily: TextStyles.medium,
+        color: DefaultColours.black,
+        marginBottom: "1.25rem",
+    },
+
+    quietTimeLabel: {
+        fontSize: FontSize.xs14,
+        TextStyles: TextStyles.regular,
+        letterSpacing: "0.08em",
+        color: DefaultColours.greyPrimaryMainText,
+        marginBottom: "0.5rem",
+    },
+
+    quietTimeRow: {
+        display: "flex",
+        alignItems: "center",
+        gap: "1rem",
+        marginBottom: "1.5rem",
+    },
+
+    quietTimeArrow: {
+        fontSize: FontSize.l24,
+        color: DefaultColours.greyPrimaryMainText,
+    },
+
+    settingsButtonRow: {
+        display: "flex",
+        justifyContent: "flex-end",
+        gap: "12px",
+        marginTop: "1rem",
+    },
+
+    settingsCancelButton: {
+        background: "transparent",
+        color: DefaultColours.redPrimary,
+        border: "none",
+        borderRadius: BorderRadius.smallTextBackground,
+        padding: "10px 16px",
+        fontSize: FontSize.s16,
+        TextStyles: TextStyles.regular,
+        cursor: "pointer",
+        fontFamily: "inherit",
+        letterSpacing: "0.05em",
+        "&:hover": {
+            background: DefaultColours.redTextDark,
+            color: DefaultColours.white,
+        },
+    },
+
+    settingsOkButton: {
+        background: "transparent",
+        color: DefaultColours.redPrimary,
+        border: "none",
+        borderRadius: BorderRadius.smallTextBackground,
+        padding: "10px 16px",
+        fontSize: FontSize.s16,
+        TextStyles: TextStyles.regular,
+        cursor: "pointer",
+        fontFamily: "inherit",
+        letterSpacing: "0.05em",
+        "&:hover": {
+            background: DefaultColours.redTextDark,
+            color: DefaultColours.white,
+        },
+    },
+
+    settingsSuccessText: {
+        fontSize: FontSize.xs14,
+        color: DefaultColours.greenPrimary,
+        textAlign: "right" as const,
+        marginTop: "8px",
+    },
+
+    settingsErrorText: {
+        fontSize: FontSize.xs14,
+        color: DefaultColours.redPrimary,
+        textAlign: "right" as const,
+        marginTop: "8px",
+    },
+
+    clickableTimeBox: {
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "flex-end",
+        gap: "4px",
+    },
+
+    timeText: (isActive: boolean) => ({
+        fontSize: "40px",
+        fontWeight: 400,
+        color: isActive
+            ? DefaultColours.redPrimary
+            : DefaultColours.black,
+        lineHeight: 1,
+    }),
+
+    amPmText: (isActive: boolean) => ({
+        fontSize: "12px",
+        color: isActive
+            ? DefaultColours.redPrimary
+            : DefaultColours.greyPrimaryMainText,
+        paddingBottom: "4px",
+        lineHeight: 1.2,
+    }),
+
+    timePicker: {
+        "& .MuiClock-pin": { backgroundColor: DefaultColours.redPrimary },
+        "& .MuiClockPointer-root": { backgroundColor: DefaultColours.redPrimary },
+        "& .MuiClockPointer-thumb": {
+            backgroundColor: DefaultColours.redPrimary,
+            borderColor: DefaultColours.redPrimary,
+        },
+        "& .MuiClockNumber-root.Mui-selected": {
+            backgroundColor: DefaultColours.redPrimary,
+        },
+        "& .MuiPickersToolbar-root": { display: "none" },
+    },
+
+    hideActionBar: { display: "none" },
+
+    quietTimeStepLabel: {
+        fontSize: FontSize.xs14,
+        fontFamily: TextStyles.medium,
+        color: DefaultColours.black,
+        marginBottom: "1.25rem",
     },
 };

@@ -69,7 +69,7 @@ public class ClockInControllerTest {
         // Given the service returns a valid status response for the authenticated user
         ClockInStatusResponse mockResponse = new ClockInStatusResponse(
                 "08:00", "17:00", "Tuesday, 7 April, 2026",
-                1, 90.0, 8.5, 20
+                1, 90.0, 8.5, 20,"10:10"
         );
 
         when(clockInService.getStatus()).thenReturn(mockResponse);

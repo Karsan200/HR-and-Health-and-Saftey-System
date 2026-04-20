@@ -220,6 +220,77 @@ describe('colourController', () => {
     });
   });
 
+  it('uses default colour values directly when custom colours match defaults', async () => {
+    (getSettings as jest.Mock).mockResolvedValue({
+      ...defaultSettings,
+      themePreset: null,
+      accentColour: DefaultColours.redPrimary,
+      textColour: DefaultColours.black,
+      backgroundColour: DefaultColours.greyBackground,
+    });
+
+    let capturedCtx: any;
+
+    render(
+        <ThemeProvider>
+          <ThemeConsumer onRender={(ctx) => { capturedCtx = ctx; }} />
+        </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(capturedCtx.theme.redPrimary).toBe(DefaultColours.redPrimary);
+      expect(capturedCtx.theme.redTextDark).toBe(DefaultColours.redTextDark);
+      expect(capturedCtx.theme.redBackgroundLight).toBe(DefaultColours.redBackgroundLight);
+      expect(capturedCtx.theme.black).toBe(DefaultColours.black);
+      expect(capturedCtx.theme.greyBackground).toBe(DefaultColours.greyBackground);
+    });
+  });
+
+  it('generates colour set for custom text colour', async () => {
+    (getSettings as jest.Mock).mockResolvedValue({
+      ...defaultSettings,
+      themePreset: null,
+      accentColour: DefaultColours.redPrimary,
+      textColour: '#123456',
+      backgroundColour: DefaultColours.greyBackground,
+    });
+
+    let capturedCtx: any;
+
+    render(
+        <ThemeProvider>
+          <ThemeConsumer onRender={(ctx) => { capturedCtx = ctx; }} />
+        </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(capturedCtx.theme.black).toBe(DefaultColours.black);
+    });
+  });
+
+
+  it('generates colour set for custom background colour', async () => {
+    (getSettings as jest.Mock).mockResolvedValue({
+      ...defaultSettings,
+      themePreset: null,
+      accentColour: DefaultColours.redPrimary,
+      textColour: DefaultColours.black,
+      backgroundColour: '#abcdef',
+    });
+
+    let capturedCtx: any;
+
+    render(
+        <ThemeProvider>
+          <ThemeConsumer onRender={(ctx) => { capturedCtx = ctx; }} />
+        </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(capturedCtx.theme.greyBackground).toBe("#abcdef");
+    });
+  });
+
   // -------------------------------------------------------------------------
   // Settings loading — accessibility
   // -------------------------------------------------------------------------

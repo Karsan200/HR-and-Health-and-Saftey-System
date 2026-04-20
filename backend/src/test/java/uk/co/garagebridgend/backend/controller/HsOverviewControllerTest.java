@@ -38,7 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Integration tests for the HS Overview controller endpoint.
- *
  * This test class prepares a small in-memory dataset (accounts, files,
  * documents, hazards and signatures) and verifies the JSON response from
  * the /hs-overview endpoint under different authentication scenarios.
@@ -214,7 +213,7 @@ public class HsOverviewControllerTest {
      * @throws Exception if the request or assertions fail
      */
     @Test
-    @WithMockUser(username = "60")
+    @WithMockUser(username = "0")
     @Order(2)
     void testHsOverviewUserNotFound() throws Exception {
 

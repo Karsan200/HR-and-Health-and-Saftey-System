@@ -66,7 +66,7 @@ export const styles = (theme: any, accessibility: { largeText: boolean, dyslexic
      * Fixed height/minWidth and centred content for the numeric badge.
      */
     headerBadge: {
-        backgroundColor: theme.redPrimary,
+        backgroundColor: theme.redTrafficPrimary,
         borderRadius: BorderRadius.mediumNotification,
         paddingHorizontal: 8,
         height: 28,

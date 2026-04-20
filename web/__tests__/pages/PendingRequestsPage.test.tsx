@@ -12,10 +12,14 @@ import {
     formatRequestedOn,
 } from "../../src/logic/PendingRequestsService";
 import { fetchLeaveTypes } from "../../src/logic/LeaveTypeService";
+import { fetchReportedClockInCount } from "../../src/logic/ClockOverridesService";
 
 jest.mock("../../src/AuthContext");
 jest.mock("../../src/logic/PendingRequestsService");
 jest.mock("../../src/logic/LeaveTypeService");
+jest.mock("../../src/logic/ClockOverridesService", () => ({
+    fetchReportedClockInCount: jest.fn(),
+}));
 
 jest.mock("../../src/components/SectionNavbar", () => ({
     SectionNavBar: ({ tabs }: { tabs: { label: string; count?: number }[] }) => (
@@ -37,6 +41,7 @@ const mockFetchPendingLeave = fetchPendingLeave as jest.Mock;
 const mockApproveLeave      = approveLeaveRequest as jest.Mock;
 const mockDeclineLeave      = declineLeaveRequest as jest.Mock;
 const mockFetchLeaveTypes   = fetchLeaveTypes as jest.Mock;
+const mockFetchReportedCount = fetchReportedClockInCount as jest.Mock;
 const mockFormatDateRange   = formatDateRange as jest.Mock;
 const mockFormatRequestedOn = formatRequestedOn as jest.Mock;
 
@@ -71,6 +76,7 @@ beforeEach(() => {
     mockUseAuth.mockReturnValue({ authenticationService: mockAuthService });
     mockFetchPendingLeave.mockResolvedValue([]);
     mockFetchLeaveTypes.mockResolvedValue([]);
+    mockFetchReportedCount.mockResolvedValue(0);
     mockApproveLeave.mockResolvedValue(undefined);
     mockDeclineLeave.mockResolvedValue(undefined);
     mockFormatDateRange.mockImplementation(
@@ -92,6 +98,12 @@ async function renderPage() {
         );
     });
     return result!;
+}
+
+// Returns the nav-badge element scoped to the tab with the given label
+function getBadgeInTab(tabLabel: string) {
+    const tab = screen.getAllByTestId("nav-tab").find(t => t.textContent?.includes(tabLabel));
+    return tab?.querySelector('[data-testid="nav-badge"]');
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -221,12 +233,12 @@ describe("PendingRequestsPage", () => {
         it("shows the correct count in the nav badge", async () => {
             mockFetchPendingLeave.mockResolvedValueOnce([requestOne, requestTwo]);
             await renderPage();
-            expect(screen.getByTestId("nav-badge")).toHaveTextContent("2");
+            expect(getBadgeInTab("Pending Requests")).toHaveTextContent("2");
         });
 
         it("shows zero in the badge when there are no requests", async () => {
             await renderPage();
-            expect(screen.getByTestId("nav-badge")).toHaveTextContent("0");
+            expect(getBadgeInTab("Pending Requests")).toHaveTextContent("0");
         });
     });
 
@@ -260,10 +272,10 @@ describe("PendingRequestsPage", () => {
         it("decrements the nav badge count after a successful approve", async () => {
             mockFetchPendingLeave.mockResolvedValueOnce([requestOne]);
             await renderPage();
-            expect(screen.getByTestId("nav-badge")).toHaveTextContent("1");
+            expect(getBadgeInTab("Pending Requests")).toHaveTextContent("1");
             await userEvent.click(screen.getByText("Approve"));
             await waitFor(() =>
-                expect(screen.getByTestId("nav-badge")).toHaveTextContent("0")
+                expect(getBadgeInTab("Pending Requests")).toHaveTextContent("0")
             );
         });
 
@@ -329,10 +341,10 @@ describe("PendingRequestsPage", () => {
         it("decrements the nav badge count after a successful decline", async () => {
             mockFetchPendingLeave.mockResolvedValueOnce([requestOne]);
             await renderPage();
-            expect(screen.getByTestId("nav-badge")).toHaveTextContent("1");
+            expect(getBadgeInTab("Pending Requests")).toHaveTextContent("1");
             await userEvent.click(screen.getByText("Decline"));
             await waitFor(() =>
-                expect(screen.getByTestId("nav-badge")).toHaveTextContent("0")
+                expect(getBadgeInTab("Pending Requests")).toHaveTextContent("0")
             );
         });
 
