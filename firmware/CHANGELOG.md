@@ -1,4 +1,4 @@
-## [V0.4.0] - TBD
+## [V0.4.0] - 2026-04-20
 
 ### Added
 - Radio locking so Bluetooth and Wi-Fi cannot be used at the same time on the Pico to avoid disruption to receiving and sending data
