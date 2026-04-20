@@ -20,6 +20,7 @@ import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.ClockInEventRepository;
 import uk.co.garagebridgend.backend.repository.IotDeviceRepository;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.mockito.Mockito.doThrow;
@@ -57,6 +58,10 @@ public class IotControllerTest {
 
     private UUID accountBleId;
 
+    private LocalDateTime currentTime;
+
+    private LocalDateTime oneHourAgoTime;
+
     @BeforeEach
     public void setUp() {
         // Clear the repository before each test to ensure a clean state
@@ -83,6 +88,10 @@ public class IotControllerTest {
         accountRepository.save(account);
 
         accountBleId = account.getBleSignature();
+
+        // Set the current time for testing purposes
+        currentTime = LocalDateTime.now();
+        oneHourAgoTime = currentTime.minusHours(1);
     }
 
     @Test
@@ -94,8 +103,8 @@ public class IotControllerTest {
                         .content("""
                     {
                         "signatures": ["%s", "%s"],
-                        "timestamp": "2026-04-13T14:30:00"
-                    }""".formatted(UUID.randomUUID(), UUID.randomUUID()))).andExpect(status().isOk());
+                        "timestamp": "%s"
+                    }""".formatted(UUID.randomUUID(), UUID.randomUUID(), oneHourAgoTime))).andExpect(status().isOk());
     }
 
     @Test
@@ -117,8 +126,6 @@ public class IotControllerTest {
 
     @Test
     public void testUploadDuplicateAttendanceData() throws Exception {
-        String timestamp = "2026-04-13T14:30:00";
-
         // First upload should succeed
         mockMvc.perform(post("/api/iot/attendance/upload")
                         .header("X-Device-Id", deviceId)
@@ -128,7 +135,7 @@ public class IotControllerTest {
                     {
                         "signatures": ["%s"],
                         "timestamp": "%s"
-                    }""".formatted(accountBleId, timestamp))).andExpect(status().isOk());
+                    }""".formatted(accountBleId, currentTime))).andExpect(status().isOk());
 
         var expect = clockInEventRepository.findAll().size();
 
@@ -141,7 +148,7 @@ public class IotControllerTest {
                     {
                         "signatures": ["%s"],
                         "timestamp": "%s"
-                    }""".formatted(accountBleId, timestamp))).andExpect(status().isOk());
+                    }""".formatted(accountBleId, currentTime))).andExpect(status().isOk());
 
         // Verify that only one clock-in event was created for the duplicate timestamp
         var events = clockInEventRepository.findAll();
@@ -157,8 +164,8 @@ public class IotControllerTest {
                         .content("""
                     {
                         "signatures": ["%s"],
-                        "timestamp": "2026-04-13T14:30:00"
-                    }""".formatted(UUID.randomUUID()))).andExpect(status().isUnauthorized());
+                        "timestamp": "%s"
+                    }""".formatted(UUID.randomUUID(), currentTime))).andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -170,8 +177,8 @@ public class IotControllerTest {
                         .content("""
                     {
                         "signatures": ["%s"],
-                        "timestamp": "2026-04-13T14:30:00"
-                    }""".formatted(UUID.randomUUID()))).andExpect(status().isUnauthorized());
+                        "timestamp": "%s"
+                    }""".formatted(UUID.randomUUID(), currentTime))).andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -190,7 +197,7 @@ public class IotControllerTest {
                         .content("""
                     {
                         "signatures": ["%s"],
-                        "timestamp": "2026-04-13T14:30:00"
-                    }""".formatted(UUID.randomUUID()))).andExpect(status().isInternalServerError());
+                        "timestamp": "%s"
+                    }""".formatted(UUID.randomUUID(), currentTime))).andExpect(status().isInternalServerError());
     }
 }

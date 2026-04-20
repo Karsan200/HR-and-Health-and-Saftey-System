@@ -2,8 +2,13 @@ alter table account_table
     add constraint UKia9q7o6xtcuckl8ywdvrgre2c
         unique (ble_signature);
 
-alter table clock_in_event_table
-    modify clock_in_event_id uuid not null;
+ALTER TABLE clock_in_event_table
+DROP PRIMARY KEY,
+    DROP COLUMN clock_in_event_id;
+
+ALTER TABLE clock_in_event_table
+    ADD COLUMN clock_in_event_id UUID NOT NULL DEFAULT (UUID()),
+    ADD PRIMARY KEY (clock_in_event_id);
 
 alter table document_table
     modify signature_required tinyint(1) default 0 not null first;
