@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import uk.co.garagebridgend.backend.logic.ClockInAdminService;
+import uk.co.garagebridgend.backend.models.entity.ClockInTable;
 import uk.co.garagebridgend.backend.models.request.ClockInCreateRequest;
 import uk.co.garagebridgend.backend.models.request.ClockInOverrideRequest;
 import uk.co.garagebridgend.backend.models.response.AccountSearchResponse;
@@ -22,6 +24,7 @@ import uk.co.garagebridgend.backend.models.response.ClockInAdminResponse;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -108,14 +111,19 @@ public class ClockInAdminController {
 
     /**
      * Creates a new clock-in record for a specific employee on a given date.
-     * Requires admin or manager authority (enforced in SecurityConfig).
+     * Returns 201 Created with the database-assigned UUID so the frontend can
+     * use the real ID immediately without needing to reload the list.
      *
      * @param request the details of the record to create
+     * @return 201 Created with body {@code { "clockId": "<uuid>" }}
      */
     @PostMapping("/clock-ins")
-    public void createClockIn(@RequestBody final ClockInCreateRequest request) {
+    public ResponseEntity<Map<String, UUID>> createClockIn(@RequestBody final ClockInCreateRequest request) {
         try {
-            clockInAdminService.createClockIn(request);
+            ClockInTable saved = clockInAdminService.createClockIn(request);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(Map.of("clockId", saved.getClockInId()));
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {

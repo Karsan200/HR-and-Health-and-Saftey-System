@@ -19,11 +19,11 @@ if "config.json" not in os.listdir():
     # TODO: In future this should start a network a user can join to initially flash the device with device_id,api_key,ssid,password
     with open("config.json", "w") as f:
         f.write("""{
-    "ssid": "",
-    "password": "",
-    "server_url": "https://api-ltp.tomsw.uk",
-    "device_id": "",
-    "api_key": "",
+    "ssid": "VM6474747-plus",
+    "password": "jy8DdckmRxqx",
+    "server_url": "http://192.168.0.212:8080",
+    "device_id": "9b4cfe01-3835-11f1-b008-18c04d1acf19",
+    "api_key": "password",
     "scanning_interval": 15,
     "upload_interval": 60,
     "rssi_threshold": -75,
