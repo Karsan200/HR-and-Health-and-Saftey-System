@@ -56,7 +56,7 @@ public class DocumentService {
                 .map(document -> new DocumentResponse(
                         document.getDocumentId(),
                         document.getTitle(),
-                        storageService.getPresignedUrl(document.getFile().getFileId().toString()),
+                        storageService.getObject(document.getFile().getFileId().toString()),
                         signatureRepository.existsByAccountAndDocument(account, document)
                 ))
                 .toList();

@@ -72,8 +72,8 @@ class DocumentServiceTest {
         when(documentRecipientRepository.existsByDocumentAndAccount(document, account))
                 .thenReturn(true);
 
-        when(storageService.getPresignedUrl(any()))
-                .thenReturn("test-url");
+        when(storageService.getObject(any()))
+                .thenReturn("test-encoding");
 
         when(signatureRepository.existsByAccountAndDocument(account, document))
                 .thenReturn(false);
@@ -82,7 +82,7 @@ class DocumentServiceTest {
 
         assertEquals(1, result.size());
         assertEquals("Employee Contract", result.get(0).getTitle());
-        assertEquals("test-url", result.get(0).getUrl());
+        assertEquals("test-encoding", result.get(0).getUrl());
         assertFalse(result.get(0).isSigned());
     }
 

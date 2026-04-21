@@ -41,7 +41,7 @@ public class QualificationService {
                 .map(qualification -> new QualificationResponse(
                         qualification.getTitle(),
                         qualification.getDetails(),
-                        storageService.getPresignedUrl(
+                        storageService.getObject(
                                 qualification.getFile().getFileId().toString()
                         )
                 ))

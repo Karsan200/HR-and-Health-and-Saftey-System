@@ -48,14 +48,10 @@ public class DrivingLicenceService {
         // Take the most recent (first due to DESC ordering)
         var latest = documents.get(0);
 
-        String url = storageService.getPresignedUrl(
-                latest.getFile().getFileId().toString()
-        );
-
         return new DrivingLicenceResponse(
                 latest.getTitle(),
                 latest.getFile().getExtension(),
-                storageService.getPresignedUrl(
+                storageService.getObject(
                         latest.getFile().getFileId().toString()
                 )
         );    }

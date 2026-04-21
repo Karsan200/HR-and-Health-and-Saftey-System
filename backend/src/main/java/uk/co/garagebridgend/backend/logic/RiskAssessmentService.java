@@ -170,7 +170,7 @@ public class RiskAssessmentService {
 
         // Fetch file URLs from object storage
         List<String> fileUrls = hazardFilesRepository.findByHazard(hazard).stream()
-                .map(hf -> storageService.getPresignedUrl(hf.getFile().getFileId().toString()))
+                .map(hf -> storageService.getObject(hf.getFile().getFileId().toString()))
                 .collect(Collectors.toList());
 
         return new HazardReportResponse(

@@ -1,14 +1,10 @@
 package uk.co.garagebridgend.backend.logic;
 
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
+import io.minio.*;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.http.Method;
 import java.util.concurrent.TimeUnit;
 
@@ -69,6 +65,32 @@ public class StorageService {
      */
     public byte[] decodeBase64(final String base64Data) {
         return java.util.Base64.getDecoder().decode(base64Data);
+    }
+
+
+    /** Base64 encoding utility method.
+     * @param data the byte array to encode as a Base64 string
+     * @return a Base64-encoded string representation of the input data
+     */
+    public String encodeBase64(final byte[] data) {
+        return java.util.Base64.getEncoder().encodeToString(data);
+    }
+
+    /** Retrieves an object from MinIO storage and returns its content as a Base64-encoded string.
+     * @param objectName the name of the object to retrieve from MinIO
+     * @return a Base64-encoded string containing the object's data
+     * @throws RuntimeException if any error occurs during retrieval or encoding
+     */
+    public String getObject(final String objectName) throws RuntimeException {
+        try (InputStream stream = minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket(bucketName)
+                        .object(objectName)
+                        .build())) {
+            return encodeBase64(stream.readAllBytes());
+        } catch (Exception e) {
+            throw new RuntimeException("Error retrieving object: " + e.getMessage(), e);
+        }
     }
 
     /**

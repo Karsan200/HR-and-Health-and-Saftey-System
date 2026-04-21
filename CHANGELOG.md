@@ -1,3 +1,9 @@
+## [V0.4.1] - 2026-04-21
+
+### Fixed
+- Issue where the android deployment pipeline was sending an APK instead of a bundle
+- Backend URL for the web app was still set to localhost, changed it to production URL
+
 ## [V0.4.0] - 2026-04-20
 
 ### Added

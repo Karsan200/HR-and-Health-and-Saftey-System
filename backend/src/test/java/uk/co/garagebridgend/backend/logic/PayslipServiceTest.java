@@ -72,8 +72,8 @@ class PayslipServiceTest {
         when(payslipRepository.findByFileAccountOrderByYearDescMonthDesc(account))
                 .thenReturn(List.of(payslip));
 
-        when(storageService.getPresignedUrl(any()))
-                .thenReturn("test-url");
+        when(storageService.getObject(any()))
+                .thenReturn("test-encoding");
 
         List<PayslipResponse> result =
                 payslipService.getPayslipsForCurrentUser();
@@ -86,7 +86,7 @@ class PayslipServiceTest {
         assertEquals(2026, response.getYear());
         assertEquals(1, response.getMonth());
         assertFalse(response.isPSixty());
-        assertEquals("test-url", response.getUrl());
+        assertEquals("test-encoding", response.getUrl());
     }
 
     /**
