@@ -166,6 +166,42 @@ export const pendingRequestsPageStyles = {
         letterSpacing: "0.17px",
     },
 
+    // Notes box
+    notesBox: {
+        padding: "12px 16px",
+        backgroundColor: DefaultColours.white,
+        borderRadius: `${BorderRadius.mediumNotification}px`,
+        border: `1px solid ${DefaultColours.greyIconLight}`,
+        display: "flex",
+        flexDirection: "column" as const,
+        gap: "6px",
+        alignSelf: "flex-start",
+    },
+
+    notesHeader: {
+        display: "flex",
+        alignItems: "center",
+        gap: "6px",
+    },
+
+    notesIcon: {
+        fontSize: "16px",
+        color: DefaultColours.greyPrimaryMainText,
+    },
+
+    notesLabel: {
+        ...TextStyles.medium,
+        fontSize: FontSize.xs14,
+        color: DefaultColours.greyPrimaryMainText,
+    },
+
+    notesText: (hasNotes: boolean) => ({
+        ...TextStyles.regular,
+        fontSize: FontSize.s16,
+        color: hasNotes ? DefaultColours.black : DefaultColours.greyPrimaryMainText,
+        fontStyle: hasNotes ? "normal" : "italic",
+    }),
+
     // Reason section
     reasonSection: {
         display: "flex",

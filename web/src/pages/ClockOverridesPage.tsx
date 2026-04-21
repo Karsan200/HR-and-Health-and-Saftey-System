@@ -462,19 +462,22 @@ function AddClockInModal({ open, defaultDate, onClose, onAdded }: AddModalProps)
         setSaving(true);
         setError(null);
         try {
-            await createClockIn({
-                accountId:    selectedEmployee.accountId,
+            const clockInTime  = toBackendTime(clockIn  || null);
+            const clockOutTime = toBackendTime(clockOut || null);
+
+            const { clockId } = await createClockIn({
+                accountId: selectedEmployee.accountId,
                 date,
-                clockInTime:  toBackendTime(clockIn  || null),
-                clockOutTime: toBackendTime(clockOut || null),
+                clockInTime,
+                clockOutTime,
             }, authenticationService);
 
             onAdded({
-                clockId:         crypto.randomUUID(),
+                clockId,
                 employeeName:    selectedEmployee.fullName,
                 accountId:       selectedEmployee.accountId,
-                clockInTime:     toBackendTime(clockIn  || null),
-                clockOutTime:    toBackendTime(clockOut || null),
+                clockInTime,
+                clockOutTime,
                 created:         `${date}T00:00:00`,
                 isAdminAdjusted: true,
                 report:          null,
