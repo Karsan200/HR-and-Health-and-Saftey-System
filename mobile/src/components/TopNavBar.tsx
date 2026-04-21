@@ -4,7 +4,6 @@ import { Icon } from 'react-native-paper';
 import { topNavStyles as styles } from './TopNavBar.styles';
 import { ThemeContext } from "../theme/colourController";
 
-
 type TopNavBarProps = {
   title: string;
   showBackButton?: boolean;
