@@ -335,7 +335,7 @@ class RiskAssessmentServiceTest {
 
         when(hazardRepository.findById(1L)).thenReturn(Optional.of(hazard));
         when(hazardFilesRepository.findByHazard(hazard)).thenReturn(List.of(hazardFile));
-        when(storageService.getPresignedUrl(any())).thenReturn("https://example.com/file.jpg");
+        when(storageService.getObject(any())).thenReturn("test-encoding");
 
         HazardReportResponse result = riskAssessmentService.getHazardById(1L);
 
@@ -345,7 +345,7 @@ class RiskAssessmentServiceTest {
         assertFalse(result.isClosed());
         assertFalse(result.isDraft());
         assertEquals(1, result.getFileUrls().size());
-        assertEquals("https://example.com/file.jpg", result.getFileUrls().get(0));
+        assertEquals("test-encoding", result.getFileUrls().get(0));
     }
 
     @Test

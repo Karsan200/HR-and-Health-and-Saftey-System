@@ -59,7 +59,7 @@ public class PayslipService {
                         payslip.getYear(),
                         payslip.getMonth(),
                         payslip.isPSixty(),
-                        storageService.getPresignedUrl(
+                        storageService.getObject(
                                 payslip.getFile().getFileId().toString()
                         )
                 ))
