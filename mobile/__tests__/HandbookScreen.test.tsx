@@ -17,23 +17,23 @@ jest.mock('react-native-wheel-color-picker', () => null);
 
 
 jest.mock('react-native-blob-util', () => ({
-    __esModule: true,
-    default: {
-        config: jest.fn(() => ({
-            fetch: jest.fn(() =>
-                Promise.resolve({ path: () => '/storage/emulated/0/Download/test.pdf' })
-            ),
-        })),
-        fs: {
-            dirs: {
-                DownloadDir: '/storage/emulated/0/Download',
-                DocumentDir: '/data/user/0/com.frontend/files',
-            },
-        },
-        ios: {
-            presentOptionsMenu: jest.fn(),
-        },
+  __esModule: true,
+  default: {
+    fs: {
+      dirs: {
+        DownloadDir: '/storage/emulated/0/Download',
+        DocumentDir: '/data/user/0/com.frontend/files',
+      },
+      writeFile: jest.fn().mockResolvedValue(undefined),
+      exists: jest.fn().mockResolvedValue(true),
     },
+    android: {
+      addCompleteDownload: jest.fn().mockResolvedValue(undefined),
+    },
+    ios: {
+      presentOptionsMenu: jest.fn().mockResolvedValue(undefined),
+    },
+  },
 }));
 
 const mockFetch = AuthenticationService.fetch as jest.Mock;
