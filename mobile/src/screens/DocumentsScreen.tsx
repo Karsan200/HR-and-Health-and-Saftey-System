@@ -148,7 +148,7 @@ export default function DocumentsScreen() {
                 {/* PDF Viewer */}
                 <View style={styles.pdfContainer}>
                     <Pdf
-                        source={{ uri: selectedDocument.url, cache: false }}
+                        source={{ uri: `data:application/pdf;base64,${selectedDocument.url}`, cache: false }}
                         trustAllCerts={false}
                         style={styles.pdf}
                         onError={(error) => {
