@@ -103,7 +103,7 @@ frontend:mobile:android:build:
   artifacts:
     when: always
     paths:
-      - mobile/android/app/build/outputs/apk/release/
+      - mobile/android/app/build/outputs/bundle/release/
     expire_in: 4 week
 
 
