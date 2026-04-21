@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Box, Typography, TextField, Button, CircularProgress } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import NotesOutlinedIcon from "@mui/icons-material/NotesOutlined";
 import { SectionNavBar, type SectionNavTab } from "../components/SectionNavbar";
 import { useAuth } from "../AuthContext";
 import {
@@ -19,7 +20,7 @@ import {
     type ResolvedLeaveType,
 } from "../logic/LeaveTypeService";
 import { pendingRequestsPageStyles as styles } from "./PendingRequestsPage.styles";
-import {DefaultColours} from "../theme/colours";
+import { DefaultColours } from "../theme/colours";
 import { fetchReportedClockInCount } from "../logic/ClockOverridesService";
 
 interface LeaveRequestCardProps {
@@ -38,6 +39,8 @@ function LeaveRequestCard({ request, leaveTypes, onApprove, onDecline }: LeaveRe
     const bg        = leaveType ? toHex(leaveType.colourBg)   : DefaultColours.greenBackgroundLight;
     const textColor = leaveType ? toHex(leaveType.colourIcon) : DefaultColours.greyPrimaryMainText;
     const Icon      = leaveType?.Icon;
+
+    const hasNotes = request.notes !== null && request.notes.trim().length > 0;
 
     async function handleAction(action: "approve" | "decline") {
         setSubmitting(true);
@@ -80,6 +83,17 @@ function LeaveRequestCard({ request, leaveTypes, onApprove, onDecline }: LeaveRe
 
                     <Typography sx={styles.dateRange}>
                         {formatDateRange(request.startDate, request.endDate)}
+                    </Typography>
+                </Box>
+
+                {/* Employee notes box */}
+                <Box sx={styles.notesBox}>
+                    <Box sx={styles.notesHeader}>
+                        <NotesOutlinedIcon sx={styles.notesIcon} />
+                        <Typography sx={styles.notesLabel}>Employee Notes</Typography>
+                    </Box>
+                    <Typography sx={styles.notesText(hasNotes)}>
+                        {hasNotes ? request.notes : "No notes left for this leave request"}
                     </Typography>
                 </Box>
 
