@@ -68,26 +68,40 @@ export function ScreenConfig(body: ScreenConfigProps) {
     body.setCurrentScreen('dateDetails');
   };
 
-    const [selectedRiskAssessmentId, setSelectedRiskAssessmentId] = React.useState<number | null>(null);
-    const [selectedRiskAssessmentTitle, setSelectedRiskAssessmentTitle] = React.useState<string>('');
-    const [selectedHazardId, setSelectedHazardId] = React.useState<number | null>(null);
+  const [selectedRiskAssessmentId, setSelectedRiskAssessmentId] = React.useState<number | null>(null);
+  const [selectedRiskAssessmentTitle, setSelectedRiskAssessmentTitle] = React.useState<string>('');
+  const [selectedHazardId, setSelectedHazardId] = React.useState<number | null>(null);
 
-    const handleViewHazards = (riskAssessmentId: number, title: string) => {
-        setSelectedRiskAssessmentId(riskAssessmentId);
-        setSelectedRiskAssessmentTitle(title);
-        body.setCurrentScreen('hazardList');
-    };
+  const handleViewHazards = (riskAssessmentId: number, title: string) => {
+      setSelectedRiskAssessmentId(riskAssessmentId);
+      setSelectedRiskAssessmentTitle(title);
+      body.setCurrentScreen('hazardList');
+  };
 
-    const handleViewHazard = (hazardId: number) => {
-        setSelectedHazardId(hazardId);
-        body.setCurrentScreen('viewHazard');
-    };
+  const handleViewHazard = (hazardId: number) => {
+      setSelectedHazardId(hazardId);
+      body.setCurrentScreen('viewHazard');
+  };
+
+  const Nav = ({ title, showBackButton = false, onBackPress }: {
+    title: string;
+    showBackButton?: boolean;
+    onBackPress?: () => void;
+  }) => (
+    <TopNavBar
+      title={title}
+      showBackButton={showBackButton}
+      onBackPress={onBackPress}
+      onNotificationsPress={() => handleNavigate('notifications')}
+      onProfilePress={() => handleNavigate('profile')}
+    />
+  );
 
   switch (body.currentScreen) {
     case 'calendar':
       return (
         <>
-          <TopNavBar title="Calendar" />
+          <Nav title="Calendar" />
           <CalendarScreen onDayPress={handleOpenDateDetails} />
         </>
       );
@@ -95,7 +109,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'dateDetails':
       return (
         <>
-          <TopNavBar
+          <Nav
             title=""
             showBackButton={true}
             onBackPress={() => handleNavigate('calendar')}
@@ -107,7 +121,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'payslips':
       return (
         <>
-          <TopNavBar
+          <Nav
             title="Payslips"
           />
           <View style={styles.content} >
@@ -119,7 +133,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'handbook':
       return (
         <>
-          <TopNavBar
+          <Nav
             title="Handbook"
           />
           <View style={styles.content} >
@@ -131,7 +145,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'clockIn':
       return (
         <>
-          <TopNavBar title="Clock-In" />
+          <Nav title="Clock-In" />
           <View style={styles.content}>
             <ClockInScreen/>
           </View>
@@ -141,7 +155,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'overview':
       return (
         <>
-          <TopNavBar title="Overview" />
+          <Nav title="Overview" />
           <View style={styles.content}>
               <HsOverview onOpenRiskAssessment={() => handleNavigate('hazardForm')} />
           </View>
@@ -151,7 +165,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'documents':
       return (
         <>
-          <TopNavBar
+          <Nav
             title="Documents"
           />
           <View style={styles.content}>
@@ -163,7 +177,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
       case 'risk':
           return (
               <>
-                  <TopNavBar title="Risk" />
+                  <Nav title="Risk" />
                   <View style={styles.content}>
                       <RiskAssessments
                           onViewHazards={handleViewHazards}
@@ -180,7 +194,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
       case 'hazardList':
           return (
               <>
-                  <TopNavBar
+                  <Nav
                       title="Hazards"
                       showBackButton={true}
                       onBackPress={() => handleNavigate('risk')}
@@ -205,7 +219,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
       case 'viewHazard':
           return (
               <>
-                  <TopNavBar
+                  <Nav
                       title="Hazard"
                       showBackButton={true}
                       onBackPress={() => handleNavigate('hazardList')}
@@ -224,7 +238,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'hazardForm':
       return (
         <>
-          <TopNavBar
+          <Nav
             title="Hazard Form"
             showBackButton={true}
             onBackPress={() => handleNavigate('risk')}
@@ -241,7 +255,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'personal':
       return (
         <>
-          <TopNavBar
+          <Nav
             title="Personal"
           />
           <View style={styles.content}>
@@ -253,7 +267,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'settings':
       return (
         <>
-          <TopNavBar
+          <Nav
             title="Settings"
             showBackButton={true}
             onBackPress={() => handleNavigate('home')}
@@ -267,7 +281,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'profile':
       return (
         <>
-          <TopNavBar
+          <Nav
             title="Profile"
             showBackButton={true}
             onBackPress={() => handleNavigate('home')}
@@ -283,7 +297,7 @@ export function ScreenConfig(body: ScreenConfigProps) {
     case 'editProfile':
       return (
         <>
-          <TopNavBar
+          <Nav
             title="Edit Profile"
             showBackButton={true}
             onBackPress={() => handleNavigate('profile')}
