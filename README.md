@@ -1,8 +1,14 @@
 # Rent A Tech - Team 42a (Garage Guardian)
 
-
-
 ## Installation
+
+## Requirements
+1. [This] Repository hosted on GitLab
+2. A Cloudflare account
+3. Virtual machine or server with at least 4GB of RAM and 2 CPU cores (minimum)
+4. Object storage solution (e.g., MinIO, AWS S3, Cloudflare R2) for storing uploaded files **(This guide will use Cloudflare R2)**
+5. Raspberry Pi Pico 2 W for firmware deployment (optional for Clock In/Out System)
+6. Thonny IDE for flashing the Raspberry Pi Pico 2 W (optional for Clock In/Out System)
 
 ### Backend
 1. Clone the repository: `git clone https://git.cardiff.ac.uk/c23037502/rent-a-tech-team-42a.git`
@@ -55,8 +61,8 @@ CREATE DATABASE rent_a_tech;
 4. Build the project using Gradle: `./gradlew build`
 5. Run the application: `./gradlew bootRun`
 
-### Dummy Data
-To populate the database with dummy data **(NOT FOR PRODUCTION)**, you can run the following SQL file after running the application for the first time to create the necessary tables:
+### Dummy Data (Development Only)
+To populate the database with dummy data, you can run the following SQL file after running the application for the first time to create the necessary tables:
 ```text
 /backend/src/main/resources/dummyData.sql
 ```
