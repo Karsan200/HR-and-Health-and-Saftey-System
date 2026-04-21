@@ -970,7 +970,6 @@ INSERT INTO clock_in_table (
       (UUID(), 3, '08:00:00', '16:55:00', '2026-04-02 08:00:00'),
       (UUID(), 4, '09:05:00', '17:40:00', '2026-04-02 09:05:00');
 
-
 INSERT INTO admin_notifications_table (
     account_id,
     title,

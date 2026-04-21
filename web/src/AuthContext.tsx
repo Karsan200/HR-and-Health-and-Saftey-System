@@ -14,6 +14,7 @@ export type AuthContextType = {
 
     accessToken: string | null;
     setAccessToken: React.Dispatch<React.SetStateAction<string | null>>;
+    setMfaSecret: React.Dispatch<React.SetStateAction<string | null>>;
 
     isAuthenticated: boolean | null;
     setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean | null>>;
@@ -64,9 +65,23 @@ export function AuthProvider(
                 const data = await response.json();
                 setIsMfaAuthenticated(data.mfaAuthorised);
                 if (data.secret !== null) {
-                    setMfaSecret(
-                    `otpauth://totp/${AppSettings.COMPANY_NAME}:${data.username}?secret=${data.secret}&issuer=${AppSettings.COMPANY_NAME}`
-                    );
+                    const totpUrl = `otpauth://totp/${AppSettings.COMPANY_NAME}:${data.username}?secret=${data.secret}&issuer=${AppSettings.COMPANY_NAME}`;
+                    setMfaSecret(totpUrl);
+
+                    // Set the MFA secret in a secure cookie for later use if the page is refreshed
+                    const isSecure = window.location.protocol === 'https:';
+                    const secureFlag = isSecure ? '; secure' : '';
+
+                    document.cookie = `mfaSecret=${totpUrl}; path=/; samesite=strict; max-age=600${secureFlag}`;
+                }
+                else {
+                    if (data.mfaAuthorised) {
+                        // Clear the MFA secret cookie as the user is MFA authenticated
+                        document.cookie = `mfaSecret=; path=/; samesite=strict; max-age=0`;
+                    }
+                    else {
+                        setMfaSecret(AuthenticationService.extractMfaCookie())
+                    }
                 }
             } else {
                 setIsMfaAuthenticated(false);
@@ -78,7 +93,7 @@ export function AuthProvider(
 
     return (
         <AuthContext.Provider value={
-        { authenticationService, accessToken, setAccessToken, isAuthenticated, setIsAuthenticated, isMfaAuthenticated, setIsMfaAuthenticated }
+        { authenticationService, accessToken, setAccessToken, setMfaSecret, isAuthenticated, setIsAuthenticated, isMfaAuthenticated, setIsMfaAuthenticated }
         }>
             {isAuthenticated === null ? <ActivityLoader /> :
             isAuthenticated ?

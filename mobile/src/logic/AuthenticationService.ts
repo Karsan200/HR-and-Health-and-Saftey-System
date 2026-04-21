@@ -116,7 +116,7 @@ class AuthenticationService {
      * @returns Promise that resolves when the tokens are successfully stored
      * @throws HttpException with appropriate status code and message if storing credentials in keychain fails
      */
-    static async putCredentials(accessToken: string, refreshToken: string): Promise<void> {
+    static async putCredentials(accessToken: string | null, refreshToken: string | null): Promise<void> {
         try {
             await Keychain.setGenericPassword('authTokens', JSON.stringify({ accessToken, refreshToken }));
         } catch (error) {

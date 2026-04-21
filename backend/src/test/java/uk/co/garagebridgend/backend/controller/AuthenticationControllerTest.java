@@ -38,6 +38,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -148,6 +149,15 @@ public class AuthenticationControllerTest {
         sessionMobile.setMobile(true);
         sessionMobile.setTwoFactor(false);
         sessionRepository.save(sessionMobile);
+
+        // Create session
+        SessionTable sessionLogout = new SessionTable();
+        sessionLogout.setAccount(mobile);
+        sessionLogout.setRefreshToken("87cc6b12-d1aa-468a-bc98-ad1a902c8b3e");
+        sessionLogout.setExpires(LocalDateTime.now(Clock.systemUTC()).plusHours(2));
+        sessionLogout.setMobile(false);
+        sessionLogout.setTwoFactor(true);
+        sessionRepository.save(sessionLogout);
     }
 
     private String getAccessToken(String refreshToken) throws Exception {
@@ -281,6 +291,47 @@ public class AuthenticationControllerTest {
                         "password": "hashedPassword",
                         "isMobile": false
                     }"""))
+                .andExpect(status().isInternalServerError()) // matches ResponseStatusException
+                .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
+                .andExpect(result -> {
+                    ResponseStatusException ex = (ResponseStatusException) result.getResolvedException();
+                    assertNotNull(ex);
+                    assertEquals("Internal sever error", ex.getReason()); // match your controller message
+                });
+    }
+
+    @Test
+    @Order(3)
+    void testLogoutSuccess() throws Exception {
+        String accessToken = getAccessToken("87cc6b12-d1aa-468a-bc98-ad1a902c8b3e");
+
+        mockMvc.perform(get("/auth/logout")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .cookie(new Cookie("refreshToken", "87cc6b12-d1aa-468a-bc98-ad1a902c8b3e")))
+                .andExpect(status().isOk());
+
+        // Verify session is deleted
+        Optional<SessionTable> session = sessionRepository.findByRefreshToken("87cc6b12-d1aa-468a-bc98-ad1a902c8b3e");
+        assertTrue(session.isEmpty(), "Session should be deleted after logout");
+    }
+
+    @Test
+    @Order(3)
+    void testLogoutThrowsException() throws Exception {
+        String accessToken = getAccessToken("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
+
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(authenticationController).build();
+
+        // simulate your AuthenticationService throwing an exception
+        doThrow(new RuntimeException("Service failed"))
+                .when(authenticationService).logout("87cc6b24-d1aa-468a-bc98-ad1a902c8b3e");
+
+
+        // perform a POST to /auth/logout with a cookie
+        mockMvc.perform(get("/auth/logout")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .cookie(new Cookie("refreshToken", "87cc6b24-d1aa-468a-bc98-ad1a902c8b3e")))
                 .andExpect(status().isInternalServerError()) // matches ResponseStatusException
                 .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
                 .andExpect(result -> {
