@@ -99,7 +99,8 @@ frontend:mobile:android:build:
     - npm ci
     - cd android
     - chmod +x gradlew
-    - ./gradlew bundleRelease --no-daemon
+    - echo "$KEYSTORE_BASE64" | base64 -d > app/release.keystore
+    - KEYSTORE_PATH=release.keystore ./gradlew bundleRelease --no-daemon
   artifacts:
     when: always
     paths:
