@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import uk.co.garagebridgend.backend.RentATechApplication;
 import uk.co.garagebridgend.backend.logic.ClockInAdminService;
+import uk.co.garagebridgend.backend.models.entity.ClockInTable;
 import uk.co.garagebridgend.backend.models.response.AccountSearchResponse;
 import uk.co.garagebridgend.backend.models.response.ClockInAdminResponse;
 
@@ -70,6 +71,16 @@ public class ClockInAdminControllerTest {
                 false,
                 null
         );
+    }
+
+    /**
+     * Builds a minimal {@link ClockInTable} stub with a generated ID.
+     * Used to satisfy the non-void return type of {@code createClockIn}.
+     */
+    private ClockInTable buildClockInTableStub() {
+        ClockInTable stub = new ClockInTable();
+        stub.setClockInId(UUID.randomUUID());
+        return stub;
     }
 
     // GET /api/admin/clock-ins
@@ -265,11 +276,11 @@ public class ClockInAdminControllerTest {
     @Test
     void testCreateClockInSuccess() throws Exception {
 
-        // Given the service successfully creates the record
-        doNothing().when(clockInAdminService).createClockIn(any());
+        // Given the service successfully creates the record and returns the saved entity
+        when(clockInAdminService.createClockIn(any())).thenReturn(buildClockInTableStub());
 
         // When the client submits a valid create request
-        // Then the controller should return HTTP 200 (OK)
+        // Then the controller should return HTTP 201 (Created)
         mockMvc.perform(post("/api/admin/clock-ins")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -280,7 +291,7 @@ public class ClockInAdminControllerTest {
                             "clockOutTime": "17:00"
                         }
                         """))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -352,11 +363,11 @@ public class ClockInAdminControllerTest {
     @Test
     void testCreateClockInWithNullClockOutTime() throws Exception {
 
-        // Given the service successfully creates the record with no clock-out time
-        doNothing().when(clockInAdminService).createClockIn(any());
+        // Given the service successfully creates the record and returns the saved entity
+        when(clockInAdminService.createClockIn(any())).thenReturn(buildClockInTableStub());
 
         // When the client submits a create request with a null clock-out time
-        // Then the controller should return HTTP 200 (OK)
+        // Then the controller should return HTTP 201 (Created)
         mockMvc.perform(post("/api/admin/clock-ins")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -367,7 +378,7 @@ public class ClockInAdminControllerTest {
                             "clockOutTime": null
                         }
                         """))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     // DELETE /api/admin/clock-ins/{clockId}
