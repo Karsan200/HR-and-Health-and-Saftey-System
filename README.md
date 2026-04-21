@@ -78,6 +78,7 @@ sudo systemctl status jenkins
 #### Other Considerations
 - Port forwarding may need to be set up on your router to allow external access to the Jenkins server and the backend API. By default, Jenkins runs on port `8080`, so you would need to forward this port to the internal IP address of your server.
 - The backend API runs on port `5000`, so you would also need to forward this port to allow external access to the API.
+- If you are running on a server onsite you may want to consider products like Tailscale or Cloudflared to forward routes without needing a networking setup.
 
 ### Backend (API)
 
