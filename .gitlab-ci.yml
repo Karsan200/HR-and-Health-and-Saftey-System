@@ -99,11 +99,13 @@ frontend:mobile:android:build:
     - npm ci
     - cd android
     - chmod +x gradlew
-    - ./gradlew assembleRelease --no-daemon
+    - echo "$KEYSTORE_BASE64" | base64 -d > app/release.keystore
+    - echo "Keystore exists:" && ls -la app/release.keystore
+    - KEYSTORE_PATH=$(pwd)/app/release.keystore ./gradlew bundleRelease --no-daemon
   artifacts:
     when: always
     paths:
-      - mobile/android/app/build/outputs/apk/release/
+      - mobile/android/app/build/outputs/bundle/release/
     expire_in: 4 week
 
 
@@ -163,9 +165,9 @@ frontend:mobile:android:deploy:
     - if: $CI_COMMIT_BRANCH == "main"
   script:
     - gem install fastlane
-    - cd mobile
     - echo "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" | base64 -d > /tmp/service-account.json
-    - fastlane supply --apk "mobile/android/app/build/outputs/apk/release/app-release.apk" --track "internal" --json_key "/tmp/service-account.json" --package_name "com.garagebridgend.HR"
+    - find . -name "*.aab"
+    - fastlane supply --aab "mobile/android/app/build/outputs/bundle/release/app-release.aab" --track "internal" --json_key "/tmp/service-account.json" --package_name "com.garagebridgend.HR"
 
 frontend:web:deploy:
   image: node:20-bullseye
