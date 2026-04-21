@@ -167,7 +167,7 @@ frontend:mobile:android:deploy:
     - gem install fastlane
     - echo "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" | base64 -d > /tmp/service-account.json
     - find . -name "*.aab"
-    - fastlane supply --aab "mobile/android/app/build/outputs/bundle/release/app-release.aab" --track "internal" --json_key "/tmp/service-account.json" --package_name "com.garagebridgend.HR"
+    - fastlane supply --aab "mobile/android/app/build/outputs/bundle/release/app-release.aab" --track "internal" --release_status "draft" --json_key "/tmp/service-account.json" --package_name "com.garagebridgend.HR"
 
 frontend:web:deploy:
   image: node:20-bullseye
