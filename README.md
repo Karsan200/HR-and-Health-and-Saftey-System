@@ -2,70 +2,90 @@
 
 ## Installation
 
-## Requirements
+### Requirements
 1. [This] Repository hosted on GitLab
 2. A Cloudflare account
-3. Virtual machine or server with at least 4GB of RAM and 2 CPU cores (minimum)
+3. Virtual machine or server with at least 64GB storage, 4GB of RAM and 2 CPU cores (minimum)
 4. Object storage solution (e.g., MinIO, AWS S3, Cloudflare R2) for storing uploaded files **(This guide will use Cloudflare R2)**
 5. Raspberry Pi Pico 2 W for firmware deployment (optional for Clock In/Out System)
 6. Thonny IDE for flashing the Raspberry Pi Pico 2 W (optional for Clock In/Out System)
 
-### Backend
-1. Clone the repository: `git clone https://git.cardiff.ac.uk/c23037502/rent-a-tech-team-42a.git`
-2. Navigate to the backend directory: `cd rent-a-tech-team-42a/backend`
-3. Configure your application.properties file with your database credentials and other necessary configurations.
-```yaml
-spring.application.name=Rent-A-Tech
-
-  # --- FOR DEVELOPMENT USE ONLY ---
-spring.jpa.hibernate.ddl-auto=create-drop
-spring.flyway.enabled=false
-  # --- ---
-  # --- FOR PRODUCTION USE ONLY ---
-spring.jpa.hibernate.ddl-auto=none
-spring.flyway.enabled=true
-spring.flyway.locations=classpath:db/migration
-  # --- ---
-spring.datasource.url=jdbc:mariadb://localhost:3306/rent_a_tech
-spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
-spring.datasource.username={ DATABASE USERNAME }
-spring.datasource.password={ DATABASE PASSWORD }
-
-minio.url=https://cdn-ltp.tomsw.uk/
-minio.access.key={ MINIO ACCESS KEY }
-minio.access.secret={ MINIO SECRET KEY }
-minio.bucket.name=rent-a-tech-dev
-minio.file.maxsize=10240
-
-jwt.secret={ Base64 JWT SECRET TOKEN }
-jwt.access_token_expiration=300000
-jwt.refresh_token_expiration=3600
-jwt.refresh_token_expiration_mobile=2592000
-
-leave.total-allowance-hours=160
-leave.minimum-advance-booking-days=14
-leave.max-approved-per-day=2
-
-leave.working-hours.monday-thursday.start=08:00
-leave.working-hours.monday-thursday.end=17:00
-leave.working-hours.friday.start=08:00
-leave.working-hours.friday.end=12:00
+### Setup
+*This guide uses Ubuntu 24.04 as the operating system for the server*
+#### Database (MariaDB)
+Run these commands on your virtual machine or server to install MariaDB
+```bash
+sudo apt update
+sudo apt install mariadb-server mariadb-client galera-4
+sudo mariadb-secure-installation
 ```
-* For the database configuration, you must use MariaDB and create a database named `rent_a_tech`. You can use the following SQL command to create the database:
-```sql
+after this step it will prompt you to set a root password and configure other security settings for the database. Remember these for later as you will need them to connect the backend to the database.
+
+##### Create database
+```bash
+sudo mariadb -u root -p
 CREATE DATABASE rent_a_tech;
 ```
-* For the MinIO configuration, you can set up a local MinIO server or use a cloud-based S3 compatible object storage solution such as AWS S3 or Cloudflare R2. Make sure to replace the placeholders with your actual credentials and the URL of your MinIO server. If you are using a local MinIO server, the URL would typically be `http://localhost:9000/`.
-* For the JWT configuration, generate a secure secret token and set appropriate expiration times for access and refresh tokens. Please note the expiration times are a Long integer so do not set values higher than `Long.MAX_VALUE` (9223372036854775807).
 
-4. Build the project using Gradle: `./gradlew build`
-5. Run the application: `./gradlew bootRun`
+#### Containerisation (Docker)
+Run these commands on your virtual machine or server to install Docker
+```bash
+# Add Docker's official GPG key:
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-### Dummy Data (Development Only)
-To populate the database with dummy data, you can run the following SQL file after running the application for the first time to create the necessary tables:
-```text
-/backend/src/main/resources/dummyData.sql
+# Add the repository to Apt sources:
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
+#### Jenkins (CI/CD)
+Run these commands on your virtual machine or server to install Jenkins
+##### Install Java (Jenkins dependency)
+```bash
+sudo apt update
+sudo apt install fontconfig openjdk-21-jre
+java -version
+```
+##### Install Jenkins
+```bash
+sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc]" \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt update
+sudo apt install jenkins
+```
+##### Start Jenkins
+```bash
+sudo systemctl enable jenkins
+sudo systemctl start jenkins
+sudo systemctl status jenkins
+```
+
+#### Other Considerations
+- Port forwarding may need to be set up on your router to allow external access to the Jenkins server and the backend API. By default, Jenkins runs on port `8080`, so you would need to forward this port to the internal IP address of your server.
+- The backend API runs on port `5000`, so you would also need to forward this port to allow external access to the API.
+
+### Backend (API)
+
+### Desktop Admin Panel (Website)
+
+### Mobile App
+
+### Clock In/Out System (Firmware)
 
 ## Authors and acknowledgment
 - Kirsten Ashmead
