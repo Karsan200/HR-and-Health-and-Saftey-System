@@ -6,36 +6,20 @@ import java.util.UUID;
 
 /**
  * Response returned by the today's clock-ins endpoint.
+ *
+ * @param accountId    the account ID of the employee
+ * @param employeeName the employee's full name ({@code firstName + " " + lastName})
+ * @param firstOnSite  the earliest clock-in event recorded for this employee today
+ * @param lastOnSite   the most recent clock-in event recorded for this employee today
+ * @param allEvents    all clock-in events for this employee today, ordered by creation
+ *                     time ascending; shown when the admin expands an employee's row
  */
 public record TodaysClockInsResponse(
-
-        /** The account ID of the employee. */
         Long accountId,
-
-        /** The employee's full name ({@code firstName + " " + lastName}). */
         String employeeName,
-
-        /**
-         * The earliest clock-in event recorded for this employee today,
-         * representing when they first arrived on site. Null if no events exist
-         * (should not occur in practice since the group only appears when at
-         * least one event exists).
-         */
         ClockInEventSummary firstOnSite,
-
-        /**
-         * The most recent clock-in event recorded for this employee today,
-         * representing the last time they were seen on site. Null when the
-         * employee has only one event (firstOnSite == lastOnSite).
-         */
         ClockInEventSummary lastOnSite,
-
-        /**
-         * All clock-in events for this employee today, ordered by creation
-         * time ascending. Shown when the admin expands an employee's row.
-         */
         List<ClockInEventSummary> allEvents
-
 ) {
 
     /**
@@ -47,5 +31,5 @@ public record TodaysClockInsResponse(
     public record ClockInEventSummary(
             UUID eventId,
             LocalDateTime timestamp
-    ) {}
+    ) { }
 }

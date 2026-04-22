@@ -85,6 +85,13 @@ public class ClockInAdminController {
         }
     }
 
+    /**
+     * Returns today's clock-in events grouped by employee.
+     *
+     * @param date the date to query in YYYY-MM-DD format; defaults to today if omitted
+     * @return one summary entry per employee who has at least one event today,
+     *         ordered by first-on-site time ascending
+     */
     @GetMapping("/clock-in-events/today")
     public List<TodaysClockInsResponse> getTodaysClockIns(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate date) {
