@@ -47,6 +47,30 @@ export interface ClockOverrideRequest {
     removeReport: boolean;
 }
 
+/** A single clock-in event summary (from the BLE / mobile tap events table) */
+export interface ClockInEventSummary {
+    eventId: string;
+    timestamp: string;
+}
+
+/**
+ * One employee's activity for today — their first and last on-site time
+ * plus the full list of events for the expanded view.
+ */
+export interface TodaysClockInEntry {
+    accountId: number;
+    employeeName: string;
+    /** The employee's earliest event of the day */
+    firstOnSite: ClockInEventSummary;
+    /**
+     * The employee's most recent event of the day. Null when they only have
+     * one event (firstOnSite and lastOnSite would be the same record).
+     */
+    lastOnSite: ClockInEventSummary | null;
+    /** Full list of today's events, ordered earliest first */
+    allEvents: ClockInEventSummary[];
+}
+
 // Service functions
 
 /**
@@ -92,6 +116,36 @@ export async function fetchAllClockIns(
         const body = await response.text();
         console.error(`Clock-in fetch failed — status: ${response.status}, body: ${body}`);
         throw new Error(`Failed to fetch clock-ins: ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Fetches today's clock-in events grouped by employee.
+ * Each entry contains the employee's first and last event of the day
+ * (first/last on site) plus their full event list for the expanded view.
+ *
+ * @param authService the authentication service used to make the request
+ * @param date optional ISO date string override — defaults to today on the server
+ */
+export async function fetchTodaysClockIns(
+    authService: AuthenticationService,
+    date?: string,
+): Promise<TodaysClockInEntry[]> {
+    const url = date
+        ? `/api/admin/clock-in-events/today?date=${date}`
+        : "/api/admin/clock-in-events/today";
+
+    const response = await authService.fetch(url, {
+        method: "GET",
+        credentials: "include",
+    });
+
+    if (!response.ok) {
+        const body = await response.text();
+        console.error(`Today's clock-ins fetch failed — status: ${response.status}, body: ${body}`);
+        throw new Error(`Failed to fetch today's clock-ins: ${response.status}`);
     }
 
     return response.json();
@@ -152,7 +206,18 @@ export async function createClockIn(
         throw new Error(body || `Create failed: ${response.status}`);
     }
 
-    return response.json() as Promise<ClockInCreateResponse>;
+    const text = await response.text();
+    if (!text || !text.trim()) {
+        console.warn("createClockIn: empty response body, using temporary ID");
+        return { clockId: crypto.randomUUID() };
+    }
+
+    try {
+        return JSON.parse(text) as ClockInCreateResponse;
+    } catch {
+        console.warn("createClockIn: could not parse response body, using temporary ID");
+        return { clockId: crypto.randomUUID() };
+    }
 }
 
 /**
@@ -229,6 +294,20 @@ export async function fetchReportedClockInCount(
 export function formatTime(time: string | null): string | null {
     if (!time) return null;
     return time.substring(0, 5);
+}
+
+/**
+ * Formats a LocalDateTime string from the backend into a short time display (HH:mm).
+ * Returns "--:--" if the value is null or unparseable.
+ */
+export function formatDateTime(dateTime: string | null): string {
+    if (!dateTime) return "--:--";
+    try {
+        const date = new Date(dateTime);
+        return date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    } catch {
+        return "--:--";
+    }
 }
 
 /**

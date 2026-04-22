@@ -92,4 +92,27 @@ public interface ClockInEventRepository extends JpaRepository<ClockInEventTable,
             LocalDateTime start,
             LocalDateTime end
     );
+
+    /**
+     * Returns all clock-in events whose {@code created} timestamp falls within
+     * the supplied range (inclusive), ordered by creation time ascending.
+     * <p>
+     * Eagerly fetches the associated {@link uk.co.garagebridgend.backend.models.entity.AccountTable}
+     * in the same query to avoid N+1 selects when mapping the results.
+     *
+     * @param start the start of the time range (inclusive)
+     * @param end   the end of the time range (inclusive)
+     * @return all matching events ordered by {@code created} ascending
+     */
+    @Query("""
+            SELECT e FROM ClockInEventTable e
+            JOIN FETCH e.account
+            WHERE e.created >= :start
+              AND e.created <= :end
+            ORDER BY e.created ASC
+            """)
+    List<ClockInEventTable> findAllForDateRange(
+            @Param("start") LocalDateTime start,
+            @Param("end")   LocalDateTime end
+    );
 }
