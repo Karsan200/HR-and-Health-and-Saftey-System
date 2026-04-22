@@ -151,11 +151,11 @@ export function HazardViewPage() {
                             <Box sx={styles.fieldWrapper}>
                                 <Typography sx={styles.fieldLabel}>Photos</Typography>
                                 <Box sx={styles.photoGrid}>
-                                    {hazard.fileUrls.map((url) => (
+                                    {hazard.fileUrls.map((url, index) => (
                                         <Box
-                                            key={url}
+                                            key={index}
                                             component="img"
-                                            src={url}
+                                            src={`data:image/jpeg;base64,${url}`}
                                             sx={styles.photo}
                                         />
                                     ))}
