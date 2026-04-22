@@ -5,7 +5,7 @@
 
 export const AppSettings = {
   // Backend API URL (10.0.2.2 = default emulator IP)
-  API_URL: 'https://api-ltp.tomsw.uk/',
+  API_URL: 'https://api-ltp.tomsw.uk',
 
   // CDN URL for static assets
   CDN_URL: 'https://cdn.tomsw.uk',
