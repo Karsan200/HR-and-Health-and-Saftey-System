@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.co.garagebridgend.backend.models.entity.AccountTable;
+import uk.co.garagebridgend.backend.models.entity.ClockInEventTable;
 import uk.co.garagebridgend.backend.models.entity.ClockInReportTable;
 import uk.co.garagebridgend.backend.models.entity.ClockInTable;
 import uk.co.garagebridgend.backend.models.request.ClockInCreateRequest;
 import uk.co.garagebridgend.backend.models.request.ClockInOverrideRequest;
 import uk.co.garagebridgend.backend.models.response.AccountSearchResponse;
 import uk.co.garagebridgend.backend.models.response.ClockInAdminResponse;
+import uk.co.garagebridgend.backend.models.response.TodaysClockInsResponse;
+import uk.co.garagebridgend.backend.repository.ClockInEventRepository;
 import uk.co.garagebridgend.backend.repository.ClockInReportRepository;
 import uk.co.garagebridgend.backend.repository.AccountRepository;
 import uk.co.garagebridgend.backend.repository.ClockInRepository;
@@ -17,14 +20,18 @@ import uk.co.garagebridgend.backend.repository.ClockInRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
  * Service handling admin-only clock-in operations: retrieving all clock-ins
- * for a given date, applying manual time overrides, and searching for employees
- * by name to populate autocomplete fields.
+ * for a given date, applying manual time overrides, searching for employees
+ * by name to populate autocomplete fields, and retrieving today's clock-in
+ * events grouped by employee.
  */
 @Service
 @RequiredArgsConstructor
@@ -38,6 +45,9 @@ public class ClockInAdminService {
 
     /** Repository for looking up employee accounts when creating manual records. */
     private final AccountRepository accountRepository;
+
+    /** Repository for accessing individual clock-in events. */
+    private final ClockInEventRepository clockInEventRepository;
 
     /**
      * Returns all clock-in records for the given date across all employees,
@@ -189,6 +199,67 @@ public class ClockInAdminService {
     }
 
     /**
+     * Returns all employees who have at least one clock-in event on the given
+     * date, with the full list of their events ordered by time ascending.
+     * <p>
+     * The results are grouped by account and ordered by each employee's
+     * earliest event of the day so the list reads chronologically.
+     *
+     * @param date the date to query; typically today
+     * @return one {@link TodaysClockInsResponse} per employee, ordered by
+     *         first-on-site time ascending
+     */
+    public List<TodaysClockInsResponse> getTodaysClockIns(final LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay   = date.atTime(LocalTime.MAX);
+
+        List<ClockInEventTable> events =
+                clockInEventRepository.findAllForDateRange(startOfDay, endOfDay);
+
+        // Group events by accountId, preserving insertion order (already ASC by time)
+        Map<Long, List<ClockInEventTable>> byAccount = new LinkedHashMap<>();
+        for (ClockInEventTable event : events) {
+            byAccount
+                    .computeIfAbsent(event.getAccount().getAccountId(), id -> new ArrayList<>())
+                    .add(event);
+        }
+
+        List<TodaysClockInsResponse> result = new ArrayList<>();
+
+        for (Map.Entry<Long, List<ClockInEventTable>> entry : byAccount.entrySet()) {
+            List<ClockInEventTable> employeeEvents = entry.getValue();
+
+            // Events are already sorted ASC — first and last are simply head and tail
+            ClockInEventTable first = employeeEvents.getFirst();
+            ClockInEventTable last  = employeeEvents.getLast();
+
+            String fullName = first.getAccount().getFirstName()
+                    + " " + first.getAccount().getLastName();
+
+            TodaysClockInsResponse.ClockInEventSummary firstSummary = toEventSummary(first);
+
+            // Only populate lastOnSite when there is more than one event
+            TodaysClockInsResponse.ClockInEventSummary lastSummary =
+                    employeeEvents.size() > 1 ? toEventSummary(last) : null;
+
+            List<TodaysClockInsResponse.ClockInEventSummary> allSummaries = employeeEvents
+                    .stream()
+                    .map(this::toEventSummary)
+                    .toList();
+
+            result.add(new TodaysClockInsResponse(
+                    entry.getKey(),
+                    fullName,
+                    firstSummary,
+                    lastSummary,
+                    allSummaries
+            ));
+        }
+
+        return result;
+    }
+
+    /**
      * Maps a {@link ClockInTable} entity to a {@link ClockInAdminResponse},
      * attaching the most recent report for that record if one exists.
      *
@@ -224,6 +295,22 @@ public class ClockInAdminService {
                 report.getReportId(),
                 report.getIssue(),
                 report.getCreated()
+        );
+    }
+
+    /**
+     * Maps a {@link ClockInEventTable} entity to a lightweight
+     * {@link TodaysClockInsResponse.ClockInEventSummary}.
+     *
+     * @param event the event entity to map
+     * @return the mapped summary
+     */
+    private TodaysClockInsResponse.ClockInEventSummary toEventSummary(
+            final ClockInEventTable event
+    ) {
+        return new TodaysClockInsResponse.ClockInEventSummary(
+                event.getClockInEventId(),
+                event.getCreated()
         );
     }
 }

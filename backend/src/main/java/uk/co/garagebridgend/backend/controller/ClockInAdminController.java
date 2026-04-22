@@ -21,6 +21,7 @@ import uk.co.garagebridgend.backend.models.request.ClockInCreateRequest;
 import uk.co.garagebridgend.backend.models.request.ClockInOverrideRequest;
 import uk.co.garagebridgend.backend.models.response.AccountSearchResponse;
 import uk.co.garagebridgend.backend.models.response.ClockInAdminResponse;
+import uk.co.garagebridgend.backend.models.response.TodaysClockInsResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -81,6 +82,17 @@ public class ClockInAdminController {
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal server error."
             );
+        }
+    }
+
+    @GetMapping("/clock-in-events/today")
+    public List<TodaysClockInsResponse> getTodaysClockIns(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate date) {
+        try {
+            return clockInAdminService.getTodaysClockIns(date != null ? date : LocalDate.now());
+        } catch (Exception e) {
+            LOG.error("Error retrieving today's clock-in events", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error.");
         }
     }
 
