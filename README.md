@@ -242,6 +242,43 @@ You should see `garagebridgend-backend` in the list with status `Up`.
 ---
 
 ### Desktop Admin Panel (Website)
+The admin panel is a React/Vite application deployed to Cloudflare Pages via GitLab CI/CD. Once deployed, no server-side hosting is required — Cloudflare Pages handles all static asset delivery.
+
+#### Prerequisites
+- A Cloudflare account with Pages enabled.
+- GitLab CI/CD variables configured for the repository.
+#### Cloudflare Pages Setup
+
+##### 1. Create a Pages Project
+1. In the Cloudflare dashboard, navigate to **Workers & Pages → Create application → Pages**.
+2. Select **Direct Upload** (the GitLab CI/CD pipeline will handle deployments rather than connecting Cloudflare directly to GitLab).
+3. Give the project a name (e.g. `garage-guardian-admin`) and complete the setup. Note the project name as you will need it for the CI/CD configuration.
+##### 2. Generate a Cloudflare API Token
+1. In the Cloudflare dashboard, go to **My Profile → API Tokens → Create Token**.
+2. Use the **Edit Cloudflare Workers** template, or create a custom token with **Cloudflare Pages: Edit** permissions.
+3. Copy the token — you will need it in the next step.
+#### GitLab CI/CD Configuration
+
+In your GitLab repository, navigate to **Settings → CI/CD → Variables** and add the following:
+
+| Variable | Description |
+|----------|-------------|
+| `CLOUDFLARE_API_TOKEN` | The API token generated above |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID (found in the Cloudflare dashboard sidebar) |
+| `CF_ZONE_ID` | Your Cloudflare Zone ID (found in the Cloudflare dashboard under your domain's overview page) |
+
+The `.gitlab-ci.yml` in the repository defines the pipeline. On a push to the configured branch, it will:
+1. Install dependencies (`npm ci`).
+2. Build the Vite app (`npm run build`).
+3. Deploy the contents of the `dist/` folder to Cloudflare Pages using `wrangler pages deploy`.
+#### Accessing the Admin Panel
+Once deployed, Cloudflare Pages will provide a URL in the format:
+```
+https://garage-guardian-admin.pages.dev
+```
+You can also configure a custom domain in the Cloudflare Pages project settings.
+ 
+---
 
 ### Mobile App
 
