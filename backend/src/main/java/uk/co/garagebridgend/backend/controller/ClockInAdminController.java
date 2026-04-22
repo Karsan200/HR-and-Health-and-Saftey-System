@@ -123,6 +123,7 @@ public class ClockInAdminController {
             ClockInTable saved = clockInAdminService.createClockIn(request);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
+                    .header("Content-Type", "application/json")
                     .body(Map.of("clockId", saved.getClockInId()));
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());

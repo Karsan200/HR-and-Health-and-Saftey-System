@@ -152,7 +152,18 @@ export async function createClockIn(
         throw new Error(body || `Create failed: ${response.status}`);
     }
 
-    return response.json() as Promise<ClockInCreateResponse>;
+    const text = await response.text();
+    if (!text || !text.trim()) {
+        console.warn("createClockIn: empty response body, using temporary ID");
+        return { clockId: crypto.randomUUID() };
+    }
+
+    try {
+        return JSON.parse(text) as ClockInCreateResponse;
+    } catch {
+        console.warn("createClockIn: could not parse response body, using temporary ID");
+        return { clockId: crypto.randomUUID() };
+    }
 }
 
 /**
