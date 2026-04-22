@@ -13,6 +13,7 @@ jest.mock('react-native-paper', () => {
 
   jest.mock('../src/logic/AuthenticationService.ts', () => ({
     fetch: jest.fn(),
+    putCredentials: jest.fn(),
   }));
 
   return {
@@ -41,7 +42,7 @@ describe('HomeScreen', () => {
             onSelectSettings={() => {}}
             onSelectProfile={() => {}}
             onSelectNotifications={() => {}}
-            onSelectLogout={() => {}}
+            setIsAuthenticated={jest.fn()}
         />,
     );
 
@@ -56,14 +57,14 @@ describe('HomeScreen', () => {
 
   it('renders all buttons', () => {
     const { getByText } = render(
-        <HomeScreen
-            onSelectHr={() => {}}
-            onSelectHealthSafety={() => {}}
-            onSelectSettings={() => {}}
-            onSelectProfile={() => {}}
-            onSelectNotifications={() => {}}
-            onSelectLogout={() => {}}
-        />,
+      <HomeScreen
+        onSelectHr={() => {}}
+        onSelectHealthSafety={() => {}}
+        onSelectSettings={() => {}}
+        onSelectProfile={() => {}}
+        onSelectNotifications={() => {}}
+        setIsAuthenticated={jest.fn()}
+      />,
     );
 
     expect(getByText('HR Portal')).toBeTruthy();
@@ -76,14 +77,14 @@ describe('HomeScreen', () => {
 
   it('presses all buttons to cover functions', () => {
     const { getByText } = render(
-        <HomeScreen
-            onSelectHr={() => {}}
-            onSelectHealthSafety={() => {}}
-            onSelectSettings={() => {}}
-            onSelectProfile={() => {}}
-            onSelectNotifications={() => {}}
-            onSelectLogout={() => {}}
-        />,
+      <HomeScreen
+        onSelectHr={() => {}}
+        onSelectHealthSafety={() => {}}
+        onSelectSettings={() => {}}
+        onSelectProfile={() => {}}
+        onSelectNotifications={() => {}}
+        setIsAuthenticated={jest.fn()}
+      />,
     );
 
     fireEvent.press(getByText('HR Portal'));

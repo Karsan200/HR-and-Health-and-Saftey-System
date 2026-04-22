@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect } from "react";
 import dayjs, { type Dayjs } from "dayjs";
 import {
     Box,
@@ -15,6 +15,7 @@ import ShieldIcon from "@mui/icons-material/Shield";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
+import LogoutIcon from '@mui/icons-material/Logout';
 import { personalPageStyles as styles } from "./PersonalPage.styles";
 import { useAuth } from "../AuthContext";
 import { fetchPersonalData, updateNotificationSettings, type ProfileResponse, type SettingsResponse } from "../logic/PersonalService";
@@ -28,7 +29,7 @@ const TABS: { key: Tab; label: string }[] = [
     { key: "security",  label: "Security" },
 ];
 
-// Settup for the rows of information
+// Setup for the rows of information
 
 interface InfoRowProps {
     icon: React.ReactNode;
@@ -460,31 +461,46 @@ function SecurityTab() {
 }
 
 export function PersonalPage() {
-    const { authenticationService } = useAuth();
+    const auth = useAuth();
 
     const [profile, setProfile] = useState<ProfileResponse | null>(null);
     const [settings, setSettings] = useState<SettingsResponse | null>(null);
     const [activeTab, setActiveTab] = useState<Tab>("profile");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-    const loadProfile = useCallback(async () => {
-        setLoading(true);
-        setError(null);
+    async function handleLogout() {
+        setIsLoggingOut(true);
         try {
-            const { profile, settings } = await fetchPersonalData(authenticationService);
-            setProfile(profile);
-            setSettings(settings);
+            await auth.authenticationService.fetch("/auth/logout", {
+                method: "GET",
+                credentials: "include" as RequestCredentials,
+            });
         } catch {
-            setError("Failed to load profile. Please try again.");
+            // Ignore errors
         } finally {
-            setLoading(false);
+            auth.setIsMfaAuthenticated(false);
+            auth.setIsAuthenticated(false);
         }
-    }, [authenticationService]);
+    }
 
     useEffect(() => {
+        async function loadProfile() {
+            setLoading(true);
+            setError(null);
+            try {
+                const { profile, settings } = await fetchPersonalData(auth.authenticationService);
+                setProfile(profile);
+                setSettings(settings);
+            } catch {
+                setError("Failed to load profile. Please try again.");
+            } finally {
+                setLoading(false);
+            }
+        }
         loadProfile();
-    }, [loadProfile]);
+    }, [auth.authenticationService]);
 
     return (
         <Box sx={styles.page}>
@@ -507,7 +523,6 @@ export function PersonalPage() {
                     </Box>
                 )}
 
-                {/* Tabs */}
                 <Box sx={styles.tabsRow}>
                     {TABS.map(({ key, label }) => (
                         <Box
@@ -520,7 +535,6 @@ export function PersonalPage() {
                     ))}
                 </Box>
 
-                {/* Content */}
                 {loading && (
                     <Box sx={styles.loadingContainer}>
                         <CircularProgress size={32} sx={styles.loadingSpinner} />
@@ -535,9 +549,20 @@ export function PersonalPage() {
                     <>
                         {activeTab === "profile"  && <ProfileTab profile={profile} settings={settings} />}
                         {activeTab === "settings" && <SettingsTab settings={settings} />}
-                        {activeTab === "security" && <SecurityTab/>}
+                        {activeTab === "security" && <SecurityTab />}
                     </>
                 )}
+
+                <Box
+                    component="button"
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    sx={styles.securityButton}
+                >
+                    <LogoutIcon sx={{ fontSize: 16 }} />
+                    {isLoggingOut ? "Logging Out..." : "Logout"}
+                </Box>
+
             </Box>
         </Box>
     );

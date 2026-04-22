@@ -35,6 +35,11 @@ export interface ClockInCreateRequest {
     clockOutTime: string | null;
 }
 
+/** Response returned by the backend after a clock-in record is created */
+export interface ClockInCreateResponse {
+    clockId: string;
+}
+
 /** Payload sent when an admin overrides a clock-in record */
 export interface ClockOverrideRequest {
     clockInTime: string | null;
@@ -123,14 +128,17 @@ export async function submitClockOverride(
 
 /**
  * Creates a new clock-in record for a specific employee on a given date.
+ * Returns the database-assigned UUID so the caller can update local state
+ * with the real ID immediately, without needing to reload the full list.
  *
  * @param request the details of the record to create
  * @param authService the authentication service used to make the request
+ * @returns the real clockId assigned by the database
  */
 export async function createClockIn(
     request: ClockInCreateRequest,
     authService: AuthenticationService,
-): Promise<void> {
+): Promise<ClockInCreateResponse> {
     const response = await authService.fetch("/api/admin/clock-ins", {
         method: "POST",
         credentials: "include",
@@ -143,6 +151,8 @@ export async function createClockIn(
         console.error(`Clock-in create failed — status: ${response.status}, body: ${body}`);
         throw new Error(body || `Create failed: ${response.status}`);
     }
+
+    return response.json() as Promise<ClockInCreateResponse>;
 }
 
 /**

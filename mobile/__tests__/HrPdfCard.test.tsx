@@ -162,8 +162,8 @@ describe('HrPdfCard', () => {
             const pdfElement = UNSAFE_queryByType(MockPdf); // now works
             expect(pdfElement).not.toBeNull();
             expect(pdfElement?.props.source).toEqual({
-                uri: baseProps.pdfUrl,
-                cache: true,
+                uri: "data:application/pdf;base64," + baseProps.pdfUrl,
+                cache: false,
             });
         });
 

@@ -90,7 +90,7 @@ beforeEach(() => {
     mockFetchReportedCount.mockResolvedValue(0);
     mockFetchPendingCount.mockResolvedValue(0);
     mockSubmitClockOverride.mockResolvedValue(undefined);
-    mockCreateClockIn.mockResolvedValue(undefined);
+    mockCreateClockIn.mockResolvedValue({ clockId: "new-clock-uuid" });
     mockDeleteClockIn.mockResolvedValue(undefined);
     mockSearchAccounts.mockResolvedValue([]);
 });
@@ -695,6 +695,7 @@ describe("ClockOverridesPage", () => {
 
         it("adds the new record to the list after a successful add", async () => {
             mockSearchAccounts.mockResolvedValueOnce([{ accountId: 42, fullName: "Bob Builder" }]);
+            mockCreateClockIn.mockResolvedValueOnce({ clockId: "bob-clock-uuid" });
             await renderPage();
             await userEvent.click(screen.getByRole("button", { name: /add clock-in/i }));
 

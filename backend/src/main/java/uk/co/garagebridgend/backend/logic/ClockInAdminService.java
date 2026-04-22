@@ -110,12 +110,13 @@ public class ClockInAdminService {
      * The isAdminAdjusted flag is set to true as this record is created manually.
      *
      * @param request the details of the clock-in record to create
+     * @return the saved {@link ClockInTable} entity, including its generated ID
      * @throws IllegalArgumentException if no account exists for the given accountId,
      *                                  or if a clock-in already exists for that
      *                                  employee on the requested date
      */
     @Transactional
-    public void createClockIn(final ClockInCreateRequest request) {
+    public ClockInTable createClockIn(final ClockInCreateRequest request) {
         AccountTable account = accountRepository.findById(request.accountId())
                 .orElseThrow(() -> new IllegalArgumentException("Account not found."));
 
@@ -143,6 +144,8 @@ public class ClockInAdminService {
         // to the start of the requested date so date-range queries find it correctly.
         ClockInTable saved = clockInRepository.saveAndFlush(record);
         clockInRepository.backdateCreated(saved.getClockInId(), startOfDay);
+
+        return saved;
     }
 
     /**

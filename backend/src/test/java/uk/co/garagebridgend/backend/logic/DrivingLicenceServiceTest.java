@@ -62,15 +62,15 @@ class DrivingLicenceServiceTest {
                         account, "driving licence"))
                 .thenReturn(List.of(document));
 
-        when(storageService.getPresignedUrl(any()))
-                .thenReturn("test-url");
+        when(storageService.getObject(any()))
+                .thenReturn("test-encoding");
 
         DrivingLicenceResponse result =
                 drivingLicenceService.getDrivingLicenceForCurrentUser();
 
         assertEquals("Driving Licence", result.getTitle());
         assertEquals("pdf", result.getExtension());
-        assertEquals("test-url", result.getUrl());
+        assertEquals("test-encoding", result.getUrl());
     }
 
     /**

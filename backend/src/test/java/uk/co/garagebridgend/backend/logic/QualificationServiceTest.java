@@ -54,8 +54,8 @@ class QualificationServiceTest {
         when(qualificationRepository.findByAccountOrderByCreatedDesc(account))
                 .thenReturn(List.of(qualification));
 
-        when(storageService.getPresignedUrl(any()))
-                .thenReturn("test-url");
+        when(storageService.getObject(any()))
+                .thenReturn("test-encoding");
 
         List<QualificationResponse> result =
                 qualificationService.getQualificationsForCurrentUser();
@@ -63,7 +63,7 @@ class QualificationServiceTest {
         assertEquals(1, result.size());
         assertEquals("Health and Safety", result.get(0).getTitle());
         assertEquals("Workplace safety training", result.get(0).getDetails());
-        assertEquals("test-url", result.get(0).getUrl());
+        assertEquals("test-encoding", result.get(0).getUrl());
     }
 
     @Test

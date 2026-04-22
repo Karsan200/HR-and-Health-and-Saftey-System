@@ -1,59 +1,74 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { ScrollView, Text, View, Pressable } from 'react-native';
 import { Avatar, IconButton } from 'react-native-paper';
 import { homeStyles as styles } from './HomeScreen.styles';
 import { ThemeContext } from '../theme/colourController';
-import AuthenticationService from "../logic/AuthenticationService.ts";
+import AuthenticationService from '../logic/AuthenticationService.ts';
 
 type HomeScreenProps = {
   onSelectHr: () => void;
   onSelectHealthSafety: () => void;
   onSelectSettings: () => void;
   onSelectProfile: () => void;
-  onSelectLogout: () => void;
   onSelectNotifications: () => void;
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean | null>>;
 };
 
 type Profile = {
-    firstName: string;
-    lastName: string;
+  firstName: string;
+  lastName: string;
 };
 
 export default function HomeScreen({
-                                     onSelectHr,
-                                     onSelectHealthSafety,
-                                     onSelectSettings,
-                                     onSelectLogout,
-                                     onSelectNotifications,
-                                     onSelectProfile,
-                                   }: HomeScreenProps) {
+  onSelectHr,
+  onSelectHealthSafety,
+  onSelectSettings,
+  onSelectNotifications,
+  onSelectProfile,
+  setIsAuthenticated,
+}: HomeScreenProps) {
   // Pull the current theme from the ThemeContext
   const { theme, accessibility } = useContext(ThemeContext);
   const themedStyles = styles(theme, accessibility);
-    const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await AuthenticationService.fetch('/api/profile/me');
+        if (response.ok) {
+          const data = await response.json();
+          setProfile({ firstName: data.firstName, lastName: data.lastName });
+        }
+      } catch {}
+    };
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const response = await AuthenticationService.fetch('/api/profile/me');
-                if (response.ok) {
-                    const data = await response.json();
-                    setProfile({ firstName: data.firstName, lastName: data.lastName });
-                }
-            } catch {
-            }
-        };
+    fetchProfile();
+  }, []);
 
-        fetchProfile();
-    }, []);
+  async function onSelectLogout() {
+    try {
+      const credentials = await AuthenticationService.getCredentials();
 
+      if (credentials) {
+        await AuthenticationService.fetch('/auth/logout', {
+          method: 'GET',
+          headers: {
+            Cookie: `refreshToken=${credentials.refreshToken}`,
+          },
+        });
+      }
+    } catch (e) {
+      console.error('Logout failed:', e);
+    } finally {
+      await AuthenticationService.putCredentials(null, null);
+      setIsAuthenticated(false);
+    }
+  }
 
-    const displayName = profile
-        ? `${profile.firstName} ${profile.lastName}`
-        : '';
+  const displayName = profile ? `${profile.firstName} ${profile.lastName}` : '';
 
-    return (
+  return (
     <ScrollView contentContainerStyle={themedStyles.container}>
       {/* Profile Icon */}
       <Avatar.Icon
@@ -85,7 +100,10 @@ export default function HomeScreen({
       </Pressable>
 
       {/* Health & Safety */}
-      <Pressable style={themedStyles.sectionButton} onPress={onSelectHealthSafety}>
+      <Pressable
+        style={themedStyles.sectionButton}
+        onPress={onSelectHealthSafety}
+      >
         <View style={themedStyles.sectionButtonContent}>
           <IconButton
             icon="shield-outline"
@@ -94,7 +112,9 @@ export default function HomeScreen({
             containerColor="transparent"
             style={themedStyles.iconButton}
           />
-          <Text style={themedStyles.sectionButtonText}>Health &amp; Safety</Text>
+          <Text style={themedStyles.sectionButtonText}>
+            Health &amp; Safety
+          </Text>
         </View>
       </Pressable>
 
@@ -103,7 +123,10 @@ export default function HomeScreen({
         <Text style={themedStyles.quickAccessTitle}>QUICK ACCESS</Text>
 
         {/* Profile */}
-        <Pressable style={themedStyles.quickAccessButtonContainer} onPress={onSelectProfile}>
+        <Pressable
+          style={themedStyles.quickAccessButtonContainer}
+          onPress={onSelectProfile}
+        >
           <View style={themedStyles.quickAccessButtonContent}>
             <IconButton
               icon="account-circle"
@@ -117,7 +140,10 @@ export default function HomeScreen({
         </Pressable>
 
         {/* Notifications */}
-        <Pressable style={themedStyles.quickAccessButtonContainer} onPress={onSelectNotifications}>
+        <Pressable
+          style={themedStyles.quickAccessButtonContainer}
+          onPress={onSelectNotifications}
+        >
           <View style={themedStyles.quickAccessButtonContent}>
             <IconButton
               icon="bell-outline"
@@ -131,7 +157,10 @@ export default function HomeScreen({
         </Pressable>
 
         {/* Settings */}
-        <Pressable style={themedStyles.quickAccessButtonContainer} onPress={onSelectSettings}>
+        <Pressable
+          style={themedStyles.quickAccessButtonContainer}
+          onPress={onSelectSettings}
+        >
           <View style={themedStyles.quickAccessButtonContent}>
             <IconButton
               icon="cog"
@@ -145,7 +174,10 @@ export default function HomeScreen({
         </Pressable>
 
         {/* Logout */}
-        <Pressable style={themedStyles.quickAccessButtonContainer} onPress={onSelectLogout}>
+        <Pressable
+          style={themedStyles.quickAccessButtonContainer}
+          onPress={onSelectLogout}
+        >
           <View style={themedStyles.quickAccessButtonContent}>
             <IconButton
               icon="logout"

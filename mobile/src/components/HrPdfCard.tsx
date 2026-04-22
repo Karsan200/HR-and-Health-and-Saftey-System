@@ -90,7 +90,7 @@ const HrPdfCard: React.FC<HrPdfCardProps> = ({
             {isExpanded && (
                 <View style={styles.pdfContainer}>
                     <Pdf
-                        source={{ uri: pdfUrl, cache: true }}
+                        source={{ uri: `data:application/pdf;base64,${pdfUrl}`, cache: false }}
                         trustAllCerts={false}
                         style={styles.pdf}
                         onError={(error) => {
