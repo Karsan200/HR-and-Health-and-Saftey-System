@@ -320,6 +320,66 @@ Once the pipeline has run and the release has been published in Google Play Cons
 ---
 
 ### Clock In/Out System (Firmware)
+The Clock In/Out system runs on a Raspberry Pi Pico 2 W flashed with MicroPython firmware. The device scans for nearby BLE advertisements from employee devices and reports attendance events to the backend API over WiFi.
+
+#### Prerequisites
+- A Raspberry Pi Pico 2 W.
+- [Thonny IDE](https://thonny.org/) installed on your computer.
+- The MicroPython firmware for the Pico 2 W (`.uf2` file) — available from the [MicroPython downloads page](https://micropython.org/download/RPI_PICO2_W/).
+- The backend API is deployed and accessible from the same network as the Pico.
+#### 1. Flash MicroPython onto the Pico
+1. Hold the **BOOTSEL** button on the Pico and plug it into your computer via USB. It will appear as a mass storage device called `RPI-RP2`.
+2. Drag and drop the MicroPython `.uf2` file onto the `RPI-RP2` drive. The Pico will reboot automatically and is now running MicroPython.
+#### 2. Configure Thonny
+1. Open Thonny and go to **Tools → Options → Interpreter**.
+2. Set the interpreter to **MicroPython (Raspberry Pi Pico)**.
+3. Select the correct COM port / serial device for your Pico and click **OK**.
+4. You should see the MicroPython REPL prompt (`>>>`) in the Thonny shell.
+#### 3. Create the Configuration File
+The firmware reads its settings from a `config.json` file that must be uploaded to the Pico alongside the main code. If `config.json` is not present on boot, the device will create a blank template automatically — you can then edit and re-upload it, or create it manually from the start using the structure below:
+
+```json
+{
+    "ssid": "YOUR_WIFI_NETWORK_NAME",
+    "password": "YOUR_WIFI_PASSWORD",
+    "server_url": "https://your-server-url",
+    "device_id": "pico-entrance-01",
+    "api_key": "YOUR_API_KEY",
+    "scanning_interval": 15,
+    "upload_interval": 60,
+    "rssi_threshold": -75,
+    "max_cache_entries": 100
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `ssid` | WiFi network name the Pico should connect to |
+| `password` | WiFi password |
+| `server_url` | Full URL of the deployed backend API |
+| `device_id` | Unique identifier for this device — used by the backend to identify which reader reported an event |
+| `api_key` | API key used to authenticate requests to the backend |
+| `scanning_interval` | How often (in seconds) the device scans for BLE advertisements |
+| `upload_interval` | How often (in seconds) the device uploads cached events to the backend |
+| `rssi_threshold` | Minimum signal strength (in dBm) for a BLE device to be recorded — devices with a weaker signal than this value are ignored (e.g. `-75`) |
+| `max_cache_entries` | Maximum number of BLE events to hold in memory before uploading |
+
+#### 4. Upload Files to the Pico
+Using Thonny's file browser (**View → Files**):
+1. Navigate to the project's `firmware/` directory on your computer (left panel).
+2. Upload `config.json` to the root of the Pico filesystem (right panel) by right-clicking and selecting **Upload to /**.
+3. Upload `main.py` (and any other required source files) to the root of the Pico filesystem in the same way.
+#### 5. Run the Firmware
+With `main.py` on the device, the firmware will run automatically on boot. You can also press **F5** in Thonny to run it immediately and observe output in the shell for debugging.
+
+On startup, the device will:
+1. Connect to the configured WiFi network.
+2. Begin scanning for BLE advertisements from registered employee devices.
+3. Send attendance events to the backend API at `api_base_url` as employees come into range.
+#### Deploying Multiple Devices
+Repeat steps 1–5 for each additional Pico. Ensure each device has a unique `device_id` in its `config.json`. All devices can point to the same `api_base_url`.
+ 
+---
 
 ## Authors and acknowledgment
 - Kirsten Ashmead
