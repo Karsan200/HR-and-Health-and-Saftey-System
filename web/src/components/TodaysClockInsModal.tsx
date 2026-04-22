@@ -35,8 +35,6 @@ function initials(fullName: string): string {
     );
 }
 
-// ─── Employee row ─────────────────────────────────────────────────────────────
-
 interface EmployeeRowProps {
     entry: TodaysClockInEntry;
 }
@@ -149,7 +147,6 @@ function EmployeeRow({ entry }: EmployeeRowProps) {
     );
 }
 
-// ─── Modal ────────────────────────────────────────────────────────────────────
 
 interface TodaysClockInsModalProps {
     open: boolean;
