@@ -281,6 +281,43 @@ You can also configure a custom domain in the Cloudflare Pages project settings.
 ---
 
 ### Mobile App
+The mobile app is a React Native application distributed via the Google Play Store. The GitLab CI/CD pipeline handles building and pushing new releases to Google Play Console.
+
+#### Prerequisites
+- A Google Play Console developer account with the app already created.
+- A signing keystore file for the release build.
+- GitLab CI/CD variables configured for the repository.
+#### Google Play Console Setup
+
+##### 1. Create a Service Account
+The CI/CD pipeline uses a Google Play service account to publish builds automatically.
+
+1. In Google Play Console, navigate to **Setup → API access**.
+2. Link your Google Play Console account to a Google Cloud project if you haven't already.
+3. Click **Create new service account** and follow the link to Google Cloud Console.
+4. In Google Cloud Console, create a service account and grant it the **Service Account User** role.
+5. Create and download a JSON key for the service account.
+6. Back in Google Play Console, grant the service account **Release manager** (or appropriate) permissions on your app.
+#### GitLab CI/CD Configuration
+
+In your GitLab repository, navigate to **Settings → CI/CD → Variables** and add the following:
+
+| Variable | Description |
+|----------|-------------|
+| `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | Base64-encoded contents of the Google Play service account JSON key file. Generate with: `base64 -w 0 service-account.json` |
+| `KEY_ALIAS` | The key alias used when generating the keystore |
+| `KEY_PASSWORD` | Password for the key alias |
+| `KEYSTORE_BASE64` | Base64-encoded contents of your `.keystore` / `.jks` signing file. Generate with: `base64 -w 0 your.keystore` |
+| `KEYSTORE_PASSWORD` | Password for the keystore |
+
+The `.gitlab-ci.yml` in the repository defines the pipeline. On a push to the configured branch, it will:
+1. Install dependencies (`npm ci`).
+2. Build a signed release APK/AAB using the keystore credentials.
+3. Upload the build to Google Play Console using the service account, targeting the configured track (e.g. `internal`, `alpha`, or `production`).
+#### Installing the App
+Once the pipeline has run and the release has been published in Google Play Console, the app can be downloaded from the Play Store. During development, use the **Internal testing** track to distribute to testers before a wider release.
+ 
+---
 
 ### Clock In/Out System (Firmware)
 
