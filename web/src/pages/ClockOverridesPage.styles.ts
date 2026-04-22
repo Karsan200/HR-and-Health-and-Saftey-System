@@ -237,6 +237,36 @@ export const clockOverridesPageStyles = {
         letterSpacing: "0.17px",
     },
 
+    todaysButton: {
+        height: "auto",
+        justifyContent: "center",
+        display: "flex",
+        alignItems: "center",
+        padding: "10px 24px",
+        gap: "10px",
+        minWidth: "200px",
+        backgroundColor: DefaultColours.white,
+        boxShadow: `0px 0px 4px ${DefaultColours.greyIconLight}`,
+        borderRadius: `${BorderRadius.largeButtonsAndOutlines}px`,
+        textTransform: "none" as const,
+        flexShrink: 0,
+        borderColor: DefaultColours.greyIconLight,
+        color: DefaultColours.greyPrimaryMainText,
+        "&:hover": {
+            backgroundColor: DefaultColours.greyBackground,
+            borderColor: DefaultColours.greyPrimaryMainText,
+            boxShadow: `0px 0px 4px ${DefaultColours.greyIconLight}`,
+        },
+    },
+
+    todaysButtonLabel: {
+        ...TextStyles.semiBold,
+        fontSize: FontSize.m20,
+        color: DefaultColours.greyPrimaryMainText,
+        lineHeight: "120%",
+        letterSpacing: "0.17px",
+    },
+
     addButton: {
         height: "auto",
         justifyContent: "center",

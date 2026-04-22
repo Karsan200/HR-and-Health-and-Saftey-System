@@ -5,7 +5,7 @@
 
 export const AppSettings = {
   // Backend API URL
-  API_URL: 'https://api-ltp.tomsw.uk',
+  API_URL: 'http://localhost:8080',
   
   // CDN URL for static assets
   CDN_URL: 'https://cdn-ltp.tomsw.uk',

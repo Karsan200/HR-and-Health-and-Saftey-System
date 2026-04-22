@@ -21,6 +21,7 @@ import uk.co.garagebridgend.backend.models.request.ClockInCreateRequest;
 import uk.co.garagebridgend.backend.models.request.ClockInOverrideRequest;
 import uk.co.garagebridgend.backend.models.response.AccountSearchResponse;
 import uk.co.garagebridgend.backend.models.response.ClockInAdminResponse;
+import uk.co.garagebridgend.backend.models.response.TodaysClockInsResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -85,6 +86,24 @@ public class ClockInAdminController {
     }
 
     /**
+     * Returns today's clock-in events grouped by employee.
+     *
+     * @param date the date to query in YYYY-MM-DD format; defaults to today if omitted
+     * @return one summary entry per employee who has at least one event today,
+     *         ordered by first-on-site time ascending
+     */
+    @GetMapping("/clock-in-events/today")
+    public List<TodaysClockInsResponse> getTodaysClockIns(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate date) {
+        try {
+            return clockInAdminService.getTodaysClockIns(date != null ? date : LocalDate.now());
+        } catch (Exception e) {
+            LOG.error("Error retrieving today's clock-in events", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error.");
+        }
+    }
+
+    /**
      * Applies an admin override to a specific clock-in record, replacing
      * the existing times with those supplied in the request body.
      *
@@ -123,6 +142,7 @@ public class ClockInAdminController {
             ClockInTable saved = clockInAdminService.createClockIn(request);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
+                    .header("Content-Type", "application/json")
                     .body(Map.of("clockId", saved.getClockInId()));
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
