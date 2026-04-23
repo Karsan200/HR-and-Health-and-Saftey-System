@@ -9,7 +9,7 @@ import ProfileScreen from '../screens/personal/ProfileScreen.tsx';
 import EditProfileScreen from '../screens/personal/EditProfileScreen.tsx';
 import React from 'react';
 
-import { ScreenConfigStyles } from './ScreenConfig.styles.ts';
+import { ScreenConfigStyles as styles } from './ScreenConfig.styles.ts';
 import { ScreenKey } from '../logic/NavigationConfiguration.ts';
 import { ScreenConfigProps } from '../model/props/ScreenConfigProps.ts';
 import HazardForm from "../screens/HazardForm.tsx";
@@ -21,13 +21,8 @@ import PersonalScreen from "../screens/PersonalScreen.tsx";
 import HazardView from "../screens/HazardView.tsx";
 import HazardList from "../screens/HazardList.tsx";
 import ClockInScreen from '../screens/ClockInScreen.tsx';
-import { useTheme } from '../theme/colourController.tsx';
 
 export function ScreenConfig(body: ScreenConfigProps) {
-
-  const { theme } = useTheme();
-  const styles = ScreenConfigStyles(theme);
-
   // Defaulting to the calendar screen when the HR section is selected.
   const handleSelectHr = () => {
     body.setSection('hr');
