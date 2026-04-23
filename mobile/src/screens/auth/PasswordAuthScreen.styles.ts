@@ -16,6 +16,7 @@ export const passwordAuthScreenStyles = (theme: any, accessibility: { largeText:
     paddingTop: 40,
     paddingBottom: 40,
     backgroundColor: theme.white,
+    color: theme.white,
   },
 
   /** Logo image styling: fixed dimensions and aspect ratio preservation. */
