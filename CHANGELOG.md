@@ -1,3 +1,19 @@
+## [V0.4.3] - 2026-04-23
+
+### Added
+- Popup when the user reaches the pin code screen to ask for permissions so that BLE Bluetooth can start working immediately
+- Added interface to admin web app to view clock in events, with filtering options
+
+### Fixed
+- Issue where the android app pipeline was not appending the version number
+- Issue where on the mobile app and desktop admin panel images were not being loaded due to them not reading the base64 encoded objects correctly
+
+## [V0.4.2] - 2026-04-22
+
+### Fixed
+- Android app CI/CD pipeline was not correctly signing the app bundle, fixed the signing configuration in the Gradle build files to ensure the app bundle is signed with the correct keystore and key alias for release builds
+- Issue where on the mobile app PDFs did not load or download due to it directly calling S3 instead of returning base64
+
 ## [V0.4.1] - 2026-04-21
 
 ### Fixed

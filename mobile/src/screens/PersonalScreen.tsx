@@ -137,13 +137,15 @@ export default function PersonalScreen() {
                         {selectedLicence.title}
                     </Text>
                 </View>
-                <View style={styles.pdfContainer}>
-                    <Image
-                        source={{ uri: selectedLicence.url }}
-                        style={styles.pdf}
-                        resizeMode="contain"
-                    />
-                </View>
+                {selectedLicence.url !== null && selectedLicence.url !== undefined ? (
+                  <View style={styles.pdfContainer}>
+                      <Image
+                          source={{ uri: `data:image;base64,${selectedLicence.url}` }}
+                          style={styles.pdf}
+                          resizeMode="contain"
+                      />
+                  </View>
+                ): (<></>)}
             </View>
         );
     }
@@ -165,17 +167,19 @@ export default function PersonalScreen() {
                         {selectedQualification.title}
                     </Text>
                 </View>
-                <View style={styles.pdfContainer}>
-                    <Pdf
-                        source={{ uri: selectedQualification.url, cache: false }}
-                        trustAllCerts={false}
-                        style={styles.pdf}
-                        onError={(error) => {
-                            console.error('PDF error:', error);
-                            Alert.alert('Error', 'Failed to load PDF.');
-                        }}
-                    />
-                </View>
+                {selectedQualification.url !== null && selectedQualification.url !== undefined ? (
+                  <View style={styles.pdfContainer}>
+                      <Pdf
+                          source={{ uri: `data:application/pdf;base64,${selectedQualification.url}`, cache: false }}
+                          trustAllCerts={false}
+                          style={styles.pdf}
+                          onError={(error) => {
+                              console.error('PDF error:', error);
+                              Alert.alert('Error', 'Failed to load PDF.');
+                          }}
+                      />
+                  </View>
+                ): (<></>)}
             </View>
         );
     }
