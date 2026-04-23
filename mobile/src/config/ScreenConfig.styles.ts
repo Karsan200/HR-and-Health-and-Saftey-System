@@ -1,11 +1,10 @@
 import { StyleSheet } from 'react-native';
-import { DefaultColours } from '../theme/colours.ts';
 
-export const ScreenConfigStyles =
+export const ScreenConfigStyles = (theme: any) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: DefaultColours.white,
+      backgroundColor: theme.white,
     },
     content: {
       flex: 1,
