@@ -177,7 +177,8 @@ describe("submitClockOverride", () => {
 
 describe("createClockIn", () => {
     it("calls the correct endpoint", async () => {
-        const auth = makeMockAuthService({ body: { clockId: "new-uuid" } });
+        // createClockIn now reads response.text() — supply the payload via text
+        const auth = makeMockAuthService({ text: JSON.stringify({ clockId: "new-uuid" }) });
         await createClockIn({ accountId: 1, date: "2026-04-07", clockInTime: "08:00:00", clockOutTime: "17:00:00" }, auth as never);
         expect(auth.fetch).toHaveBeenCalledWith(
             "/api/admin/clock-ins",
@@ -186,7 +187,7 @@ describe("createClockIn", () => {
     });
 
     it("sends the create payload as JSON", async () => {
-        const auth = makeMockAuthService({ body: { clockId: "new-uuid" } });
+        const auth = makeMockAuthService({ text: JSON.stringify({ clockId: "new-uuid" }) });
         const request = { accountId: 1, date: "2026-04-07", clockInTime: "08:00:00", clockOutTime: null };
         await createClockIn(request, auth as never);
         expect(auth.fetch).toHaveBeenCalledWith(
@@ -196,7 +197,7 @@ describe("createClockIn", () => {
     });
 
     it("sets Content-Type to application/json", async () => {
-        const auth = makeMockAuthService({ body: { clockId: "new-uuid" } });
+        const auth = makeMockAuthService({ text: JSON.stringify({ clockId: "new-uuid" }) });
         await createClockIn({ accountId: 1, date: "2026-04-07", clockInTime: null, clockOutTime: null }, auth as never);
         expect(auth.fetch).toHaveBeenCalledWith(
             expect.any(String),
@@ -205,10 +206,33 @@ describe("createClockIn", () => {
     });
 
     it("resolves with the clockId returned by the backend on a successful response", async () => {
-        const auth = makeMockAuthService({ body: { clockId: "new-uuid" } });
+        // Supply the JSON via text since createClockIn calls response.text() internally
+        const auth = makeMockAuthService({ text: JSON.stringify({ clockId: "new-uuid" }) });
         await expect(
             createClockIn({ accountId: 1, date: "2026-04-07", clockInTime: null, clockOutTime: null }, auth as never)
         ).resolves.toEqual({ clockId: "new-uuid" });
+    });
+
+    it("falls back to a generated UUID when the response body is empty", async () => {
+        // Empty text simulates a 201 with no body, should not throw
+        const auth = makeMockAuthService({ text: "" });
+        const result = await createClockIn(
+            { accountId: 1, date: "2026-04-07", clockInTime: null, clockOutTime: null },
+            auth as never
+        );
+        expect(result).toHaveProperty("clockId");
+        expect(typeof result.clockId).toBe("string");
+        expect(result.clockId.length).toBeGreaterThan(0);
+    });
+
+    it("falls back to a generated UUID when the response body is not valid JSON", async () => {
+        const auth = makeMockAuthService({ text: "not-json" });
+        const result = await createClockIn(
+            { accountId: 1, date: "2026-04-07", clockInTime: null, clockOutTime: null },
+            auth as never
+        );
+        expect(result).toHaveProperty("clockId");
+        expect(typeof result.clockId).toBe("string");
     });
 
     it("throws with the response body message when not ok", async () => {
@@ -218,7 +242,7 @@ describe("createClockIn", () => {
         ).rejects.toThrow("A clock-in record already exists");
     });
 
-    it("throws a fallback message when the response body is empty", async () => {
+    it("throws a fallback message when the response body is empty and not ok", async () => {
         const auth = makeMockAuthService({ ok: false, text: "" });
         await expect(
             createClockIn({ accountId: 1, date: "2026-04-07", clockInTime: null, clockOutTime: null }, auth as never)

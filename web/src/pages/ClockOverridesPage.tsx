@@ -22,6 +22,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberOutlined from "@mui/icons-material/WarningAmberOutlined";
 import CalendarTodayOutlined from "@mui/icons-material/CalendarTodayOutlined";
 import PersonSearchOutlinedIcon from "@mui/icons-material/PersonSearchOutlined";
+import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
 
 import { SectionNavBar, type SectionNavTab } from "../components/SectionNavbar";
 import { useAuth } from "../AuthContext";
@@ -39,6 +40,7 @@ import {
     type ClockInRecord,
     type AccountSearchResult,
 } from "../logic/ClockOverridesService";
+import { TodaysClockInsModal } from "../components/TodaysClockInsModal";
 import { clockOverridesPageStyles as styles } from "./ClockOverridesPage.styles";
 import { DefaultColours } from "../theme/colours";
 import { FontSize, TextStyles, BorderRadius } from "../theme/theme";
@@ -805,20 +807,21 @@ function ClockInCard({ record, onEdit, onDelete }: ClockInCardProps) {
 export function ClockOverridesPage() {
     const { authenticationService } = useAuth();
 
-    const [selectedDate, setSelectedDate]         = useState<string>(todayISO());
-    const [employeeFilter, setEmployeeFilter]     = useState<string>("");
-    const [sortBy, setSortBy]                     = useState<SortOption>("date-asc");
-    const [showReportedOnly, setShowReportedOnly] = useState<boolean>(false);
-    const [showAll, setShowAll]                   = useState<boolean>(false);
-    const [records, setRecords]                   = useState<ClockInRecord[]>([]);
-    const [loading, setLoading]                   = useState(false);
-    const [error, setError]                       = useState<string | null>(null);
-    const [editingRecord, setEditingRecord]       = useState<ClockInRecord | null>(null);
-    const [editModalOpen, setEditModalOpen]       = useState(false);
-    const [addModalOpen, setAddModalOpen]         = useState(false);
-    const [deletingRecord, setDeletingRecord]     = useState<ClockInRecord | null>(null);
-    const [deleteModalOpen, setDeleteModalOpen]   = useState(false);
-    const [pendingCount, setPendingCount]         = useState<number>(0);
+    const [selectedDate, setSelectedDate]             = useState<string>(todayISO());
+    const [employeeFilter, setEmployeeFilter]         = useState<string>("");
+    const [sortBy, setSortBy]                         = useState<SortOption>("date-asc");
+    const [showReportedOnly, setShowReportedOnly]     = useState<boolean>(false);
+    const [showAll, setShowAll]                       = useState<boolean>(false);
+    const [records, setRecords]                       = useState<ClockInRecord[]>([]);
+    const [loading, setLoading]                       = useState(false);
+    const [error, setError]                           = useState<string | null>(null);
+    const [editingRecord, setEditingRecord]           = useState<ClockInRecord | null>(null);
+    const [editModalOpen, setEditModalOpen]           = useState(false);
+    const [addModalOpen, setAddModalOpen]             = useState(false);
+    const [deletingRecord, setDeletingRecord]         = useState<ClockInRecord | null>(null);
+    const [deleteModalOpen, setDeleteModalOpen]       = useState(false);
+    const [todaysModalOpen, setTodaysModalOpen]       = useState(false);
+    const [pendingCount, setPendingCount]             = useState<number>(0);
     const [totalReportedCount, setTotalReportedCount] = useState<number>(0);
 
     const loadRecords = useCallback(async () => {
@@ -846,7 +849,7 @@ export function ClockOverridesPage() {
             const count = await fetchPendingLeaveCount(authenticationService);
             setPendingCount(count);
         } catch {
-            // Non-critical — badge stays at 0 if the request fails
+            // Non-critical
         }
     }, [authenticationService]);
 
@@ -861,7 +864,7 @@ export function ClockOverridesPage() {
             const count = await fetchReportedClockInCount(authenticationService);
             setTotalReportedCount(count);
         } catch {
-            // Non-critical — badge stays at 0 if the request fails
+            // Non-critical
         }
     }, [authenticationService]);
 
@@ -949,7 +952,7 @@ export function ClockOverridesPage() {
         <Box sx={styles.pageContainer}>
             <SectionNavBar tabs={calendarTabs} />
 
-            {/* Filters and add button row */}
+            {/* Filters, add button, and today's clock-ins button row */}
             <Box sx={{ display: "flex", gap: "16px", alignItems: "stretch" }}>
                 <Box sx={{ ...styles.filtersCard, flex: 1 }}>
                     <TextField
@@ -1029,6 +1032,17 @@ export function ClockOverridesPage() {
                     </Typography>
                 </Box>
 
+                {/* Today's Clock-ins button */}
+                <Button
+                    variant="outlined"
+                    startIcon={<PeopleOutlineIcon sx={{ fontSize: "20px" }} />}
+                    onClick={() => setTodaysModalOpen(true)}
+                    sx={styles.todaysButton}
+                >
+                    <Typography sx={styles.todaysButtonLabel}>Today's Clock-ins</Typography>
+                </Button>
+
+                {/* Add Clock-in button */}
                 <Button
                     variant="contained"
                     startIcon={<AddIcon sx={{ color: DefaultColours.white }} />}
@@ -1091,6 +1105,11 @@ export function ClockOverridesPage() {
                 open={deleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
                 onDeleted={handleDeleted}
+            />
+
+            <TodaysClockInsModal
+                open={todaysModalOpen}
+                onClose={() => setTodaysModalOpen(false)}
             />
         </Box>
     );

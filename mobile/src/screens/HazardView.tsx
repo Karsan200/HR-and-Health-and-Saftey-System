@@ -193,7 +193,7 @@ export default function HazardView({ hazardId }: Props) {
                                 <Image
                                     testID={`hazard-photo-${i}`}
                                     key={i}
-                                    source={{ uri: url }}
+                                    source={{ uri: `data:image;base64,${url}` }}
                                     style={styles.photoThumb}
                                     resizeMode="cover"
                                 />

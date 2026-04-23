@@ -31,6 +31,7 @@ import {
   BleBroadcastHook,
   BleBroadcastTaskArgs,
 } from './src/hook/BleBroadcastHook.ts';
+import { requestBlePermissions } from './src/logic/RequestBlePermissions.ts';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -64,6 +65,13 @@ function App() {
 
       if (isEmulator) {
         console.warn('Skipping BLE setup on emulator');
+        return;
+      }
+
+      // Request permissions before anything BLE-related
+      const hasPermissions = await requestBlePermissions();
+      if (!hasPermissions) {
+        console.warn('BLE permissions denied — attendance tracking unavailable');
         return;
       }
 

@@ -135,7 +135,7 @@ describe("HazardViewPage", () => {
             renderPage();
             expect(await screen.findByText("Photos")).toBeInTheDocument();
             const img = screen.getByRole("img");
-            expect(img).toHaveAttribute("src", "https://example.com/photo1.jpg");
+            expect(img).toHaveAttribute("src", "data:image/jpeg;base64,https://example.com/photo1.jpg");
         });
     });
 
