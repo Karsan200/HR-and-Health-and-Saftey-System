@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { Fonts, FontSize, Spacing, TextStyles } from '../../theme/theme.ts';
+import {DefaultColours} from "../../theme/colours.ts";
 
 /** Styles for the Password Authentication Screen, defining layout and visual properties for the screen components. */
 export const passwordAuthScreenStyles = (theme: any, accessibility: { largeText: boolean, dyslexicFont: boolean }) => {
@@ -14,7 +15,8 @@ export const passwordAuthScreenStyles = (theme: any, accessibility: { largeText:
   container: {
     paddingHorizontal: Spacing.largePadding,
     paddingTop: 40,
-    paddingBottom: 40
+    paddingBottom: 40,
+    backgroundColor: DefaultColours.white,
   },
 
   /** Logo image styling: fixed dimensions and aspect ratio preservation. */

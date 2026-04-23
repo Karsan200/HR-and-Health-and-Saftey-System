@@ -251,6 +251,7 @@ export const styles = (theme: any) =>
 
     datePickerInput: {
       backgroundColor: theme.white,
+      color: theme.black,
     },
 
     datePickerOutline: {
