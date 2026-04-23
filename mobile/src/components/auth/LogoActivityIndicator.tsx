@@ -1,11 +1,12 @@
 import { ActivityIndicator, Image, View } from 'react-native';
-import React, {useContext} from 'react';
-import { ThemeContext } from '../../theme/colourController.tsx';
+import React from 'react';
+import { useTheme } from '../../theme/colourController.tsx';
 
-import { logoActivityIndicatorStyles as styles } from './LogoActivityIndicator.styles.ts';
+import { logoActivityIndicatorStyles } from './LogoActivityIndicator.styles.ts';
 
 export default function LogoActivityIndicator() {
-    const { theme } = useContext(ThemeContext);
+  const { theme } = useTheme();
+  const styles = logoActivityIndicatorStyles(theme);
 
   return (
     <View style={styles.container}>

@@ -1,12 +1,12 @@
 import { StyleSheet } from 'react-native';
-import { DefaultColours } from '../../theme/colours.ts';
 
-export const logoActivityIndicatorStyles = StyleSheet.create({
+export const logoActivityIndicatorStyles = (theme: any) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: DefaultColours.white,
+    backgroundColor: theme.white,
   },
   image: {
     width: 217.5,
